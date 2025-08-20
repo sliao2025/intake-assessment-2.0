@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  # engine:
+  #   build: { context: ., dockerfile: docker/engine.Dockerfile }
+  #   ports:
+  #     - "8000:8000"
+  app:
+    build: { context: ., dockerfile: docker/app.Dockerfile }
+    ports:
+      - "3000:3000"
+    # environment:
+    #   - NEXT_PUBLIC_ENGINE_URL=http://engine:8000
+    # depends_on:
+    #   - engine
