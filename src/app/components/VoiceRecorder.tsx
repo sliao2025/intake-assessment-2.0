@@ -7,12 +7,12 @@ const theme = {
   accent: "#84cc16",
 };
 
-function useRecorder() {
+function useRecorder(audioState?: string | null) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const [recording, setRecording] = useState(false);
   const [permissionError, setPermissionError] = useState<string | null>(null);
-  const [audioURL, setAudioURL] = useState<string | null>(null);
+  const [audioURL, setAudioURL] = useState<string | null>(audioState ?? null);
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef<number | null>(null);
 
@@ -62,12 +62,14 @@ function useRecorder() {
 export default function VoiceRecorder({
   onAttach,
   label = "Record a quick answer (optional)",
+  audioState,
 }: {
   onAttach?: (url: string | null) => void;
   label?: string;
+  audioState?: string | null;
 }) {
   const { start, stop, reset, recording, permissionError, audioURL, elapsed } =
-    useRecorder();
+    useRecorder(audioState);
   const [playing, setPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -182,15 +184,14 @@ export default function VoiceRecorder({
           {!recording ? (
             <button
               onClick={handleStart}
-              className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold shadow-sm border border-lime-400"
-              style={{ background: theme.accent, color: "white" }}
+              className="inline-flex items-center gap-2 hover:bg-red-600 cursor-pointer bg-red-500 text-white rounded-full px-3 py-2 text-sm font-semibold shadow-sm"
             >
               <Mic className="h-4 w-4" /> Record
             </button>
           ) : (
             <button
               onClick={handleStop}
-              className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold bg-red-600 text-white shadow-sm"
+              className="inline-flex items-center gap-2 hover:bg-red-600 cursor-pointer rounded-full px-3 py-2 text-sm font-semibold bg-red-500 text-white shadow-sm"
             >
               <Square className="h-4 w-4" /> Stop
             </button>

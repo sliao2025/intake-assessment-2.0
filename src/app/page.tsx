@@ -1,8 +1,10 @@
+// src/app/page.tsx
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
+
 import ProgressHeader from "./components/ProgressHeader";
 import ConfettiBurst from "./components/ConfettiBurst";
 import StepTitle from "./components/StepTitle";
@@ -11,7 +13,9 @@ import Field from "./components/primitives/Field";
 import Likert from "./components/primitives/Likert";
 import ToggleRow from "./components/primitives/ToggleRow";
 import ReviewItem from "./components/primitives/ReviewItem";
-import { praises, theme, ease } from "./components/theme";
+import { praises, theme, ease, intPsychTheme } from "./components/theme";
+
+import GardenFrame from "./components/decor/Garden";
 
 type Step = {
   key: string;
@@ -21,6 +25,7 @@ type Step = {
 
 const steps: Step[] = [
   { key: "welcome", title: "Welcome", type: "intro" },
+  { key: "hipaa", title: "HIPAA Statement", type: "intro" },
   { key: "profile", title: "About You", type: "form" },
   { key: "story", title: "Your Story", type: "open" },
   { key: "symptoms", title: "Quick Check-In", type: "quiz" },
@@ -32,12 +37,14 @@ export default function Page() {
   const [step, setStep] = useState(0);
   const [praise, setPraise] = useState<string | null>(null);
   const [burst, setBurst] = useState(false);
-
+  const [progress, setProgress] = useState(0);
   const [profile, setProfile] = useState({
     name: "",
     age: "",
     pronouns: "",
     email: "",
+    contactNumber: "",
+    dob: "",
   });
   const [storyText, setStoryText] = useState("");
   const [storyAudio, setStoryAudio] = useState<string | null>(null);
@@ -52,10 +59,24 @@ export default function Page() {
   const [usesNicotine, setUsesNicotine] = useState(false);
   const [usesCannabis, setUsesCannabis] = useState(false);
 
+  useEffect(() => {
+    if ((step * 100) / steps.length > progress) {
+      setProgress((p) => p + 100 / steps.length);
+    }
+  }, [step]);
+
+  useEffect(() => {
+    // console.log("Audio state:", storyAudio);
+  }, [storyAudio]);
+
   const canNext = useMemo(() => {
     if (steps[step].key === "profile")
       return Boolean(
-        profile.name && profile.age && profile.email.includes("@")
+        profile.name &&
+          profile.age &&
+          profile.email.includes("@") &&
+          profile.dob &&
+          profile.contactNumber
       );
     if (steps[step].key === "story")
       return storyText.trim().length > 30 || Boolean(storyAudio);
@@ -83,10 +104,12 @@ export default function Page() {
 
   return (
     <div
-      className="min-h-screen w-full"
-      style={{ background: theme.bgSoft, color: theme.text }}
+      className="relative min-h-screen w-full"
+      style={{ background: intPsychTheme.bgSoft, color: theme.text }}
     >
+      {/* Confetti + Decorative Garden */}
       <ConfettiBurst show={burst} />
+      <GardenFrame />
 
       <ProgressHeader
         step={step}
@@ -95,9 +118,10 @@ export default function Page() {
         onStepClick={setStep}
         stepTitles={progressTitles}
         canNext={canNext}
+        progress={progress}
       />
 
-      <div className="mx-auto max-w-4xl px-4 py-8">
+      <div className="relative z-10 mx-auto max-w-4xl px-4 py-8">
         <motion.div
           key={steps[step].key}
           initial={{ y: 12, opacity: 0 }}
@@ -108,23 +132,59 @@ export default function Page() {
         >
           {steps[step].key === "welcome" && (
             <div className="space-y-5">
-              <StepTitle n={1} title="Welcome" />
+              <StepTitle n={step + 1} title="Welcome" />
               <p className="text-gray-700 font-sans">
-                This guided intake helps your clinician understand what matters
-                most to you. It takes ~5–7 minutes. You can type or speak on
-                open questions.
+                This detailed survey will give your clinician much of the
+                necessary context that could otherwise take a full session to
+                gather. This will help them <b>jumpstart your treatment</b> and
+                spend session time talking about the right things.
               </p>
-              <ul className="list-disc text-gray-600 pl-5">
-                <li>Progress saves locally while this page is open.</li>
-                <li>You can skip any question. Voice notes are optional.</li>
-                <li>We’ll show short encouragements as you move along.</li>
-              </ul>
+              <p>
+                There will be multiple choice, and free response style questions
+                which you can choose to type or respond to with a voice note.
+                The more <b>detail</b> you include, the better we can understand
+                how to help.
+              </p>
+              <p>Let's start!</p>
+            </div>
+          )}
+
+          {steps[step].key === "hipaa" && (
+            <div className="space-y-5">
+              <StepTitle n={step + 1} title={steps[step].title} />
+              <p className="text-gray-700 font-sans">Before we start,</p>
+              <p>
+                We want to let you know that your responses will be kept{" "}
+                <b>private</b> and <b>secure</b> compliant under the Health
+                Insurance Portability and Accountability Act <b>(HIPPA)</b>.
+              </p>
+              <p>
+                You may access a longer version of this statement{" "}
+                <a
+                  href="https://www.integrative-psych.org/legal/hipaa"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: intPsychTheme.accent,
+                    textDecoration: "underline",
+                    transition: "color 0.2s",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.color = intPsychTheme.primary)
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.color = intPsychTheme.accent)
+                  }
+                >
+                  here
+                </a>
+              </p>
             </div>
           )}
 
           {steps[step].key === "profile" && (
             <div className="space-y-6">
-              <StepTitle n={2} title="About You" />
+              <StepTitle n={step + 1} title={steps[step].title} />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field label="Full name" required>
                   <input
@@ -148,6 +208,32 @@ export default function Page() {
                     }
                   />
                 </Field>
+
+                <Field label="Email" required>
+                  <input
+                    type="email"
+                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
+                    placeholder="you@example.com"
+                    value={profile.email}
+                    onChange={(e) =>
+                      setProfile((p) => ({ ...p, email: e.target.value }))
+                    }
+                  />
+                </Field>
+                <Field label="Contact Number" required>
+                  <input
+                    type="tel"
+                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
+                    placeholder="123-456-7890"
+                    value={profile.contactNumber}
+                    onChange={(e) =>
+                      setProfile((p) => ({
+                        ...p,
+                        contactNumber: e.target.value,
+                      }))
+                    }
+                  />
+                </Field>
                 <Field label="Pronouns">
                   <select
                     className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
@@ -163,14 +249,13 @@ export default function Page() {
                     <option>Prefer to self-describe</option>
                   </select>
                 </Field>
-                <Field label="Email">
+                <Field label="Date of Birth" required>
                   <input
-                    type="email"
+                    type="date"
                     className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
-                    placeholder="you@example.com"
-                    value={profile.email}
+                    value={profile.dob}
                     onChange={(e) =>
-                      setProfile((p) => ({ ...p, email: e.target.value }))
+                      setProfile((p) => ({ ...p, dob: e.target.value }))
                     }
                   />
                 </Field>
@@ -180,25 +265,41 @@ export default function Page() {
 
           {steps[step].key === "story" && (
             <div className="space-y-6">
-              <StepTitle n={3} title="Your Story" />
-              <Field label="What’s the main goal you’d like us to help you with? (type or record)">
+              <StepTitle n={step + 1} title="Your Story" />
+              <Field
+                label={
+                  <>
+                    <b>Tell us the story</b> of how you got here, why are you
+                    asking for help today?
+                    <div className="text-slate-600 text-sm mt-1">
+                      Please describe the following:
+                      <ul className="list-disc pl-5 mt-1">
+                        <li>(A) Onset and precipitating events</li>
+                        <li>(B) Periods when symptoms were better or worse</li>
+                        <li>(C) How symptoms have changed over time</li>
+                      </ul>
+                    </div>
+                  </>
+                }
+                required
+              >
                 <textarea
                   rows={6}
                   className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
-                  placeholder="Share anything important in your own words…"
+                  placeholder="Share here in your own words…"
                   value={storyText}
                   onChange={(e) => setStoryText(e.target.value)}
                 />
               </Field>
-              <VoiceRecorder onAttach={setStoryAudio} />
+              <VoiceRecorder audioState={storyAudio} onAttach={setStoryAudio} />
             </div>
           )}
 
           {steps[step].key === "symptoms" && (
             <div className="space-y-6">
-              <StepTitle n={4} title="Quick Check-In" />
+              <StepTitle n={step + 1} title="Quick Check-In" />
               <p className="text-slate-700">
-                A few quick items to help your clinician focus (PHQ‑2 + GAD‑2).
+                A few quick items to help your clinician focus (PHQ-2 + GAD-2).
               </p>
               <div className="space-y-4">
                 <Likert
@@ -231,7 +332,7 @@ export default function Page() {
 
           {steps[step].key === "lifestyle" && (
             <div className="space-y-6">
-              <StepTitle n={5} title="Sleep & Lifestyle" />
+              <StepTitle n={step + 1} title="Sleep & Lifestyle" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <ToggleRow
                   label="I fall asleep faster if I sleep earlier"
@@ -259,7 +360,7 @@ export default function Page() {
 
           {steps[step].key === "review" && (
             <div className="space-y-6">
-              <StepTitle n={6} title="Review & Finish" />
+              <StepTitle n={step + 1} title="Review & Finish" />
               <div className="rounded-2xl border border-slate-300 p-4 bg-slate-50 text-slate-800">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <ReviewItem label="Name" value={profile.name} />
@@ -309,11 +410,11 @@ export default function Page() {
                 <button
                   onClick={() =>
                     alert(
-                      "Thanks! This is just a front‑end mockup—no data was saved."
+                      "Thanks! This is just a front-end mockup—no data was saved."
                     )
                   }
                   className="inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white"
-                  style={{ background: theme.accent }}
+                  style={{ background: intPsychTheme.secondary }}
                 >
                   <CheckCircle2 className="h-5 w-5" /> Finish
                 </button>
@@ -329,11 +430,12 @@ export default function Page() {
             >
               <ChevronLeft className="h-4 w-4" /> Back
             </button>
+
             {step < 1 && (
               <button
                 onClick={goNext}
                 className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white"
-                style={{ background: theme.primary }}
+                style={{ background: intPsychTheme.secondary }}
               >
                 Start <ChevronRight className="h-4 w-4" />
               </button>
@@ -344,11 +446,12 @@ export default function Page() {
                 onClick={goNext}
                 disabled={!canNext}
                 className="inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
-                style={{ background: theme.primary }}
+                style={{ background: intPsychTheme.secondary }}
               >
                 Next <ChevronRight className="h-4 w-4" />
               </button>
             )}
+
             {step === steps.length - 1 && (
               <button
                 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
@@ -361,12 +464,12 @@ export default function Page() {
           </div>
         </motion.div>
 
-        <div className="mt-6 flex items-center justify-center text-xs text-slate-500">
+        {/* <div className="mt-6 flex items-center justify-center text-xs text-slate-500">
           <span>
             UI mockup • green nature palette • serif headings • voice notes •
             step guide
           </span>
-        </div>
+        </div> */}
       </div>
     </div>
   );
