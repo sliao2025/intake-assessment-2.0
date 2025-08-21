@@ -52,7 +52,7 @@ export default function GrassBlade({
                         C ${rightTip} ${ctrlY}, ${rightCtrlX} ${ctrlY}, ${rightBase} ${top + h}
                         Z
                     `}
-                    fill="#16a34a"
+                    fill="#3ed24cff"
                 />
             </g>
             <style jsx>{`

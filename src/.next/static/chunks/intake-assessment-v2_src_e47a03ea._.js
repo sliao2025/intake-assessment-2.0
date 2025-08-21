@@ -1293,7 +1293,7 @@ function GrassBlade(param) {
                 className: "jsx-b07b180fab8267e4" + " " + "gb-tip-sway",
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
                     d: "\n                        M ".concat(leftBase, " ").concat(top + h, "\n                        C ").concat(leftCtrlX, " ").concat(ctrlY, ", ").concat(leftTip, " ").concat(ctrlY, ", ").concat(leftTip, " ").concat(tipY, "\n                        L ").concat(rightTip, " ").concat(tipY, "\n                        C ").concat(rightTip, " ").concat(ctrlY, ", ").concat(rightCtrlX, " ").concat(ctrlY, ", ").concat(rightBase, " ").concat(top + h, "\n                        Z\n                    "),
-                    fill: "#16a34a",
+                    fill: "#3ed24cff",
                     className: "jsx-b07b180fab8267e4"
                 }, void 0, false, {
                     fileName: "[project]/intake-assessment-v2/src/app/components/decor/GrassBlade.tsx",
@@ -1503,9 +1503,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2
 var __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$styled$2d$jsx$2f$style$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/intake-assessment-v2/src/node_modules/styled-jsx/style.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$decor$2f$VinesTop$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/intake-assessment-v2/src/app/components/decor/VinesTop.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$decor$2f$MeadowRow$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/intake-assessment-v2/src/app/components/decor/MeadowRow.tsx [app-client] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$decor$2f$FlowerCluster$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/intake-assessment-v2/src/app/components/decor/FlowerCluster.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$theme$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/intake-assessment-v2/src/app/components/theme.ts [app-client] (ecmascript)");
-;
 ;
 ;
 ;
@@ -1520,7 +1518,7 @@ function GardenFrame() {
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 style: {
                     height: "45%",
-                    background: "linear-gradient(to top, rgba(22,163,74,0.14), rgba(22,163,74,0.04), rgba(22,163,74,0))"
+                    background: "linear-gradient(to top, rgba(22,163,74,0.3), rgba(22,163,74,0.15), rgba(22,163,74,0))"
                 },
                 className: "jsx-c0c4beb5c2093591" + " " + "absolute inset-x-0 bottom-0"
             }, void 0, false, {
@@ -1535,7 +1533,7 @@ function GardenFrame() {
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$decor$2f$MeadowRow$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                             count: 4,
-                            scale: 0.825,
+                            scale: 1.2,
                             colors: [
                                 __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$theme$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["intPsychTheme"].accent,
                                 "#cfe8ff",
@@ -1549,7 +1547,7 @@ function GardenFrame() {
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$decor$2f$MeadowRow$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                             count: 5,
                             flip: true,
-                            scale: 0.85,
+                            scale: 2.5,
                             colors: [
                                 __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$theme$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["intPsychTheme"].primary,
                                 __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$theme$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["intPsychTheme"].accent,
@@ -1572,13 +1570,13 @@ function GardenFrame() {
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "jsx-c0c4beb5c2093591" + " " + "absolute inset-x-0 bottom-0 h-[46%] opacity-60",
+                className: "jsx-c0c4beb5c2093591" + " " + "absolute inset-x-0 bottom-0 h-[46%] opacity-50",
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "jsx-c0c4beb5c2093591" + " " + "mx-auto max-w-6xl px-3 space-y-4",
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$decor$2f$MeadowRow$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                             count: 6,
-                            scale: 0.8775,
+                            scale: 1.5,
                             colors: [
                                 __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$theme$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["intPsychTheme"].secondary,
                                 "#ffd7a3",
@@ -1592,7 +1590,7 @@ function GardenFrame() {
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$decor$2f$MeadowRow$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                             count: 7,
                             flip: true,
-                            scale: 0.95,
+                            scale: 2.75,
                             colors: [
                                 __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$theme$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["intPsychTheme"].secondary,
                                 "#ffb347",
@@ -1615,13 +1613,13 @@ function GardenFrame() {
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "jsx-c0c4beb5c2093591" + " " + "absolute inset-x-0 bottom-0 h-[34%] opacity-85",
+                className: "jsx-c0c4beb5c2093591" + " " + "absolute inset-x-0 bottom-0 h-[34%] opacity-80",
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "jsx-c0c4beb5c2093591" + " " + "mx-auto max-w-5xl px-4 space-y-3",
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$decor$2f$MeadowRow$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                             count: 10,
-                            scale: 1.05,
+                            scale: 3,
                             colors: [
                                 __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$theme$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["intPsychTheme"].primary,
                                 __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$theme$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["intPsychTheme"].secondary,
@@ -1635,7 +1633,7 @@ function GardenFrame() {
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$decor$2f$MeadowRow$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                             count: 11,
                             flip: true,
-                            scale: 1.16,
+                            scale: 3.5,
                             colors: [
                                 __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$theme$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["intPsychTheme"].accent,
                                 __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$theme$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["intPsychTheme"].primary,
@@ -1649,7 +1647,7 @@ function GardenFrame() {
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$decor$2f$MeadowRow$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                             count: 12,
                             flip: true,
-                            scale: 1.3,
+                            scale: 4,
                             colors: [
                                 __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$theme$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["intPsychTheme"].secondary,
                                 __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$theme$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["intPsychTheme"].primary,
@@ -1672,12 +1670,12 @@ function GardenFrame() {
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "jsx-c0c4beb5c2093591" + " " + "absolute inset-x-0 bottom-0 h-[10%] opacity-85",
+                className: "jsx-c0c4beb5c2093591" + " " + "absolute inset-x-0 bottom-0 h-[10%] opacity-100",
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "jsx-c0c4beb5c2093591" + " " + "mx-auto max-w-5xl px-4 space-y-3",
                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$decor$2f$MeadowRow$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                         count: 12,
-                        scale: 1.5,
+                        scale: 5,
                         colors: [
                             __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$theme$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["intPsychTheme"].primary,
                             __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$theme$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["intPsychTheme"].secondary,
@@ -1698,35 +1696,9 @@ function GardenFrame() {
                 lineNumber: 81,
                 columnNumber: 7
             }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "jsx-c0c4beb5c2093591" + " " + "garden-sway sway-med absolute left-2 bottom-1 hidden md:block",
-                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$decor$2f$FlowerCluster$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
-                    fileName: "[project]/intake-assessment-v2/src/app/components/decor/Garden.tsx",
-                    lineNumber: 94,
-                    columnNumber: 9
-                }, this)
-            }, void 0, false, {
-                fileName: "[project]/intake-assessment-v2/src/app/components/decor/Garden.tsx",
-                lineNumber: 93,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "jsx-c0c4beb5c2093591" + " " + "garden-sway sway-med absolute right-2 bottom-1 hidden md:block",
-                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$decor$2f$FlowerCluster$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                    flip: true
-                }, void 0, false, {
-                    fileName: "[project]/intake-assessment-v2/src/app/components/decor/Garden.tsx",
-                    lineNumber: 97,
-                    columnNumber: 9
-                }, this)
-            }, void 0, false, {
-                fileName: "[project]/intake-assessment-v2/src/app/components/decor/Garden.tsx",
-                lineNumber: 96,
-                columnNumber: 7
-            }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$app$2f$components$2f$decor$2f$VinesTop$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                 fileName: "[project]/intake-assessment-v2/src/app/components/decor/Garden.tsx",
-                lineNumber: 101,
+                lineNumber: 95,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$intake$2d$assessment$2d$v2$2f$src$2f$node_modules$2f$styled$2d$jsx$2f$style$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {

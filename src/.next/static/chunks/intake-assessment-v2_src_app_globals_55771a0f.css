@@ -1418,8 +1418,20 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  .opacity-0 {
+    opacity: 0;
+  }
+
+  .opacity-20 {
+    opacity: .2;
+  }
+
   .opacity-40 {
     opacity: .4;
+  }
+
+  .opacity-50 {
+    opacity: .5;
   }
 
   .opacity-60 {
@@ -1430,12 +1442,20 @@
     opacity: .65;
   }
 
+  .opacity-80 {
+    opacity: .8;
+  }
+
   .opacity-85 {
     opacity: .85;
   }
 
   .opacity-90 {
     opacity: .9;
+  }
+
+  .opacity-100 {
+    opacity: 1;
   }
 
   .shadow, .shadow-sm {

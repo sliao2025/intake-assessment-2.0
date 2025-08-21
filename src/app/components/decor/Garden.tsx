@@ -18,7 +18,7 @@ export default function GardenFrame() {
         style={{
           height: "45%",
           background:
-            "linear-gradient(to top, rgba(22,163,74,0.14), rgba(22,163,74,0.04), rgba(22,163,74,0))",
+            "linear-gradient(to top, rgba(22,163,74,0.3), rgba(22,163,74,0.15), rgba(22,163,74,0))",
         }}
       />
 
@@ -27,75 +27,69 @@ export default function GardenFrame() {
         <div className="mx-auto max-w-7xl px-2 space-y-6">
           <MeadowRow
             count={4}
-            scale={0.825}
+            scale={1.2}
             colors={[intPsychTheme.accent, "#cfe8ff", "#8ec5ff"]}
           />
           <MeadowRow
             count={5}
             flip
-            scale={0.85}
+            scale={2.5}
             colors={[intPsychTheme.primary, intPsychTheme.accent, "#bfd9f2"]}
           />
         </div>
       </div>
 
       {/* Midground layer */}
-      <div className="absolute inset-x-0 bottom-0 h-[46%] opacity-60">
+      <div className="absolute inset-x-0 bottom-0 h-[46%] opacity-50">
         <div className="mx-auto max-w-6xl px-3 space-y-4">
           <MeadowRow
             count={6}
-            scale={0.8775}
+            scale={1.5}
             colors={[intPsychTheme.secondary, "#ffd7a3", "#ffbe6b"]}
           />
           <MeadowRow
             count={7}
             flip
-            scale={0.95}
+            scale={2.75}
             colors={[intPsychTheme.secondary, "#ffb347", "#ff9966"]}
           />
         </div>
       </div>
 
       {/* Foreground layer: densest at the base for a lush look */}
-      <div className="absolute inset-x-0 bottom-0 h-[34%] opacity-85">
+      <div className="absolute inset-x-0 bottom-0 h-[34%] opacity-80">
         <div className="mx-auto max-w-5xl px-4 space-y-3">
           <MeadowRow
             count={10}
-            scale={1.05}
+            scale={3}
             colors={[intPsychTheme.primary, intPsychTheme.secondary, intPsychTheme.accent]}
           />
           <MeadowRow
             count={11}
             flip
-            scale={1.16}
+            scale={3.5}
             colors={[intPsychTheme.accent, intPsychTheme.primary, intPsychTheme.secondary]}
           />
           <MeadowRow
             count={12}
             flip
-            scale={1.3}
+            scale={4}
             colors={[intPsychTheme.secondary, intPsychTheme.primary, intPsychTheme.accent]}
           />
         </div>
       </div>
-      <div className="absolute inset-x-0 bottom-0 h-[10%] opacity-85">
+      <div className="absolute inset-x-0 bottom-0 h-[10%] opacity-100">
         <div className="mx-auto max-w-5xl px-4 space-y-3">
           <MeadowRow
             count={12}
-            scale={1.5}
+            scale={5}
             colors={[intPsychTheme.primary, intPsychTheme.secondary, intPsychTheme.accent]}
           />
           
         </div>
       </div>
 
-      {/* Corner anchors for ultra-wide */}
-      <div className="garden-sway sway-med absolute left-2 bottom-1 hidden md:block">
-        <FlowerCluster />
-      </div>
-      <div className="garden-sway sway-med absolute right-2 bottom-1 hidden md:block">
-        <FlowerCluster flip />
-      </div>
+      
 
       {/* Top accents */}
       <VinesTop />
