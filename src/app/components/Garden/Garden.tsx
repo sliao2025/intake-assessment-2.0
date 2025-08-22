@@ -62,19 +62,31 @@ export default function GardenFrame() {
           <MeadowRow
             count={10}
             scale={3}
-            colors={[intPsychTheme.primary, intPsychTheme.secondary, intPsychTheme.accent]}
+            colors={[
+              intPsychTheme.primary,
+              intPsychTheme.secondary,
+              intPsychTheme.accent,
+            ]}
           />
           <MeadowRow
             count={11}
             flip
             scale={3.5}
-            colors={[intPsychTheme.accent, intPsychTheme.primary, intPsychTheme.secondary]}
+            colors={[
+              intPsychTheme.accent,
+              intPsychTheme.primary,
+              intPsychTheme.secondary,
+            ]}
           />
           <MeadowRow
             count={12}
             flip
             scale={4}
-            colors={[intPsychTheme.secondary, intPsychTheme.primary, intPsychTheme.accent]}
+            colors={[
+              intPsychTheme.secondary,
+              intPsychTheme.primary,
+              intPsychTheme.accent,
+            ]}
           />
         </div>
       </div>
@@ -83,13 +95,14 @@ export default function GardenFrame() {
           <MeadowRow
             count={12}
             scale={5}
-            colors={[intPsychTheme.primary, intPsychTheme.secondary, intPsychTheme.accent]}
+            colors={[
+              intPsychTheme.primary,
+              intPsychTheme.secondary,
+              intPsychTheme.accent,
+            ]}
           />
-          
         </div>
       </div>
-
-      
 
       {/* Top accents */}
       <VinesTop />

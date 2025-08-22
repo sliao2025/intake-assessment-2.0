@@ -15,7 +15,8 @@ import ToggleRow from "./components/primitives/ToggleRow";
 import ReviewItem from "./components/primitives/ReviewItem";
 import { praises, theme, ease, intPsychTheme } from "./components/theme";
 
-import GardenFrame from "./components/decor/Garden";
+import GardenFrame from "./components/Garden/Garden";
+import BambooForestFrame from "./components/Bamboo/BambooForest";
 
 type Step = {
   key: string;
@@ -26,6 +27,7 @@ type Step = {
 const steps: Step[] = [
   { key: "welcome", title: "Welcome", type: "intro" },
   { key: "hipaa", title: "HIPAA Statement", type: "intro" },
+  { key: "contact", title: "Contact Info", type: "form" },
   { key: "profile", title: "About You", type: "form" },
   { key: "story", title: "Your Story", type: "open" },
   { key: "symptoms", title: "Quick Check-In", type: "quiz" },
@@ -45,6 +47,8 @@ export default function Page() {
     email: "",
     contactNumber: "",
     dob: "",
+    genderIdentity: "",
+    sexualOrientation: "",
   });
   const [storyText, setStoryText] = useState("");
   const [storyAudio, setStoryAudio] = useState<string | null>(null);
@@ -68,6 +72,14 @@ export default function Page() {
   useEffect(() => {
     // console.log("Audio state:", storyAudio);
   }, [storyAudio]);
+
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
 
   const canNext = useMemo(() => {
     if (steps[step].key === "profile")
@@ -104,13 +116,13 @@ export default function Page() {
 
   return (
     <div
-      className="relative min-h-screen w-full"
-      style={{ background: intPsychTheme.bgSoft, color: theme.text }}
+      className="fixed inset-0 w-full h-dvh overflow-hidden"
+      style={{ background: intPsychTheme.card, color: theme.text }}
     >
       {/* Confetti + Decorative Garden */}
       <ConfettiBurst show={burst} />
       <GardenFrame />
-
+      {/* <BambooForestFrame/> */}
       <ProgressHeader
         step={step}
         total={steps.length}
@@ -128,7 +140,7 @@ export default function Page() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -12, opacity: 0 }}
           transition={{ duration: 0.4, ease }}
-          className="rounded-3xl border border-gray-200 bg-white p-6 md:p-8 shadow"
+          className="rounded-4xl border border-gray-200 bg-white/70 backdrop-blur-sm p-6 md:p-8 shadow-md max-h-[70vh] scrollable-div overflow-y-auto pr-2"
         >
           {steps[step].key === "welcome" && (
             <div className="space-y-5">
@@ -182,34 +194,53 @@ export default function Page() {
             </div>
           )}
 
-          {steps[step].key === "profile" && (
+          {steps[step].key === "contact" && (
             <div className="space-y-6">
               <StepTitle n={step + 1} title={steps[step].title} />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="Full name" required>
-                  <input
-                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
-                    placeholder="e.g., Alex Rivera"
-                    value={profile.name}
-                    onChange={(e) =>
-                      setProfile((p) => ({ ...p, name: e.target.value }))
-                    }
-                  />
-                </Field>
-                <Field label="Age" required>
-                  <input
-                    type="number"
-                    min={1}
+                <Field title="Gender Identity" required>
+                  <select
                     className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
-                    placeholder="e.g., 28"
-                    value={profile.age}
+                    value={profile.genderIdentity}
                     onChange={(e) =>
-                      setProfile((p) => ({ ...p, age: e.target.value }))
+                      setProfile((p) => ({
+                        ...p,
+                        genderIdentity: e.target.value,
+                      }))
                     }
-                  />
+                  >
+                    <option value="">Choose…</option>
+                    <option>CIS/Male</option>
+                    <option>CIS/Female</option>
+                    <option>Trans Male</option>
+                    <option>Trans Female</option>
+                    <option>Gender Fluid</option>
+                    <option>Prefer not to disclose</option>
+                  </select>
+                </Field>
+                <Field title="Sexual Identity/Orientation" required>
+                  <select
+                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
+                    value={profile.sexualOrientation}
+                    onChange={(e) =>
+                      setProfile((p) => ({
+                        ...p,
+                        sexualOrientation: e.target.value,
+                      }))
+                    }
+                    multiple={true}
+                  >
+                    <option value="">Choose…</option>
+                    <option>CIS/Male</option>
+                    <option>CIS/Female</option>
+                    <option>Trans Male</option>
+                    <option>Trans Female</option>
+                    <option>Gender Fluid</option>
+                    <option>Prefer not to disclose</option>
+                  </select>
                 </Field>
 
-                <Field label="Email" required>
+                <Field title="Ethnicity" required>
                   <input
                     type="email"
                     className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
@@ -220,7 +251,7 @@ export default function Page() {
                     }
                   />
                 </Field>
-                <Field label="Contact Number" required>
+                <Field title="Religion" required>
                   <input
                     type="tel"
                     className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
@@ -234,7 +265,7 @@ export default function Page() {
                     }
                   />
                 </Field>
-                <Field label="Pronouns">
+                <Field title="Pronouns">
                   <select
                     className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
                     value={profile.pronouns}
@@ -249,7 +280,78 @@ export default function Page() {
                     <option>Prefer to self-describe</option>
                   </select>
                 </Field>
-                <Field label="Date of Birth" required>
+              </div>
+            </div>
+          )}
+
+          {steps[step].key === "profile" && (
+            <div className="space-y-6">
+              <StepTitle n={step + 1} title={steps[step].title} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Field title="Full name" required>
+                  <input
+                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                    placeholder="e.g., Alex Rivera"
+                    value={profile.name}
+                    onChange={(e) =>
+                      setProfile((p) => ({ ...p, name: e.target.value }))
+                    }
+                  />
+                </Field>
+                <Field title="Age" required>
+                  <input
+                    type="number"
+                    min={1}
+                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
+                    placeholder="e.g., 28"
+                    value={profile.age}
+                    onChange={(e) =>
+                      setProfile((p) => ({ ...p, age: e.target.value }))
+                    }
+                  />
+                </Field>
+
+                <Field title="Email" required>
+                  <input
+                    type="email"
+                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
+                    placeholder="you@example.com"
+                    value={profile.email}
+                    onChange={(e) =>
+                      setProfile((p) => ({ ...p, email: e.target.value }))
+                    }
+                  />
+                </Field>
+                <Field title="Contact Number" required>
+                  <input
+                    type="tel"
+                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
+                    placeholder="123-456-7890"
+                    value={profile.contactNumber}
+                    onChange={(e) =>
+                      setProfile((p) => ({
+                        ...p,
+                        contactNumber: e.target.value,
+                      }))
+                    }
+                  />
+                </Field>
+                <Field title="Pronouns">
+                  <select
+                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
+                    value={profile.pronouns}
+                    onChange={(e) =>
+                      setProfile((p) => ({ ...p, pronouns: e.target.value }))
+                    }
+                  >
+                    <option value="">Choose…</option>
+                    <option>She/Her</option>
+                    <option>He/Him</option>
+                    <option>They/Them</option>
+                    <option>Prefer to self-describe</option>
+                  </select>
+                </Field>
+                <Field title="Date of Birth" required>
                   <input
                     type="date"
                     className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
@@ -267,16 +369,51 @@ export default function Page() {
             <div className="space-y-6">
               <StepTitle n={step + 1} title="Your Story" />
               <Field
-                label={
+                title={
                   <>
                     <b>Tell us the story</b> of how you got here, why are you
                     asking for help today?
-                    <div className="text-slate-600 text-sm mt-1">
-                      Please describe the following:
+                  </>
+                }
+                label={
+                  <>
+                    <div>Please describe the following:</div>
+                    <ul className="list-disc pl-5 mt-1">
+                      <li>(A) Onset and precipitating events</li>
+                      <li>(B) Periods when symptoms were better or worse</li>
+                      <li>(C) How symptoms have changed over time</li>
+                    </ul>
+                  </>
+                }
+                required
+              >
+                <textarea
+                  rows={6}
+                  className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
+                  placeholder="Share here in your own words…"
+                  value={storyText}
+                  onChange={(e) => setStoryText(e.target.value)}
+                />
+              </Field>
+              <VoiceRecorder audioState={storyAudio} onAttach={setStoryAudio} />
+              <Field
+                title={
+                  <>
+                    Please use this space to <b>elaborate</b> on your mental
+                    health treatment goals.
+                  </>
+                }
+                label={
+                  <>
+                    <div>
+                      For Example:
                       <ul className="list-disc pl-5 mt-1">
-                        <li>(A) Onset and precipitating events</li>
-                        <li>(B) Periods when symptoms were better or worse</li>
-                        <li>(C) How symptoms have changed over time</li>
+                        <li>Your primary reason for reaching out</li>
+                        <li>Symptoms and/or issues you have identified</li>
+                        <li>
+                          How long you've experienced any symptoms and how they
+                          may have changed over time
+                        </li>
                       </ul>
                     </div>
                   </>
@@ -426,7 +563,7 @@ export default function Page() {
             <button
               onClick={goBack}
               disabled={step === 0}
-              className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-medium border border-gray-300 text-gray-700 disabled:opacity-40"
+              className="inline-flex cursor-pointer disabled:cursor-not-allowed bg-white items-center gap-2 rounded-xl px-3 py-2 font-medium border border-gray-300 text-gray-700 disabled:opacity-40"
             >
               <ChevronLeft className="h-4 w-4" /> Back
             </button>

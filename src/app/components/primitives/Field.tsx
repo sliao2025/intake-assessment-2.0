@@ -3,15 +3,17 @@
 import React from "react";
 
 const Field: React.FC<{
+  title?: string | React.ReactNode;
   label?: string | React.ReactNode;
   required?: boolean;
   children: React.ReactNode;
-}> = ({ label, required, children }) => (
+}> = ({ title, label, required, children }) => (
   <label className="block">
-    <div className="mb-1 text-sm text-slate-700">
+    <div className="mb-1 text-md semibold text-slate-700">
       {required && <span className="text-rose-600">* </span>}
-      {label}
+      {title}
     </div>
+    <div className="mb-1 text-sm semibold text-slate-700">{label}</div>
     {children}
   </label>
 );
