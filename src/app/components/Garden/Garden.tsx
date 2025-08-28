@@ -8,7 +8,7 @@ import { intPsychTheme } from "../theme";
 
 /* ------------------ Main exported frames ------------------ */
 
-export default function GardenFrame() {
+export default function GardenFrame({ bloom = 0 }: { bloom?: number }) {
   // Multi-layered decorative garden with broad coverage and varied sway speeds.
   return (
     <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
@@ -28,13 +28,15 @@ export default function GardenFrame() {
           <MeadowRow
             count={4}
             scale={1.2}
+            progress={bloom}
             colors={[intPsychTheme.accent, "#cfe8ff", "#8ec5ff"]}
           />
           <MeadowRow
             count={5}
             flip
             scale={2.5}
-            colors={[intPsychTheme.primary, intPsychTheme.accent, "#bfd9f2"]}
+            progress={bloom}
+            colors={[intPsychTheme.alternate, intPsychTheme.accent, "#bfd9f2"]}
           />
         </div>
       </div>
@@ -45,13 +47,19 @@ export default function GardenFrame() {
           <MeadowRow
             count={6}
             scale={1.5}
+            progress={bloom}
             colors={[intPsychTheme.secondary, "#ffd7a3", "#ffbe6b"]}
           />
           <MeadowRow
             count={7}
             flip
             scale={2.75}
-            colors={[intPsychTheme.secondary, "#ffb347", "#ff9966"]}
+            progress={bloom}
+            colors={[
+              intPsychTheme.secondary,
+              intPsychTheme.alternate,
+              "#ff9966",
+            ]}
           />
         </div>
       </div>
@@ -62,6 +70,7 @@ export default function GardenFrame() {
           <MeadowRow
             count={10}
             scale={3}
+            progress={bloom}
             colors={[
               intPsychTheme.primary,
               intPsychTheme.secondary,
@@ -72,9 +81,10 @@ export default function GardenFrame() {
             count={11}
             flip
             scale={3.5}
+            progress={bloom}
             colors={[
               intPsychTheme.accent,
-              intPsychTheme.primary,
+              intPsychTheme.alternate,
               intPsychTheme.secondary,
             ]}
           />
@@ -82,8 +92,9 @@ export default function GardenFrame() {
             count={12}
             flip
             scale={4}
+            progress={bloom}
             colors={[
-              intPsychTheme.secondary,
+              intPsychTheme.alternate,
               intPsychTheme.primary,
               intPsychTheme.accent,
             ]}
@@ -95,6 +106,7 @@ export default function GardenFrame() {
           <MeadowRow
             count={12}
             scale={5}
+            progress={bloom}
             colors={[
               intPsychTheme.primary,
               intPsychTheme.secondary,

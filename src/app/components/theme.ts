@@ -11,6 +11,7 @@ export const intPsychTheme = {
   primary: "#113e60",
   accent: "#0072ce",
   secondary: "#ffa440",
+  alternate: "#f43f5e",
   bgSoft: "#fffaf0ff",
   card: "#ffffff",
   text: "#0f172a",

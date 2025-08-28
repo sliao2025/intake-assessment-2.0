@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
+import type { Profile } from "./lib/types";
 import { motion } from "framer-motion";
 import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -13,10 +14,12 @@ import Field from "./components/primitives/Field";
 import Likert from "./components/primitives/Likert";
 import ToggleRow from "./components/primitives/ToggleRow";
 import ReviewItem from "./components/primitives/ReviewItem";
+import Separator from "./components/primitives/Separator";
 import { praises, theme, ease, intPsychTheme } from "./components/theme";
-
 import GardenFrame from "./components/Garden/Garden";
-import BambooForestFrame from "./components/Bamboo/BambooForest";
+import ContactSection from "./components/Sections/ContactSection";
+import ProfileSection from "./components/Sections/ProfileSection";
+import CheckInSection from "./components/Sections/CheckInSection";
 
 type Step = {
   key: string;
@@ -29,8 +32,8 @@ const steps: Step[] = [
   { key: "hipaa", title: "HIPAA Statement", type: "intro" },
   { key: "contact", title: "Contact Info", type: "form" },
   { key: "profile", title: "About You", type: "form" },
+  { key: "screen", title: "Quick Check-In", type: "quiz" },
   { key: "story", title: "Your Story", type: "open" },
-  { key: "symptoms", title: "Quick Check-In", type: "quiz" },
   { key: "lifestyle", title: "Sleep & Lifestyle", type: "form" },
   { key: "review", title: "Review", type: "review" },
 ];
@@ -39,16 +42,29 @@ export default function Page() {
   const [step, setStep] = useState(0);
   const [praise, setPraise] = useState<string | null>(null);
   const [burst, setBurst] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [profile, setProfile] = useState({
-    name: "",
+  const [maxVisited, setMaxVisited] = useState(0);
+  const [profile, setProfile] = useState<Profile>({
+    firstName: "",
+    lastName: "",
     age: "",
-    pronouns: "",
+    pronouns: [],
     email: "",
     contactNumber: "",
     dob: "",
     genderIdentity: "",
-    sexualOrientation: "",
+    sexualOrientation: [],
+    ethnicity: [],
+    religion: [],
+    hasReceivedMentalHealthTreatment: false,
+    therapyDuration: "",
+    previousDiagnosis: "",
+    moodChanges: [],
+    behaviorChanges: [],
+    thoughtChanges: [],
+    dietType: [],
+    alcoholFrequency: "",
+    drinksPerOccasion: "",
+    substancesUsed: [],
   });
   const [storyText, setStoryText] = useState("");
   const [storyAudio, setStoryAudio] = useState<string | null>(null);
@@ -64,14 +80,13 @@ export default function Page() {
   const [usesCannabis, setUsesCannabis] = useState(false);
 
   useEffect(() => {
-    if ((step * 100) / steps.length > progress) {
-      setProgress((p) => p + 100 / steps.length);
-    }
-  }, [step]);
-
-  useEffect(() => {
-    // console.log("Audio state:", storyAudio);
-  }, [storyAudio]);
+    console.log(profile.hasReceivedMentalHealthTreatment);
+  }, [profile.hasReceivedMentalHealthTreatment]);
+  const progressPct = useMemo(() => {
+    if (steps.length <= 1) return 0;
+    // Percent of furthest reached step over last index
+    return Math.min(100, Math.round((maxVisited / (steps.length - 1)) * 100));
+  }, [maxVisited, steps.length]);
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -82,19 +97,30 @@ export default function Page() {
   }, []);
 
   const canNext = useMemo(() => {
-    if (steps[step].key === "profile")
+    if (steps[step].key === "contact")
       return Boolean(
-        profile.name &&
+        profile.firstName &&
+          profile.lastName &&
           profile.age &&
           profile.email.includes("@") &&
           profile.dob &&
           profile.contactNumber
       );
+    if (steps[step].key === "profile")
+      return Boolean(
+        profile.genderIdentity &&
+          profile.sexualOrientation.length > 0 &&
+          profile.ethnicity.length > 0 &&
+          profile.religion.length > 0 &&
+          profile.pronouns.length > 0
+      );
     if (steps[step].key === "story")
       return storyText.trim().length > 30 || Boolean(storyAudio);
-    if (steps[step].key === "symptoms")
-      return Boolean(
-        symptoms.phq1 && symptoms.phq2 && symptoms.gad1 && symptoms.gad2
+    if (steps[step].key === "screen")
+      return (
+        profile.moodChanges.length > 0 &&
+        profile.behaviorChanges.length > 0 &&
+        profile.thoughtChanges.length > 0
       );
     return true;
   }, [step, profile, storyText, storyAudio, symptoms]);
@@ -109,28 +135,33 @@ export default function Page() {
       setTimeout(() => setBurst(false), 1200);
       setTimeout(() => setPraise(null), 2000);
       setStep(next);
+      setMaxVisited((prev) => Math.max(prev, next));
     }
   };
-
+  const goToStep = (index: number) => {
+    if (index <= maxVisited) {
+      setStep(index);
+    }
+  };
   const goBack = () => setStep((s) => Math.max(0, s - 1));
+  const bloom = Math.max(0.05, progressPct / 100);
 
   return (
     <div
       className="fixed inset-0 w-full h-dvh overflow-hidden"
       style={{ background: intPsychTheme.card, color: theme.text }}
     >
-      {/* Confetti + Decorative Garden */}
       <ConfettiBurst show={burst} />
-      <GardenFrame />
-      {/* <BambooForestFrame/> */}
+      <GardenFrame bloom={bloom} />
       <ProgressHeader
         step={step}
         total={steps.length}
         praise={praise}
-        onStepClick={setStep}
+        onStepClick={goToStep}
         stepTitles={progressTitles}
         canNext={canNext}
-        progress={progress}
+        maxVisited={maxVisited}
+        progressPct={progressPct}
       />
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-8">
@@ -168,7 +199,7 @@ export default function Page() {
               <p>
                 We want to let you know that your responses will be kept{" "}
                 <b>private</b> and <b>secure</b> compliant under the Health
-                Insurance Portability and Accountability Act <b>(HIPPA)</b>.
+                Insurance Portability and Accountability Act <b>(HIPAA)</b>.
               </p>
               <p>
                 You may access a longer version of this statement{" "}
@@ -195,174 +226,30 @@ export default function Page() {
           )}
 
           {steps[step].key === "contact" && (
-            <div className="space-y-6">
-              <StepTitle n={step + 1} title={steps[step].title} />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field title="Gender Identity" required>
-                  <select
-                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
-                    value={profile.genderIdentity}
-                    onChange={(e) =>
-                      setProfile((p) => ({
-                        ...p,
-                        genderIdentity: e.target.value,
-                      }))
-                    }
-                  >
-                    <option value="">Choose…</option>
-                    <option>CIS/Male</option>
-                    <option>CIS/Female</option>
-                    <option>Trans Male</option>
-                    <option>Trans Female</option>
-                    <option>Gender Fluid</option>
-                    <option>Prefer not to disclose</option>
-                  </select>
-                </Field>
-                <Field title="Sexual Identity/Orientation" required>
-                  <select
-                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
-                    value={profile.sexualOrientation}
-                    onChange={(e) =>
-                      setProfile((p) => ({
-                        ...p,
-                        sexualOrientation: e.target.value,
-                      }))
-                    }
-                    multiple={true}
-                  >
-                    <option value="">Choose…</option>
-                    <option>CIS/Male</option>
-                    <option>CIS/Female</option>
-                    <option>Trans Male</option>
-                    <option>Trans Female</option>
-                    <option>Gender Fluid</option>
-                    <option>Prefer not to disclose</option>
-                  </select>
-                </Field>
-
-                <Field title="Ethnicity" required>
-                  <input
-                    type="email"
-                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
-                    placeholder="you@example.com"
-                    value={profile.email}
-                    onChange={(e) =>
-                      setProfile((p) => ({ ...p, email: e.target.value }))
-                    }
-                  />
-                </Field>
-                <Field title="Religion" required>
-                  <input
-                    type="tel"
-                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
-                    placeholder="123-456-7890"
-                    value={profile.contactNumber}
-                    onChange={(e) =>
-                      setProfile((p) => ({
-                        ...p,
-                        contactNumber: e.target.value,
-                      }))
-                    }
-                  />
-                </Field>
-                <Field title="Pronouns">
-                  <select
-                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
-                    value={profile.pronouns}
-                    onChange={(e) =>
-                      setProfile((p) => ({ ...p, pronouns: e.target.value }))
-                    }
-                  >
-                    <option value="">Choose…</option>
-                    <option>She/Her</option>
-                    <option>He/Him</option>
-                    <option>They/Them</option>
-                    <option>Prefer to self-describe</option>
-                  </select>
-                </Field>
-              </div>
-            </div>
+            <ContactSection
+              title={steps[step].title}
+              profile={profile}
+              setProfile={setProfile}
+              step={step}
+            />
           )}
 
           {steps[step].key === "profile" && (
-            <div className="space-y-6">
-              <StepTitle n={step + 1} title={steps[step].title} />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field title="Full name" required>
-                  <input
-                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
-                    placeholder="e.g., Alex Rivera"
-                    value={profile.name}
-                    onChange={(e) =>
-                      setProfile((p) => ({ ...p, name: e.target.value }))
-                    }
-                  />
-                </Field>
-                <Field title="Age" required>
-                  <input
-                    type="number"
-                    min={1}
-                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
-                    placeholder="e.g., 28"
-                    value={profile.age}
-                    onChange={(e) =>
-                      setProfile((p) => ({ ...p, age: e.target.value }))
-                    }
-                  />
-                </Field>
+            <ProfileSection
+              title={steps[step].title}
+              profile={profile}
+              setProfile={setProfile}
+              step={step}
+            />
+          )}
 
-                <Field title="Email" required>
-                  <input
-                    type="email"
-                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
-                    placeholder="you@example.com"
-                    value={profile.email}
-                    onChange={(e) =>
-                      setProfile((p) => ({ ...p, email: e.target.value }))
-                    }
-                  />
-                </Field>
-                <Field title="Contact Number" required>
-                  <input
-                    type="tel"
-                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
-                    placeholder="123-456-7890"
-                    value={profile.contactNumber}
-                    onChange={(e) =>
-                      setProfile((p) => ({
-                        ...p,
-                        contactNumber: e.target.value,
-                      }))
-                    }
-                  />
-                </Field>
-                <Field title="Pronouns">
-                  <select
-                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
-                    value={profile.pronouns}
-                    onChange={(e) =>
-                      setProfile((p) => ({ ...p, pronouns: e.target.value }))
-                    }
-                  >
-                    <option value="">Choose…</option>
-                    <option>She/Her</option>
-                    <option>He/Him</option>
-                    <option>They/Them</option>
-                    <option>Prefer to self-describe</option>
-                  </select>
-                </Field>
-                <Field title="Date of Birth" required>
-                  <input
-                    type="date"
-                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
-                    value={profile.dob}
-                    onChange={(e) =>
-                      setProfile((p) => ({ ...p, dob: e.target.value }))
-                    }
-                  />
-                </Field>
-              </div>
-            </div>
+          {steps[step].key === "screen" && (
+            <CheckInSection
+              title={steps[step].title}
+              profile={profile}
+              setProfile={setProfile}
+              step={step}
+            />
           )}
 
           {steps[step].key === "story" && (
@@ -396,6 +283,7 @@ export default function Page() {
                 />
               </Field>
               <VoiceRecorder audioState={storyAudio} onAttach={setStoryAudio} />
+              <Separator label="Your Goals" />
               <Field
                 title={
                   <>
@@ -429,41 +317,98 @@ export default function Page() {
                 />
               </Field>
               <VoiceRecorder audioState={storyAudio} onAttach={setStoryAudio} />
-            </div>
-          )}
-
-          {steps[step].key === "symptoms" && (
-            <div className="space-y-6">
-              <StepTitle n={step + 1} title="Quick Check-In" />
-              <p className="text-slate-700">
-                A few quick items to help your clinician focus (PHQ-2 + GAD-2).
-              </p>
-              <div className="space-y-4">
-                <Likert
-                  id="phq1"
-                  label="Little interest or pleasure in doing things"
-                  value={symptoms.phq1}
-                  onChange={(v) => setSymptoms((s) => ({ ...s, phq1: v }))}
+              <Separator label="Culture & Context (optional)" />
+              <Field
+                title={
+                  <>
+                    What role does culture (religion, ethnicity, nationality,
+                    spirituality) play on your life? <i>(optional)</i>
+                  </>
+                }
+              >
+                <textarea
+                  rows={6}
+                  className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
+                  placeholder="Share here in your own words…"
+                  value={storyText}
+                  onChange={(e) => setStoryText(e.target.value)}
                 />
+              </Field>
+              <VoiceRecorder audioState={storyAudio} onAttach={setStoryAudio} />
+              <Separator label="Previous Treatment" />
+              <Field title={"Previous Mental Health Treatment"} required>
                 <Likert
-                  id="phq2"
-                  label="Feeling down, depressed, or hopeless"
-                  value={symptoms.phq2}
-                  onChange={(v) => setSymptoms((s) => ({ ...s, phq2: v }))}
-                />
-                <Likert
-                  id="gad1"
-                  label="Feeling nervous, anxious, or on edge"
-                  value={symptoms.gad1}
-                  onChange={(v) => setSymptoms((s) => ({ ...s, gad1: v }))}
-                />
-                <Likert
-                  id="gad2"
-                  label="Not being able to stop or control worrying"
-                  value={symptoms.gad2}
-                  onChange={(v) => setSymptoms((s) => ({ ...s, gad2: v }))}
-                />
-              </div>
+                  label="Are you currently or have you previously received mental health treatment?"
+                  value={profile.hasReceivedMentalHealthTreatment.toString()}
+                  onChange={(v) =>
+                    setProfile((p) => ({
+                      ...p,
+                      hasReceivedMentalHealthTreatment: v === "true",
+                    }))
+                  }
+                  options={[
+                    { key: "true", label: "Yes" },
+                    { key: "false", label: "No" },
+                  ]}
+                ></Likert>
+              </Field>
+              {profile.hasReceivedMentalHealthTreatment && (
+                <>
+                  <Field title={"How long are/were you in therapy?"} required>
+                    <Likert
+                      value={profile.therapyDuration}
+                      onChange={(v) =>
+                        setProfile((p) => ({ ...p, therapyDuration: v }))
+                      }
+                      options={[
+                        {
+                          key: "Less than 6 months",
+                          label: "Less than 6 months",
+                        },
+                        { key: "6-12 months", label: "6-12 months" },
+                        { key: "1-2 years", label: "1-2 years" },
+                        { key: "2-3 years", label: "2-3 years" },
+                        { key: "4-5 years", label: "4-5 years" },
+                        { key: "5+ years", label: "5+ years" },
+                      ]}
+                    ></Likert>
+                  </Field>
+                  <Field title={"What was the diagnosis?"} required>
+                    <input
+                      className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                      placeholder="e.g., Generalized Anxiety Disorder"
+                      value={profile.previousDiagnosis || ""}
+                      onChange={(e) =>
+                        setProfile((p) => ({
+                          ...p,
+                          previousDiagnosis: e.target.value,
+                        }))
+                      }
+                    />
+                  </Field>
+                  <Field
+                    title={
+                      <>
+                        Please briefly describe any previous mental health
+                        treatment, what you worked on, and how you felt it went.
+                      </>
+                    }
+                    required
+                  >
+                    <textarea
+                      rows={4}
+                      className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
+                      placeholder="Share here in your own words…"
+                      value={storyText}
+                      onChange={(e) => setStoryText(e.target.value)}
+                    />
+                  </Field>
+                  <VoiceRecorder
+                    audioState={storyAudio}
+                    onAttach={setStoryAudio}
+                  />
+                </>
+              )}
             </div>
           )}
 
@@ -500,9 +445,13 @@ export default function Page() {
               <StepTitle n={step + 1} title="Review & Finish" />
               <div className="rounded-2xl border border-slate-300 p-4 bg-slate-50 text-slate-800">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <ReviewItem label="Name" value={profile.name} />
+                  <ReviewItem label="Name" value={profile.firstName} />
+                  <ReviewItem label="Name" value={profile.lastName} />
                   <ReviewItem label="Age" value={profile.age} />
-                  <ReviewItem label="Pronouns" value={profile.pronouns} />
+                  <ReviewItem
+                    label="Pronouns"
+                    value={profile.pronouns[0]?.value || ""}
+                  />
                   <ReviewItem label="Email" value={profile.email} />
                 </div>
                 <div className="mt-4">
@@ -517,10 +466,6 @@ export default function Page() {
                   )}
                 </div>
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <ReviewItem label="PHQ1" value={symptoms.phq1} />
-                  <ReviewItem label="PHQ2" value={symptoms.phq2} />
-                  <ReviewItem label="GAD1" value={symptoms.gad1} />
-                  <ReviewItem label="GAD2" value={symptoms.gad2} />
                   <ReviewItem
                     label="Sleep earlier helps"
                     value={sleepEarly ? "Yes" : "No"}
@@ -536,6 +481,30 @@ export default function Page() {
                   <ReviewItem
                     label="Cannabis use"
                     value={usesCannabis ? "Yes" : "No"}
+                  />
+                  <ReviewItem
+                    label="Mood changes"
+                    value={
+                      profile.moodChanges.length
+                        ? profile.moodChanges.join(", ")
+                        : "—"
+                    }
+                  />
+                  <ReviewItem
+                    label="Behavioral changes"
+                    value={
+                      profile.behaviorChanges.length
+                        ? profile.behaviorChanges.join(", ")
+                        : "—"
+                    }
+                  />
+                  <ReviewItem
+                    label="Thought changes"
+                    value={
+                      profile.thoughtChanges.length
+                        ? profile.thoughtChanges.join(", ")
+                        : "—"
+                    }
                   />
                 </div>
               </div>
@@ -600,13 +569,6 @@ export default function Page() {
             )}
           </div>
         </motion.div>
-
-        {/* <div className="mt-6 flex items-center justify-center text-xs text-slate-500">
-          <span>
-            UI mockup • green nature palette • serif headings • voice notes •
-            step guide
-          </span>
-        </div> */}
       </div>
     </div>
   );

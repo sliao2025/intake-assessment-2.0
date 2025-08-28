@@ -14,7 +14,8 @@ type Props = {
   onStepClick: (i: number) => void;
   stepTitles: string[];
   canNext: boolean;
-  progress: number;
+  maxVisited: number;
+  progressPct: number;
 };
 
 const ProgressHeader: React.FC<Props> = ({
@@ -24,10 +25,9 @@ const ProgressHeader: React.FC<Props> = ({
   onStepClick,
   stepTitles,
   canNext,
-  progress,
+  maxVisited,
+  progressPct,
 }) => {
-  
-
   return (
     <div className="sticky top-0 z-40 backdrop-blur bg-white/80 border-b border-gray-200">
       <div className="mx-auto max-w-4xl px-4 py-3">
@@ -67,12 +67,17 @@ const ProgressHeader: React.FC<Props> = ({
               key={title}
               className={`flex items-center gap-1 ${
                 i === step ? "font-semibold" : "text-gray-500"
-              } ${i <= step ? "cursor-pointer" : "cursor-not-allowed"}`}
-              style={i === step ? { color: intPsychTheme.primary } : undefined}
+              } ${i <= maxVisited ? "cursor-pointer" : "cursor-not-allowed"}`}
+              style={
+                i === step
+                  ? { color: intPsychTheme.primary }
+                  : i < maxVisited
+                  ? { color: theme.primary }
+                  : undefined
+              }
               onClick={() => {
-                const isBackOrCurrent = i <= step;
-                // const isForwardAllowed = i > step && canNext;
-                if (isBackOrCurrent) {
+                const isAllowed = i <= maxVisited;
+                if (isAllowed) {
                   onStepClick(i);
                 }
               }}
@@ -80,7 +85,11 @@ const ProgressHeader: React.FC<Props> = ({
               <div
                 className={`h-2 w-2 rounded-full ${"bg-gray-300"}`}
                 style={
-                  i === step ? { background: intPsychTheme.primary } : undefined
+                  i === step
+                    ? { background: intPsychTheme.primary }
+                    : i < maxVisited
+                    ? { background: theme.primary }
+                    : undefined
                 }
               />{" "}
               {title}
@@ -95,7 +104,7 @@ const ProgressHeader: React.FC<Props> = ({
               background: `linear-gradient(90deg, ${intPsychTheme.primary}, ${intPsychTheme.accent})`,
             }}
             initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
+            animate={{ width: `${progressPct}%` }}
             transition={{ duration: 0.6, ease }}
           />
         </div>
