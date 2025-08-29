@@ -7,8 +7,9 @@ const Field: React.FC<{
   label?: string | React.ReactNode;
   required?: boolean;
   children: React.ReactNode;
-}> = ({ title, label, required, children }) => (
-  <label className="block">
+  className?: string;
+}> = ({ title, label, required, children, className }) => (
+  <label className={`block ${className || ""}`}>
     <div className="mb-1 text-md semibold text-slate-700">
       {required && <span className="text-rose-600">* </span>}
       {title}

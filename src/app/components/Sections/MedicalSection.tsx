@@ -1,0 +1,465 @@
+"use client";
+
+import React from "react";
+import Separator from "../primitives/Separator";
+import Field from "../primitives/Field";
+import { intPsychTheme } from "../theme";
+import type {
+  Profile,
+  StateSetter,
+  Medication,
+  Allergy,
+  Hospitalization,
+  InjuryDetails,
+} from "../../lib/types";
+
+type Props = {
+  title: string;
+  profile: Profile;
+  setProfile: StateSetter<Profile>;
+  step: number;
+};
+
+const emptyMedication: Medication = {
+  name: "",
+  dosage: "",
+  frequency: "",
+  purpose: "",
+  prescriber: "",
+  comments: "",
+};
+const emptyAllergy: Allergy = { name: "", reaction: "" };
+const emptyHosp: Hospitalization = {
+  hospitalName: "",
+  location: "",
+  date: "",
+  reason: "",
+};
+
+export default function MedicalSection({ title, profile, setProfile }: Props) {
+  // ------- helpers -------
+  const addCurrentMed = () =>
+    setProfile((p) => ({
+      ...p,
+      currentMedications: [...p.currentMedications, { ...emptyMedication }],
+    }));
+  const updateCurrentMed = (idx: number, key: keyof Medication, val: string) =>
+    setProfile((p) => ({
+      ...p,
+      currentMedications: p.currentMedications.map((m, i) =>
+        i === idx ? { ...m, [key]: val } : m
+      ),
+    }));
+  const removeCurrentMed = (idx: number) =>
+    setProfile((p) => ({
+      ...p,
+      currentMedications: p.currentMedications.filter((_, i) => i !== idx),
+    }));
+
+  const addPrevMed = () =>
+    setProfile((p) => ({
+      ...p,
+      previousMedications: [...p.previousMedications, { ...emptyMedication }],
+    }));
+  const updatePrevMed = (idx: number, key: keyof Medication, val: string) =>
+    setProfile((p) => ({
+      ...p,
+      previousMedications: p.previousMedications.map((m, i) =>
+        i === idx ? { ...m, [key]: val } : m
+      ),
+    }));
+  const removePrevMed = (idx: number) =>
+    setProfile((p) => ({
+      ...p,
+      previousMedications: p.previousMedications.filter((_, i) => i !== idx),
+    }));
+
+  const addAllergy = () =>
+    setProfile((p) => ({
+      ...p,
+      medicalAllergies: [...p.medicalAllergies, { ...emptyAllergy }],
+    }));
+  const updateAllergy = (idx: number, key: keyof Allergy, val: string) =>
+    setProfile((p) => ({
+      ...p,
+      medicalAllergies: p.medicalAllergies.map((a, i) =>
+        i === idx ? { ...a, [key]: val } : a
+      ),
+    }));
+  const removeAllergy = (idx: number) =>
+    setProfile((p) => ({
+      ...p,
+      medicalAllergies: p.medicalAllergies.filter((_, i) => i !== idx),
+    }));
+
+  const addHosp = () =>
+    setProfile((p) => ({
+      ...p,
+      previousHospitalizations: [
+        ...p.previousHospitalizations,
+        { ...emptyHosp },
+      ],
+    }));
+  const updateHosp = (idx: number, key: keyof Hospitalization, val: string) =>
+    setProfile((p) => ({
+      ...p,
+      previousHospitalizations: p.previousHospitalizations.map((h, i) =>
+        i === idx ? { ...h, [key]: val } : h
+      ),
+    }));
+  const removeHosp = (idx: number) =>
+    setProfile((p) => ({
+      ...p,
+      previousHospitalizations: p.previousHospitalizations.filter(
+        (_, i) => i !== idx
+      ),
+    }));
+
+  const showInjuries = Boolean(profile.previousInjuries);
+  const ensureInjuries = () =>
+    setProfile((p) => ({
+      ...p,
+      previousInjuries: p.previousInjuries ?? {
+        injuryList: "",
+        explanation: "",
+      },
+    }));
+  const updateInjuries = (key: keyof InjuryDetails, val: string) =>
+    setProfile((p) => ({
+      ...p,
+      previousInjuries: {
+        ...(p.previousInjuries ?? { injuryList: "", explanation: "" }),
+        [key]: val,
+      },
+    }));
+
+  // ------- small UI atoms -------
+  const Card: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <div className="rounded-2xl border border-slate-300 p-4 bg-white/80">
+      {children}
+    </div>
+  );
+
+  const Input = (
+    props: React.InputHTMLAttributes<HTMLInputElement> & { label: string }
+  ) => (
+    <div className="flex flex-col gap-1">
+      <label className="text-sm text-slate-600">{props.label}</label>
+      <input
+        {...props}
+        className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+      />
+    </div>
+  );
+
+  const TextArea = (
+    props: React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
+      label: string;
+    }
+  ) => (
+    <div className="flex flex-col gap-1">
+      <label className="text-sm text-slate-600">{props.label}</label>
+      <textarea
+        {...props}
+        rows={props.rows ?? 3}
+        className="w-full rounded-2xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+      />
+    </div>
+  );
+
+  const AddButton: React.FC<{ onClick: () => void; label: string }> = ({
+    onClick,
+    label,
+  }) => (
+    <button
+      onClick={onClick}
+      className="inline-flex cursor-pointer items-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+      style={{ outlineColor: intPsychTheme.secondary }}
+    >
+      + {label}
+    </button>
+  );
+
+  const RemoveButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
+    <button
+      onClick={onClick}
+      title="Remove"
+      aria-label="Remove"
+      className="flex items-center justify-center rounded-full w-7 h-7 text-red-600 hover:bg-red-100 hover:text-red-700 cursor-pointer transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-4 w-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+        />
+      </svg>
+    </button>
+  );
+
+  // ------- render -------
+  return (
+    <div className="space-y-8">
+      {/* Current Medications */}
+      <Separator label="Current Medications" />
+      {profile.currentMedications.length === 0 ? (
+        <div className="flex items-center justify-between rounded-xl border border-dashed border-slate-300 p-4 bg-white/60">
+          <div className="text-sm text-slate-600">No medications added.</div>
+          <AddButton onClick={addCurrentMed} label="Add Medication" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {profile.currentMedications.map((m, idx) => (
+            <Card key={idx}>
+              <div className="flex justify-between mb-2 group">
+                <div className="font-medium text-slate-700">
+                  Medication #{idx + 1}
+                </div>
+                <RemoveButton onClick={() => removeCurrentMed(idx)} />
+              </div>
+              <div className="grid grid-cols-1 gap-3">
+                <Input
+                  label="Name"
+                  value={m.name}
+                  onChange={(e) =>
+                    updateCurrentMed(idx, "name", e.target.value)
+                  }
+                />
+                <Input
+                  label="Dosage"
+                  value={m.dosage}
+                  onChange={(e) =>
+                    updateCurrentMed(idx, "dosage", e.target.value)
+                  }
+                />
+                <Input
+                  label="Frequency"
+                  value={m.frequency}
+                  onChange={(e) =>
+                    updateCurrentMed(idx, "frequency", e.target.value)
+                  }
+                />
+                <Input
+                  label="Purpose"
+                  value={m.purpose}
+                  onChange={(e) =>
+                    updateCurrentMed(idx, "purpose", e.target.value)
+                  }
+                />
+                <Input
+                  label="Prescriber"
+                  value={m.prescriber}
+                  onChange={(e) =>
+                    updateCurrentMed(idx, "prescriber", e.target.value)
+                  }
+                />
+                <TextArea
+                  label="Comments"
+                  value={m.comments}
+                  onChange={(e) =>
+                    updateCurrentMed(idx, "comments", e.target.value)
+                  }
+                />
+              </div>
+            </Card>
+          ))}
+          <div className="md:col-span-2">
+            <AddButton onClick={addCurrentMed} label="Add Another Medication" />
+          </div>
+        </div>
+      )}
+
+      {/* Previous Medications */}
+      <Separator label="Previous Medications" />
+      {profile.previousMedications.length === 0 ? (
+        <div className="flex items-center justify-between rounded-xl border border-dashed border-slate-300 p-4 bg-white/60">
+          <div className="text-sm text-slate-600">
+            No previous medications added.
+          </div>
+          <AddButton onClick={addPrevMed} label="Add Previous Medication" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {profile.previousMedications.map((m, idx) => (
+            <Card key={idx}>
+              <div className="flex justify-between mb-2 group">
+                <div className="font-medium text-slate-700">
+                  Previous Medication #{idx + 1}
+                </div>
+                <RemoveButton onClick={() => removePrevMed(idx)} />
+              </div>
+              <div className="grid grid-cols-1 gap-3">
+                <Input
+                  label="Name"
+                  value={m.name}
+                  onChange={(e) => updatePrevMed(idx, "name", e.target.value)}
+                />
+                <Input
+                  label="Dosage"
+                  value={m.dosage}
+                  onChange={(e) => updatePrevMed(idx, "dosage", e.target.value)}
+                />
+                <Input
+                  label="Frequency"
+                  value={m.frequency}
+                  onChange={(e) =>
+                    updatePrevMed(idx, "frequency", e.target.value)
+                  }
+                />
+                <Input
+                  label="Purpose"
+                  value={m.purpose}
+                  onChange={(e) =>
+                    updatePrevMed(idx, "purpose", e.target.value)
+                  }
+                />
+                <Input
+                  label="Prescriber"
+                  value={m.prescriber}
+                  onChange={(e) =>
+                    updatePrevMed(idx, "prescriber", e.target.value)
+                  }
+                />
+                <TextArea
+                  label="Comments"
+                  value={m.comments}
+                  onChange={(e) =>
+                    updatePrevMed(idx, "comments", e.target.value)
+                  }
+                />
+              </div>
+            </Card>
+          ))}
+          <div className="md:col-span-2">
+            <AddButton
+              onClick={addPrevMed}
+              label="Add Another Previous Medication"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Medical Allergies */}
+      <Separator label="Medical Allergies" />
+      {profile.medicalAllergies.length === 0 ? (
+        <div className="flex items-center justify-between rounded-xl border border-dashed border-slate-300 p-4 bg-white/60">
+          <div className="text-sm text-slate-600">No allergies recorded.</div>
+          <AddButton onClick={addAllergy} label="Add Allergy" />
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {profile.medicalAllergies.map((a, idx) => (
+            <Card key={idx}>
+              <div className="flex justify-between mb-2 group">
+                <div className="font-medium text-slate-700">
+                  Allergy #{idx + 1}
+                </div>
+                <RemoveButton onClick={() => removeAllergy(idx)} />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <Input
+                  label="Medication Name"
+                  value={a.name}
+                  onChange={(e) => updateAllergy(idx, "name", e.target.value)}
+                />
+                <Input
+                  label="Reaction"
+                  value={a.reaction}
+                  onChange={(e) =>
+                    updateAllergy(idx, "reaction", e.target.value)
+                  }
+                />
+              </div>
+            </Card>
+          ))}
+          <AddButton onClick={addAllergy} label="Add Another Allergy" />
+        </div>
+      )}
+
+      {/* Previous Hospitalization */}
+      <Separator label="Previous Hospitalization" />
+      {profile.previousHospitalizations.length === 0 ? (
+        <div className="flex items-center justify-between rounded-xl border border-dashed border-slate-300 p-4 bg-white/60">
+          <div className="text-sm text-slate-600">
+            No hospitalizations added.
+          </div>
+          <AddButton onClick={addHosp} label="Add Hospitalization" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {profile.previousHospitalizations.map((h, idx) => (
+            <Card key={idx}>
+              <div className="flex justify-between mb-2 group">
+                <div className="font-medium text-slate-700">
+                  Hospitalization #{idx + 1}
+                </div>
+                <RemoveButton onClick={() => removeHosp(idx)} />
+              </div>
+              <div className="grid grid-cols-1 gap-3">
+                <Input
+                  label="Name of Hospital"
+                  value={h.hospitalName}
+                  onChange={(e) =>
+                    updateHosp(idx, "hospitalName", e.target.value)
+                  }
+                />
+                <Input
+                  label="Location"
+                  value={h.location}
+                  onChange={(e) => updateHosp(idx, "location", e.target.value)}
+                />
+                <Input
+                  label="Date"
+                  type="date"
+                  value={h.date}
+                  onChange={(e) => updateHosp(idx, "date", e.target.value)}
+                />
+                <TextArea
+                  label="Reason"
+                  value={h.reason}
+                  onChange={(e) => updateHosp(idx, "reason", e.target.value)}
+                />
+              </div>
+            </Card>
+          ))}
+          <div className="md:col-span-2">
+            <AddButton onClick={addHosp} label="Add Another Hospitalization" />
+          </div>
+        </div>
+      )}
+
+      {/* Previous Injuries */}
+      <Separator label="Previous Injuries" />
+      {!showInjuries ? (
+        <div className="flex items-center justify-between rounded-xl border border-dashed border-slate-300 p-4 bg-white/60">
+          <div className="text-sm text-slate-600">No injuries recorded.</div>
+          <AddButton onClick={ensureInjuries} label="Add Injury Details" />
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-slate-300 p-4 bg-white/80">
+          <div className="grid grid-cols-1 gap-3">
+            <TextArea
+              label="Injury List"
+              rows={2}
+              value={profile.previousInjuries?.injuryList ?? ""}
+              onChange={(e) => updateInjuries("injuryList", e.target.value)}
+            />
+            <TextArea
+              label="Explanation"
+              rows={4}
+              value={profile.previousInjuries?.explanation ?? ""}
+              onChange={(e) => updateInjuries("explanation", e.target.value)}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

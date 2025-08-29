@@ -20,6 +20,7 @@ import GardenFrame from "./components/Garden/Garden";
 import ContactSection from "./components/Sections/ContactSection";
 import ProfileSection from "./components/Sections/ProfileSection";
 import CheckInSection from "./components/Sections/CheckInSection";
+import MedicalSection from "./components/Sections/MedicalSection";
 
 type Step = {
   key: string;
@@ -34,6 +35,7 @@ const steps: Step[] = [
   { key: "profile", title: "About You", type: "form" },
   { key: "screen", title: "Quick Check-In", type: "quiz" },
   { key: "story", title: "Your Story", type: "open" },
+  { key: "medical", title: "Medical History", type: "form" },
   { key: "lifestyle", title: "Sleep & Lifestyle", type: "form" },
   { key: "review", title: "Review", type: "review" },
 ];
@@ -65,6 +67,14 @@ export default function Page() {
     alcoholFrequency: "",
     drinksPerOccasion: "",
     substancesUsed: [],
+    currentMedications: [],
+    previousMedications: [],
+    medicalAllergies: [],
+    previousHospitalizations: [],
+    previousInjuries: null,
+    isEmployed: false,
+    jobDetails: "",
+    hobbies: "",
   });
   const [storyText, setStoryText] = useState("");
   const [storyAudio, setStoryAudio] = useState<string | null>(null);
@@ -79,9 +89,6 @@ export default function Page() {
   const [usesNicotine, setUsesNicotine] = useState(false);
   const [usesCannabis, setUsesCannabis] = useState(false);
 
-  useEffect(() => {
-    console.log(profile.hasReceivedMentalHealthTreatment);
-  }, [profile.hasReceivedMentalHealthTreatment]);
   const progressPct = useMemo(() => {
     if (steps.length <= 1) return 0;
     // Percent of furthest reached step over last index
@@ -97,31 +104,31 @@ export default function Page() {
   }, []);
 
   const canNext = useMemo(() => {
-    if (steps[step].key === "contact")
-      return Boolean(
-        profile.firstName &&
-          profile.lastName &&
-          profile.age &&
-          profile.email.includes("@") &&
-          profile.dob &&
-          profile.contactNumber
-      );
-    if (steps[step].key === "profile")
-      return Boolean(
-        profile.genderIdentity &&
-          profile.sexualOrientation.length > 0 &&
-          profile.ethnicity.length > 0 &&
-          profile.religion.length > 0 &&
-          profile.pronouns.length > 0
-      );
-    if (steps[step].key === "story")
-      return storyText.trim().length > 30 || Boolean(storyAudio);
-    if (steps[step].key === "screen")
-      return (
-        profile.moodChanges.length > 0 &&
-        profile.behaviorChanges.length > 0 &&
-        profile.thoughtChanges.length > 0
-      );
+    // if (steps[step].key === "contact")
+    //   return Boolean(
+    //     profile.firstName &&
+    //       profile.lastName &&
+    //       profile.age &&
+    //       profile.email.includes("@") &&
+    //       profile.dob &&
+    //       profile.contactNumber
+    //   );
+    // if (steps[step].key === "profile")
+    //   return Boolean(
+    //     profile.genderIdentity &&
+    //       profile.sexualOrientation.length > 0 &&
+    //       profile.ethnicity.length > 0 &&
+    //       profile.religion.length > 0 &&
+    //       profile.pronouns.length > 0
+    //   );
+    // if (steps[step].key === "story")
+    //   return storyText.trim().length > 30 || Boolean(storyAudio);
+    // if (steps[step].key === "screen")
+    //   return (
+    //     profile.moodChanges.length > 0 &&
+    //     profile.behaviorChanges.length > 0 &&
+    //     profile.thoughtChanges.length > 0
+    //   );
     return true;
   }, [step, profile, storyText, storyAudio, symptoms]);
 
@@ -411,7 +418,14 @@ export default function Page() {
               )}
             </div>
           )}
-
+          {steps[step].key === "medical" && (
+            <MedicalSection
+              title={steps[step].title}
+              profile={profile}
+              setProfile={setProfile}
+              step={step}
+            />
+          )}
           {steps[step].key === "lifestyle" && (
             <div className="space-y-6">
               <StepTitle n={step + 1} title="Sleep & Lifestyle" />

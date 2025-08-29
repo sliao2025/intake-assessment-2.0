@@ -17,17 +17,42 @@ export type EngineNextResponse = {
 
 export type Option = { label: string; value: string };
 
-// Generic state setter type to mirror React's setState without importing React types
 export type StateSetter<T> = (value: T | ((prev: T) => T)) => void;
+
+export type Medication = {
+  name: string;
+  dosage: string;
+  frequency: string;
+  purpose: string;
+  prescriber: string;
+  comments: string;
+};
+
+export type Allergy = {
+  name: string;
+  reaction: string;
+};
+
+export type Hospitalization = {
+  hospitalName: string;
+  location: string;
+  date: string;
+  reason: string;
+};
+
+export type InjuryDetails = {
+  injuryList: string;
+  explanation: string;
+};
 
 export type Profile = {
   firstName: string;
   lastName: string;
-  age: string; // keep as string to accommodate inputs; parse/validate elsewhere
+  age: string;
   pronouns: Option[];
   email: string;
   contactNumber: string;
-  dob: string; // ISO date string from input
+  dob: string;
   genderIdentity: string;
   sexualOrientation: Option[];
   ethnicity: Option[];
@@ -42,4 +67,12 @@ export type Profile = {
   alcoholFrequency: string;
   drinksPerOccasion: string;
   substancesUsed: Option[];
+  currentMedications: Medication[];
+  previousMedications: Medication[];
+  medicalAllergies: Allergy[];
+  previousHospitalizations: Hospitalization[];
+  previousInjuries?: InjuryDetails | null;
+  isEmployed: boolean;
+  jobDetails: string;
+  hobbies: string;
 };
