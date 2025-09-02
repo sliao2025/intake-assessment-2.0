@@ -75,4 +75,5 @@ export type Profile = {
   isEmployed: boolean;
   jobDetails: string;
   hobbies: string;
+  familyHistory: string[];
 };

@@ -9,18 +9,16 @@ import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import ProgressHeader from "./components/ProgressHeader";
 import ConfettiBurst from "./components/ConfettiBurst";
 import StepTitle from "./components/StepTitle";
-import VoiceRecorder from "./components/VoiceRecorder";
-import Field from "./components/primitives/Field";
-import Likert from "./components/primitives/Likert";
 import ToggleRow from "./components/primitives/ToggleRow";
 import ReviewItem from "./components/primitives/ReviewItem";
-import Separator from "./components/primitives/Separator";
+
 import { praises, theme, ease, intPsychTheme } from "./components/theme";
 import GardenFrame from "./components/Garden/Garden";
 import ContactSection from "./components/Sections/ContactSection";
 import ProfileSection from "./components/Sections/ProfileSection";
 import CheckInSection from "./components/Sections/CheckInSection";
 import MedicalSection from "./components/Sections/MedicalSection";
+import StorySection from "./components/Sections/StorySection";
 
 type Step = {
   key: string;
@@ -75,6 +73,7 @@ export default function Page() {
     isEmployed: false,
     jobDetails: "",
     hobbies: "",
+    familyHistory: [],
   });
   const [storyText, setStoryText] = useState("");
   const [storyAudio, setStoryAudio] = useState<string | null>(null);
@@ -260,163 +259,16 @@ export default function Page() {
           )}
 
           {steps[step].key === "story" && (
-            <div className="space-y-6">
-              <StepTitle n={step + 1} title="Your Story" />
-              <Field
-                title={
-                  <>
-                    <b>Tell us the story</b> of how you got here, why are you
-                    asking for help today?
-                  </>
-                }
-                label={
-                  <>
-                    <div>Please describe the following:</div>
-                    <ul className="list-disc pl-5 mt-1">
-                      <li>(A) Onset and precipitating events</li>
-                      <li>(B) Periods when symptoms were better or worse</li>
-                      <li>(C) How symptoms have changed over time</li>
-                    </ul>
-                  </>
-                }
-                required
-              >
-                <textarea
-                  rows={6}
-                  className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
-                  placeholder="Share here in your own words…"
-                  value={storyText}
-                  onChange={(e) => setStoryText(e.target.value)}
-                />
-              </Field>
-              <VoiceRecorder audioState={storyAudio} onAttach={setStoryAudio} />
-              <Separator label="Your Goals" />
-              <Field
-                title={
-                  <>
-                    Please use this space to <b>elaborate</b> on your mental
-                    health treatment goals.
-                  </>
-                }
-                label={
-                  <>
-                    <div>
-                      For Example:
-                      <ul className="list-disc pl-5 mt-1">
-                        <li>Your primary reason for reaching out</li>
-                        <li>Symptoms and/or issues you have identified</li>
-                        <li>
-                          How long you've experienced any symptoms and how they
-                          may have changed over time
-                        </li>
-                      </ul>
-                    </div>
-                  </>
-                }
-                required
-              >
-                <textarea
-                  rows={6}
-                  className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
-                  placeholder="Share here in your own words…"
-                  value={storyText}
-                  onChange={(e) => setStoryText(e.target.value)}
-                />
-              </Field>
-              <VoiceRecorder audioState={storyAudio} onAttach={setStoryAudio} />
-              <Separator label="Culture & Context (optional)" />
-              <Field
-                title={
-                  <>
-                    What role does culture (religion, ethnicity, nationality,
-                    spirituality) play on your life? <i>(optional)</i>
-                  </>
-                }
-              >
-                <textarea
-                  rows={6}
-                  className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
-                  placeholder="Share here in your own words…"
-                  value={storyText}
-                  onChange={(e) => setStoryText(e.target.value)}
-                />
-              </Field>
-              <VoiceRecorder audioState={storyAudio} onAttach={setStoryAudio} />
-              <Separator label="Previous Treatment" />
-              <Field title={"Previous Mental Health Treatment"} required>
-                <Likert
-                  label="Are you currently or have you previously received mental health treatment?"
-                  value={profile.hasReceivedMentalHealthTreatment.toString()}
-                  onChange={(v) =>
-                    setProfile((p) => ({
-                      ...p,
-                      hasReceivedMentalHealthTreatment: v === "true",
-                    }))
-                  }
-                  options={[
-                    { key: "true", label: "Yes" },
-                    { key: "false", label: "No" },
-                  ]}
-                ></Likert>
-              </Field>
-              {profile.hasReceivedMentalHealthTreatment && (
-                <>
-                  <Field title={"How long are/were you in therapy?"} required>
-                    <Likert
-                      value={profile.therapyDuration}
-                      onChange={(v) =>
-                        setProfile((p) => ({ ...p, therapyDuration: v }))
-                      }
-                      options={[
-                        {
-                          key: "Less than 6 months",
-                          label: "Less than 6 months",
-                        },
-                        { key: "6-12 months", label: "6-12 months" },
-                        { key: "1-2 years", label: "1-2 years" },
-                        { key: "2-3 years", label: "2-3 years" },
-                        { key: "4-5 years", label: "4-5 years" },
-                        { key: "5+ years", label: "5+ years" },
-                      ]}
-                    ></Likert>
-                  </Field>
-                  <Field title={"What was the diagnosis?"} required>
-                    <input
-                      className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
-                      placeholder="e.g., Generalized Anxiety Disorder"
-                      value={profile.previousDiagnosis || ""}
-                      onChange={(e) =>
-                        setProfile((p) => ({
-                          ...p,
-                          previousDiagnosis: e.target.value,
-                        }))
-                      }
-                    />
-                  </Field>
-                  <Field
-                    title={
-                      <>
-                        Please briefly describe any previous mental health
-                        treatment, what you worked on, and how you felt it went.
-                      </>
-                    }
-                    required
-                  >
-                    <textarea
-                      rows={4}
-                      className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
-                      placeholder="Share here in your own words…"
-                      value={storyText}
-                      onChange={(e) => setStoryText(e.target.value)}
-                    />
-                  </Field>
-                  <VoiceRecorder
-                    audioState={storyAudio}
-                    onAttach={setStoryAudio}
-                  />
-                </>
-              )}
-            </div>
+            <StorySection
+              title={steps[step].title}
+              step={step}
+              profile={profile}
+              setProfile={setProfile}
+              storyText={storyText}
+              setStoryText={setStoryText}
+              storyAudio={storyAudio}
+              setStoryAudio={setStoryAudio}
+            />
           )}
           {steps[step].key === "medical" && (
             <MedicalSection
