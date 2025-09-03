@@ -5,17 +5,17 @@ import { intPsychTheme, theme } from "../theme";
 
 type Props = {
   id?: string;
-  label?: string;
+  label?: string | React.ReactNode;
   value: string;
-  onChange: (v: string) => void;
-  options?: { key: string; label: string }[];
+  onChange: (v: string | number) => void;
+  options?: { key: string | number; label: string | number }[];
 };
 
 const Likert: React.FC<Props> = ({ id, label, value, onChange, options }) => {
   return (
     <div className="rounded-2xl border border-slate-300 p-4 bg-slate-50">
       <div className={`text-slate-800 ${label ? "mb-3" : "mb-0"}`}>{label}</div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2  gap-2">
         {options.map((o) => (
           <button
             key={o.key}

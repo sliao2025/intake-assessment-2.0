@@ -48,8 +48,8 @@ const ethnicityOptions: Option[] = [
 ];
 
 const religionOptions: Option[] = [
-  { label: "Buddhism", value: "buddhism" },
-  { label: "Christianity", value: "christianity" },
+  { label: "Buddhist", value: "buddhism" },
+  { label: "Christian", value: "christian" },
   { label: "Hindu", value: "hindu" },
   { label: "Jewish", value: "jewish" },
   { label: "Muslim", value: "muslim" },
@@ -117,6 +117,20 @@ const substanceOptions: Option[] = [
   { label: "Other", value: "other" },
 ];
 
+const degreeOptions: Option[] = [
+  { label: "Didn't complete high school", value: "no_high_school" },
+  { label: "High school graduate", value: "high_school" },
+  { label: "Some college, but no degree", value: "some_college" },
+  { label: "Certificate (career and technical)", value: "certificate" },
+  { label: "Associate's degree", value: "associates" },
+  { label: "Bachelor's degree", value: "bachelors" },
+  { label: "Master's degree", value: "masters" },
+  { label: "Professional/doctorate degree", value: "doctorate" },
+];
+
+const degreeLabel = (v: string) =>
+  degreeOptions.find((o) => o.value === v)?.label ?? "Choose…";
+
 const alcoholFrequencyLabel = (v: string) =>
   alcoholFrequencyOptions.find((o) => o.value === v)?.label ?? "Choose…";
 
@@ -139,6 +153,89 @@ export default function ContactSection({
       <StepTitle n={step + 1} title={title} />
       <div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Field title="Height" required>
+            <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <div className="relative">
+                  <input
+                    type="number"
+                    min={0}
+                    max={8}
+                    step={1}
+                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 pr-8 text-slate-900 placeholder:text-slate-400"
+                    placeholder="e.g., 5"
+                    value={profile.height?.feet ?? ""}
+                    onChange={(e) =>
+                      setProfile((p) => ({
+                        ...p,
+                        height: {
+                          feet:
+                            e.target.value === ""
+                              ? null
+                              : Number(e.target.value),
+                          inches: p.height?.inches ?? null,
+                        },
+                      }))
+                    }
+                  />
+                  <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
+                    ft
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="relative">
+                  <input
+                    type="number"
+                    min={0}
+                    max={11}
+                    step={1}
+                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 pr-8 text-slate-900 placeholder:text-slate-400"
+                    placeholder="e.g., 8"
+                    value={profile.height?.inches ?? ""}
+                    onChange={(e) =>
+                      setProfile((p) => ({
+                        ...p,
+                        height: {
+                          feet: p.height?.feet ?? null,
+                          inches:
+                            e.target.value === ""
+                              ? null
+                              : Number(e.target.value),
+                        },
+                      }))
+                    }
+                  />
+                  <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
+                    in
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Field>
+
+          <Field title="Weight" required>
+            <div className="relative">
+              <input
+                type="number"
+                min={0}
+                step={1}
+                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 pr-12 text-slate-900 placeholder:text-slate-400"
+                placeholder="e.g., 150"
+                value={profile.weightLbs ?? ""}
+                onChange={(e) =>
+                  setProfile((p) => ({
+                    ...p,
+                    weightLbs:
+                      e.target.value === "" ? null : Number(e.target.value),
+                  }))
+                }
+              />
+              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
+                lbs
+              </div>
+            </div>
+          </Field>
           <Field title="Gender Identity" required>
             <Listbox
               value={profile.genderIdentity}
@@ -331,7 +428,7 @@ export default function ContactSection({
             </Listbox>
           </Field>
 
-          <Field title="Do you practice a religion?">
+          <Field title="Do you practice a religion?" required>
             <Listbox
               value={profile.religion}
               onChange={(vals: Option[]) =>
@@ -466,10 +563,105 @@ export default function ContactSection({
               </div>
             </Listbox>
           </Field>
-          <Separator
-            label={"Dietary/Substance Use"}
-            className="md:col-span-2"
-          />
+          <Field title="Highest Degree" required>
+            <Listbox
+              value={profile.highestDegree}
+              onChange={(val: string) =>
+                setProfile((p) => ({ ...p, highestDegree: val }))
+              }
+            >
+              <div className="relative">
+                <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                  {profile.highestDegree ? (
+                    <span className="text-slate-900">
+                      {degreeLabel(profile.highestDegree)}
+                    </span>
+                  ) : (
+                    <span className="text-slate-400">Choose…</span>
+                  )}
+                  <ChevronDown
+                    className="group pointer-events-none absolute top-3 right-2.5 size-4"
+                    aria-hidden="true"
+                  />
+                </ListboxButton>
+
+                <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                  {degreeOptions.map((option) => (
+                    <ListboxOption
+                      key={option.value}
+                      value={option.value}
+                      as={React.Fragment}
+                    >
+                      {({ active, selected }) => (
+                        <li
+                          className={`${
+                            active ? "bg-slate-100" : "bg-white"
+                          } relative cursor-pointer select-none py-2 pl-4 pr-10`}
+                        >
+                          <span
+                            className={`${
+                              selected
+                                ? "font-medium text-slate-900"
+                                : "font-normal text-slate-700"
+                            } block truncate`}
+                          >
+                            {option.label}
+                          </span>
+                          {selected && (
+                            <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                              <Check />
+                            </span>
+                          )}
+                        </li>
+                      )}
+                    </ListboxOption>
+                  ))}
+                </ListboxOptions>
+              </div>
+            </Listbox>
+          </Field>
+        </div>
+        <div>
+          <Field title={"Marital Status"} className="mt-6" required>
+            <Likert
+              label="Are you married?"
+              value={profile.isMarried.toString()}
+              onChange={(v) =>
+                setProfile((p) => ({
+                  ...p,
+                  isMarried: v === "true",
+                }))
+              }
+              options={[
+                { key: "true", label: "Yes" },
+                { key: "false", label: "No" },
+              ]}
+            />
+          </Field>
+          {profile.isMarried && (
+            <Field className="mt-6">
+              <Likert
+                label="How many times have you been married?"
+                value={profile.timesMarried.toString()}
+                onChange={(v) =>
+                  setProfile((p) => ({
+                    ...p,
+                    timesMarried: Number(v),
+                  }))
+                }
+                options={[
+                  { key: "1", label: "1" },
+                  { key: "2", label: "2" },
+                  { key: "3", label: "3" },
+                  { key: "4", label: "4" },
+                ]}
+              />
+            </Field>
+          )}
+        </div>
+
+        <Separator label={"Dietary/Substance Use"} className="md:col-span-2" />
+        <div className="grid md:grid-cols-2 gap-4">
           <Field title="How often do you consume alcoholic beverages?" required>
             <Listbox
               value={profile.alcoholFrequency}
@@ -799,6 +991,47 @@ export default function ContactSection({
             }
           />
         </Field>
+        <Field title={"Sexual Activity"} className="mt-6" required>
+          <Likert
+            label="Are you currently sexually active, or will be soon?"
+            value={profile.isSexuallyActive.toString()}
+            onChange={(v) =>
+              setProfile((p) => ({
+                ...p,
+                isSexuallyActive: v === "true",
+              }))
+            }
+            options={[
+              { key: "true", label: "Yes" },
+              { key: "false", label: "No" },
+            ]}
+          />
+        </Field>
+        {profile.isSexuallyActive && (
+          <Field className="mt-6">
+            <Likert
+              label={
+                <>
+                  <b>In the past year</b>, how many different sexual partners
+                  have you had?
+                </>
+              }
+              value={profile.sexualPartners.toString()}
+              onChange={(v) =>
+                setProfile((p) => ({
+                  ...p,
+                  sexualPartners: String(v),
+                }))
+              }
+              options={[
+                { key: "1", label: "1" },
+                { key: "2-4", label: "2 to 4" },
+                { key: "5-9", label: "5 to 9" },
+                { key: "10+", label: "10+" },
+              ]}
+            />
+          </Field>
+        )}
       </div>
     </div>
   );

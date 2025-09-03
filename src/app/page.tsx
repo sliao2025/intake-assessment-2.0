@@ -18,12 +18,22 @@ import ContactSection from "./components/Sections/ContactSection";
 import ProfileSection from "./components/Sections/ProfileSection";
 import CheckInSection from "./components/Sections/CheckInSection";
 import MedicalSection from "./components/Sections/MedicalSection";
+import RelationshipSection from "./components/Sections/RelationshipSection";
 import StorySection from "./components/Sections/StorySection";
+import AssessmentsSection from "./components/Sections/AssessmentsSection";
 
 type Step = {
   key: string;
   title: string;
   type: "intro" | "form" | "open" | "quiz" | "review";
+};
+
+type Relationship = {
+  id: string;
+  name: string;
+  role: string;
+  strength: "really_bad" | "not_great" | "pretty_good" | "really_good";
+  happy: boolean;
 };
 
 const steps: Step[] = [
@@ -33,8 +43,9 @@ const steps: Step[] = [
   { key: "profile", title: "About You", type: "form" },
   { key: "screen", title: "Quick Check-In", type: "quiz" },
   { key: "story", title: "Your Story", type: "open" },
+  { key: "relationships", title: "Relationships", type: "form" },
   { key: "medical", title: "Medical History", type: "form" },
-  { key: "lifestyle", title: "Sleep & Lifestyle", type: "form" },
+  { key: "assessments", title: "Assessments", type: "form" },
   { key: "review", title: "Review", type: "review" },
 ];
 
@@ -51,10 +62,54 @@ export default function Page() {
     email: "",
     contactNumber: "",
     dob: "",
+    assessments: {
+      suicide: { ideation: "", intent: "", plan: "", protective: "" },
+      phq9: {
+        phq1: "",
+        phq2: "",
+        phq3: "",
+        phq4: "",
+        phq5: "",
+        phq6: "",
+        phq7: "",
+        phq8: "",
+        phq9: "",
+      },
+      selfHarm: { pastMonth: "", lifetime: "" },
+      asrs5: {
+        asrs1: "",
+        asrs2: "",
+        asrs3: "",
+        asrs4: "",
+        asrs5: "",
+        asrs6: "",
+      },
+      ptsd: { ptsd1: "", ptsd2: "", ptsd3: "", ptsd4: "", ptsd5: "" },
+      ace: {
+        ace1: "",
+        ace2: "",
+        ace3: "",
+        ace4: "",
+        ace5: "",
+        ace6: "",
+        ace7: "",
+        ace8: "",
+        ace9: "",
+        ace10: "",
+      },
+      stress: { pss1: "", pss2: "", pss3: "", pss4: "" },
+    },
+    height: { feet: null, inches: null },
+    weightLbs: null,
     genderIdentity: "",
     sexualOrientation: [],
     ethnicity: [],
     religion: [],
+    highestDegree: "",
+    isMarried: false,
+    timesMarried: 0,
+    isSexuallyActive: false,
+    sexualPartners: "",
     hasReceivedMentalHealthTreatment: false,
     therapyDuration: "",
     previousDiagnosis: "",
@@ -74,6 +129,7 @@ export default function Page() {
     jobDetails: "",
     hobbies: "",
     familyHistory: [],
+    likedChildhood: false,
   });
   const [storyText, setStoryText] = useState("");
   const [storyAudio, setStoryAudio] = useState<string | null>(null);
@@ -87,6 +143,8 @@ export default function Page() {
   const [sleepLate, setSleepLate] = useState(false);
   const [usesNicotine, setUsesNicotine] = useState(false);
   const [usesCannabis, setUsesCannabis] = useState(false);
+  const [relationships, setRelationships] = useState<Relationship[]>([]);
+  const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
 
   const progressPct = useMemo(() => {
     if (steps.length <= 1) return 0;
@@ -172,6 +230,7 @@ export default function Page() {
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-8">
         <motion.div
+          ref={scrollContainerRef}
           key={steps[step].key}
           initial={{ y: 12, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -270,6 +329,17 @@ export default function Page() {
               setStoryAudio={setStoryAudio}
             />
           )}
+
+          {steps[step].key === "relationships" && (
+            <RelationshipSection
+              title={steps[step].title}
+              step={step}
+              relationships={relationships}
+              setRelationships={setRelationships}
+              scrollContainerRef={scrollContainerRef}
+            />
+          )}
+
           {steps[step].key === "medical" && (
             <MedicalSection
               title={steps[step].title}
@@ -278,32 +348,14 @@ export default function Page() {
               step={step}
             />
           )}
-          {steps[step].key === "lifestyle" && (
-            <div className="space-y-6">
-              <StepTitle n={step + 1} title="Sleep & Lifestyle" />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <ToggleRow
-                  label="I fall asleep faster if I sleep earlier"
-                  checked={sleepEarly}
-                  onChange={setSleepEarly}
-                />
-                <ToggleRow
-                  label="I sleep better going to bed late and waking late"
-                  checked={sleepLate}
-                  onChange={setSleepLate}
-                />
-                <ToggleRow
-                  label="I use nicotine products"
-                  checked={usesNicotine}
-                  onChange={setUsesNicotine}
-                />
-                <ToggleRow
-                  label="I use cannabis"
-                  checked={usesCannabis}
-                  onChange={setUsesCannabis}
-                />
-              </div>
-            </div>
+
+          {steps[step].key === "assessments" && (
+            <AssessmentsSection
+              title={steps[step].title}
+              profile={profile}
+              setProfile={setProfile}
+              step={step}
+            />
           )}
 
           {steps[step].key === "review" && (
@@ -314,6 +366,23 @@ export default function Page() {
                   <ReviewItem label="Name" value={profile.firstName} />
                   <ReviewItem label="Name" value={profile.lastName} />
                   <ReviewItem label="Age" value={profile.age} />
+                  <ReviewItem
+                    label="Height"
+                    value={
+                      (profile.height?.feet ?? "—") +
+                      (profile.height?.feet != null ? "' " : "") +
+                      (profile.height?.inches ?? "") +
+                      (profile.height?.inches != null ? '"' : "")
+                    }
+                  />
+                  <ReviewItem
+                    label="Weight"
+                    value={
+                      profile.weightLbs != null
+                        ? `${profile.weightLbs} lbs`
+                        : "—"
+                    }
+                  />
                   <ReviewItem
                     label="Pronouns"
                     value={profile.pronouns[0]?.value || ""}

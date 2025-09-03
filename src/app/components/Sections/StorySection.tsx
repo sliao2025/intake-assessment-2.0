@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import React, { useEffect } from "react";
 import StepTitle from "../StepTitle";
 import Field from "../primitives/Field";
 import Likert from "../primitives/Likert";
@@ -30,6 +30,10 @@ export default function StorySection({
   storyAudio,
   setStoryAudio,
 }: Props) {
+  useEffect(() => {
+    console.log("Profile updated:", profile);
+  }, [profile.familyHistory]);
+
   return (
     <div className="space-y-6">
       <StepTitle n={step + 1} title="Your Story" />
@@ -143,7 +147,7 @@ export default function StorySection({
             <Likert
               value={profile.therapyDuration}
               onChange={(v) =>
-                setProfile((p) => ({ ...p, therapyDuration: v }))
+                setProfile((p) => ({ ...p, therapyDuration: String(v) }))
               }
               options={[
                 { key: "Less than 6 months", label: "Less than 6 months" },
@@ -241,6 +245,89 @@ export default function StorySection({
           }
         />
       </Field>
+      {!profile.familyHistory.includes("none") && (
+        <Field title={<>Please elaborate on this family history.</>} required>
+          <textarea
+            rows={4}
+            className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
+            placeholder="Share here in your own words…"
+            value={storyText}
+            onChange={(e) => setStoryText(e.target.value)}
+          />
+        </Field>
+      )}
+      <Field
+        title={
+          <>
+            Describe the environment(s) in which you grew up (# of places,
+            locations, etc.)
+          </>
+        }
+        required
+      >
+        <textarea
+          rows={4}
+          className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
+          placeholder="Share here in your own words…"
+          value={storyText}
+          onChange={(e) => setStoryText(e.target.value)}
+        />
+      </Field>
+      <Field
+        title={<>Who did you grow up with?</>}
+        label={
+          <>
+            Please share as much information as you can about the people that
+            you grew up around (include ages and relationship to you)
+          </>
+        }
+        required
+      >
+        <textarea
+          rows={4}
+          className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
+          placeholder={
+            "e.g. Mom, 60 years old | Dad, 61 years old | Fred, 12 years old, my cousin"
+          }
+          value={storyText}
+          onChange={(e) => setStoryText(e.target.value)}
+        />
+      </Field>
+      <Field title={<>Childhood Questions</>} required>
+        <Likert
+          label="Do you think of your childhood in a positive way?"
+          value={profile.likedChildhood.toString()}
+          onChange={(v) =>
+            setProfile((p) => ({
+              ...p,
+              likedChildhood: v === "true",
+            }))
+          }
+          options={[
+            { key: "true", label: "Yes" },
+            { key: "false", label: "No" },
+          ]}
+        />
+      </Field>
+      {profile.likedChildhood === false && (
+        <Field
+          title={
+            <>
+              Please tell us why you did not experience your childhood in a
+              positive way
+            </>
+          }
+          required
+        >
+          <textarea
+            rows={4}
+            className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
+            placeholder="Share here in your own words…"
+            value={storyText}
+            onChange={(e) => setStoryText(e.target.value)}
+          />
+        </Field>
+      )}
     </div>
   );
 }
