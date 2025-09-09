@@ -13,6 +13,7 @@ import type {
   Hospitalization,
   InjuryDetails,
 } from "../../lib/types";
+import StepTitle from "../StepTitle";
 
 type Props = {
   title: string;
@@ -37,7 +38,12 @@ const emptyHosp: Hospitalization = {
   reason: "",
 };
 
-export default function MedicalSection({ title, profile, setProfile }: Props) {
+export default function MedicalSection({
+  title,
+  step,
+  profile,
+  setProfile,
+}: Props) {
   // ------- helpers -------
   const addCurrentMed = () =>
     setProfile((p) => ({
@@ -184,6 +190,7 @@ export default function MedicalSection({ title, profile, setProfile }: Props) {
   // ------- render -------
   return (
     <div className="space-y-8">
+      <StepTitle n={step + 1} title={title} />
       {/* Current Medications */}
       <Separator label="Current Medications" />
       {profile.currentMedications.length === 0 ? (

@@ -133,16 +133,6 @@ export default function Page() {
   });
   const [storyText, setStoryText] = useState("");
   const [storyAudio, setStoryAudio] = useState<string | null>(null);
-  const [symptoms, setSymptoms] = useState<{ [k: string]: string }>({
-    phq1: "",
-    phq2: "",
-    gad1: "",
-    gad2: "",
-  });
-  const [sleepEarly, setSleepEarly] = useState(false);
-  const [sleepLate, setSleepLate] = useState(false);
-  const [usesNicotine, setUsesNicotine] = useState(false);
-  const [usesCannabis, setUsesCannabis] = useState(false);
   const [relationships, setRelationships] = useState<Relationship[]>([]);
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -187,7 +177,7 @@ export default function Page() {
     //     profile.thoughtChanges.length > 0
     //   );
     return true;
-  }, [step, profile, storyText, storyAudio, symptoms]);
+  }, [step, profile, storyText, storyAudio]);
 
   const progressTitles = steps.map((s) => s.title);
 
@@ -356,111 +346,6 @@ export default function Page() {
               setProfile={setProfile}
               step={step}
             />
-          )}
-
-          {steps[step].key === "review" && (
-            <div className="space-y-6">
-              <StepTitle n={step + 1} title="Review & Finish" />
-              <div className="rounded-2xl border border-slate-300 p-4 bg-slate-50 text-slate-800">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <ReviewItem label="Name" value={profile.firstName} />
-                  <ReviewItem label="Name" value={profile.lastName} />
-                  <ReviewItem label="Age" value={profile.age} />
-                  <ReviewItem
-                    label="Height"
-                    value={
-                      (profile.height?.feet ?? "—") +
-                      (profile.height?.feet != null ? "' " : "") +
-                      (profile.height?.inches ?? "") +
-                      (profile.height?.inches != null ? '"' : "")
-                    }
-                  />
-                  <ReviewItem
-                    label="Weight"
-                    value={
-                      profile.weightLbs != null
-                        ? `${profile.weightLbs} lbs`
-                        : "—"
-                    }
-                  />
-                  <ReviewItem
-                    label="Pronouns"
-                    value={profile.pronouns[0]?.value || ""}
-                  />
-                  <ReviewItem label="Email" value={profile.email} />
-                </div>
-                <div className="mt-4">
-                  <div className="text-slate-600 mb-1">Your Story</div>
-                  <div className="whitespace-pre-wrap text-slate-900 min-h-6">
-                    {storyText || "—"}
-                  </div>
-                  {storyAudio && (
-                    <div className="mt-2">
-                      <audio controls src={storyAudio} className="w-full" />
-                    </div>
-                  )}
-                </div>
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <ReviewItem
-                    label="Sleep earlier helps"
-                    value={sleepEarly ? "Yes" : "No"}
-                  />
-                  <ReviewItem
-                    label="Sleep late helps"
-                    value={sleepLate ? "Yes" : "No"}
-                  />
-                  <ReviewItem
-                    label="Nicotine use"
-                    value={usesNicotine ? "Yes" : "No"}
-                  />
-                  <ReviewItem
-                    label="Cannabis use"
-                    value={usesCannabis ? "Yes" : "No"}
-                  />
-                  <ReviewItem
-                    label="Mood changes"
-                    value={
-                      profile.moodChanges.length
-                        ? profile.moodChanges.join(", ")
-                        : "—"
-                    }
-                  />
-                  <ReviewItem
-                    label="Behavioral changes"
-                    value={
-                      profile.behaviorChanges.length
-                        ? profile.behaviorChanges.join(", ")
-                        : "—"
-                    }
-                  />
-                  <ReviewItem
-                    label="Thought changes"
-                    value={
-                      profile.thoughtChanges.length
-                        ? profile.thoughtChanges.join(", ")
-                        : "—"
-                    }
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                <p className="text-slate-600 text-sm">
-                  This is a mockup. Clicking Finish shows a friendly
-                  confirmation—no data is stored.
-                </p>
-                <button
-                  onClick={() =>
-                    alert(
-                      "Thanks! This is just a front-end mockup—no data was saved."
-                    )
-                  }
-                  className="inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white"
-                  style={{ background: intPsychTheme.secondary }}
-                >
-                  <CheckCircle2 className="h-5 w-5" /> Finish
-                </button>
-              </div>
-            </div>
           )}
 
           <div className="mt-8 flex items-center justify-between">
