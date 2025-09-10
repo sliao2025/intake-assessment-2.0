@@ -5,7 +5,8 @@ import StepTitle from "../StepTitle";
 import Field from "../primitives/Field";
 import Likert from "../primitives/Likert";
 import type { Profile } from "../../lib/types";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ArrowRight } from "lucide-react";
+import { intPsychTheme } from "../theme";
 
 /** Simple collapsible with gating */
 function Collapsible({
@@ -331,42 +332,40 @@ export default function AssessmentsSection({
     return (
       <div className="space-y-3">
         {!done && !item && (
-          <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
-            {loading ? "Loading…" : "Preparing your first item…"}
-          </div>
+          <>{loading ? "Loading…" : "Preparing your first item…"}</>
         )}
 
         {item && (
           <div className="space-y-4">
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <Field title={item.stem}>
-                {/* Build Likert options from the CAT item payload to match original PHQ-9 style */}
-                {(() => {
-                  const opts =
-                    item?.options?.labels?.map((lbl: string, i: number) => ({
-                      key: String(item.options.values[i]),
-                      label: lbl,
-                    })) ?? [];
-                  return (
-                    <Likert
-                      value={selected}
-                      onChange={(v) => setSelected(String(v))}
-                      options={opts}
-                    />
-                  );
-                })()}
-              </Field>
-              <div className="mt-4 flex justify-end">
-                <button
-                  type="button"
-                  disabled={!selected || loading}
-                  onClick={() => selected && answer(Number(selected))}
-                  className="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white disabled:opacity-50"
-                  style={{ background: selected ? "#0ea5e9" : "#94a3b8" }}
-                >
-                  {loading ? "Submitting…" : "Submit"}
-                </button>
-              </div>
+            <Field title={item.stem}>
+              {/* Build Likert options from the CAT item payload to match original PHQ-9 style */}
+              {(() => {
+                const opts =
+                  item?.options?.labels?.map((lbl: string, i: number) => ({
+                    key: String(item.options.values[i]),
+                    label: lbl,
+                  })) ?? [];
+                return (
+                  <Likert
+                    value={selected}
+                    onChange={(v) => setSelected(String(v))}
+                    options={opts}
+                  />
+                );
+              })()}
+            </Field>
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                disabled={!selected || loading}
+                onClick={() => selected && answer(Number(selected))}
+                className="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold cursor-pointer text-white disabled:opacity-50"
+                style={{
+                  background: selected ? intPsychTheme.accent : "#94a3b8",
+                }}
+              >
+                {loading ? "Submitting…" : <ArrowRight className="h-6 w-6" />}
+              </button>
             </div>
             <div className="text-sm text-gray-600">
               θ {theta?.toFixed(2)} • SE {se?.toFixed(2)}
