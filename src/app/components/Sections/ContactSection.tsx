@@ -5,22 +5,9 @@ import * as React from "react";
 import StepTitle from "../StepTitle";
 import Field from "../primitives/Field";
 import { Option } from "../../lib/types";
+import type { Profile } from "../../lib/types";
 
-export type Profile = {
-  firstName: string;
-  lastName: string;
-  age: string;
-  pronouns: Option[];
-  email: string;
-  contactNumber: string;
-  dob: string;
-  genderIdentity: string;
-  sexualOrientation: Option[];
-  ethnicity: Option[];
-  religion: Option[];
-};
-
-export default function ProfileSection({
+export default function ContactSection({
   title,
   profile,
   setProfile,
@@ -31,6 +18,25 @@ export default function ProfileSection({
   setProfile: React.Dispatch<React.SetStateAction<Profile>>;
   step: number;
 }) {
+  // async function createSession() {
+  //   setLoading(true);
+  //   try {
+  //     const r = await fetch("/api/sessions", {
+  //       method: "POST",
+  //       body: JSON.stringify({
+  //         assessmentSlug: "phq9",
+  //         userId: "anon",
+  //         scaleCode: "PHQ9",
+  //       }),
+  //     });
+  //     const data = await r.json();
+  //     setSessionId(data.sessionId);
+  //     return data.sessionId as string;
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
+
   return (
     <div className="space-y-6">
       <StepTitle n={step + 1} title={title} />

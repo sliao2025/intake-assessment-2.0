@@ -3,7 +3,7 @@ import { ASSESSMENTS } from "../../seed/assessments";
 
 const sessions = new Map<string, any>();
 
-export const Sessions = {
+export const AssessmentSessions = {
   async create(userId: string, assessmentSlug: string, scaleCode?: string) {
     const id = randomUUID();
     const assessment = ASSESSMENTS[assessmentSlug];

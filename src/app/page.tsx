@@ -3,8 +3,8 @@
 
 import React, { useMemo, useState, useEffect } from "react";
 import type { Profile } from "./lib/types";
-import { motion } from "framer-motion";
-import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, progress } from "framer-motion";
+import { CheckCircle2, ChevronLeft, ChevronRight, Save } from "lucide-react";
 
 import ProgressHeader from "./components/ProgressHeader";
 import ConfettiBurst from "./components/ConfettiBurst";
@@ -28,14 +28,6 @@ type Step = {
   type: "intro" | "form" | "open" | "quiz" | "review";
 };
 
-type Relationship = {
-  id: string;
-  name: string;
-  role: string;
-  strength: "really_bad" | "not_great" | "pretty_good" | "really_good";
-  happy: boolean;
-};
-
 const steps: Step[] = [
   { key: "welcome", title: "Welcome", type: "intro" },
   { key: "hipaa", title: "HIPAA Statement", type: "intro" },
@@ -55,6 +47,7 @@ export default function Page() {
   const [burst, setBurst] = useState(false);
   const [maxVisited, setMaxVisited] = useState(0);
   const [profile, setProfile] = useState<Profile>({
+    progress: 0,
     firstName: "",
     lastName: "",
     age: "",
@@ -130,10 +123,18 @@ export default function Page() {
     hobbies: "",
     familyHistory: [],
     likedChildhood: false,
+    relationships: [],
+    // New RichResponse story fields
+    storyNarrative: { text: "" },
+    goals: { text: "" },
+    livingSituation: { text: "" },
+    cultureContext: { text: "" },
+    prevTreatmentSummary: { text: "" },
+    familyHistoryElaboration: { text: "" },
+    upbringingEnvironments: { text: "" },
+    upbringingWhoWith: { text: "" },
+    childhoodNegativeReason: { text: "" },
   });
-  const [storyText, setStoryText] = useState("");
-  const [storyAudio, setStoryAudio] = useState<string | null>(null);
-  const [relationships, setRelationships] = useState<Relationship[]>([]);
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
 
   const progressPct = useMemo(() => {
@@ -142,6 +143,10 @@ export default function Page() {
     return Math.min(100, Math.round((maxVisited / (steps.length - 1)) * 100));
   }, [maxVisited, steps.length]);
 
+  useEffect(() => {
+    setProfile((p) => ({ ...p, progress: progressPct }));
+    console.log(progressPct);
+  }, [progressPct]);
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -169,7 +174,7 @@ export default function Page() {
     //       profile.pronouns.length > 0
     //   );
     // if (steps[step].key === "story")
-    //   return storyText.trim().length > 30 || Boolean(storyAudio);
+    //   return true; // updated logic removed storyText/storyAudio dependency
     // if (steps[step].key === "screen")
     //   return (
     //     profile.moodChanges.length > 0 &&
@@ -177,11 +182,11 @@ export default function Page() {
     //     profile.thoughtChanges.length > 0
     //   );
     return true;
-  }, [step, profile, storyText, storyAudio]);
+  }, [step, profile]);
 
   const progressTitles = steps.map((s) => s.title);
 
-  const goNext = () => {
+  const goNext = async () => {
     const next = Math.min(step + 1, steps.length - 1);
     if (next !== step) {
       setPraise(praises[Math.floor(Math.random() * praises.length)]);
@@ -199,6 +204,20 @@ export default function Page() {
   };
   const goBack = () => setStep((s) => Math.max(0, s - 1));
   const bloom = Math.max(0.05, progressPct / 100);
+
+  async function saveProgress() {
+    try {
+      const r = await fetch("/api/patient", {
+        method: "POST",
+        body: JSON.stringify(profile),
+      });
+      const data = await r.json();
+      console.log("Stored new profile", data);
+    } catch (error) {
+      console.log("Failed to store new profile", error);
+    }
+    setPraise("Profile saved!");
+  }
 
   return (
     <div
@@ -242,6 +261,10 @@ export default function Page() {
                 which you can choose to type or respond to with a voice note.
                 The more <b>detail</b> you include, the better we can understand
                 how to help.
+              </p>
+              <p>
+                The whole process should take around 30 minutes to an hour, but
+                you
               </p>
               <p>Let's start!</p>
             </div>
@@ -313,10 +336,6 @@ export default function Page() {
               step={step}
               profile={profile}
               setProfile={setProfile}
-              storyText={storyText}
-              setStoryText={setStoryText}
-              storyAudio={storyAudio}
-              setStoryAudio={setStoryAudio}
             />
           )}
 
@@ -324,8 +343,8 @@ export default function Page() {
             <RelationshipSection
               title={steps[step].title}
               step={step}
-              relationships={relationships}
-              setRelationships={setRelationships}
+              profile={profile}
+              setProfile={setProfile}
               scrollContainerRef={scrollContainerRef}
             />
           )}
@@ -356,27 +375,37 @@ export default function Page() {
             >
               <ChevronLeft className="h-4 w-4" /> Back
             </button>
+            <div>
+              {step < 1 && (
+                <button
+                  onClick={goNext}
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white"
+                  style={{ background: intPsychTheme.secondary }}
+                >
+                  Start <ChevronRight className="h-4 w-4" />
+                </button>
+              )}
 
-            {step < 1 && (
-              <button
-                onClick={goNext}
-                className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white"
-                style={{ background: intPsychTheme.secondary }}
-              >
-                Start <ChevronRight className="h-4 w-4" />
-              </button>
-            )}
-
-            {step > 0 && step < steps.length - 1 && (
-              <button
-                onClick={goNext}
-                disabled={!canNext}
-                className="inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
-                style={{ background: intPsychTheme.secondary }}
-              >
-                Next <ChevronRight className="h-4 w-4" />
-              </button>
-            )}
+              {step > 0 && step < steps.length - 1 && (
+                <>
+                  <button
+                    onClick={saveProgress}
+                    className="inline-flex mr-2 items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+                    style={{ background: intPsychTheme.accent }}
+                  >
+                    Save <Save className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={goNext}
+                    disabled={!canNext}
+                    className="inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+                    style={{ background: intPsychTheme.secondary }}
+                  >
+                    Next <ChevronRight className="h-4 w-4" />
+                  </button>
+                </>
+              )}
+            </div>
 
             {step === steps.length - 1 && (
               <button

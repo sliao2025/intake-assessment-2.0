@@ -47,3 +47,5 @@ out/
 coverage/
 *.log
 .env*
+
+/src/generated/prisma

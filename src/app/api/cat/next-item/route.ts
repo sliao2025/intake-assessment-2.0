@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { Sessions, Assessments } from "../../../lib/store/memory";
+import { AssessmentSessions, Assessments } from "../../../lib/store/memory";
 import { callEngineNext } from "../../../lib/engine";
 
 export async function GET(req: NextRequest) {
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const { sessionId } = await req.json();
-  const s = await Sessions.get(sessionId);
+  const s = await AssessmentSessions.get(sessionId);
   if (!s) return new Response("Not found", { status: 404 });
   const assessment = (await import("../../../seed/assessments")).ASSESSMENTS[
     s.assessmentSlug
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     })),
   };
   const data = await callEngineNext(payload);
-  await Sessions.update(sessionId, {
+  await AssessmentSessions.update(sessionId, {
     theta: data.theta ?? s.theta,
     seTheta: data.se ?? s.seTheta,
     state: data.stop ? "COMPLETED" : "IN_PROGRESS",

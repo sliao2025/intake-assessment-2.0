@@ -1,0 +1,21 @@
+import { NextRequest } from "next/server";
+import { prisma } from "../../../lib/prisma";
+import argon2 from "argon2";
+
+export async function POST(req: NextRequest) {
+  const { email, password, name } = await req.json();
+  const e = (email || "").toLowerCase().trim();
+  if (!e || !password)
+    return new Response("Email & password required", { status: 400 });
+
+  const existing = await prisma.user.findUnique({ where: { email: e } });
+  if (existing) return new Response("Email already in use", { status: 409 });
+
+  const passwordHash = await argon2.hash(password);
+
+  await prisma.user.create({
+    data: { email: e, passwordHash, name: name || null },
+  });
+
+  return Response.json({ ok: true });
+}

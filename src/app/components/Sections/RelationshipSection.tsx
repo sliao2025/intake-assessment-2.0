@@ -2,18 +2,11 @@
 
 import * as React from "react";
 import StepTitle from "../StepTitle";
+import type { Profile, Relationship } from "../../lib/types";
 import Field from "../primitives/Field";
 import { intPsychTheme } from "../theme";
 import Likert from "../primitives/Likert";
 import RemoveButton from "../primitives/Removebutton";
-
-export type Relationship = {
-  id: string;
-  name: string; // e.g., "Alex"
-  role: string; // e.g., "Friend", "Mom"
-  strength: "really_bad" | "not_great" | "pretty_good" | "really_good";
-  happy: boolean;
-};
 
 const strengthOptions: {
   label: string;
@@ -61,18 +54,20 @@ function withAlpha(hex: string, alpha: number) {
 type Props = {
   title: string;
   step: number;
-  relationships: Relationship[];
-  setRelationships: React.Dispatch<React.SetStateAction<Relationship[]>>;
+  profile: Profile;
+  setProfile: React.Dispatch<React.SetStateAction<Profile>>;
   scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 };
 
 export default function RelationshipSection({
   title,
   step,
-  relationships,
-  setRelationships,
+  profile,
+  setProfile,
   scrollContainerRef,
 }: Props) {
+  const relationships = profile.relationships ?? [];
+
   // --- Form draft ---
   const [draft, setDraft] = React.useState<Omit<Relationship, "id">>({
     name: "",
@@ -116,14 +111,18 @@ export default function RelationshipSection({
   // --- CRUD ---
   const addRelationship = () => {
     if (!draft.name.trim() || !draft.role.trim()) return;
-    setRelationships((prev) => [
+    const newRel: Relationship = { id: crypto.randomUUID(), ...draft };
+    setProfile((prev) => ({
       ...prev,
-      { id: crypto.randomUUID(), ...draft },
-    ]);
+      relationships: [...(prev.relationships ?? []), newRel],
+    }));
     setDraft({ name: "", role: "", strength: "pretty_good", happy: true });
   };
   const removeRelationship = (id: string) =>
-    setRelationships((prev) => prev.filter((r) => r.id !== id));
+    setProfile((prev) => ({
+      ...prev,
+      relationships: (prev.relationships ?? []).filter((r) => r.id !== id),
+    }));
 
   // --- Layout (radial) ---
   const nodes = React.useMemo(() => {
@@ -170,81 +169,6 @@ export default function RelationshipSection({
 
           <div className="w-full overflow-hidden rounded-xl border border-slate-200 bg-white">
             <svg viewBox="0 0 520 320" className="w-full h-[320px]">
-              {/* Legend (rounded card)
-              <g transform="translate(16,16)">
-                <rect
-                  x="0"
-                  y="0"
-                  width="180"
-                  height="64"
-                  rx="10"
-                  fill="#ffffff"
-                  stroke="#E2E8F0"
-                />
-                <g transform="translate(12,14)">
-                  <line
-                    x1="0"
-                    y1="0"
-                    x2="32"
-                    y2="0"
-                    stroke="#16a34a"
-                    strokeWidth="4"
-                  />
-                  <text
-                    x="40"
-                    y="4"
-                    fontSize="11"
-                    fill="#334155"
-                    dominantBaseline="middle"
-                  >
-                    Happy
-                  </text>
-                  <line
-                    x1="0"
-                    y1="18"
-                    x2="32"
-                    y2="18"
-                    stroke="#ef4444"
-                    strokeWidth="4"
-                  />
-                  <text
-                    x="40"
-                    y="22"
-                    fontSize="11"
-                    fill="#334155"
-                    dominantBaseline="middle"
-                  >
-                    Not happy
-                  </text>
-                  <line
-                    x1="0"
-                    y1="36"
-                    x2="24"
-                    y2="36"
-                    stroke="#334155"
-                    strokeWidth="2"
-                  />
-                  <line
-                    x1="28"
-                    y1="36"
-                    x2="52"
-                    y2="36"
-                    stroke="#334155"
-                    strokeWidth="6"
-                  />
-                  <text
-                    x="60"
-                    y="40"
-                    fontSize="11"
-                    fill="#334155"
-                    dominantBaseline="middle"
-                  >
-                    Thicker = stronger
-                  </text>
-                </g>
-              </g> */}
-
-              {/* Edges */}
               {nodes.map((n) => {
                 const isHover = hoveredId === n.id;
                 const sw = 1.5 + weightFor(n.strength) + (isHover ? 2 : 0);

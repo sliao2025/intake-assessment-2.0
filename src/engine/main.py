@@ -39,7 +39,6 @@ class StartRequest(BaseModel):
 
 app = FastAPI(title="Adaptive Engine (Phase‑0)")
 
-
 @app.get("/")
 def root():
     return {"message": "Adaptive Engine (Phase‑0)"}
@@ -60,7 +59,6 @@ def start_cat(req: StartRequest):
     # Use defaults for stop rule; with 0 items answered it will not stop
     stop = should_stop(theta0, 1.0, min_se=DEFAULT_MIN_SE, max_items=DEFAULT_MAX_ITEMS, n_answered=0)
     return {"nextItemId": next_id, "stop": stop, "theta": float(theta0), "se": 1.0}
-
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import StepTitle from "../StepTitle";
 import Field from "../primitives/Field";
 import Likert from "../primitives/Likert";
@@ -14,10 +14,6 @@ type Props = {
   step: number;
   profile: Profile;
   setProfile: React.Dispatch<React.SetStateAction<Profile>>;
-  storyText: string;
-  setStoryText: (v: string) => void;
-  storyAudio: string | null;
-  setStoryAudio: (v: string | null) => void;
 };
 
 export default function StorySection({
@@ -25,15 +21,7 @@ export default function StorySection({
   step,
   profile,
   setProfile,
-  storyText,
-  setStoryText,
-  storyAudio,
-  setStoryAudio,
 }: Props) {
-  useEffect(() => {
-    console.log("Profile updated:", profile);
-  }, [profile.familyHistory]);
-
   return (
     <div className="space-y-6">
       <StepTitle n={step + 1} title="Your Story" />
@@ -46,11 +34,19 @@ export default function StorySection({
         }
         label={
           <>
-            <div>Please describe the following:</div>
+            <div>
+              <i>Please describe the following:</i>
+            </div>
             <ul className="list-disc pl-5 mt-1">
-              <li>(A) Onset and precipitating events</li>
-              <li>(B) Periods when symptoms were better or worse</li>
-              <li>(C) How symptoms have changed over time</li>
+              <i>
+                <li>(A) Onset and precipitating events</li>
+              </i>
+              <i>
+                <li>(B) Periods when symptoms were better or worse</li>
+              </i>
+              <i>
+                <li>(C) How symptoms have changed over time</li>
+              </i>
             </ul>
           </>
         }
@@ -60,12 +56,28 @@ export default function StorySection({
           rows={6}
           className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
           placeholder="Share here in your own words…"
-          value={storyText}
-          onChange={(e) => setStoryText(e.target.value)}
+          value={profile.storyNarrative?.text || ""}
+          onChange={(e) =>
+            setProfile((p) => ({
+              ...p,
+              storyNarrative: { ...p.storyNarrative, text: e.target.value },
+            }))
+          }
         />
       </Field>
 
-      <VoiceRecorder audioState={storyAudio} onAttach={setStoryAudio} />
+      <VoiceRecorder
+        audioState={profile.storyNarrative?.audio?.url || null}
+        onAttach={(url) =>
+          setProfile((p) => ({
+            ...p,
+            storyNarrative: {
+              ...p.storyNarrative,
+              audio: url ? { url } : undefined,
+            },
+          }))
+        }
+      />
 
       <Separator label="Your Goals" />
       <Field
@@ -78,14 +90,20 @@ export default function StorySection({
         label={
           <>
             <div>
-              For Example:
+              <i>For Example:</i>
               <ul className="list-disc pl-5 mt-1">
-                <li>Your primary reason for reaching out</li>
-                <li>Symptoms and/or issues you have identified</li>
-                <li>
-                  How long you've experienced any symptoms and how they may have
-                  changed over time
-                </li>
+                <i>
+                  <li>Your primary reason for reaching out</li>
+                </i>
+                <i>
+                  <li>Symptoms and/or issues you have identified</li>
+                </i>
+                <i>
+                  <li>
+                    How long you've experienced any symptoms and how they may
+                    have changed over time
+                  </li>
+                </i>
               </ul>
             </div>
           </>
@@ -96,13 +114,66 @@ export default function StorySection({
           rows={6}
           className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
           placeholder="Share here in your own words…"
-          value={storyText}
-          onChange={(e) => setStoryText(e.target.value)}
+          value={profile.goals?.text || ""}
+          onChange={(e) =>
+            setProfile((p) => ({
+              ...p,
+              goals: { ...p.goals, text: e.target.value },
+            }))
+          }
         />
       </Field>
 
-      <VoiceRecorder audioState={storyAudio} onAttach={setStoryAudio} />
-
+      <VoiceRecorder
+        audioState={profile.goals?.audio?.url || null}
+        onAttach={(url) =>
+          setProfile((p) => ({
+            ...p,
+            goals: {
+              ...p.goals,
+              audio: url ? { url } : undefined,
+            },
+          }))
+        }
+      />
+      <Separator label="Living Situation" />
+      <Field
+        title={<>Please describe your living situation.</>}
+        label={
+          <div>
+            <i>
+              Include who you live with, neighborhood safety, access to
+              resources, and environmental stressors
+            </i>
+          </div>
+        }
+        required
+      >
+        <textarea
+          rows={6}
+          className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
+          placeholder="Share here in your own words…"
+          value={profile.livingSituation?.text || ""}
+          onChange={(e) =>
+            setProfile((p) => ({
+              ...p,
+              livingSituation: { ...p.livingSituation, text: e.target.value },
+            }))
+          }
+        />
+      </Field>
+      <VoiceRecorder
+        audioState={profile.livingSituation?.audio?.url || null}
+        onAttach={(url) =>
+          setProfile((p) => ({
+            ...p,
+            livingSituation: {
+              ...p.livingSituation,
+              audio: url ? { url } : undefined,
+            },
+          }))
+        }
+      />
       <Separator label="Culture & Context (optional)" />
       <Field
         title={
@@ -116,12 +187,28 @@ export default function StorySection({
           rows={6}
           className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
           placeholder="Share here in your own words…"
-          value={storyText}
-          onChange={(e) => setStoryText(e.target.value)}
+          value={profile.cultureContext?.text || ""}
+          onChange={(e) =>
+            setProfile((p) => ({
+              ...p,
+              cultureContext: { ...p.cultureContext, text: e.target.value },
+            }))
+          }
         />
       </Field>
 
-      <VoiceRecorder audioState={storyAudio} onAttach={setStoryAudio} />
+      <VoiceRecorder
+        audioState={profile.cultureContext?.audio?.url || null}
+        onAttach={(url) =>
+          setProfile((p) => ({
+            ...p,
+            cultureContext: {
+              ...p.cultureContext,
+              audio: url ? { url } : undefined,
+            },
+          }))
+        }
+      />
 
       <Separator label="Previous Treatment" />
       <Field title={"Previous Mental Health Treatment"} required>
@@ -187,12 +274,31 @@ export default function StorySection({
               rows={4}
               className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
               placeholder="Share here in your own words…"
-              value={storyText}
-              onChange={(e) => setStoryText(e.target.value)}
+              value={profile.prevTreatmentSummary?.text || ""}
+              onChange={(e) =>
+                setProfile((p) => ({
+                  ...p,
+                  prevTreatmentSummary: {
+                    ...p.prevTreatmentSummary,
+                    text: e.target.value,
+                  },
+                }))
+              }
             />
           </Field>
 
-          <VoiceRecorder audioState={storyAudio} onAttach={setStoryAudio} />
+          <VoiceRecorder
+            audioState={profile.prevTreatmentSummary?.audio?.url || null}
+            onAttach={(url) =>
+              setProfile((p) => ({
+                ...p,
+                prevTreatmentSummary: {
+                  ...p.prevTreatmentSummary,
+                  audio: url ? { url } : undefined,
+                },
+              }))
+            }
+          />
         </>
       )}
       <Separator label="Growing Up & Family History" />
@@ -246,15 +352,37 @@ export default function StorySection({
         />
       </Field>
       {!profile.familyHistory.includes("none") && (
-        <Field title={<>Please elaborate on this family history.</>} required>
-          <textarea
-            rows={4}
-            className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
-            placeholder="Share here in your own words…"
-            value={storyText}
-            onChange={(e) => setStoryText(e.target.value)}
+        <>
+          <Field title={<>Please elaborate on this family history.</>} required>
+            <textarea
+              rows={4}
+              className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
+              placeholder="Share here in your own words…"
+              value={profile.familyHistoryElaboration?.text || ""}
+              onChange={(e) =>
+                setProfile((p) => ({
+                  ...p,
+                  familyHistoryElaboration: {
+                    ...p.familyHistoryElaboration,
+                    text: e.target.value,
+                  },
+                }))
+              }
+            />
+          </Field>
+          <VoiceRecorder
+            audioState={profile.familyHistoryElaboration?.audio?.url || null}
+            onAttach={(url) =>
+              setProfile((p) => ({
+                ...p,
+                familyHistoryElaboration: {
+                  ...p.familyHistoryElaboration,
+                  audio: url ? { url } : undefined,
+                },
+              }))
+            }
           />
-        </Field>
+        </>
       )}
       <Field
         title={
@@ -269,10 +397,30 @@ export default function StorySection({
           rows={4}
           className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
           placeholder="Share here in your own words…"
-          value={storyText}
-          onChange={(e) => setStoryText(e.target.value)}
+          value={profile.upbringingEnvironments?.text || ""}
+          onChange={(e) =>
+            setProfile((p) => ({
+              ...p,
+              upbringingEnvironments: {
+                ...p.upbringingEnvironments,
+                text: e.target.value,
+              },
+            }))
+          }
         />
       </Field>
+      <VoiceRecorder
+        audioState={profile.upbringingEnvironments?.audio?.url || null}
+        onAttach={(url) =>
+          setProfile((p) => ({
+            ...p,
+            upbringingEnvironments: {
+              ...p.upbringingEnvironments,
+              audio: url ? { url } : undefined,
+            },
+          }))
+        }
+      />
       <Field
         title={<>Who did you grow up with?</>}
         label={
@@ -289,10 +437,30 @@ export default function StorySection({
           placeholder={
             "e.g. Mom, 60 years old | Dad, 61 years old | Fred, 12 years old, my cousin"
           }
-          value={storyText}
-          onChange={(e) => setStoryText(e.target.value)}
+          value={profile.upbringingWhoWith?.text || ""}
+          onChange={(e) =>
+            setProfile((p) => ({
+              ...p,
+              upbringingWhoWith: {
+                ...p.upbringingWhoWith,
+                text: e.target.value,
+              },
+            }))
+          }
         />
       </Field>
+      <VoiceRecorder
+        audioState={profile.upbringingWhoWith?.audio?.url || null}
+        onAttach={(url) =>
+          setProfile((p) => ({
+            ...p,
+            upbringingWhoWith: {
+              ...p.upbringingWhoWith,
+              audio: url ? { url } : undefined,
+            },
+          }))
+        }
+      />
       <Field title={<>Childhood Questions</>} required>
         <Likert
           label="Do you think of your childhood in a positive way?"
@@ -310,23 +478,45 @@ export default function StorySection({
         />
       </Field>
       {profile.likedChildhood === false && (
-        <Field
-          title={
-            <>
-              Please tell us why you did not experience your childhood in a
-              positive way
-            </>
-          }
-          required
-        >
-          <textarea
-            rows={4}
-            className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
-            placeholder="Share here in your own words…"
-            value={storyText}
-            onChange={(e) => setStoryText(e.target.value)}
+        <>
+          <Field
+            title={
+              <>
+                Please tell us why you did not experience your childhood in a
+                positive way
+              </>
+            }
+            required
+          >
+            <textarea
+              rows={4}
+              className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
+              placeholder="Share here in your own words…"
+              value={profile.childhoodNegativeReason?.text || ""}
+              onChange={(e) =>
+                setProfile((p) => ({
+                  ...p,
+                  childhoodNegativeReason: {
+                    ...p.childhoodNegativeReason,
+                    text: e.target.value,
+                  },
+                }))
+              }
+            />
+          </Field>
+          <VoiceRecorder
+            audioState={profile.childhoodNegativeReason?.audio?.url || null}
+            onAttach={(url) =>
+              setProfile((p) => ({
+                ...p,
+                childhoodNegativeReason: {
+                  ...p.childhoodNegativeReason,
+                  audio: url ? { url } : undefined,
+                },
+              }))
+            }
           />
-        </Field>
+        </>
       )}
     </div>
   );
