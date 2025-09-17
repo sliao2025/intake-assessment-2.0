@@ -3,7 +3,7 @@ import { prisma } from "../../../lib/prisma";
 import argon2 from "argon2";
 
 export async function POST(req: NextRequest) {
-  const { email, password, name } = await req.json();
+  const { email, password, firstName, lastName } = await req.json();
   const e = (email || "").toLowerCase().trim();
   if (!e || !password)
     return new Response("Email & password required", { status: 400 });
@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
 
   const passwordHash = await argon2.hash(password);
 
+  const name = [firstName, lastName].filter(Boolean).join(" ") || null;
   await prisma.user.create({
     data: { email: e, passwordHash, name: name || null },
   });

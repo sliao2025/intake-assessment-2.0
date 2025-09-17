@@ -1,11 +1,23 @@
 "use client";
 
-import React from "react";
+import React, { Fragment } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import { theme, intPsychTheme, ease } from "./theme";
 import logo from "../../assets/IP_Logo.png";
+import { Roboto, DM_Serif_Text } from "next/font/google";
+import {
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+  Transition,
+} from "@headlessui/react";
+import { signOut, useSession } from "next-auth/react";
+
+const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"] });
+const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
 
 type Props = {
   step: number;
@@ -141,6 +153,7 @@ const ProgressHeader: React.FC<Props> = ({
   maxVisited,
   progressPct,
 }) => {
+  const { data: session, status } = useSession();
   const stepsRowRef = React.useRef<HTMLDivElement>(null);
   const capacity = useSmartCapacity(stepsRowRef, stepTitles, step);
 
@@ -179,7 +192,7 @@ const ProgressHeader: React.FC<Props> = ({
               className="h-10 w-10 object-contain"
             />
             <span
-              className="font-semibold text-2xl font-serif"
+              className={`font-semibold text-2xl ${dm_serif.className}`}
               style={{ color: intPsychTheme.primary }}
             >
               Integrative Psych Intake Assessment
@@ -195,6 +208,72 @@ const ProgressHeader: React.FC<Props> = ({
             >
               <CheckCircle2 className="h-4 w-4" /> {praise}
             </motion.div>
+          )}
+          {process.env.NODE_ENV !== "production" && (
+            <div className="z-40">
+              <Menu as="div" className="relative inline-block text-left">
+                <div>
+                  <MenuButton
+                    className="h-9 w-9 rounded-full overflow-hidden border border-gray-200 bg-white/60 backdrop-blur-sm flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
+                    title={session?.user?.name ?? "Your profile"}
+                    aria-label="Open profile menu"
+                  >
+                    {session?.user?.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={session.user.image}
+                        alt={session?.user?.name ?? "Profile"}
+                        className="h-full w-full object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <span className="text-sm font-semibold text-gray-700">
+                        {(session?.user?.name?.[0] ?? "?").toUpperCase()}
+                      </span>
+                    )}
+                  </MenuButton>
+                </div>
+
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="transform opacity-0 scale-95"
+                  enterTo="transform opacity-100 scale-100"
+                  leave="transition ease-in duration-75"
+                  leaveFrom="transform opacity-100 scale-100"
+                  leaveTo="transform opacity-0 scale-95"
+                >
+                  <MenuItems className="absolute right-0 mt-2 w-48 origin-top-right rounded-xl border border-gray-200 bg-white/95 backdrop-blur-sm shadow-lg ring-1 ring-black/5 focus:outline-none z-50">
+                    <div className="py-1">
+                      <div className="px-3 py-2 text-xs text-gray-500 border-b border-gray-100">
+                        <div className="truncate font-medium text-gray-700">
+                          {session?.user?.name ?? "Signed in"}
+                        </div>
+                        <div className="truncate">
+                          {session?.user?.email ?? ""}
+                        </div>
+                      </div>
+                      <MenuItem>
+                        {({ active }) => (
+                          <button
+                            onClick={() =>
+                              signOut({ callbackUrl: "/auth/signin" })
+                            }
+                            className={`w-full text-left px-3 py-2 text-sm ${
+                              active
+                                ? "bg-gray-100 text-gray-900"
+                                : "text-gray-700"
+                            }`}
+                          >
+                            Logout
+                          </button>
+                        )}
+                      </MenuItem>
+                    </div>
+                  </MenuItems>
+                </Transition>
+              </Menu>
+            </div>
           )}
         </div>
 

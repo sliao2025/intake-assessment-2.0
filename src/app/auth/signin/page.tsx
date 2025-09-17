@@ -1,37 +1,40 @@
 "use client";
 
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
+import logo from "../../../assets/IP_Logo.png";
 import GardenFrame from "../../components/Garden/Garden";
 import { intPsychTheme, theme, ease } from "../../components/theme";
-import { Roboto } from "next/font/google";
+import { Roboto, DM_Serif_Text } from "next/font/google";
 
 const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"] });
+const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
 
 export default function SignInPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
-  const callbackUrl = "/"; // where to land after auth
-  const { data: session } = useSession();
+  const [errorTip, setErrorTip] = useState<string | null>(null);
   const router = useRouter();
-  //   useEffect(() => {
-  //     if (session === "authenticated") router.replace("/");
-  //   }, [session, router]);
   useEffect(() => {
-    console.log(session);
-    console.log(router);
-    if (session?.user) console.log("hi");
-  }, []);
+    if (!errorTip) return;
+    const t = setTimeout(() => setErrorTip(null), 3500);
+    return () => clearTimeout(t);
+  }, [errorTip]);
+  const callbackUrl = "/intake";
+
   return (
     <div
       className="fixed inset-0 w-full h-dvh flex items-center justify-center overflow-hidden"
       style={{ background: intPsychTheme.card, color: theme.text }}
     >
       {/* Background visuals to match the main assessment page */}
-      <GardenFrame bloom={0.2} />
+      <GardenFrame bloom={0} />
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-8">
         <motion.div
@@ -41,14 +44,56 @@ export default function SignInPage() {
           transition={{ duration: 0.4, ease }}
           className="w-[50vw] max-w-xl rounded-4xl border border-gray-200 bg-white/70 backdrop-blur-sm p-6 md:p-8 shadow-md max-h-[70vh] overflow-y-auto pr-2"
         >
-          <div className="space-y-5">
-            <h1 className="text-2xl font-semibold">
-              {mode === "signin" ? "Welcome back" : "Create your account"}
-            </h1>
+          {errorTip && (
+            <div className="mb-3">
+              <div
+                className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-white shadow"
+                style={{ background: "#ef4444" /* tailwind red-500 */ }}
+                role="alert"
+                aria-live="assertive"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className="h-4 w-4"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm0 14.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5ZM9 5.75A1 1 0 0 1 10 4.75h0a1 1 0 0 1 1 1v5a1 1 0 1 1-2 0v-5Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span>{errorTip}</span>
+              </div>
+            </div>
+          )}
+          <div className="">
+            <div className="flex items-center ">
+              <Image
+                src={logo}
+                alt="Integrative Psych logo"
+                width={100}
+                height={100}
+                className="object-contain mr-4"
+              />
+              <h1 className="text-3xl font-semibold">
+                {mode === "signin" ? (
+                  <span
+                    className={`${dm_serif.className}  `}
+                    style={{ color: intPsychTheme.primary }}
+                  >
+                    Integrative Psych Intake Form
+                  </span>
+                ) : (
+                  "Create your account"
+                )}
+              </h1>
+            </div>
             {mode === "signin" && (
               <p className="text-gray-700 font-sans">
-                Sign in to continue your assessment and pick up right where you
-                left off.
+                Sign in to begin your treatment or pick up right where you left
+                off.
               </p>
             )}
           </div>
@@ -58,12 +103,15 @@ export default function SignInPage() {
               <>
                 <button
                   className={`${roboto.className} w-full cursor-pointer border-1 inline-flex items-center gap-3 rounded-full px-5 py-3 font-medium text-black transition-all`}
-                  onClick={() =>
-                    signIn("google", {
-                      callbackUrl: callbackUrl,
-                      redirect: true,
-                    })
-                  }
+                  onClick={async () => {
+                    const res = await signIn("google", {
+                      callbackUrl,
+                      redirect: false,
+                    });
+                    if (res?.url) {
+                      router.push(res.url);
+                    }
+                  }}
                 >
                   <svg
                     width="20"
@@ -102,7 +150,12 @@ export default function SignInPage() {
                   const res = await fetch("/api/auth/signup", {
                     method: "POST",
                     headers: { "content-type": "application/json" },
-                    body: JSON.stringify({ email, password }),
+                    body: JSON.stringify({
+                      email,
+                      password,
+                      firstName,
+                      lastName,
+                    }),
                   });
                   if (!res.ok) {
                     alert(await res.text());
@@ -115,16 +168,43 @@ export default function SignInPage() {
                     redirect: true,
                   });
                 } else {
-                  await signIn("credentials", {
+                  const res = await signIn("credentials", {
                     email,
                     password,
-                    callbackUrl: callbackUrl,
-                    redirect: true,
+                    callbackUrl,
+                    redirect: false,
                   });
+                  if (res?.ok && res.url) {
+                    router.push(res.url);
+                  } else if (res?.error) {
+                    setErrorTip(
+                      "There was an error logging in. Please check your credentials and try again."
+                    );
+                  }
                 }
               }}
             >
               <div className="grid gap-3">
+                {mode === "signup" && (
+                  <>
+                    <input
+                      className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                      type="text"
+                      placeholder="First Name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      required
+                    />
+                    <input
+                      className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                      type="text"
+                      placeholder="Last Name"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      required
+                    />
+                  </>
+                )}
                 <input
                   className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
                   type="email"
@@ -144,8 +224,12 @@ export default function SignInPage() {
               </div>
 
               <button
-                className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 font-semibold text-white"
-                style={{ background: intPsychTheme.accent }}
+                className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 font-semibold text-white bg-[color:var(--accent)] hover:bg-[color:var(--accent-hover)] transition-colors duration-200 ease-in-out"
+                style={{
+                  // fallback if you don’t use CSS vars
+                  ["--accent" as any]: intPsychTheme.accent,
+                  ["--accent-hover" as any]: "#0f5caeff", // a slightly darker shade
+                }}
                 type="submit"
               >
                 {mode === "signin" ? "Sign in" : "Create account"}

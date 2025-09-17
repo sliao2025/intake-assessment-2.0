@@ -117,7 +117,7 @@ export default function GardenFrame({ bloom = 0 }: { bloom?: number }) {
       </div>
 
       {/* Top accents */}
-      <VinesTop />
+      {/* <VinesTop /> */}
 
       <style jsx>{`
         .garden-sway {

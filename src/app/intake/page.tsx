@@ -1,26 +1,31 @@
-// src/app/page.tsx
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
-import type { Profile } from "./lib/types";
+import React, { Fragment, useMemo, useState, useEffect } from "react";
+import {
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+  Transition,
+} from "@headlessui/react";
+import type { Profile } from "../lib/types";
 import { motion, progress } from "framer-motion";
 import { CheckCircle2, ChevronLeft, ChevronRight, Save } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 
-import ProgressHeader from "./components/ProgressHeader";
-import ConfettiBurst from "./components/ConfettiBurst";
-import StepTitle from "./components/StepTitle";
-import ToggleRow from "./components/primitives/ToggleRow";
-import ReviewItem from "./components/primitives/ReviewItem";
+import ProgressHeader from "../components/ProgressHeader";
+import ConfettiBurst from "../components/ConfettiBurst";
+import StepTitle from "../components/StepTitle";
 
-import { praises, theme, ease, intPsychTheme } from "./components/theme";
-import GardenFrame from "./components/Garden/Garden";
-import ContactSection from "./components/Sections/ContactSection";
-import ProfileSection from "./components/Sections/ProfileSection";
-import CheckInSection from "./components/Sections/CheckInSection";
-import MedicalSection from "./components/Sections/MedicalSection";
-import RelationshipSection from "./components/Sections/RelationshipSection";
-import StorySection from "./components/Sections/StorySection";
-import AssessmentsSection from "./components/Sections/AssessmentsSection";
+import { praises, theme, ease, intPsychTheme } from "../components/theme";
+import GardenFrame from "../components/Garden/Garden";
+import ContactSection from "../components/Sections/ContactSection";
+import ProfileSection from "../components/Sections/ProfileSection";
+import CheckInSection from "../components/Sections/CheckInSection";
+import MedicalSection from "../components/Sections/MedicalSection";
+import RelationshipSection from "../components/Sections/RelationshipSection";
+import StorySection from "../components/Sections/StorySection";
+import AssessmentsSection from "../components/Sections/AssessmentsSection";
 
 type Step = {
   key: string;
@@ -208,13 +213,18 @@ export default function Page() {
   async function saveProgress() {
     try {
       const r = await fetch("/api/patient", {
-        method: "POST",
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(profile),
       });
+      if (!r.ok) {
+        const msg = await r.text();
+        throw new Error(`${r.status} ${msg}`);
+      }
       const data = await r.json();
-      console.log("Stored new profile", data);
+      console.log("Updated profile", data);
     } catch (error) {
-      console.log("Failed to store new profile", error);
+      console.error("Failed to store profile", error);
     }
     setPraise("Profile saved!");
   }

@@ -7,7 +7,7 @@ import argon2 from "argon2";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "database", maxAge: 60 * 60 * 24 * 7 }, // 7 days
+  session: { strategy: "jwt", maxAge: 60 * 60 * 24 * 7 }, // 7 days
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -41,8 +41,15 @@ export const authOptions: NextAuthOptions = {
   ],
   pages: { signIn: "/auth/signin" },
   callbacks: {
-    async session({ session, user }) {
-      if (session.user) (session.user as any).id = user.id;
+    async jwt({ token, user }) {
+      // On initial sign-in, persist the user id onto the JWT
+      if (user) token.id = (user as any).id;
+      return token;
+    },
+    async session({ session, token }) {
+      // Expose the id from the JWT onto the session object for the client
+      if (session.user && token?.id)
+        (session.user as any).id = token.id as string;
       return session;
     },
   },
