@@ -1,9 +1,9 @@
 import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
-import { prisma } from "../../lib/prisma";
+import { authOptions } from "../../auth/[...nextauth]/route";
+import { prisma } from "../../../lib/prisma";
 import { z } from "zod";
-import { storeData } from "../../lib/storage";
+import { storeData } from "../../../lib/storage";
 
 export async function POST(req: NextRequest) {
   const profile = await req.json();

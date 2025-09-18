@@ -153,7 +153,7 @@ const ProgressHeader: React.FC<Props> = ({
   maxVisited,
   progressPct,
 }) => {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const stepsRowRef = React.useRef<HTMLDivElement>(null);
   const capacity = useSmartCapacity(stepsRowRef, stepTitles, step);
 
@@ -228,7 +228,7 @@ const ProgressHeader: React.FC<Props> = ({
                       />
                     ) : (
                       <span className="text-sm font-semibold text-gray-700">
-                        {(session?.user?.name?.[0] ?? "?").toUpperCase()}
+                        {(session?.user?.name?.[0] ?? "G").toUpperCase()}
                       </span>
                     )}
                   </MenuButton>
@@ -249,9 +249,15 @@ const ProgressHeader: React.FC<Props> = ({
                         <div className="truncate font-medium text-gray-700">
                           {session?.user?.name ?? "Signed in"}
                         </div>
-                        <div className="truncate">
-                          {session?.user?.email ?? ""}
-                        </div>
+                        {session?.user?.email.split("-")[0] === "guest" ? (
+                          <div className="truncate italic text-gray-400">
+                            (Guest user)
+                          </div>
+                        ) : (
+                          <div className="truncate">
+                            {session?.user?.email ?? ""}
+                          </div>
+                        )}
                       </div>
                       <MenuItem>
                         {({ active }) => (

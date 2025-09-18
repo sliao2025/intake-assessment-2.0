@@ -1,21 +1,13 @@
 "use client";
 
 import React, { Fragment, useMemo, useState, useEffect } from "react";
-import {
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems,
-  Transition,
-} from "@headlessui/react";
 import type { Profile } from "../lib/types";
 import { motion, progress } from "framer-motion";
 import { CheckCircle2, ChevronLeft, ChevronRight, Save } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
-
 import ProgressHeader from "../components/ProgressHeader";
 import ConfettiBurst from "../components/ConfettiBurst";
 import StepTitle from "../components/StepTitle";
+import { signOut, useSession } from "next-auth/react";
 
 import { praises, theme, ease, intPsychTheme } from "../components/theme";
 import GardenFrame from "../components/Garden/Garden";
@@ -46,12 +38,9 @@ const steps: Step[] = [
   { key: "review", title: "Review", type: "review" },
 ];
 
-export default function Page() {
-  const [step, setStep] = useState(0);
-  const [praise, setPraise] = useState<string | null>(null);
-  const [burst, setBurst] = useState(false);
-  const [maxVisited, setMaxVisited] = useState(0);
-  const [profile, setProfile] = useState<Profile>({
+// Build a fresh default profile each time to avoid stale/shared references
+function makeDefaultProfile(): Profile {
+  return {
     progress: 0,
     firstName: "",
     lastName: "",
@@ -129,7 +118,6 @@ export default function Page() {
     familyHistory: [],
     likedChildhood: false,
     relationships: [],
-    // New RichResponse story fields
     storyNarrative: { text: "" },
     goals: { text: "" },
     livingSituation: { text: "" },
@@ -139,14 +127,69 @@ export default function Page() {
     upbringingEnvironments: { text: "" },
     upbringingWhoWith: { text: "" },
     childhoodNegativeReason: { text: "" },
-  });
+  };
+}
+
+// Deep merge incoming partial profile into defaults (arrays replaced, objects merged, primitives prefer incoming when defined)
+function mergeWithDefaults<T extends Record<string, any>>(
+  defaults: T,
+  incoming: Partial<T>
+): T {
+  const output: any = Array.isArray(defaults) ? [] : { ...defaults };
+  for (const key of Object.keys(defaults)) {
+    const d = (defaults as any)[key];
+    const i = (incoming as any)?.[key];
+
+    if (i === undefined || i === null) {
+      // keep default when incoming is missing/null
+      (output as any)[key] = d;
+      continue;
+    }
+
+    // Arrays: take incoming as-is
+    if (Array.isArray(d)) {
+      (output as any)[key] = Array.isArray(i) ? i : d;
+      continue;
+    }
+
+    // Objects: recurse
+    if (d && typeof d === "object" && !Array.isArray(d)) {
+      (output as any)[key] = mergeWithDefaults(
+        d,
+        typeof i === "object" ? i : {}
+      );
+      continue;
+    }
+
+    // Primitives: prefer incoming
+    (output as any)[key] = i;
+  }
+
+  // Also include any extra keys from incoming not present in defaults
+  for (const key of Object.keys(incoming || {})) {
+    if (!(key in output)) {
+      (output as any)[key] = (incoming as any)[key];
+    }
+  }
+
+  return output as T;
+}
+
+export default function Page() {
+  const { data: session } = useSession();
+
+  const [step, setStep] = useState(0);
+  const [praise, setPraise] = useState<string | null>(null);
+  const [burst, setBurst] = useState(false);
+  const [maxVisited, setMaxVisited] = useState(0);
+  const [profile, setProfile] = useState<Profile>(makeDefaultProfile());
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
 
   const progressPct = useMemo(() => {
     if (steps.length <= 1) return 0;
     // Percent of furthest reached step over last index
     return Math.min(100, Math.round((maxVisited / (steps.length - 1)) * 100));
-  }, [maxVisited, steps.length]);
+  }, [maxVisited]);
 
   useEffect(() => {
     setProfile((p) => ({ ...p, progress: progressPct }));
@@ -159,6 +202,26 @@ export default function Page() {
       document.body.style.overflow = prev;
     };
   }, []);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      console.log(session);
+      const profileResp = await fetch("api/profile/load", {
+        method: "GET",
+      });
+      const data = await profileResp.json();
+      const incoming = data?.profile ?? null;
+      if (incoming) {
+        const merged = mergeWithDefaults(makeDefaultProfile(), incoming);
+        setProfile(merged);
+        console.log("Loaded profile (merged)", merged);
+      } else {
+        // Ensure we always have a fresh default object
+        setProfile(makeDefaultProfile());
+        console.log("No saved profile found; using defaults");
+      }
+    };
+    fetchProfile();
+  }, [session]);
 
   const canNext = useMemo(() => {
     // if (steps[step].key === "contact")
@@ -199,7 +262,8 @@ export default function Page() {
       setTimeout(() => setBurst(false), 1200);
       setTimeout(() => setPraise(null), 2000);
       setStep(next);
-      setMaxVisited((prev) => Math.max(prev, next));
+      setMaxVisited((prev) => Math.max(prev, next)); //change this logic to change when all field are complete
+      saveProgress();
     }
   };
   const goToStep = (index: number) => {
@@ -212,7 +276,7 @@ export default function Page() {
 
   async function saveProgress() {
     try {
-      const r = await fetch("/api/patient", {
+      const r = await fetch("/api/profile/create", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(profile),
@@ -226,7 +290,6 @@ export default function Page() {
     } catch (error) {
       console.error("Failed to store profile", error);
     }
-    setPraise("Profile saved!");
   }
 
   return (
@@ -259,7 +322,10 @@ export default function Page() {
         >
           {steps[step].key === "welcome" && (
             <div className="space-y-5">
-              <StepTitle n={step + 1} title="Welcome" />
+              <StepTitle
+                n={step + 1}
+                title={`Welcome, ${session?.user?.name.split(" ")[0] ?? ""}`}
+              />
               <p className="text-gray-700 font-sans">
                 This detailed survey will give your clinician much of the
                 necessary context that could otherwise take a full session to
@@ -398,13 +464,13 @@ export default function Page() {
 
               {step > 0 && step < steps.length - 1 && (
                 <>
-                  <button
+                  {/* <button
                     onClick={saveProgress}
                     className="inline-flex mr-2 items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
                     style={{ background: intPsychTheme.accent }}
                   >
                     Save <Save className="h-4 w-4" />
-                  </button>
+                  </button> */}
                   <button
                     onClick={goNext}
                     disabled={!canNext}
