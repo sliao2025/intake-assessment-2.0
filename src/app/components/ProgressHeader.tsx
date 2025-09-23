@@ -209,7 +209,7 @@ const ProgressHeader: React.FC<Props> = ({
                 <CheckCircle2 className="h-4 w-4" /> {praise}
               </motion.div>
             )}
-            {process.env.NODE_ENV !== "production" && (
+            {
               <div className="z-40">
                 <Menu as="div" className="relative inline-block text-left">
                   <div>
@@ -279,7 +279,7 @@ const ProgressHeader: React.FC<Props> = ({
                   </Transition>
                 </Menu>
               </div>
-            )}
+            }
           </div>
         </div>
 
