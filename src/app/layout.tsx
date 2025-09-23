@@ -24,8 +24,14 @@ export default async function RootLayout({
   const session = await getServerSession(authOptions);
 
   return (
-    <html lang="en">
-      <body className="min-h-screen antialiased">
+    <html lang="en" className="h-full">
+      <head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
+      </head>
+      <body className="min-h-[100svh] h-full antialiased">
         <Providers session={session}>{children}</Providers>
       </body>
     </html>
