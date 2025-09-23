@@ -1,0 +1,33 @@
+substitutions:
+  _SERVICE: intake-assessment # name of your Cloud Run service
+  _REGION: us-central1 # pick your region
+  _INSTANCE: assessment-test-472319:us-central1:test-mysql-instance # your Cloud SQL instance connection name
+  _IMAGE: us-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/$_SERVICE:$COMMIT_SHA
+
+steps:
+  # 1. Build container
+  - name: gcr.io/cloud-builders/docker
+    args: ["build", "-t", "${_IMAGE}", "."]
+
+  # 2. Push to Artifact Registry
+  - name: gcr.io/cloud-builders/docker
+    args: ["push", "${_IMAGE}"]
+
+  # 3. Deploy to Cloud Run
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gcloud run deploy ${_SERVICE} \
+          --image ${_IMAGE} \
+          --region ${_REGION} \
+          --platform managed \
+          --service-account assess-app@${PROJECT_ID}.iam.gserviceaccount.com \
+          --allow-unauthenticated \
+          --add-cloudsql-instances ${_INSTANCE} \
+          --set-env-vars NODE_ENV=production \
+          --set-env-vars NEXTAUTH_URL=https://${_SERVICE}-${SHORT_SHA}-${_REGION}.a.run.app \
+          --set-secrets DATABASE_URL=DATABASE_URL:latest,NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest,GOOGLE_CLIENT_SECRET=GOOGLE_CLIENT_SECRET:latest
+images:
+  - ${_IMAGE}
