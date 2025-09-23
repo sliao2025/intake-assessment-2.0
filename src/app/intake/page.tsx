@@ -440,7 +440,7 @@ export default function Page() {
   if (status === "loading" || loading) {
     return (
       <div
-        className="fixed inset-0 w-full min-h-[100svh] h-dvh flex items-center justify-center"
+        className="fixed inset-0 min-h-[100svh] h-dvh flex items-center justify-center"
         style={{ background: intPsychTheme.card, color: theme.text }}
       >
         <div className="animate-pulse text-center">
@@ -456,7 +456,7 @@ export default function Page() {
 
   return (
     <div
-      className="fixed inset-0 w-full min-h-[100svh] h-dvh overflow-hidden"
+      className="fixed inset-0 w-full min-h-[100svh] h-dvh overflow-x-hidden"
       style={{
         background: intPsychTheme.card,
         color: theme.text,

@@ -30,16 +30,8 @@ export default function SignInPage() {
 
   return (
     <div
-      className="fixed inset-0 w-full min-h-[100svh] h-dvh overflow-hidden"
-      style={{
-        background: intPsychTheme.card,
-        color: theme.text,
-        paddingBottom: "env(safe-area-inset-bottom)",
-        WebkitTapHighlightColor: "transparent",
-        overflowX: "hidden",
-        overscrollBehaviorX: "none",
-        touchAction: "pan-y",
-      }}
+      className="fixed inset-0 w-full h-dvh flex items-center justify-center overflow-hidden"
+      style={{ background: intPsychTheme.card, color: theme.text }}
     >
       {/* Background visuals to match the main assessment page */}
       <GardenFrame bloom={0} />
