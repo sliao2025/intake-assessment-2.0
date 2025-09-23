@@ -4,6 +4,7 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 import { prisma } from "../../../lib/prisma";
 import { z } from "zod";
 import { storeData } from "../../../lib/storage";
+import type { InputJsonValue } from "@prisma/client/runtime/library";
 
 export async function POST(req: NextRequest) {
   const profile = await req.json();
@@ -32,17 +33,18 @@ export async function PUT(req: NextRequest) {
   }
 
   const profile = parsed.data;
+  const jsonProfile = JSON.parse(JSON.stringify(profile)) as InputJsonValue;
 
   // Your Prisma model stores JSON in Profile.json with userId as the PK
   const saved = await prisma.profile.upsert({
     where: { userId: session.user.id },
     update: {
-      json: profile,
+      json: jsonProfile, // <— changed
       version: { increment: 1 },
     },
     create: {
       userId: session.user.id,
-      json: profile,
+      json: jsonProfile, // <— changed
     },
     select: { userId: true, updatedAt: true, version: true },
   });
