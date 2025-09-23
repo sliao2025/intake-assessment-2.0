@@ -360,7 +360,7 @@ export default function ContactSection({
             </Listbox>
           </Field>
 
-          <Field title="What ethnic category best describes you?">
+          <Field required title="What ethnic category best describes you?">
             <Listbox
               value={profile.ethnicity}
               onChange={(vals: Option[]) =>
@@ -496,7 +496,7 @@ export default function ContactSection({
             </Listbox>
           </Field>
 
-          <Field title="Preferred Pronouns">
+          <Field required title="Preferred Pronouns">
             <Listbox
               value={profile.pronouns}
               onChange={(vals: Option[]) =>
@@ -781,7 +781,10 @@ export default function ContactSection({
             </Listbox>
           </Field>
 
-          <Field title="Which of these substances do you use frequently?">
+          <Field
+            required
+            title="Which of these substances do you use frequently?"
+          >
             <Listbox
               value={profile.substancesUsed}
               onChange={(vals: Option[]) =>

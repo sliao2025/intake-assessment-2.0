@@ -108,17 +108,20 @@ export type Assessments = {
     ptsd4: string;
     ptsd5: string;
   };
-  ace: {
-    ace1: string;
-    ace2: string;
-    ace3: string;
-    ace4: string;
-    ace5: string;
-    ace6: string;
-    ace7: string;
-    ace8: string;
-    ace9: string;
-    ace10: string;
+  aceResilience: {
+    r01: string; // Mother loved me when I was little.
+    r02: string; // Father loved me when I was little.
+    r03: string; // Other people helped my parents and they seemed to love me.
+    r04: string; // As an infant, someone enjoyed playing with me, and I enjoyed it too.
+    r05: string; // Relatives made me feel better if I was sad or worried.
+    r06: string; // Neighbors or friends’ parents seemed to like me.
+    r07: string; // Teachers, coaches, youth leaders or ministers were there to help me.
+    r08: string; // Family, neighbors and friends talked about making our lives better.
+    r09: string; // We had rules in our house and were expected to keep them.
+    r10: string; // When I felt really bad, I could find someone I trusted to talk to.
+    r11: string; // As a youth, people noticed I was capable and could get things done.
+    r12: string; // I was independent and a go‑getter.
+    r13: string; // I believed that life is what you make it.
   };
   stress: { pss1: string; pss2: string; pss3: string; pss4: string };
 };
@@ -142,9 +145,9 @@ export type Profile = {
   email: string;
   contactNumber: string;
   dob: string;
-  pronouns: Option[];
 
   // Profile Section
+  pronouns: Option[];
   height: { feet: number | null; inches: number | null };
   weightLbs: number | null;
   genderIdentity: string;
@@ -153,7 +156,7 @@ export type Profile = {
   religion: Option[];
   highestDegree: string;
   isMarried: boolean;
-  timesMarried: number;
+  timesMarried?: number;
   isSexuallyActive: boolean;
   sexualPartners: string;
   dietType: Option[];
@@ -161,10 +164,10 @@ export type Profile = {
   drinksPerOccasion: string;
   substancesUsed: Option[];
   isEmployed: boolean;
-  jobDetails: string;
+  jobDetails?: string;
   hobbies: string;
 
-  // Check-in Section
+  // Screen Section
   moodChanges: string[];
   behaviorChanges: string[];
   thoughtChanges: string[];
@@ -174,10 +177,10 @@ export type Profile = {
   goals: RichResponse; // “Your Goals”
   livingSituation: RichResponse; // “Living Situation”
   cultureContext?: RichResponse; // optional
-  prevTreatmentSummary?: RichResponse; // description of previous MH treatment
   hasReceivedMentalHealthTreatment: boolean;
   therapyDuration: string;
   previousDiagnosis: string;
+  prevTreatmentSummary?: RichResponse; // description of previous MH treatment
   familyHistoryElaboration?: RichResponse; // elaboration when familyHistory is not "none"
   upbringingEnvironments: RichResponse; // “Describe the environment(s)…”
   upbringingWhoWith: RichResponse; // “Who did you grow up with?”

@@ -81,20 +81,20 @@ const asrs0to4 = [
   { key: "4", label: "Very often" },
 ];
 
-const pcl0to4 = [
-  { key: "0", label: "Not at all" },
-  { key: "1", label: "A little bit" },
-  { key: "2", label: "Moderately" },
-  { key: "3", label: "Quite a bit" },
-  { key: "4", label: "Extremely" },
-];
-
 const pss0to4 = [
   { key: "0", label: "Never" },
   { key: "1", label: "Almost never" },
   { key: "2", label: "Sometimes" },
   { key: "3", label: "Fairly often" },
   { key: "4", label: "Very often" },
+];
+
+const aceTrue5 = [
+  { key: "0", label: "Definitely true" },
+  { key: "1", label: "Probably true" },
+  { key: "2", label: "Not sure" },
+  { key: "3", label: "Probably not true" },
+  { key: "4", label: "Definitely not true" },
 ];
 
 export default function AssessmentsSection({
@@ -148,17 +148,20 @@ export default function AssessmentsSection({
     "asrs6",
   ] as const;
   const ptsdKeys = ["ptsd1", "ptsd2", "ptsd3", "ptsd4", "ptsd5"] as const;
-  const aceKeys = [
-    "ace1",
-    "ace2",
-    "ace3",
-    "ace4",
-    "ace5",
-    "ace6",
-    "ace7",
-    "ace8",
-    "ace9",
-    "ace10",
+  const aceRKeys = [
+    "r01",
+    "r02",
+    "r03",
+    "r04",
+    "r05",
+    "r06",
+    "r07",
+    "r08",
+    "r09",
+    "r10",
+    "r11",
+    "r12",
+    "r13",
   ] as const;
   const pssKeys = ["pss1", "pss2", "pss3", "pss4"] as const;
 
@@ -167,7 +170,7 @@ export default function AssessmentsSection({
   const complete3 = a.selfHarm.pastMonth !== "" && a.selfHarm.lifetime !== "";
   const complete4 = asrsKeys.every((k) => a.asrs5[k] !== "");
   const complete5 = ptsdKeys.every((k) => a.ptsd[k] !== "");
-  const complete6 = aceKeys.every((k) => a.ace[k] !== "");
+  const complete6 = aceRKeys.every((k) => a.aceResilience[k] !== "");
   const complete7 = pssKeys.every((k) => a.stress[k] !== "");
 
   // PHQ-9 is always enabled
@@ -246,7 +249,7 @@ export default function AssessmentsSection({
       next.assessments.selfHarm = { ...p.assessments.selfHarm };
       next.assessments.asrs5 = { ...p.assessments.asrs5 };
       next.assessments.ptsd = { ...p.assessments.ptsd };
-      next.assessments.ace = { ...p.assessments.ace };
+      next.assessments.aceResilience = { ...p.assessments.aceResilience };
       next.assessments.stress = { ...p.assessments.stress };
       path(next);
       return next;
@@ -420,7 +423,13 @@ export default function AssessmentsSection({
       >
         <Phq9CAT />
       </Collapsible> */}
-      <Collapsible title="PHQ-9" open={open2} setOpen={setOpen2} enabled={u2}>
+      <Collapsible
+        title="PHQ-9"
+        subtitle="Patient Health Questionaire-9"
+        open={open2}
+        setOpen={setOpen2}
+        enabled={u2}
+      >
         <div className="grid md:grid-cols-1 gap-4">
           <Field title="Little interest or pleasure in doing things">
             <Likert
@@ -507,7 +516,13 @@ export default function AssessmentsSection({
       </Collapsible>
 
       {/* 3) GAD-7 */}
-      <Collapsible title="GAD-7" open={open3} setOpen={setOpen3} enabled={u3}>
+      <Collapsible
+        title="GAD-7"
+        subtitle="General Anxiety Disorder-7"
+        open={open3}
+        setOpen={setOpen3}
+        enabled={u3}
+      >
         <div className="grid md:grid-cols-1 gap-4">
           <Field title="Feeling nervous, anxious, or on edge">
             <Likert
@@ -578,6 +593,7 @@ export default function AssessmentsSection({
       {/* 4) Self-Harm */}
       <Collapsible
         title="Self-Harm"
+        subtitle="Non-suicidal self-injury"
         open={open4}
         setOpen={setOpen4}
         enabled={u4}
@@ -605,7 +621,13 @@ export default function AssessmentsSection({
       </Collapsible>
 
       {/* 5) ASRS-5 (Adult ADHD Screener - 6 items) */}
-      <Collapsible title="ASRS-5" open={open5} setOpen={setOpen5} enabled={u5}>
+      <Collapsible
+        title="ASRS-5"
+        subtitle="Adult ADHD Self-Report Scale"
+        open={open5}
+        setOpen={setOpen5}
+        enabled={u5}
+      >
         <div className="grid md:grid-cols-1 gap-4">
           <Field title="How often do you have trouble wrapping up the final details of a project, once the challenging parts have been done?">
             <Likert
@@ -665,152 +687,193 @@ export default function AssessmentsSection({
       </Collapsible>
 
       {/* 6) PTSD (PCL-5 short, 5 items) */}
-      <Collapsible title="PTSD" open={open6} setOpen={setOpen6} enabled={u6}>
+      <Collapsible
+        title="PTSD"
+        subtitle="PCL-5 Short"
+        open={open6}
+        setOpen={setOpen6}
+        enabled={u6}
+      >
         <div className="grid md:grid-cols-1 gap-4">
-          <Field title="In the past month, how often have you had nightmares about a stressful experience or thought about it when you did not want to?">
+          <Field title="In the past month, have you had nightmares or thought about the traumatic event(s) when you did not want to? ">
             <Likert
               value={a.ptsd.ptsd1}
               onChange={(v) =>
                 setA((n) => (n.assessments.ptsd.ptsd1 = String(v)))
               }
-              options={pcl0to4}
+              options={yesNo}
             />
           </Field>
-          <Field title="In the past month, how often have you tried hard not to think about a stressful experience or avoided situations that reminded you of it?">
+          <Field title="In the past month, have you tried hard not to think about the traumatic event(s) or went out of your way to avoid situations that reminded you of these event(s)?">
             <Likert
               value={a.ptsd.ptsd2}
               onChange={(v) =>
                 setA((n) => (n.assessments.ptsd.ptsd2 = String(v)))
               }
-              options={pcl0to4}
+              options={yesNo}
             />
           </Field>
-          <Field title="In the past month, how often have you been constantly on guard, watchful, or easily startled?">
+          <Field title="In the past month, have you been constantly on guard, watchful, or easily startled?">
             <Likert
               value={a.ptsd.ptsd3}
               onChange={(v) =>
                 setA((n) => (n.assessments.ptsd.ptsd3 = String(v)))
               }
-              options={pcl0to4}
+              options={yesNo}
             />
           </Field>
-          <Field title="In the past month, how often have you felt numb or detached from people, activities, or your surroundings?">
+          <Field title="In the past month, have you felt numb or detached from people, activities, or your surroundings?">
             <Likert
               value={a.ptsd.ptsd4}
               onChange={(v) =>
                 setA((n) => (n.assessments.ptsd.ptsd4 = String(v)))
               }
-              options={pcl0to4}
+              options={yesNo}
             />
           </Field>
-          <Field title="In the past month, how often have you felt guilty or unable to stop blaming yourself or others for the stressful experience?">
+          <Field title="In the past month, have you felt guilty or unable to stop blaming yourself or others for the traumatic event(s) or any problems these event(s) may have caused?">
             <Likert
               value={a.ptsd.ptsd5}
               onChange={(v) =>
                 setA((n) => (n.assessments.ptsd.ptsd5 = String(v)))
               }
-              options={pcl0to4}
+              options={yesNo}
             />
           </Field>
         </div>
       </Collapsible>
 
-      {/* 7) ACE (10 items, Yes/No) */}
+      {/* 7) ACE Resilience (13 items, 5‑point truth scale) */}
       <Collapsible
-        title="ACE (Adverse Childhood Experiences)"
+        title="ACE"
+        subtitle="Adverse Childhood Experiences - Resilience"
         open={open7}
         setOpen={setOpen7}
         enabled={u7}
       >
         <div className="grid md:grid-cols-1 gap-4">
-          <Field title="Did a parent or other adult in the household often or very often swear at you, insult you, put you down, or humiliate you?">
+          {/* Block ace_00 */}
+          <Field title="I believe that my mother loved me when I was little.">
             <Likert
-              value={a.ace.ace1}
+              value={a.aceResilience.r01}
               onChange={(v) =>
-                setA((n) => (n.assessments.ace.ace1 = String(v)))
+                setA((n) => (n.assessments.aceResilience.r01 = String(v)))
               }
-              options={yesNo}
+              options={aceTrue5}
             />
           </Field>
-          <Field title="Did a parent or other adult in the household often or very often push, grab, slap, or throw something at you?">
+          <Field title="I believe that my father loved me when I was little.">
             <Likert
-              value={a.ace.ace2}
+              value={a.aceResilience.r02}
               onChange={(v) =>
-                setA((n) => (n.assessments.ace.ace2 = String(v)))
+                setA((n) => (n.assessments.aceResilience.r02 = String(v)))
               }
-              options={yesNo}
+              options={aceTrue5}
             />
           </Field>
-          <Field title="Did an adult or person at least 5 years older than you ever touch or fondle you or have you touch their body in a sexual way?">
+          <Field title="When I was little, other people helped my mother and father take care of me and they seemed to love me.">
             <Likert
-              value={a.ace.ace3}
+              value={a.aceResilience.r03}
               onChange={(v) =>
-                setA((n) => (n.assessments.ace.ace3 = String(v)))
+                setA((n) => (n.assessments.aceResilience.r03 = String(v)))
               }
-              options={yesNo}
+              options={aceTrue5}
             />
           </Field>
-          <Field title="Did you often or very often feel that no one in your family loved you or thought you were important or special?">
+          <Field title="I’ve heard that when I was an infant someone in my family enjoyed playing with me, and I enjoyed it too.">
             <Likert
-              value={a.ace.ace4}
+              value={a.aceResilience.r04}
               onChange={(v) =>
-                setA((n) => (n.assessments.ace.ace4 = String(v)))
+                setA((n) => (n.assessments.aceResilience.r04 = String(v)))
               }
-              options={yesNo}
+              options={aceTrue5}
             />
           </Field>
-          <Field title="Did you often or very often feel that you didn’t have enough to eat, had to wear dirty clothes, or had no one to protect you?">
+
+          {/* Block ace_01 */}
+          <Field title="When I was a child, there were relatives who made me feel better if I was sad or worried.">
             <Likert
-              value={a.ace.ace5}
+              value={a.aceResilience.r05}
               onChange={(v) =>
-                setA((n) => (n.assessments.ace.ace5 = String(v)))
+                setA((n) => (n.assessments.aceResilience.r05 = String(v)))
               }
-              options={yesNo}
+              options={aceTrue5}
             />
           </Field>
-          <Field title="Was a biological parent ever lost to you through divorce, abandonment, or other reason?">
+          <Field title="When I was a child, neighbors or my friends’ parents seemed to like me.">
             <Likert
-              value={a.ace.ace6}
+              value={a.aceResilience.r06}
               onChange={(v) =>
-                setA((n) => (n.assessments.ace.ace6 = String(v)))
+                setA((n) => (n.assessments.aceResilience.r06 = String(v)))
               }
-              options={yesNo}
+              options={aceTrue5}
             />
           </Field>
-          <Field title="Was your mother or stepmother often or very often pushed, grabbed, slapped, or had something thrown at her?">
+          <Field title="When I was a child, teachers, coaches, youth leaders or ministers were there to help me.">
             <Likert
-              value={a.ace.ace7}
+              value={a.aceResilience.r07}
               onChange={(v) =>
-                setA((n) => (n.assessments.ace.ace7 = String(v)))
+                setA((n) => (n.assessments.aceResilience.r07 = String(v)))
               }
-              options={yesNo}
+              options={aceTrue5}
             />
           </Field>
-          <Field title="Did you live with anyone who was a problem drinker or alcoholic, or who used street drugs?">
+
+          {/* Block ace_02 */}
+          <Field title="My family, neighbors and friends talked often about making our lives better.">
             <Likert
-              value={a.ace.ace8}
+              value={a.aceResilience.r08}
               onChange={(v) =>
-                setA((n) => (n.assessments.ace.ace8 = String(v)))
+                setA((n) => (n.assessments.aceResilience.r08 = String(v)))
               }
-              options={yesNo}
+              options={aceTrue5}
             />
           </Field>
-          <Field title="Was a household member depressed or mentally ill, or did a household member attempt suicide?">
+          <Field title="We had rules in our house and were expected to keep them.">
             <Likert
-              value={a.ace.ace9}
+              value={a.aceResilience.r09}
               onChange={(v) =>
-                setA((n) => (n.assessments.ace.ace9 = String(v)))
+                setA((n) => (n.assessments.aceResilience.r09 = String(v)))
               }
-              options={yesNo}
+              options={aceTrue5}
             />
           </Field>
-          <Field title="Did a household member go to prison?">
+          <Field title="When I felt really bad, I could almost always find someone I trusted to talk to.">
             <Likert
-              value={a.ace.ace10}
+              value={a.aceResilience.r10}
               onChange={(v) =>
-                setA((n) => (n.assessments.ace.ace10 = String(v)))
+                setA((n) => (n.assessments.aceResilience.r10 = String(v)))
               }
-              options={yesNo}
+              options={aceTrue5}
+            />
+          </Field>
+
+          {/* Block ace_03 */}
+          <Field title="As a youth, people noticed that I was capable and could get things done.">
+            <Likert
+              value={a.aceResilience.r11}
+              onChange={(v) =>
+                setA((n) => (n.assessments.aceResilience.r11 = String(v)))
+              }
+              options={aceTrue5}
+            />
+          </Field>
+          <Field title="I was independent and a go‑getter.">
+            <Likert
+              value={a.aceResilience.r12}
+              onChange={(v) =>
+                setA((n) => (n.assessments.aceResilience.r12 = String(v)))
+              }
+              options={aceTrue5}
+            />
+          </Field>
+          <Field title="I believed that life is what you make it.">
+            <Likert
+              value={a.aceResilience.r13}
+              onChange={(v) =>
+                setA((n) => (n.assessments.aceResilience.r13 = String(v)))
+              }
+              options={aceTrue5}
             />
           </Field>
         </div>

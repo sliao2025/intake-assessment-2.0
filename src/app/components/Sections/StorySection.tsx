@@ -351,26 +351,30 @@ export default function StorySection({
           }
         />
       </Field>
-      {!profile.familyHistory.includes("none") && (
-        <>
-          <Field title={<>Please elaborate on this family history.</>} required>
-            <textarea
-              rows={4}
-              className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
-              placeholder="Share here in your own words…"
-              value={profile.familyHistoryElaboration?.text || ""}
-              onChange={(e) =>
-                setProfile((p) => ({
-                  ...p,
-                  familyHistoryElaboration: {
-                    ...p.familyHistoryElaboration,
-                    text: e.target.value,
-                  },
-                }))
-              }
-            />
-          </Field>
-          {/* <VoiceRecorder
+      {!profile.familyHistory.includes("none") &&
+        profile.familyHistory.length > 0 && (
+          <>
+            <Field
+              title={<>Please elaborate on this family history.</>}
+              required
+            >
+              <textarea
+                rows={4}
+                className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
+                placeholder="Share here in your own words…"
+                value={profile.familyHistoryElaboration?.text || ""}
+                onChange={(e) =>
+                  setProfile((p) => ({
+                    ...p,
+                    familyHistoryElaboration: {
+                      ...p.familyHistoryElaboration,
+                      text: e.target.value,
+                    },
+                  }))
+                }
+              />
+            </Field>
+            {/* <VoiceRecorder
             audioState={profile.familyHistoryElaboration?.audio?.url || null}
             onAttach={(url) =>
               setProfile((p) => ({
@@ -382,8 +386,8 @@ export default function StorySection({
               }))
             }
           /> */}
-        </>
-      )}
+          </>
+        )}
       <Field
         title={
           <>

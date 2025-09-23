@@ -90,17 +90,20 @@ function makeDefaultProfile(): Profile {
         asrs6: "",
       },
       ptsd: { ptsd1: "", ptsd2: "", ptsd3: "", ptsd4: "", ptsd5: "" },
-      ace: {
-        ace1: "",
-        ace2: "",
-        ace3: "",
-        ace4: "",
-        ace5: "",
-        ace6: "",
-        ace7: "",
-        ace8: "",
-        ace9: "",
-        ace10: "",
+      aceResilience: {
+        r01: "",
+        r02: "",
+        r03: "",
+        r04: "",
+        r05: "",
+        r06: "",
+        r07: "",
+        r08: "",
+        r09: "",
+        r10: "",
+        r11: "",
+        r12: "",
+        r13: "",
       },
       stress: { pss1: "", pss2: "", pss3: "", pss4: "" },
     },
@@ -264,31 +267,130 @@ export default function Page() {
   // }, [session]);
 
   const canNext = useMemo(() => {
-    // if (steps[step].key === "contact")
-    //   return Boolean(
-    //     profile.firstName &&
-    //       profile.lastName &&
-    //       profile.age &&
-    //       profile.email.includes("@") &&
-    //       profile.dob &&
-    //       profile.contactNumber
-    //   );
-    // if (steps[step].key === "profile")
-    //   return Boolean(
-    //     profile.genderIdentity &&
-    //       profile.sexualOrientation.length > 0 &&
-    //       profile.ethnicity.length > 0 &&
-    //       profile.religion.length > 0 &&
-    //       profile.pronouns.length > 0
-    //   );
-    // if (steps[step].key === "story")
-    //   return true; // updated logic removed storyText/storyAudio dependency
-    // if (steps[step].key === "screen")
-    //   return (
-    //     profile.moodChanges.length > 0 &&
-    //     profile.behaviorChanges.length > 0 &&
-    //     profile.thoughtChanges.length > 0
-    //   );
+    const key = steps[step].key;
+
+    // Contact: strict required fields
+    if (key === "contact") {
+      return Boolean(
+        profile.firstName &&
+          profile.lastName &&
+          profile.age &&
+          profile.email.includes("@") &&
+          profile.dob &&
+          profile.contactNumber
+      );
+    }
+
+    // Profile: required demographics + basic anthropometrics
+    if (key === "profile") {
+      return Boolean(
+        profile.genderIdentity &&
+          profile.sexualOrientation.length > 0 &&
+          profile.ethnicity.length > 0 &&
+          profile.religion.length > 0 &&
+          profile.pronouns.length > 0 &&
+          profile.height.feet !== null &&
+          profile.height.inches !== null &&
+          profile.weightLbs !== null &&
+          profile.highestDegree &&
+          profile.dietType.length > 0 &&
+          profile.alcoholFrequency &&
+          profile.drinksPerOccasion &&
+          profile.substancesUsed.length > 0 &&
+          profile.jobDetails &&
+          profile.hobbies
+      );
+    }
+
+    // Quick Check-In: require minimal triage + suicide screener (now lives here)
+    if (key === "screen") {
+      const hasMood =
+        Array.isArray(profile.moodChanges) && profile.moodChanges.length > 0;
+      const hasBehavior =
+        Array.isArray(profile.behaviorChanges) &&
+        profile.behaviorChanges.length > 0;
+      const hasThought =
+        Array.isArray(profile.thoughtChanges) &&
+        profile.thoughtChanges.length > 0;
+
+      const s = profile.assessments.suicide;
+
+      // Base required suicide items
+      const baseSuicideAnswered = s.wishDead !== "" && s.thoughts !== "";
+
+      // Conditional follow-ups only if there are suicidal thoughts
+      let suicideOk = baseSuicideAnswered;
+      if (s.thoughts === "yes") {
+        suicideOk =
+          suicideOk &&
+          s.methodHow !== "" &&
+          s.intention !== "" &&
+          s.plan !== "" &&
+          s.behavior !== "";
+
+        // If behavior is yes, require timing follow-up
+        if (s.behavior === "yes") {
+          suicideOk = suicideOk && s.behavior3mo !== "";
+        }
+      }
+
+      return hasMood && hasBehavior && hasThought && suicideOk;
+    }
+
+    // Story: require minimal narrative + goals (either text or audio counts)
+    if (key === "story") {
+      const hasStory = Boolean(
+        (profile.storyNarrative?.text &&
+          profile.storyNarrative.text.trim().length > 0) ||
+          profile.storyNarrative?.audio?.url
+      );
+      const hasGoals = Boolean(
+        (profile.goals?.text && profile.goals.text.trim().length > 0) ||
+          profile.goals?.audio?.url
+      );
+      const hasLiving = Boolean(
+        (profile.livingSituation?.text &&
+          profile.livingSituation.text.trim().length > 0) ||
+          profile.livingSituation?.audio?.url
+      );
+      const hasEnvironments = Boolean(
+        (profile.upbringingEnvironments?.text &&
+          profile.upbringingEnvironments.text.trim().length > 0) ||
+          profile.upbringingEnvironments?.audio?.url
+      );
+
+      const hasUpbringingWhoWith = Boolean(
+        (profile.upbringingWhoWith?.text &&
+          profile.upbringingWhoWith.text.trim().length > 0) ||
+          profile.upbringingWhoWith?.audio?.url
+      );
+
+      return (
+        hasStory &&
+        hasGoals &&
+        hasLiving &&
+        hasEnvironments &&
+        hasUpbringingWhoWith
+      );
+    }
+
+    // Relationships: require at least one mapped relationship
+    if (key === "relationships") {
+      return (
+        Array.isArray(profile.relationships) && profile.relationships.length > 0
+      );
+    }
+
+    // Medical: require that at least one medical data point is provided
+    // (any of: current meds, previous meds, allergies, hospitalizations, or injuries)
+
+    // Assessments: require the minimal baseline (PHQ-9 complete)
+    if (key === "assessments") {
+      const pss4 = profile.assessments.stress.pss4;
+      return Boolean(pss4 !== "");
+    }
+
+    // All other steps: allow Next (internal components handle their own gating/UI)
     return true;
   }, [step, profile]);
 
