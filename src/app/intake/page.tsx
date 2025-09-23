@@ -468,7 +468,7 @@ export default function Page() {
       }}
     >
       <ConfettiBurst show={burst} />
-      {/* <GardenFrame bloom={bloom} /> */}
+      <GardenFrame bloom={bloom} />
       <ProgressHeader
         step={step}
         total={steps.length}

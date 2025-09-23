@@ -34,7 +34,7 @@ export default function SignInPage() {
       style={{ background: intPsychTheme.card, color: theme.text }}
     >
       {/* Background visuals to match the main assessment page */}
-      {/* <GardenFrame bloom={0} /> */}
+      <GardenFrame bloom={0} />
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-8">
         <motion.div
