@@ -30,11 +30,11 @@ export default function SignInPage() {
 
   return (
     <div
-      className="fixed inset-0 w-full h-dvh flex items-center justify-center overflow-hidden"
+      className="fixed inset-0 h-dvh flex items-center justify-center overflow-hidden"
       style={{ background: intPsychTheme.card, color: theme.text }}
     >
       {/* Background visuals to match the main assessment page */}
-      <GardenFrame bloom={0} />
+      {/* <GardenFrame bloom={0} /> */}
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-8">
         <motion.div
