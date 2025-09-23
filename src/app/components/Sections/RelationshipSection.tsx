@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import StepTitle from "../StepTitle";
-import type { Profile, Relationship } from "../../lib/types";
+import type { Profile, Relationship } from "../../lib/types/types";
 import Field from "../primitives/Field";
 import { intPsychTheme } from "../theme";
 import Likert from "../primitives/Likert";

@@ -7,7 +7,7 @@ import Likert from "../primitives/Likert";
 import Separator from "../primitives/Separator";
 import VoiceRecorder from "../VoiceRecorder";
 import MultiSelectGroup from "../primitives/MultiSelectGroup";
-import type { Profile } from "../../lib/types";
+import type { Profile } from "../../lib/types/types";
 
 type Props = {
   title: string;
@@ -66,7 +66,7 @@ export default function StorySection({
         />
       </Field>
 
-      <VoiceRecorder
+      {/* <VoiceRecorder
         audioState={profile.storyNarrative?.audio?.url || null}
         onAttach={(url) =>
           setProfile((p) => ({
@@ -77,7 +77,7 @@ export default function StorySection({
             },
           }))
         }
-      />
+      /> */}
 
       <Separator label="Your Goals" />
       <Field
@@ -124,7 +124,7 @@ export default function StorySection({
         />
       </Field>
 
-      <VoiceRecorder
+      {/* <VoiceRecorder
         audioState={profile.goals?.audio?.url || null}
         onAttach={(url) =>
           setProfile((p) => ({
@@ -135,7 +135,7 @@ export default function StorySection({
             },
           }))
         }
-      />
+      /> */}
       <Separator label="Living Situation" />
       <Field
         title={<>Please describe your living situation.</>}
@@ -162,7 +162,7 @@ export default function StorySection({
           }
         />
       </Field>
-      <VoiceRecorder
+      {/* <VoiceRecorder
         audioState={profile.livingSituation?.audio?.url || null}
         onAttach={(url) =>
           setProfile((p) => ({
@@ -173,7 +173,7 @@ export default function StorySection({
             },
           }))
         }
-      />
+      /> */}
       <Separator label="Culture & Context (optional)" />
       <Field
         title={
@@ -197,7 +197,7 @@ export default function StorySection({
         />
       </Field>
 
-      <VoiceRecorder
+      {/* <VoiceRecorder
         audioState={profile.cultureContext?.audio?.url || null}
         onAttach={(url) =>
           setProfile((p) => ({
@@ -208,7 +208,7 @@ export default function StorySection({
             },
           }))
         }
-      />
+      /> */}
 
       <Separator label="Previous Treatment" />
       <Field title={"Previous Mental Health Treatment"} required>
@@ -287,7 +287,7 @@ export default function StorySection({
             />
           </Field>
 
-          <VoiceRecorder
+          {/* <VoiceRecorder
             audioState={profile.prevTreatmentSummary?.audio?.url || null}
             onAttach={(url) =>
               setProfile((p) => ({
@@ -298,7 +298,7 @@ export default function StorySection({
                 },
               }))
             }
-          />
+          /> */}
         </>
       )}
       <Separator label="Growing Up & Family History" />
@@ -370,7 +370,7 @@ export default function StorySection({
               }
             />
           </Field>
-          <VoiceRecorder
+          {/* <VoiceRecorder
             audioState={profile.familyHistoryElaboration?.audio?.url || null}
             onAttach={(url) =>
               setProfile((p) => ({
@@ -381,7 +381,7 @@ export default function StorySection({
                 },
               }))
             }
-          />
+          /> */}
         </>
       )}
       <Field
@@ -409,7 +409,7 @@ export default function StorySection({
           }
         />
       </Field>
-      <VoiceRecorder
+      {/* <VoiceRecorder
         audioState={profile.upbringingEnvironments?.audio?.url || null}
         onAttach={(url) =>
           setProfile((p) => ({
@@ -420,7 +420,7 @@ export default function StorySection({
             },
           }))
         }
-      />
+      /> */}
       <Field
         title={<>Who did you grow up with?</>}
         label={
@@ -449,7 +449,7 @@ export default function StorySection({
           }
         />
       </Field>
-      <VoiceRecorder
+      {/* <VoiceRecorder
         audioState={profile.upbringingWhoWith?.audio?.url || null}
         onAttach={(url) =>
           setProfile((p) => ({
@@ -460,7 +460,7 @@ export default function StorySection({
             },
           }))
         }
-      />
+      /> */}
       <Field title={<>Childhood Questions</>} required>
         <Likert
           label="Do you think of your childhood in a positive way?"
@@ -504,7 +504,7 @@ export default function StorySection({
               }
             />
           </Field>
-          <VoiceRecorder
+          {/* <VoiceRecorder
             audioState={profile.childhoodNegativeReason?.audio?.url || null}
             onAttach={(url) =>
               setProfile((p) => ({
@@ -515,7 +515,7 @@ export default function StorySection({
                 },
               }))
             }
-          />
+          /> */}
         </>
       )}
     </div>

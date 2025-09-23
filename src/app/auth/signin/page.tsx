@@ -86,7 +86,12 @@ export default function SignInPage() {
                     Integrative Psych Intake Form
                   </span>
                 ) : (
-                  "Create your account"
+                  <span
+                    className={`${dm_serif.className}`}
+                    style={{ color: intPsychTheme.primary }}
+                  >
+                    Create your account
+                  </span>
                 )}
               </h1>
             </div>
@@ -265,17 +270,17 @@ export default function SignInPage() {
                       </button>
                     </div>
                   )}
-                  <div className="my-4 flex items-center gap-3">
-                    <div className="h-px bg-gray-300 flex-1" />
-                    <span className="text-xs uppercase tracking-wide text-gray-500">
-                      or
-                    </span>
-                    <div className="h-px bg-gray-300 flex-1" />
-                  </div>
                 </div>
                 <div className="mt-4 space-y-4">
                   {mode === "signin" && (
                     <>
+                      <div className="my-4 flex items-center gap-3">
+                        <div className="h-px bg-gray-300 flex-1" />
+                        <span className="text-xs uppercase tracking-wide text-gray-500">
+                          or
+                        </span>
+                        <div className="h-px bg-gray-300 flex-1" />
+                      </div>
                       <button
                         className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 font-semibold text-white bg-[color:var(--accent)] hover:bg-[color:var(--accent-hover)] transition-colors duration-200 ease-in-out"
                         style={{

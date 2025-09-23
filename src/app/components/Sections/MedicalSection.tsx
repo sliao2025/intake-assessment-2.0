@@ -12,8 +12,54 @@ import type {
   Allergy,
   Hospitalization,
   InjuryDetails,
-} from "../../lib/types";
+} from "../../lib/types/types";
 import StepTitle from "../StepTitle";
+
+// ---- Hoisted UI atoms to maintain stable component identity across renders ----
+const Card: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="rounded-2xl border border-slate-300 p-4 bg-white/80">
+    {children}
+  </div>
+);
+
+const Input = (
+  props: React.InputHTMLAttributes<HTMLInputElement> & { label: string }
+) => (
+  <div className="flex flex-col gap-1">
+    <label className="text-sm text-slate-600">{props.label}</label>
+    <input
+      {...props}
+      className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+    />
+  </div>
+);
+
+const TextArea = (
+  props: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { label: string }
+) => (
+  <div className="flex flex-col gap-1">
+    <label className="text-sm text-slate-600">{props.label}</label>
+    <textarea
+      {...props}
+      rows={props.rows ?? 3}
+      className="w-full rounded-2xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+    />
+  </div>
+);
+
+const AddButton: React.FC<{ onClick: () => void; label: string }> = ({
+  onClick,
+  label,
+}) => (
+  <button
+    onClick={onClick}
+    className="inline-flex cursor-pointer items-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+    style={{ outlineColor: intPsychTheme.secondary }}
+  >
+    + {label}
+  </button>
+);
+// -----------------------------------------------------------------------------
 
 type Props = {
   title: string;
@@ -139,53 +185,6 @@ export default function MedicalSection({
         [key]: val,
       },
     }));
-
-  // ------- small UI atoms -------
-  const Card: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <div className="rounded-2xl border border-slate-300 p-4 bg-white/80">
-      {children}
-    </div>
-  );
-
-  const Input = (
-    props: React.InputHTMLAttributes<HTMLInputElement> & { label: string }
-  ) => (
-    <div className="flex flex-col gap-1">
-      <label className="text-sm text-slate-600">{props.label}</label>
-      <input
-        {...props}
-        className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
-      />
-    </div>
-  );
-
-  const TextArea = (
-    props: React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
-      label: string;
-    }
-  ) => (
-    <div className="flex flex-col gap-1">
-      <label className="text-sm text-slate-600">{props.label}</label>
-      <textarea
-        {...props}
-        rows={props.rows ?? 3}
-        className="w-full rounded-2xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
-      />
-    </div>
-  );
-
-  const AddButton: React.FC<{ onClick: () => void; label: string }> = ({
-    onClick,
-    label,
-  }) => (
-    <button
-      onClick={onClick}
-      className="inline-flex cursor-pointer items-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-      style={{ outlineColor: intPsychTheme.secondary }}
-    >
-      + {label}
-    </button>
-  );
 
   // ------- render -------
   return (

@@ -4,7 +4,7 @@ import * as React from "react";
 import StepTitle from "../StepTitle";
 import Field from "../primitives/Field";
 import Likert from "../primitives/Likert";
-import type { Profile } from "../../lib/types";
+import type { Profile } from "../../lib/types/types";
 import { ChevronDown, ArrowRight } from "lucide-react";
 import { intPsychTheme } from "../theme";
 
@@ -111,13 +111,13 @@ export default function AssessmentsSection({
   const a = profile.assessments;
 
   // Collapsible open state
-  const [open1, setOpen1] = React.useState(false); // Suicide
-  const [open2, setOpen2] = React.useState(true); // PHQ-9
-  const [open3, setOpen3] = React.useState(false); // Self-harm
-  const [open4, setOpen4] = React.useState(false); // ASRS-5
-  const [open5, setOpen5] = React.useState(false); // PTSD
-  const [open6, setOpen6] = React.useState(false); // ACE
-  const [open7, setOpen7] = React.useState(false); // Stress
+  const [open2, setOpen2] = React.useState(false); // PHQ-9 (start collapsed)
+  const [open3, setOpen3] = React.useState(false); // GAD-7
+  const [open4, setOpen4] = React.useState(false); // Self-harm
+  const [open5, setOpen5] = React.useState(false); // ASRS-5
+  const [open6, setOpen6] = React.useState(false); // PTSD
+  const [open7, setOpen7] = React.useState(false); // ACE
+  const [open8, setOpen8] = React.useState(false); // Stress
 
   const phqKeys = [
     "phq1",
@@ -129,6 +129,15 @@ export default function AssessmentsSection({
     "phq7",
     "phq8",
     "phq9",
+  ] as const;
+  const gad7Keys = [
+    "gad1",
+    "gad2",
+    "gad3",
+    "gad4",
+    "gad5",
+    "gad6",
+    "gad7",
   ] as const;
   const asrsKeys = [
     "asrs1",
@@ -153,26 +162,22 @@ export default function AssessmentsSection({
   ] as const;
   const pssKeys = ["pss1", "pss2", "pss3", "pss4"] as const;
 
-  // Completion gates
-  const complete1 =
-    a.suicide.ideation !== "" &&
-    a.suicide.intent !== "" &&
-    a.suicide.plan !== "" &&
-    a.suicide.protective !== "";
-  const complete2 = phqKeys.every((k) => a.phq9[k] !== "");
+  const complete1 = phqKeys.every((k) => a.phq9[k] !== "");
+  const complete2 = gad7Keys.every((k) => a.gad7[k] !== "");
   const complete3 = a.selfHarm.pastMonth !== "" && a.selfHarm.lifetime !== "";
   const complete4 = asrsKeys.every((k) => a.asrs5[k] !== "");
   const complete5 = ptsdKeys.every((k) => a.ptsd[k] !== "");
   const complete6 = aceKeys.every((k) => a.ace[k] !== "");
   const complete7 = pssKeys.every((k) => a.stress[k] !== "");
 
-  // Latching unlock flags so once a section is unlocked it stays interactive
-  const [u2, setU2] = React.useState(complete1);
-  const [u3, setU3] = React.useState(complete2);
-  const [u4, setU4] = React.useState(complete3);
-  const [u5, setU5] = React.useState(complete4);
-  const [u6, setU6] = React.useState(complete5);
-  const [u7, setU7] = React.useState(complete6);
+  // PHQ-9 is always enabled
+  const [u2, setU2] = React.useState(true); // PHQ-9 always enabled
+  const [u3, setU3] = React.useState(complete1); // GAD-7 after PHQ-9
+  const [u4, setU4] = React.useState(complete2); // Self-harm after GAD-7
+  const [u5, setU5] = React.useState(complete3); // ASRS-5
+  const [u6, setU6] = React.useState(complete4); // PTSD
+  const [u7, setU7] = React.useState(complete5); // ACE
+  const [u8, setU8] = React.useState(complete6); // Stress
 
   // One-time auto-open on first unlock (detect rising edge)
   const prevComplete1 = React.useRef(complete1);
@@ -184,48 +189,48 @@ export default function AssessmentsSection({
 
   React.useEffect(() => {
     if (!prevComplete1.current && complete1) {
-      setU2(true);
-      setOpen2(true);
+      setU3(true);
+      setOpen3(true);
     }
     prevComplete1.current = complete1;
   }, [complete1]);
 
   React.useEffect(() => {
     if (!prevComplete2.current && complete2) {
-      setU3(true);
-      setOpen3(true);
+      setU4(true);
+      setOpen4(true);
     }
     prevComplete2.current = complete2;
   }, [complete2]);
 
   React.useEffect(() => {
     if (!prevComplete3.current && complete3) {
-      setU4(true);
-      setOpen4(true);
+      setU5(true);
+      setOpen5(true);
     }
     prevComplete3.current = complete3;
   }, [complete3]);
 
   React.useEffect(() => {
     if (!prevComplete4.current && complete4) {
-      setU5(true);
-      setOpen5(true);
+      setU6(true);
+      setOpen6(true);
     }
     prevComplete4.current = complete4;
   }, [complete4]);
 
   React.useEffect(() => {
     if (!prevComplete5.current && complete5) {
-      setU6(true);
-      setOpen6(true);
+      setU7(true);
+      setOpen7(true);
     }
     prevComplete5.current = complete5;
   }, [complete5]);
 
   React.useEffect(() => {
     if (!prevComplete6.current && complete6) {
-      setU7(true);
-      setOpen7(true);
+      setU8(true);
+      setOpen8(true);
     }
     prevComplete6.current = complete6;
   }, [complete6]);
@@ -237,6 +242,7 @@ export default function AssessmentsSection({
       // deep copy shallow sub-objects we touch:
       next.assessments.suicide = { ...p.assessments.suicide };
       next.assessments.phq9 = { ...p.assessments.phq9 };
+      next.assessments.gad7 = { ...p.assessments.gad7 };
       next.assessments.selfHarm = { ...p.assessments.selfHarm };
       next.assessments.asrs5 = { ...p.assessments.asrs5 };
       next.assessments.ptsd = { ...p.assessments.ptsd };
@@ -404,56 +410,8 @@ export default function AssessmentsSection({
     <div className="space-y-6">
       <StepTitle n={step + 1} title={title} />
 
-      {/* 1) Suicide */}
-      <Collapsible
-        title="Suicide Risk (screen)"
-        subtitle="Brief safety screen"
-        open={open1}
-        setOpen={setOpen1}
-        enabled={true}
-      >
-        <div className="grid md:grid-cols-1 gap-4">
-          <Field title="In the past few weeks, have you wished you were dead or wished you could go to sleep and not wake up?">
-            <Likert
-              value={a.suicide.ideation}
-              onChange={(v) =>
-                setA((n) => (n.assessments.suicide.ideation = String(v)))
-              }
-              options={yesNo}
-            />
-          </Field>
-          <Field title="Are you having thoughts of killing yourself right now?">
-            <Likert
-              value={a.suicide.intent}
-              onChange={(v) =>
-                setA((n) => (n.assessments.suicide.intent = String(v)))
-              }
-              options={yesNo}
-            />
-          </Field>
-          <Field title="Have you been thinking about how you might kill yourself?">
-            <Likert
-              value={a.suicide.plan}
-              onChange={(v) =>
-                setA((n) => (n.assessments.suicide.plan = String(v)))
-              }
-              options={yesNo}
-            />
-          </Field>
-          <Field title="Do you have reasons for living or protective factors that keep you safe?">
-            <Likert
-              value={a.suicide.protective}
-              onChange={(v) =>
-                setA((n) => (n.assessments.suicide.protective = String(v)))
-              }
-              options={protective}
-            />
-          </Field>
-        </div>
-      </Collapsible>
-
       {/* 2) PHQ-9 */}
-      <Collapsible
+      {/* <Collapsible
         title="PHQ-9 (Adaptive)"
         subtitle="Over the last 2 weeks — delivered adaptively"
         open={open2}
@@ -461,14 +419,8 @@ export default function AssessmentsSection({
         enabled={true}
       >
         <Phq9CAT />
-      </Collapsible>
-      {/* <Collapsible
-        title="PHQ-9"
-        subtitle="Over the last 2 weeks"
-        open={open2}
-        setOpen={setOpen2}
-        enabled={u2}
-      >
+      </Collapsible> */}
+      <Collapsible title="PHQ-9" open={open2} setOpen={setOpen2} enabled={u2}>
         <div className="grid md:grid-cols-1 gap-4">
           <Field title="Little interest or pleasure in doing things">
             <Likert
@@ -552,15 +504,83 @@ export default function AssessmentsSection({
             />
           </Field>
         </div>
-      </Collapsible> */}
+      </Collapsible>
 
-      {/* 3) Self-Harm */}
+      {/* 3) GAD-7 */}
+      <Collapsible title="GAD-7" open={open3} setOpen={setOpen3} enabled={u3}>
+        <div className="grid md:grid-cols-1 gap-4">
+          <Field title="Feeling nervous, anxious, or on edge">
+            <Likert
+              value={a.gad7.gad1}
+              onChange={(v) =>
+                setA((n) => (n.assessments.gad7.gad1 = String(v)))
+              }
+              options={freq0to3}
+            />
+          </Field>
+          <Field title="Not being able to stop or control worrying">
+            <Likert
+              value={a.gad7.gad2}
+              onChange={(v) =>
+                setA((n) => (n.assessments.gad7.gad2 = String(v)))
+              }
+              options={freq0to3}
+            />
+          </Field>
+          <Field title="Worrying too much about different things">
+            <Likert
+              value={a.gad7.gad3}
+              onChange={(v) =>
+                setA((n) => (n.assessments.gad7.gad3 = String(v)))
+              }
+              options={freq0to3}
+            />
+          </Field>
+          <Field title="Trouble relaxing">
+            <Likert
+              value={a.gad7.gad4}
+              onChange={(v) =>
+                setA((n) => (n.assessments.gad7.gad4 = String(v)))
+              }
+              options={freq0to3}
+            />
+          </Field>
+          <Field title="Being so restless that it is hard to sit still">
+            <Likert
+              value={a.gad7.gad5}
+              onChange={(v) =>
+                setA((n) => (n.assessments.gad7.gad5 = String(v)))
+              }
+              options={freq0to3}
+            />
+          </Field>
+          <Field title="Becoming easily annoyed or irritable">
+            <Likert
+              value={a.gad7.gad6}
+              onChange={(v) =>
+                setA((n) => (n.assessments.gad7.gad6 = String(v)))
+              }
+              options={freq0to3}
+            />
+          </Field>
+          <Field title="Feeling afraid as if something awful might happen">
+            <Likert
+              value={a.gad7.gad7}
+              onChange={(v) =>
+                setA((n) => (n.assessments.gad7.gad7 = String(v)))
+              }
+              options={freq0to3}
+            />
+          </Field>
+        </div>
+      </Collapsible>
+
+      {/* 4) Self-Harm */}
       <Collapsible
         title="Self-Harm"
-        subtitle="History and recent behavior"
-        open={open3}
-        setOpen={setOpen3}
-        enabled={u3}
+        open={open4}
+        setOpen={setOpen4}
+        enabled={u4}
       >
         <div className="grid md:grid-cols-1 gap-4">
           <Field title="In the past month, have you intentionally hurt yourself (e.g., cut, burned, scratched) without wanting to die?">
@@ -584,14 +604,8 @@ export default function AssessmentsSection({
         </div>
       </Collapsible>
 
-      {/* 4) ASRS-5 (Adult ADHD Screener - 6 items) */}
-      <Collapsible
-        title="ASRS-5"
-        subtitle="Over the last 6 months"
-        open={open4}
-        setOpen={setOpen4}
-        enabled={u4}
-      >
+      {/* 5) ASRS-5 (Adult ADHD Screener - 6 items) */}
+      <Collapsible title="ASRS-5" open={open5} setOpen={setOpen5} enabled={u5}>
         <div className="grid md:grid-cols-1 gap-4">
           <Field title="How often do you have trouble wrapping up the final details of a project, once the challenging parts have been done?">
             <Likert
@@ -650,14 +664,8 @@ export default function AssessmentsSection({
         </div>
       </Collapsible>
 
-      {/* 5) PTSD (PCL-5 short, 5 items) */}
-      <Collapsible
-        title="PTSD"
-        subtitle="Past month"
-        open={open5}
-        setOpen={setOpen5}
-        enabled={u5}
-      >
+      {/* 6) PTSD (PCL-5 short, 5 items) */}
+      <Collapsible title="PTSD" open={open6} setOpen={setOpen6} enabled={u6}>
         <div className="grid md:grid-cols-1 gap-4">
           <Field title="In the past month, how often have you had nightmares about a stressful experience or thought about it when you did not want to?">
             <Likert
@@ -707,12 +715,12 @@ export default function AssessmentsSection({
         </div>
       </Collapsible>
 
-      {/* 6) ACE (10 items, Yes/No) */}
+      {/* 7) ACE (10 items, Yes/No) */}
       <Collapsible
         title="ACE (Adverse Childhood Experiences)"
-        open={open6}
-        setOpen={setOpen6}
-        enabled={u6}
+        open={open7}
+        setOpen={setOpen7}
+        enabled={u7}
       >
         <div className="grid md:grid-cols-1 gap-4">
           <Field title="Did a parent or other adult in the household often or very often swear at you, insult you, put you down, or humiliate you?">
@@ -808,12 +816,12 @@ export default function AssessmentsSection({
         </div>
       </Collapsible>
 
-      {/* 7) Stress (PSS-4) */}
+      {/* 8) Stress (PSS-4) */}
       <Collapsible
         title="Perceived Stress (PSS-4)"
-        open={open7}
-        setOpen={setOpen7}
-        enabled={u7}
+        open={open8}
+        setOpen={setOpen8}
+        enabled={u8}
       >
         <div className="grid md:grid-cols-1 gap-4">
           <Field title="In the last month, how often have you felt that you were unable to control the important things in your life?">
@@ -858,12 +866,12 @@ export default function AssessmentsSection({
       {/* Minor affordance: hint if next is locked */}
       {!complete1 && (
         <div className="text-xs text-slate-500">
-          Complete the Suicide screen to unlock PHQ-9.
+          Complete PHQ-9 to unlock GAD-7.
         </div>
       )}
       {complete1 && !complete2 && (
         <div className="text-xs text-slate-500">
-          Complete PHQ-9 to unlock Self-Harm.
+          Complete GAD-7 to unlock Self-Harm.
         </div>
       )}
       {complete2 && !complete3 && (

@@ -131,7 +131,7 @@ const OverflowSignal: React.FC<{
       style={{ zIndex: 1 }}
     >
       <div
-        className={`pointer-events-none inline-flex items-center gap-1 rounded-full bg-gray-100/90 px-2 py-0.5 text-xs font-medium text-gray-600 shadow-sm border border-gray-200 whitespace-nowrap leading-none ${
+        className={`pointer-events-none inline-flex items-center gap-1 rounded-full bg-gray-100/90 px-2 py-0.5 text-xs font-medium text-gray-600  whitespace-nowrap leading-none ${
           side === "left" ? "ml-1" : "mr-1"
         }`}
         title={side === "left" ? "Earlier sections" : "Later sections"}
@@ -219,7 +219,6 @@ const ProgressHeader: React.FC<Props> = ({
                     aria-label="Open profile menu"
                   >
                     {session?.user?.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={session.user.image}
                         alt={session?.user?.name ?? "Profile"}

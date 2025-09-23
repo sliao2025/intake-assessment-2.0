@@ -19,12 +19,3 @@ export const intPsychTheme = {
 };
 
 export const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-export const praises = [
-  "Nice progress!",
-  "You're doing great!",
-  "Love the detail—keep going!",
-  "Halfway there!",
-  "Awesome focus!",
-  "Great job finishing this section!",
-];

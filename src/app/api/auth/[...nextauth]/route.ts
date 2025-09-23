@@ -31,15 +31,21 @@ export const authOptions: NextAuthOptions = {
             "Guest";
           const email = `guest-${randomUUID()}@guest.local`;
           const user = await prisma.user.create({
-            data: { email, name },
+            data: { email, name, guest: true },
           });
           return {
             id: user.id,
             email: user.email ?? undefined,
             name: user.name ?? undefined,
             image: user.image ?? undefined,
-            role: "guest",
-          } as any;
+            role: "guest", // or "user"
+          } satisfies {
+            id: string;
+            email?: string;
+            name?: string;
+            image?: string;
+            role: "guest" | "user";
+          };
         }
 
         // --- Email/password branch ---
@@ -59,7 +65,13 @@ export const authOptions: NextAuthOptions = {
           name: user.name ?? undefined,
           image: user.image ?? undefined,
           role: "user",
-        } as any;
+        } satisfies {
+          id: string;
+          email?: string;
+          name?: string;
+          image?: string;
+          role: "guest" | "user";
+        };
       },
     }),
   ],
@@ -67,15 +79,15 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = (user as any).id;
-        token.role = (user as any).role ?? "user";
+        token.id = (user as any).id ?? token.id;
+        token.role = (user as any).role ?? token.role ?? "user";
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user && token?.id) {
-        (session.user as any).id = token.id as string;
-        (session.user as any).role = (token as any).role ?? "user";
+        session.user.id = token.id as string;
+        session.user.role = (token.role as "guest" | "user") ?? "user";
       }
       return session;
     },

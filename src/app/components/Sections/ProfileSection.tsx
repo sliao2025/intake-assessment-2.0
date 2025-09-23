@@ -4,7 +4,7 @@ import * as React from "react";
 import { ChevronDown, Check } from "lucide-react";
 import StepTitle from "../StepTitle";
 import Field from "../primitives/Field";
-import { Profile } from "../../lib/types";
+import { Profile } from "../../lib/types/types";
 import {
   Listbox,
   ListboxButton,
@@ -12,7 +12,7 @@ import {
   ListboxOptions,
 } from "@headlessui/react";
 
-import { Option } from "../../lib/types";
+import { Option } from "../../lib/types/types";
 import Separator from "../primitives/Separator";
 import Likert from "../primitives/Likert";
 

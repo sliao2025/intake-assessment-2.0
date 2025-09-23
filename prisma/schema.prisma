@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -21,6 +21,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   profile       Profile?
+  guest         Boolean? @default(false)
 }
 
 model Account {
@@ -29,12 +30,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.Text   // <- widen
+  access_token      String? @db.Text   // <- widen
   expires_at        Int?
   token_type        String?
-  scope             String?
-  id_token          String?
+  scope             String? @db.Text   // <- often long, widen too
+  id_token          String? @db.Text   // <- widen
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

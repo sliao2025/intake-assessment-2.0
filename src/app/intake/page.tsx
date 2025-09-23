@@ -1,15 +1,15 @@
 "use client";
 
 import React, { Fragment, useMemo, useState, useEffect } from "react";
-import type { Profile } from "../lib/types";
+import type { Profile } from "../lib/types/types";
 import { motion, progress } from "framer-motion";
 import { CheckCircle2, ChevronLeft, ChevronRight, Save } from "lucide-react";
 import ProgressHeader from "../components/ProgressHeader";
 import ConfettiBurst from "../components/ConfettiBurst";
 import StepTitle from "../components/StepTitle";
 import { signOut, useSession } from "next-auth/react";
-
-import { praises, theme, ease, intPsychTheme } from "../components/theme";
+import { praises, welcomeMessages } from "../components/messages";
+import { theme, ease, intPsychTheme } from "../components/theme";
 import GardenFrame from "../components/Garden/Garden";
 import ContactSection from "../components/Sections/ContactSection";
 import ProfileSection from "../components/Sections/ProfileSection";
@@ -18,6 +18,7 @@ import MedicalSection from "../components/Sections/MedicalSection";
 import RelationshipSection from "../components/Sections/RelationshipSection";
 import StorySection from "../components/Sections/StorySection";
 import AssessmentsSection from "../components/Sections/AssessmentsSection";
+import ReviewSection from "../components/Sections/ReviewSection";
 
 type Step = {
   key: string;
@@ -41,7 +42,7 @@ const steps: Step[] = [
 // Build a fresh default profile each time to avoid stale/shared references
 function makeDefaultProfile(): Profile {
   return {
-    progress: 0,
+    maxVisited: 0,
     firstName: "",
     lastName: "",
     age: "",
@@ -50,7 +51,15 @@ function makeDefaultProfile(): Profile {
     contactNumber: "",
     dob: "",
     assessments: {
-      suicide: { ideation: "", intent: "", plan: "", protective: "" },
+      suicide: {
+        wishDead: "",
+        thoughts: "",
+        methodHow: "",
+        intention: "",
+        plan: "",
+        behavior: "",
+        behavior3mo: "",
+      },
       phq9: {
         phq1: "",
         phq2: "",
@@ -61,6 +70,15 @@ function makeDefaultProfile(): Profile {
         phq7: "",
         phq8: "",
         phq9: "",
+      },
+      gad7: {
+        gad1: "",
+        gad2: "",
+        gad3: "",
+        gad4: "",
+        gad5: "",
+        gad6: "",
+        gad7: "",
       },
       selfHarm: { pastMonth: "", lifetime: "" },
       asrs5: {
@@ -176,25 +194,28 @@ function mergeWithDefaults<T extends Record<string, any>>(
 }
 
 export default function Page() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const [step, setStep] = useState(0);
   const [praise, setPraise] = useState<string | null>(null);
   const [burst, setBurst] = useState(false);
-  const [maxVisited, setMaxVisited] = useState(0);
   const [profile, setProfile] = useState<Profile>(makeDefaultProfile());
+  const [loading, setLoading] = useState(true);
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
 
   const progressPct = useMemo(() => {
-    if (steps.length <= 1) return 0;
     // Percent of furthest reached step over last index
-    return Math.min(100, Math.round((maxVisited / (steps.length - 1)) * 100));
-  }, [maxVisited]);
+    return Math.min(
+      100,
+      Math.round((profile.maxVisited / (steps.length - 1)) * 100)
+    );
+  }, [profile.maxVisited]);
 
   useEffect(() => {
     setProfile((p) => ({ ...p, progress: progressPct }));
     console.log(progressPct);
   }, [progressPct]);
+
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -202,26 +223,45 @@ export default function Page() {
       document.body.style.overflow = prev;
     };
   }, []);
+
   useEffect(() => {
+    if (status === "loading") return;
     const fetchProfile = async () => {
-      console.log(session);
-      const profileResp = await fetch("api/profile/load", {
-        method: "GET",
-      });
-      const data = await profileResp.json();
-      const incoming = data?.profile ?? null;
-      if (incoming) {
-        const merged = mergeWithDefaults(makeDefaultProfile(), incoming);
-        setProfile(merged);
-        console.log("Loaded profile (merged)", merged);
-      } else {
-        // Ensure we always have a fresh default object
-        setProfile(makeDefaultProfile());
-        console.log("No saved profile found; using defaults");
+      try {
+        setLoading(true);
+        const profileResp = await fetch("api/profile/load", { method: "GET" });
+        const data = await profileResp.json();
+        const incoming = data?.profile ?? null;
+        if (incoming) {
+          const merged = mergeWithDefaults(makeDefaultProfile(), incoming);
+          setProfile(merged);
+          console.log("Loaded profile (merged)", merged);
+        } else {
+          setProfile((p) => ({
+            ...p,
+            firstName: session?.user?.name?.split(" ")[0] ?? "",
+            lastName: session?.user?.name?.split(" ").slice(1).join(" ") ?? "",
+            email: session?.user?.role !== "guest" ? session?.user?.email : "",
+          }));
+          console.log("No saved profile found, filling in session info");
+        }
+      } catch (err) {
+        console.error("Failed loading profile", err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchProfile();
-  }, [session]);
+  }, [session, status]);
+
+  // useEffect(() => {
+  //   setProfile((p) => ({
+  //     ...p,
+  //     firstName: session?.user?.name?.split(" ")[0] ?? "",
+  //     lastName: session?.user?.name?.split(" ").slice(1).join(" ") ?? "",
+  //     email: session?.user?.email ?? "",
+  //   }));
+  // }, [session]);
 
   const canNext = useMemo(() => {
     // if (steps[step].key === "contact")
@@ -262,12 +302,15 @@ export default function Page() {
       setTimeout(() => setBurst(false), 1200);
       setTimeout(() => setPraise(null), 2000);
       setStep(next);
-      setMaxVisited((prev) => Math.max(prev, next)); //change this logic to change when all field are complete
+      setProfile((prev) => ({
+        ...prev,
+        maxVisited: Math.max(prev.maxVisited ?? 0, next),
+      }));
       saveProgress();
     }
   };
   const goToStep = (index: number) => {
-    if (index <= maxVisited) {
+    if (index <= profile.maxVisited) {
       setStep(index);
     }
   };
@@ -292,10 +335,32 @@ export default function Page() {
     }
   }
 
+  if (status === "loading" || loading) {
+    return (
+      <div
+        className="fixed inset-0 w-full h-dvh flex items-center justify-center"
+        style={{ background: intPsychTheme.card, color: theme.text }}
+      >
+        <div className="animate-pulse text-center">
+          <div
+            style={{ borderTopColor: intPsychTheme.secondary }}
+            className="rounded-full h-12 w-12 mx-auto mb-4 border-4 border-gray-300 border-t-4 border-t-transparent animate-spin"
+          />
+          <p className="text-gray-700">Preparing your intake…</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="fixed inset-0 w-full h-dvh overflow-hidden"
-      style={{ background: intPsychTheme.card, color: theme.text }}
+      style={{
+        background: intPsychTheme.card,
+        color: theme.text,
+        paddingBottom: "env(safe-area-inset-bottom)",
+        WebkitTapHighlightColor: "transparent",
+      }}
     >
       <ConfettiBurst show={burst} />
       <GardenFrame bloom={bloom} />
@@ -306,7 +371,7 @@ export default function Page() {
         onStepClick={goToStep}
         stepTitles={progressTitles}
         canNext={canNext}
-        maxVisited={maxVisited}
+        maxVisited={profile.maxVisited}
         progressPct={progressPct}
       />
 
@@ -314,23 +379,33 @@ export default function Page() {
         <motion.div
           ref={scrollContainerRef}
           key={steps[step].key}
-          initial={{ y: 12, opacity: 0 }}
+          initial={{ y: 15, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -12, opacity: 0 }}
-          transition={{ duration: 0.4, ease }}
-          className="rounded-4xl border border-gray-200 bg-white/70 backdrop-blur-sm p-6 md:p-8 shadow-md max-h-[70vh] scrollable-div overflow-y-auto pr-2"
+          exit={{ y: -15, opacity: 0 }}
+          transition={{ duration: 0.8, ease }}
+          className="rounded-4xl border border-gray-200 bg-white/70 backdrop-blur-sm p-6 md:p-8 shadow-md max-h-[70vh] scrollable-div overflow-y-auto pr-2 overscroll-y-contain"
+          style={{ WebkitOverflowScrolling: "touch" }}
         >
           {steps[step].key === "welcome" && (
             <div className="space-y-5">
               <StepTitle
                 n={step + 1}
-                title={`Welcome, ${session?.user?.name.split(" ")[0] ?? ""}`}
+                title={`${(() => {
+                  if (profile.maxVisited === 0) return welcomeMessages[0];
+                  if (profile.maxVisited >= 1 && profile.maxVisited <= 4)
+                    return welcomeMessages[1];
+                  if (profile.maxVisited === 5) return welcomeMessages[2];
+                  if (profile.maxVisited >= 6 && profile.maxVisited <= 8)
+                    return welcomeMessages[3];
+                  return welcomeMessages[4];
+                })()} ${session?.user?.name?.split(" ")[0] ?? ""}!`}
               />
               <p className="text-gray-700 font-sans">
                 This detailed survey will give your clinician much of the
                 necessary context that could otherwise take a full session to
                 gather. This will help them <b>jumpstart your treatment</b> and
-                spend session time talking about the right things.
+                spend session time talking about the right things. The whole
+                process should take around 30 minutes to an hour.
               </p>
               <p>
                 There will be multiple choice, and free response style questions
@@ -338,10 +413,22 @@ export default function Page() {
                 The more <b>detail</b> you include, the better we can understand
                 how to help.
               </p>
-              <p>
-                The whole process should take around 30 minutes to an hour, but
-                you
-              </p>
+              {session?.user?.role === "guest" ? (
+                <p>
+                  As a guest, if you leave the tab, your progress will not save
+                  and you will have to start over. Should you want to save your
+                  progress, you need to create a login or sign in with google.
+                </p>
+              ) : (
+                <p>
+                  As you progress through, your progress will save as you click
+                  to each next page. This means you don't necessarily have to
+                  complete the entire form in one sitting. However, should you
+                  exit out of the assessment midway through a specific page,
+                  your progress will be lost.
+                </p>
+              )}
+
               <p>Let's start!</p>
             </div>
           )}
@@ -443,11 +530,15 @@ export default function Page() {
             />
           )}
 
-          <div className="mt-8 flex items-center justify-between">
+          {steps[step].key === "review" && (
+            <ReviewSection title="You're all set 🎉" step={step} />
+          )}
+
+          <div className="mt-8 flex items-center justify-between gap-3">
             <button
               onClick={goBack}
               disabled={step === 0}
-              className="inline-flex cursor-pointer disabled:cursor-not-allowed bg-white items-center gap-2 rounded-xl px-3 py-2 font-medium border border-gray-300 text-gray-700 disabled:opacity-40"
+              className="inline-flex cursor-pointer disabled:cursor-not-allowed bg-white items-center gap-2 rounded-xl px-3 py-2 font-medium border border-gray-300 text-gray-700 disabled:opacity-40 transition duration-150 hover:brightness-95 active:scale-95"
             >
               <ChevronLeft className="h-4 w-4" /> Back
             </button>
@@ -455,7 +546,7 @@ export default function Page() {
               {step < 1 && (
                 <button
                   onClick={goNext}
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white"
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95"
                   style={{ background: intPsychTheme.secondary }}
                 >
                   Start <ChevronRight className="h-4 w-4" />
@@ -474,10 +565,11 @@ export default function Page() {
                   <button
                     onClick={goNext}
                     disabled={!canNext}
-                    className="inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95"
                     style={{ background: intPsychTheme.secondary }}
                   >
-                    Next <ChevronRight className="h-4 w-4" />
+                    {steps[step].key === "assessments" ? "Finish" : "Next"}{" "}
+                    <ChevronRight className="h-4 w-4" />
                   </button>
                 </>
               )}
@@ -485,11 +577,14 @@ export default function Page() {
 
             {step === steps.length - 1 && (
               <button
-                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                className="inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white"
+                onClick={() => {
+                  setStep(0);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95"
                 style={{ background: theme.primary }}
               >
-                Back to Top
+                Back to Beginning
               </button>
             )}
           </div>

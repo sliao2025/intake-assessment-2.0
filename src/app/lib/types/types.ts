@@ -64,10 +64,13 @@ export type RichResponse = {
 
 export type Assessments = {
   suicide: {
-    ideation: string;
-    intent: string;
-    plan: string;
-    protective: string;
+    wishDead: string; // "In the past month, have you wished you were dead, or wished you could go to sleep and not wake up?"
+    thoughts: string; // "In the past month, have you had any actual thoughts about killing yourself?"
+    methodHow: string; // "In the past month, have you been thinking about how you might end your life?"
+    intention: string; // "In the past month, have you had these suicidal thoughts and some intention of acting on them?"
+    plan: string; // "In the past month, have you started to work out the details of how to kill yourself? Do you intend to carry out this plan?"
+    behavior: string; // "Have you done anything, started to do anything, or prepared to do anything, to end your life? ..."
+    behavior3mo: string; // "Was this within the past 3 months?"
   };
   phq9: {
     phq1: string;
@@ -79,6 +82,15 @@ export type Assessments = {
     phq7: string;
     phq8: string;
     phq9: string;
+  };
+  gad7: {
+    gad1: string;
+    gad2: string;
+    gad3: string;
+    gad4: string;
+    gad5: string;
+    gad6: string;
+    gad7: string;
   };
   selfHarm: { pastMonth: string; lifetime: string };
   asrs5: {
@@ -121,7 +133,7 @@ export type Relationship = {
 };
 
 export type Profile = {
-  progress: number;
+  maxVisited: number;
 
   // Contact Section
   firstName: string;

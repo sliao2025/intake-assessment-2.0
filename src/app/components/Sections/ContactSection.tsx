@@ -4,8 +4,8 @@
 import * as React from "react";
 import StepTitle from "../StepTitle";
 import Field from "../primitives/Field";
-import { Option } from "../../lib/types";
-import type { Profile } from "../../lib/types";
+import type { Profile } from "../../lib/types/types";
+import { useSession } from "next-auth/react";
 
 export default function ContactSection({
   title,
@@ -18,24 +18,7 @@ export default function ContactSection({
   setProfile: React.Dispatch<React.SetStateAction<Profile>>;
   step: number;
 }) {
-  // async function createSession() {
-  //   setLoading(true);
-  //   try {
-  //     const r = await fetch("/api/sessions", {
-  //       method: "POST",
-  //       body: JSON.stringify({
-  //         assessmentSlug: "phq9",
-  //         userId: "anon",
-  //         scaleCode: "PHQ9",
-  //       }),
-  //     });
-  //     const data = await r.json();
-  //     setSessionId(data.sessionId);
-  //     return data.sessionId as string;
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }
+  const { data: session } = useSession();
 
   return (
     <div className="space-y-6">
