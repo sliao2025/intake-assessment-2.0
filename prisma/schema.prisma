@@ -7,21 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/* --- Auth.js (NextAuth) tables --- */
+/// --- Auth.js (NextAuth) tables ---
 model User {
-  id            String   @id @default(cuid())
-  email         String?  @unique
+  id            String    @id @default(cuid())
+  email         String?   @unique
   name          String?
   image         String?
   emailVerified DateTime?
-
-  // For email+password users (null for Google-only)
   passwordHash  String?
-
+  guest         Boolean?  @default(false)
   accounts      Account[]
-  sessions      Session[]
   profile       Profile?
-  guest         Boolean? @default(false)
+  sessions      Session[]
 }
 
 model Account {
@@ -30,16 +27,17 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text   // <- widen
-  access_token      String? @db.Text   // <- widen
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
-  scope             String? @db.Text   // <- often long, widen too
-  id_token          String? @db.Text   // <- widen
+  scope             String? @db.Text
+  id_token          String? @db.Text
   session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@unique([provider, providerAccountId])
+  @@index([userId], map: "Account_userId_fkey")
 }
 
 model Session {
@@ -48,6 +46,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "Session_userId_fkey")
 }
 
 model VerificationToken {
@@ -58,7 +58,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-/* --- Your Profile persistence (JSON blob) --- */
+/// --- Your Profile persistence (JSON blob) ---
 model Profile {
   userId    String   @id
   json      Json
