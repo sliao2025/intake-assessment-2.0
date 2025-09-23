@@ -375,7 +375,10 @@ export default function Page() {
         progressPct={progressPct}
       />
 
-      <div className="relative z-10 mx-auto max-w-4xl px-4 py-8">
+      <div
+        className="relative z-10 mx-auto max-w-4xl px-4 py-8"
+        style={{ scrollbarGutter: "stable both-edges" }}
+      >
         <motion.div
           ref={scrollContainerRef}
           key={steps[step].key}
@@ -383,11 +386,14 @@ export default function Page() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -15, opacity: 0 }}
           transition={{ duration: 0.8, ease }}
-          className="rounded-4xl border border-gray-200 bg-white/70 backdrop-blur-sm p-6 md:p-8 shadow-md max-h-[70vh] scrollable-div overflow-y-auto pr-2 overscroll-y-contain"
-          style={{ WebkitOverflowScrolling: "touch" }}
+          className="w-full rounded-4xl border border-gray-200 bg-white/70 backdrop-blur-sm px-4 py-6 md:px-6 md:py-8 shadow-md max-h-[70vh] scrollable-div overflow-y-auto box-border overscroll-y-contain"
+          style={{
+            WebkitOverflowScrolling: "touch",
+            scrollbarGutter: "stable both-edges",
+          }}
         >
           {steps[step].key === "welcome" && (
-            <div className="space-y-5">
+            <div className="space-y-6">
               <StepTitle
                 n={step + 1}
                 title={`${(() => {
@@ -400,36 +406,82 @@ export default function Page() {
                   return welcomeMessages[4];
                 })()} ${session?.user?.name?.split(" ")[0] ?? ""}!`}
               />
-              <p className="text-gray-700 font-sans">
-                This detailed survey will give your clinician much of the
-                necessary context that could otherwise take a full session to
-                gather. This will help them <b>jumpstart your treatment</b> and
-                spend session time talking about the right things. The whole
-                process should take around 30 minutes to an hour.
-              </p>
-              <p>
-                There will be multiple choice, and free response style questions
-                which you can choose to type or respond to with a voice note.
-                The more <b>detail</b> you include, the better we can understand
-                how to help.
-              </p>
-              {session?.user?.role === "guest" ? (
-                <p>
-                  As a guest, if you leave the tab, your progress will not save
-                  and you will have to start over. Should you want to save your
-                  progress, you need to create a login or sign in with google.
-                </p>
-              ) : (
-                <p>
-                  As you progress through, your progress will save as you click
-                  to each next page. This means you don't necessarily have to
-                  complete the entire form in one sitting. However, should you
-                  exit out of the assessment midway through a specific page,
-                  your progress will be lost.
-                </p>
-              )}
 
-              <p>Let's start!</p>
+              {/* At-a-glance cards */}
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="rounded-2xl border border-slate-200 bg-white/80 p-4">
+                  <div className="text-sm text-slate-500">Estimated time</div>
+                  <div className="text-lg font-semibold text-slate-900">
+                    30–60 minutes
+                  </div>
+                  <div className="mt-2 text-sm text-slate-600">
+                    You can move between sections and come back to edit answers.
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white/80 p-4">
+                  <div className="text-sm text-slate-500">Format</div>
+                  <div className="text-lg font-semibold text-slate-900">
+                    Multiple‑choice + Free‑response
+                  </div>
+                  <div className="mt-2 text-sm text-slate-600">
+                    Type your responses or select from options.
+                  </div>
+                </div>
+              </div>
+
+              {/* What to expect */}
+              <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 md:p-5">
+                <h3 className="font-semibold text-slate-900">What to expect</h3>
+                <ul className="mt-3 space-y-2">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 flex-none text-emerald-600" />
+                    <span className="text-slate-700">
+                      This intake helps your clinician{" "}
+                      <b>jumpstart treatment</b> by gathering context that might
+                      otherwise take a full session.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 flex-none text-emerald-600" />
+                    <span className="text-slate-700">
+                      Progress is shown above. You’ll unlock later sections as
+                      you complete earlier ones.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 flex-none text-emerald-600" />
+                    <span className="text-slate-700">
+                      The more <b>detail</b> you provide, the better we can
+                      tailor your care.
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Saving behavior */}
+              <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 md:p-5">
+                <h3 className="font-semibold text-slate-900">
+                  Saving &amp; returning
+                </h3>
+                {session?.user?.role === "guest" ? (
+                  <p className="mt-2 text-slate-700">
+                    You’re using a <b>guest session</b>. If you close this tab,
+                    your progress won’t save. To save and return later, please
+                    create an account or sign in with Google.
+                  </p>
+                ) : (
+                  <div className="mt-2 space-y-2 text-slate-700">
+                    <p>
+                      Your progress saves each time you click <b>Next</b>. You
+                      can return later and pick up where you left off.
+                    </p>
+                    <p className="text-sm text-slate-600">
+                      Note: If you leave a page mid‑way without clicking Next,
+                      answers on that page may not be saved.
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

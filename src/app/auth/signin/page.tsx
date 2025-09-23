@@ -42,7 +42,8 @@ export default function SignInPage() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -12, opacity: 0 }}
           transition={{ duration: 0.8, ease }}
-          className="w-[50vw] max-w-xl rounded-4xl border border-gray-200 bg-white/70 backdrop-blur-sm p-6 md:p-8 shadow-md max-h-[70vh] overflow-y-auto pr-2"
+          className="w-full sm:w-[80vw] md:w-[50vw] max-w-xl rounded-4xl border border-gray-200 bg-white/70 backdrop-blur-sm px-5 py-6 md:px-8 md:py-8 shadow-md max-h-[70vh] overflow-y-auto box-border"
+          style={{ scrollbarGutter: "stable both-edges" }}
         >
           {errorTip && (
             <div className="mb-3">

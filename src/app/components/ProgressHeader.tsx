@@ -198,88 +198,89 @@ const ProgressHeader: React.FC<Props> = ({
               Integrative Psych Intake Assessment
             </span>
           </div>
+          <div className="flex items-center justify-center gap-4">
+            {praise && (
+              <motion.div
+                initial={{ y: -10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -10, opacity: 0 }}
+                className="hidden md:flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium bg-green-100 text-green-700"
+              >
+                <CheckCircle2 className="h-4 w-4" /> {praise}
+              </motion.div>
+            )}
+            {process.env.NODE_ENV !== "production" && (
+              <div className="z-40">
+                <Menu as="div" className="relative inline-block text-left">
+                  <div>
+                    <MenuButton
+                      className="h-9 w-9 rounded-full overflow-hidden border border-gray-200 bg-white/60 backdrop-blur-sm flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
+                      title={session?.user?.name ?? "Your profile"}
+                      aria-label="Open profile menu"
+                    >
+                      {session?.user?.image ? (
+                        <img
+                          src={session.user.image}
+                          alt={session?.user?.name ?? "Profile"}
+                          className="h-full w-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <span className="text-sm font-semibold text-gray-700">
+                          {(session?.user?.name?.[0] ?? "G").toUpperCase()}
+                        </span>
+                      )}
+                    </MenuButton>
+                  </div>
 
-          {praise && (
-            <motion.div
-              initial={{ y: -10, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -10, opacity: 0 }}
-              className="hidden md:flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium bg-green-100 text-green-700"
-            >
-              <CheckCircle2 className="h-4 w-4" /> {praise}
-            </motion.div>
-          )}
-          {process.env.NODE_ENV !== "production" && (
-            <div className="z-40">
-              <Menu as="div" className="relative inline-block text-left">
-                <div>
-                  <MenuButton
-                    className="h-9 w-9 rounded-full overflow-hidden border border-gray-200 bg-white/60 backdrop-blur-sm flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
-                    title={session?.user?.name ?? "Your profile"}
-                    aria-label="Open profile menu"
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-100"
+                    enterFrom="transform opacity-0 scale-95"
+                    enterTo="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75"
+                    leaveFrom="transform opacity-100 scale-100"
+                    leaveTo="transform opacity-0 scale-95"
                   >
-                    {session?.user?.image ? (
-                      <img
-                        src={session.user.image}
-                        alt={session?.user?.name ?? "Profile"}
-                        className="h-full w-full object-cover"
-                        referrerPolicy="no-referrer"
-                      />
-                    ) : (
-                      <span className="text-sm font-semibold text-gray-700">
-                        {(session?.user?.name?.[0] ?? "G").toUpperCase()}
-                      </span>
-                    )}
-                  </MenuButton>
-                </div>
-
-                <Transition
-                  as={Fragment}
-                  enter="transition ease-out duration-100"
-                  enterFrom="transform opacity-0 scale-95"
-                  enterTo="transform opacity-100 scale-100"
-                  leave="transition ease-in duration-75"
-                  leaveFrom="transform opacity-100 scale-100"
-                  leaveTo="transform opacity-0 scale-95"
-                >
-                  <MenuItems className="absolute right-0 mt-2 w-48 origin-top-right rounded-xl border border-gray-200 bg-white/95 backdrop-blur-sm shadow-lg ring-1 ring-black/5 focus:outline-none z-50">
-                    <div className="py-1">
-                      <div className="px-3 py-2 text-xs text-gray-500 border-b border-gray-100">
-                        <div className="truncate font-medium text-gray-700">
-                          {session?.user?.name ?? "Signed in"}
+                    <MenuItems className="absolute right-0 mt-2 w-48 origin-top-right rounded-xl border border-gray-200 bg-white/95 backdrop-blur-sm shadow-lg ring-1 ring-black/5 focus:outline-none z-50">
+                      <div className="py-1">
+                        <div className="px-3 py-2 text-xs text-gray-500 border-b border-gray-100">
+                          <div className="truncate font-medium text-gray-700">
+                            {session?.user?.name ?? "Signed in"}
+                          </div>
+                          {session?.user?.email.split("-")[0] === "guest" ? (
+                            <div className="truncate italic text-gray-400">
+                              (Guest user)
+                            </div>
+                          ) : (
+                            <div className="truncate">
+                              {session?.user?.email ?? ""}
+                            </div>
+                          )}
                         </div>
-                        {session?.user?.email.split("-")[0] === "guest" ? (
-                          <div className="truncate italic text-gray-400">
-                            (Guest user)
-                          </div>
-                        ) : (
-                          <div className="truncate">
-                            {session?.user?.email ?? ""}
-                          </div>
-                        )}
+                        <MenuItem>
+                          {({ active }) => (
+                            <button
+                              onClick={() =>
+                                signOut({ callbackUrl: "/auth/signin" })
+                              }
+                              className={`w-full text-left px-3 py-2 text-sm ${
+                                active
+                                  ? "bg-gray-100 text-gray-900"
+                                  : "text-gray-700"
+                              }`}
+                            >
+                              Logout
+                            </button>
+                          )}
+                        </MenuItem>
                       </div>
-                      <MenuItem>
-                        {({ active }) => (
-                          <button
-                            onClick={() =>
-                              signOut({ callbackUrl: "/auth/signin" })
-                            }
-                            className={`w-full text-left px-3 py-2 text-sm ${
-                              active
-                                ? "bg-gray-100 text-gray-900"
-                                : "text-gray-700"
-                            }`}
-                          >
-                            Logout
-                          </button>
-                        )}
-                      </MenuItem>
-                    </div>
-                  </MenuItems>
-                </Transition>
-              </Menu>
-            </div>
-          )}
+                    </MenuItems>
+                  </Transition>
+                </Menu>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Steps */}

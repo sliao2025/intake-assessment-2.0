@@ -2,7 +2,6 @@ export const praises = [
   "Nice progress!",
   "You're doing great!",
   "Love the detail—keep going!",
-  "Halfway there!",
   "Awesome focus!",
   "Great job finishing this section!",
 ];
