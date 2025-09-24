@@ -40,7 +40,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #ffffff;
     --foreground: #ededed;
   }
 }
@@ -49,4 +49,32 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+:root {
+  /* Fallback page background used by theme-color and overscroll areas */
+  --app-bg-color: #f6fff8; /* light, slightly green-white */
+}
+
+html,
+body {
+  background-color: var(--app-bg-color);
+  min-height: 100%;
+  height: 100%;
+}
+
+/* Ensures visual viewport (including safe areas) is always painted.
+   The fixed gradient layer in layout.tsx handles the main case; this is a safety net. */
+body::backdrop {
+  background: var(--app-bg-color);
+}
+
+/* Mobile polish */
+body {
+  overscroll-behavior-y: contain;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Optional utility if you want to reserve top safe-area on specific screens */
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
 }
