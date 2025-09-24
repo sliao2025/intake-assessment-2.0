@@ -719,67 +719,68 @@ export default function ContactSection({
               </div>
             </Listbox>
           </Field>
-
-          <Field
-            title="When you do drink, how many drinks do you have?"
-            required
-          >
-            <Listbox
-              value={profile.drinksPerOccasion}
-              onChange={(val: string) =>
-                setProfile((p) => ({ ...p, drinksPerOccasion: val }))
-              }
+          {profile.alcoholFrequency !== "none" && (
+            <Field
+              title="When you do drink, how many drinks do you have?"
+              required
             >
-              <div className="relative">
-                <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
-                  {profile.drinksPerOccasion ? (
-                    <span className="text-slate-900">
-                      {drinksPerOccasionLabel(profile.drinksPerOccasion)}
-                    </span>
-                  ) : (
-                    <span className="text-slate-400">Choose…</span>
-                  )}
-                  <ChevronDown
-                    className="group pointer-events-none absolute top-3 right-2.5 size-4"
-                    aria-hidden="true"
-                  />
-                </ListboxButton>
+              <Listbox
+                value={profile.drinksPerOccasion}
+                onChange={(val: string) =>
+                  setProfile((p) => ({ ...p, drinksPerOccasion: val }))
+                }
+              >
+                <div className="relative">
+                  <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                    {profile.drinksPerOccasion ? (
+                      <span className="text-slate-900">
+                        {drinksPerOccasionLabel(profile.drinksPerOccasion)}
+                      </span>
+                    ) : (
+                      <span className="text-slate-400">Choose…</span>
+                    )}
+                    <ChevronDown
+                      className="group pointer-events-none absolute top-3 right-2.5 size-4"
+                      aria-hidden="true"
+                    />
+                  </ListboxButton>
 
-                <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
-                  {drinksPerOccasionOptions.map((option) => (
-                    <ListboxOption
-                      key={option.value}
-                      value={option.value}
-                      as={React.Fragment}
-                    >
-                      {({ active, selected }) => (
-                        <li
-                          className={`${
-                            active ? "bg-slate-100" : "bg-white"
-                          } relative cursor-pointer select-none py-2 pl-4 pr-10`}
-                        >
-                          <span
+                  <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                    {drinksPerOccasionOptions.map((option) => (
+                      <ListboxOption
+                        key={option.value}
+                        value={option.value}
+                        as={React.Fragment}
+                      >
+                        {({ active, selected }) => (
+                          <li
                             className={`${
-                              selected
-                                ? "font-medium text-slate-900"
-                                : "font-normal text-slate-700"
-                            } block truncate`}
+                              active ? "bg-slate-100" : "bg-white"
+                            } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                           >
-                            {option.label}
-                          </span>
-                          {selected && (
-                            <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
-                              <Check />
+                            <span
+                              className={`${
+                                selected
+                                  ? "font-medium text-slate-900"
+                                  : "font-normal text-slate-700"
+                              } block truncate`}
+                            >
+                              {option.label}
                             </span>
-                          )}
-                        </li>
-                      )}
-                    </ListboxOption>
-                  ))}
-                </ListboxOptions>
-              </div>
-            </Listbox>
-          </Field>
+                            {selected && (
+                              <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                                <Check />
+                              </span>
+                            )}
+                          </li>
+                        )}
+                      </ListboxOption>
+                    ))}
+                  </ListboxOptions>
+                </div>
+              </Listbox>
+            </Field>
+          )}
 
           <Field
             required

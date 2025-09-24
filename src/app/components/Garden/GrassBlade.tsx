@@ -1,4 +1,6 @@
-export default function GrassBlade({
+import React, { useRef, memo } from "react";
+
+function GrassBlade({
   h = 24,
   bend = 6,
   baseWidth = 2,
@@ -13,10 +15,16 @@ export default function GrassBlade({
   swayDelay?: number; // seconds (can be negative)
   swayDuration?: number; // seconds
 }) {
-  const delay =
-    typeof swayDelay === "number" ? swayDelay : Math.random() * 3 - 1.5; // -1.5s .. 1.5s
-  const duration =
-    typeof swayDuration === "number" ? swayDuration : 3.2 + Math.random() * 2.0; // 3.2s .. 5.2s
+  // Freeze animation timing so it doesn't reset on rerenders
+  const delayRef = useRef(
+    typeof swayDelay === "number" ? swayDelay : Math.random() * 3 - 1.5
+  );
+  const durationRef = useRef(
+    typeof swayDuration === "number" ? swayDuration : 3.2 + Math.random() * 2.0
+  );
+
+  const delay = delayRef.current;
+  const duration = durationRef.current;
 
   const top = 56 - h;
   const centerX = 6;
@@ -85,3 +93,5 @@ export default function GrassBlade({
     </svg>
   );
 }
+
+export default memo(GrassBlade);

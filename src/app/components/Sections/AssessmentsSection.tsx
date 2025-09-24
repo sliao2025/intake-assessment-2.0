@@ -431,6 +431,10 @@ export default function AssessmentsSection({
         enabled={u2}
       >
         <div className="grid md:grid-cols-1 gap-4">
+          <h1 className="italic text-slate-800">
+            <b>Over the last 2 weeks</b>, how often have you been bothered by
+            the following problems
+          </h1>
           <Field title="Little interest or pleasure in doing things">
             <Likert
               value={a.phq9.phq1}
@@ -524,6 +528,10 @@ export default function AssessmentsSection({
         enabled={u3}
       >
         <div className="grid md:grid-cols-1 gap-4">
+          <h1 className="italic text-slate-800">
+            <b>Over the last 2 weeks</b>, how often have you been bothered by
+            the following problems
+          </h1>
           <Field title="Feeling nervous, anxious, or on edge">
             <Likert
               value={a.gad7.gad1}
@@ -746,7 +754,7 @@ export default function AssessmentsSection({
       {/* 7) ACE Resilience (13 items, 5‑point truth scale) */}
       <Collapsible
         title="ACE"
-        subtitle="Adverse Childhood Experiences - Resilience"
+        subtitle="Adverse Childhood"
         open={open7}
         setOpen={setOpen7}
         enabled={u7}

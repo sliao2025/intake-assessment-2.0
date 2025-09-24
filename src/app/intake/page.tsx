@@ -205,19 +205,13 @@ export default function Page() {
   const [profile, setProfile] = useState<Profile>(makeDefaultProfile());
   const [loading, setLoading] = useState(true);
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
+  // Prevent re-loading state on tab focus/session refetch
+  const hasBootstrapped = React.useRef(false);
 
   const progressPct = useMemo(() => {
     // Percent of furthest reached step over last index
-    return Math.min(
-      100,
-      Math.round((profile.maxVisited / (steps.length - 1)) * 100)
-    );
+    return Math.min(100, (profile.maxVisited / steps.length) * 100);
   }, [profile.maxVisited]);
-
-  useEffect(() => {
-    setProfile((p) => ({ ...p, progress: progressPct }));
-    console.log(progressPct);
-  }, [progressPct]);
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -228,7 +222,7 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    if (status === "loading") return;
+    if (status === "loading" || hasBootstrapped.current) return;
     const fetchProfile = async () => {
       try {
         setLoading(true);
@@ -252,19 +246,12 @@ export default function Page() {
         console.error("Failed loading profile", err);
       } finally {
         setLoading(false);
+        hasBootstrapped.current = true; // mark as finished so focus refetches won't re-run bootstrap
       }
     };
     fetchProfile();
-  }, [session, status]);
-
-  // useEffect(() => {
-  //   setProfile((p) => ({
-  //     ...p,
-  //     firstName: session?.user?.name?.split(" ")[0] ?? "",
-  //     lastName: session?.user?.name?.split(" ").slice(1).join(" ") ?? "",
-  //     email: session?.user?.email ?? "",
-  //   }));
-  // }, [session]);
+    // Only depend on `status` so we don't re-run when `session` object changes identity on refetch
+  }, [status]);
 
   const canNext = useMemo(() => {
     const key = steps[step].key;
@@ -295,7 +282,6 @@ export default function Page() {
           profile.highestDegree &&
           profile.dietType.length > 0 &&
           profile.alcoholFrequency &&
-          profile.drinksPerOccasion &&
           profile.substancesUsed.length > 0 &&
           profile.jobDetails &&
           profile.hobbies
@@ -399,16 +385,32 @@ export default function Page() {
   const goNext = async () => {
     const next = Math.min(step + 1, steps.length - 1);
     if (next !== step) {
+      // celebratory UI
       setPraise(praises[Math.floor(Math.random() * praises.length)]);
       setBurst(true);
       setTimeout(() => setBurst(false), 1200);
       setTimeout(() => setPraise(null), 2000);
+
+      // compute new profile FIRST to avoid stale closure
+      const newMaxVisited = Math.max(profile.maxVisited, next);
+      const nextProfile: Profile = { ...profile, maxVisited: newMaxVisited };
+
+      // update UI state
       setStep(next);
-      setProfile((prev) => ({
-        ...prev,
-        maxVisited: Math.max(prev.maxVisited ?? 0, next),
-      }));
-      saveProgress();
+      setProfile(nextProfile);
+
+      // helpful logs (old vs new)
+      console.log(
+        "[goNext] prev maxVisited:",
+        profile.maxVisited,
+        "next:",
+        next,
+        "new maxVisited:",
+        newMaxVisited
+      );
+
+      // save using the freshly computed snapshot (do not rely on async state)
+      await saveProgress(nextProfile);
     }
   };
   const goToStep = (index: number) => {
@@ -419,25 +421,30 @@ export default function Page() {
   const goBack = () => setStep((s) => Math.max(0, s - 1));
   const bloom = Math.max(0.05, progressPct / 100);
 
-  async function saveProgress() {
+  async function saveProgress(override?: Profile) {
     try {
+      const payload = override ?? profile;
+      console.log(
+        "[saveProgress] storing profile with maxVisited=",
+        payload.maxVisited
+      );
       const r = await fetch("/api/profile/create", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profile),
+        body: JSON.stringify(payload),
       });
       if (!r.ok) {
         const msg = await r.text();
         throw new Error(`${r.status} ${msg}`);
       }
       const data = await r.json();
-      console.log("Updated profile", data);
+      console.log("[saveProgress] updated profile response", data);
     } catch (error) {
       console.error("Failed to store profile", error);
     }
   }
 
-  if (status === "loading" || loading) {
+  if (!hasBootstrapped.current && (status === "loading" || loading)) {
     return (
       <div
         className="fixed inset-0 min-h-[100svh] h-dvh flex items-center justify-center"
@@ -704,11 +711,16 @@ export default function Page() {
             <div>
               {step < 1 && (
                 <button
-                  onClick={goNext}
+                  onClick={() =>
+                    profile.maxVisited === 0
+                      ? goNext()
+                      : setStep(profile.maxVisited)
+                  }
                   className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95"
                   style={{ background: intPsychTheme.secondary }}
                 >
-                  Start <ChevronRight className="h-4 w-4" />
+                  {profile.maxVisited === 0 ? "Start" : "Resume"}
+                  <ChevronRight className="h-4 w-4" />
                 </button>
               )}
 

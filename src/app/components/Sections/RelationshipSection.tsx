@@ -7,6 +7,7 @@ import Field from "../primitives/Field";
 import { intPsychTheme } from "../theme";
 import Likert from "../primitives/Likert";
 import RemoveButton from "../primitives/Removebutton";
+import { Pencil } from "lucide-react";
 
 const strengthOptions: {
   label: string;
@@ -75,6 +76,8 @@ export default function RelationshipSection({
     strength: "pretty_good",
     happy: true,
   });
+  // --- Editing state ---
+  const [editingId, setEditingId] = React.useState<string | null>(null);
 
   // --- Interactions / refs ---
   const [hoveredId, setHoveredId] = React.useState<string | null>(null);
@@ -111,12 +114,25 @@ export default function RelationshipSection({
   // --- CRUD ---
   const addRelationship = () => {
     if (!draft.name.trim() || !draft.role.trim()) return;
-    const newRel: Relationship = { id: crypto.randomUUID(), ...draft };
-    setProfile((prev) => ({
-      ...prev,
-      relationships: [...(prev.relationships ?? []), newRel],
-    }));
-    setDraft({ name: "", role: "", strength: "pretty_good", happy: true });
+    if (!editingId) {
+      // Add new
+      const newRel: Relationship = { id: crypto.randomUUID(), ...draft };
+      setProfile((prev) => ({
+        ...prev,
+        relationships: [...(prev.relationships ?? []), newRel],
+      }));
+      setDraft({ name: "", role: "", strength: "pretty_good", happy: true });
+    } else {
+      // Update existing
+      setProfile((prev) => ({
+        ...prev,
+        relationships: (prev.relationships ?? []).map((r) =>
+          r.id === editingId ? { ...r, ...draft } : r
+        ),
+      }));
+      setEditingId(null);
+      setDraft({ name: "", role: "", strength: "pretty_good", happy: true });
+    }
   };
   const removeRelationship = (id: string) =>
     setProfile((prev) => ({
@@ -169,9 +185,23 @@ export default function RelationshipSection({
 
           <div className="w-full overflow-hidden rounded-xl border border-slate-200 bg-white">
             <svg viewBox="0 0 520 320" className="w-full h-[320px]">
+              <defs>
+                <filter
+                  id="soft-blur"
+                  x="-50%"
+                  y="-50%"
+                  width="200%"
+                  height="200%"
+                >
+                  <feGaussianBlur stdDeviation="4" />
+                </filter>
+              </defs>
               {nodes.map((n) => {
                 const isHover = hoveredId === n.id;
-                const sw = 1.5 + weightFor(n.strength) + (isHover ? 2 : 0);
+                // Dotted line for "really_bad" or "not_great"
+                const isDotted =
+                  n.strength === "really_bad" || n.strength === "not_great";
+                const sw = 2 + (isHover ? 1 : 0);
                 return (
                   <g key={`edge-${n.id}`} className="cursor-pointer">
                     <line
@@ -184,6 +214,7 @@ export default function RelationshipSection({
                       strokeOpacity={isHover ? 1 : 0.9}
                       className="transition-all duration-150"
                       style={{ cursor: "pointer" }}
+                      strokeDasharray={isDotted ? "4 3" : undefined}
                       onMouseEnter={() => setHoveredId(n.id)}
                       onMouseLeave={() => setHoveredId(null)}
                       onClick={() => selectAndScroll(n.id)}
@@ -204,15 +235,55 @@ export default function RelationshipSection({
                     className="cursor-pointer"
                   >
                     {isHover && (
-                      <circle
-                        cx={n.x}
-                        cy={n.y}
-                        r={nodeRadius + 6}
-                        fill="none"
-                        stroke={intPsychTheme.secondary}
-                        strokeWidth={2}
-                        opacity={0.8}
-                      />
+                      <g>
+                        {/* soft blurred halo */}
+                        <circle
+                          cx={n.x}
+                          cy={n.y}
+                          r={nodeRadius + 10}
+                          fill="#ffffff"
+                          fillOpacity={0.6}
+                          filter="url(#soft-blur)"
+                        />
+                        {/* pencil button to the right of the circle */}
+                        <g
+                          transform={`translate(${n.x + nodeRadius + 8}, ${
+                            n.y - 14
+                          })`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDraft({
+                              name: n.name,
+                              role: n.role,
+                              strength: n.strength,
+                              happy: n.happy,
+                            });
+                            setEditingId(n.id);
+                          }}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <rect
+                            x={0}
+                            y={0}
+                            width={28}
+                            height={28}
+                            rx={14}
+                            ry={14}
+                            fill="#ffffff"
+                            fillOpacity={0.9}
+                            stroke={intPsychTheme.secondary}
+                            strokeOpacity={0.8}
+                          />
+                          <foreignObject x={0} y={0} width={28} height={28}>
+                            <div className="flex items-center justify-center w-full h-full">
+                              <Pencil
+                                size={14}
+                                className="text-slate-800 opacity-80"
+                              />
+                            </div>
+                          </foreignObject>
+                        </g>
+                      </g>
                     )}
                     <circle
                       cx={n.x}
@@ -306,6 +377,23 @@ export default function RelationshipSection({
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    {/* Edit affordance */}
+                    <button
+                      type="button"
+                      className="cursor-pointer opacity-40 hover:opacity-80 transition text-xl px-1"
+                      title="Edit"
+                      onClick={() => {
+                        setDraft({
+                          name: r.name,
+                          role: r.role,
+                          strength: r.strength,
+                          happy: r.happy,
+                        });
+                        setEditingId(r.id);
+                      }}
+                    >
+                      <Pencil size={16} />
+                    </button>
                     <RemoveButton onClick={() => removeRelationship(r.id)} />
                   </div>
                 </li>
@@ -357,7 +445,7 @@ export default function RelationshipSection({
             </select>
           </Field>
 
-          <Field title="Are you happy with this relationship right now?">
+          <Field title="Are you happy with how the relationship currently is?">
             <Likert
               value={draft.happy ? "yes" : "no"}
               onChange={(v) => setDraft((d) => ({ ...d, happy: v === "yes" }))}
@@ -375,7 +463,7 @@ export default function RelationshipSection({
               className="inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white cursor-pointer"
               style={{ background: intPsychTheme.secondary }}
             >
-              Add
+              {editingId ? "Update" : "Add"}
             </button>
           </div>
         </div>

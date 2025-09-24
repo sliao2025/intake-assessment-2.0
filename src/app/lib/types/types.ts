@@ -161,7 +161,7 @@ export type Profile = {
   sexualPartners: string;
   dietType: Option[];
   alcoholFrequency: string;
-  drinksPerOccasion: string;
+  drinksPerOccasion?: string;
   substancesUsed: Option[];
   isEmployed: boolean;
   jobDetails?: string;

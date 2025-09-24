@@ -1,6 +1,6 @@
 // src/app/components/decor/Garden.tsx
 
-import React from "react";
+import React, { memo } from "react";
 import VinesTop from "./VinesTop";
 import MeadowRow from "./MeadowRow";
 import FlowerCluster from "./FlowerCluster";
@@ -8,7 +8,7 @@ import { intPsychTheme } from "../theme";
 
 /* ------------------ Main exported frames ------------------ */
 
-export default function GardenFrame({ bloom = 0 }: { bloom?: number }) {
+function GardenFrame({ bloom = 0 }: { bloom?: number }) {
   // Multi-layered decorative garden with broad coverage and varied sway speeds.
   return (
     <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
@@ -161,3 +161,5 @@ export default function GardenFrame({ bloom = 0 }: { bloom?: number }) {
     </div>
   );
 }
+
+export default memo(GardenFrame);

@@ -1,7 +1,8 @@
+import React, { memo } from "react";
 import GrassBlade from "./GrassBlade";
 import GardenFlower from "./GardenFlower";
 
-export default function FlowerCluster({
+function FlowerCluster({
   colors = ["#f43f5e", "#e11d48", "#fb7185"],
   flip = false,
 }: {
@@ -26,3 +27,5 @@ export default function FlowerCluster({
     </div>
   );
 }
+
+export default memo(FlowerCluster);

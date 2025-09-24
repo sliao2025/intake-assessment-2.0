@@ -1,3 +1,4 @@
+import React, { useMemo, memo } from "react";
 import FlowerCluster from "./FlowerCluster";
 
 // Deterministic pseudo-random in [0,1) from an integer key (xorshift-ish)
@@ -9,7 +10,7 @@ function rand01(key: number) {
   return (x >>> 0) / 4294967296; // 2^32
 }
 
-export default function MeadowRow({
+function MeadowRow({
   count = 8,
   flip = false,
   scale = 1,
@@ -24,14 +25,14 @@ export default function MeadowRow({
 }) {
   const clamped = Math.max(0, Math.min(1, progress));
 
-  // Precompute a deterministic rank per slot, so visibility is scattered
-  // uniformly across the row instead of left→right.
-  const ranks = Array.from({ length: count }, (_, i) => {
-    // Mix in a few props so different rows look distinct but stable.
-    const seed =
-      ((i + 1) * 1315423911) ^ (count * 2654435761) ^ (flip ? 0x9e3779b9 : 0);
-    return rand01(seed);
-  });
+  // Stable visibility order per mount, recompute only if count/flip change
+  const ranks = useMemo(() => {
+    return Array.from({ length: count }, (_, i) => {
+      const seed =
+        ((i + 1) * 1315423911) ^ (count * 2654435761) ^ (flip ? 0x9e3779b9 : 0);
+      return rand01(seed);
+    });
+  }, [count, flip]);
 
   return (
     <div
@@ -43,9 +44,8 @@ export default function MeadowRow({
       aria-hidden
     >
       {Array.from({ length: count }).map((_, i) => {
-        const r = ranks[i];
+        const r = ranks[i] ?? 0;
         const visible = r < clamped;
-        // Use rank for stagger so there's no spatial bias
         const delayMs = Math.floor(r * 300);
         return (
           <div
@@ -70,3 +70,5 @@ export default function MeadowRow({
     </div>
   );
 }
+
+export default memo(MeadowRow);

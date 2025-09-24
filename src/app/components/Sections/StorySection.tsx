@@ -179,7 +179,7 @@ export default function StorySection({
         title={
           <>
             What role does culture (religion, ethnicity, nationality,
-            spirituality) play on your life? <i>(optional)</i>
+            spirituality) play in your life? <i>(optional)</i>
           </>
         }
       >
