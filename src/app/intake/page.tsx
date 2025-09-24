@@ -463,7 +463,7 @@ export default function Page() {
 
   return (
     <div
-      className="fixed inset-0 min-h-[100svh] h-dvh overflow-hidden"
+      className="fixed inset-0 h-screen lg:h-[calc(100dvh)] overflow-hidden"
       style={{
         background: intPsychTheme.card,
         color: theme.text,
