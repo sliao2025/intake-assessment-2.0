@@ -392,7 +392,7 @@ export default function StorySection({
         title={
           <>
             Describe the environment(s) in which you grew up (# of places,
-            locations, etc.)
+            locations, etc.).
           </>
         }
         required
