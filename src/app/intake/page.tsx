@@ -466,7 +466,6 @@ export default function Page() {
       className="fixed inset-0 h-dvh overflow-y-auto overflow-x-hidden"
       style={{
         color: theme.text,
-        // paddingBottom: "env(safe-area-inset-bottom)",
         WebkitTapHighlightColor: "transparent",
         overflowX: "hidden",
         overscrollBehaviorX: "none",

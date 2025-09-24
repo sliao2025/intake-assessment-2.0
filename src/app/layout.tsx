@@ -26,16 +26,21 @@ export default async function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
       </head>
       <body
         style={{
           background:
-            "linear-gradient(to top, rgba(22, 163, 29, 0.3), rgba(108, 214, 143, 0.15), rgba(255, 255, 255, 1))",
+            "linear-gradient(to top, rgba(22, 163, 29, 0.3), rgba(150, 236, 178, 0.15), rgba(255, 255, 255, 1))",
         }}
         className="min-h-[100dvh] h-full antialiased"
       >
-        <Providers session={session}>{children}</Providers>
+        <div className="pb-[env(safe-area-inset-bottom)]">
+          <Providers session={session}>{children}</Providers>
+        </div>
       </body>
     </html>
   );
