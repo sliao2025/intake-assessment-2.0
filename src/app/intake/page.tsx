@@ -465,8 +465,6 @@ export default function Page() {
     <div
       className="fixed inset-0 h-dvh overflow-y-auto overflow-x-hidden"
       style={{
-        background:
-          "linear-gradient(to top, rgba(22, 163, 29, 0.3), rgba(108, 214, 143, 0.15), rgba(255, 255, 255, 1))",
         color: theme.text,
         // paddingBottom: "env(safe-area-inset-bottom)",
         WebkitTapHighlightColor: "transparent",

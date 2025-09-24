@@ -31,7 +31,13 @@ export default async function RootLayout({
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
       </head>
-      <body className="min-h-[100dvh] h-full antialiased">
+      <body
+        style={{
+          background:
+            "linear-gradient(to top, rgba(22, 163, 29, 0.3), rgba(108, 214, 143, 0.15), rgba(255, 255, 255, 1))",
+        }}
+        className="min-h-[100dvh] h-full antialiased"
+      >
         <Providers session={session}>{children}</Providers>
       </body>
     </html>
