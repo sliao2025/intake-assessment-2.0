@@ -31,7 +31,7 @@ export default async function RootLayout({
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
       </head>
-      <body className="min-h-[100dvh] h-full antialiased overflow-hidden">
+      <body className="min-h-[100dvh] h-full antialiased">
         <Providers session={session}>{children}</Providers>
       </body>
     </html>
