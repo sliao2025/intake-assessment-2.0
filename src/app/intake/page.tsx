@@ -463,7 +463,7 @@ export default function Page() {
 
   return (
     <div
-      className="fixed inset-0 min-h-[100svh] h-dvh overflow-x-hidden"
+      className="fixed inset-0 min-h-[100svh] h-dvh overflow-hidden"
       style={{
         background: intPsychTheme.card,
         color: theme.text,
@@ -628,6 +628,7 @@ export default function Page() {
                 >
                   here
                 </a>
+                .
               </p>
             </div>
           )}
