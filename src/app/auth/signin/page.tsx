@@ -6,7 +6,11 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import logo from "../../../assets/IP_Logo.png";
-import GardenFrame from "../../components/Garden/Garden";
+useEffect(() => {
+  if (typeof window !== "undefined" && (window as any).__setGardenBloom) {
+    (window as any).__setGardenBloom(0);
+  }
+}, []);
 import { intPsychTheme, theme, ease } from "../../components/theme";
 import { Roboto, DM_Serif_Text } from "next/font/google";
 
@@ -33,9 +37,6 @@ export default function SignInPage() {
       className="fixed inset-0 h-dvh flex items-center justify-center overflow-hidden"
       style={{ background: intPsychTheme.card, color: theme.text }}
     >
-      {/* Background visuals to match the main assessment page */}
-      <GardenFrame bloom={0} />
-
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-8">
         <motion.div
           initial={{ y: 15, opacity: 0 }}
