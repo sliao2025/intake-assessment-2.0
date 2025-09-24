@@ -13,14 +13,7 @@ function GardenFrame({ bloom = 0 }: { bloom?: number }) {
   return (
     <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
       {/* soft, taller ground gradient across bottom ~45% of screen */}
-      <div
-        className="absolute inset-x-0 bottom-0"
-        style={{
-          height: "45%",
-          background:
-            "linear-gradient(to top, rgba(22,163,74,0.3), rgba(22,163,74,0.15), rgba(22,163,74,0))",
-        }}
-      />
+      <div className="absolute inset-x-0 bottom-0" />
 
       {/* Background layer: large, lighter clusters spread tall for coverage */}
       <div className="absolute inset-x-0 bottom-0 h-[52%] opacity-40">

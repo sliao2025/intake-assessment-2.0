@@ -463,9 +463,10 @@ export default function Page() {
 
   return (
     <div
-      className="fixed inset-0 h-screen lg:h-[calc(100dvh)] overflow-y-auto overflow-x-hidden"
+      className="fixed inset-0 h-dvh overflow-y-auto overflow-x-hidden"
       style={{
-        background: intPsychTheme.card,
+        background:
+          "linear-gradient(to top, rgba(22, 163, 29, 0.3), rgba(108, 214, 143, 0.15), rgba(255, 255, 255, 0))",
         color: theme.text,
         paddingBottom: "env(safe-area-inset-bottom)",
         WebkitTapHighlightColor: "transparent",

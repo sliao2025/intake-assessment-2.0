@@ -6,11 +6,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import logo from "../../../assets/IP_Logo.png";
-useEffect(() => {
-  if (typeof window !== "undefined" && (window as any).__setGardenBloom) {
-    (window as any).__setGardenBloom(0);
-  }
-}, []);
+import GardenFrame from "../../components/Garden/Garden";
 import { intPsychTheme, theme, ease } from "../../components/theme";
 import { Roboto, DM_Serif_Text } from "next/font/google";
 
@@ -35,15 +31,22 @@ export default function SignInPage() {
   return (
     <div
       className="fixed inset-0 h-dvh flex items-center justify-center overflow-hidden"
-      style={{ background: intPsychTheme.card, color: theme.text }}
+      style={{
+        background:
+          "linear-gradient(to top, rgba(22, 163, 29, 0.3), rgba(108, 214, 143, 0.15), rgba(255, 255, 255, 0))",
+        color: theme.text,
+      }}
     >
+      {/* Background visuals to match the main assessment page */}
+      <GardenFrame bloom={0} />
+
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-8">
         <motion.div
           initial={{ y: 15, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -15, opacity: 0 }}
           transition={{ duration: 0.8, ease }}
-          className="w-full rounded-4xl border border-gray-200 bg-white/70 backdrop-blur-sm px-4 py-6 md:px-6 md:py-8 shadow-md max-h-[80vh] scrollable-div overflow-y-auto overflow-x-hidden box-border overscroll-y-contain"
+          className="w-full rounded-4xl border border-gray-200 bg-white/50 backdrop-blur-sm px-4 py-6 md:px-6 md:py-8 shadow-md max-h-[80vh] scrollable-div overflow-y-auto overflow-x-hidden box-border overscroll-y-contain"
           style={{
             WebkitOverflowScrolling: "touch",
             scrollbarGutter: "stable both-edges",

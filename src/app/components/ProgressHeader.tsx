@@ -179,7 +179,7 @@ const ProgressHeader: React.FC<Props> = ({
       : "justify-start";
 
   return (
-    <div className="sticky top-0 z-40 backdrop-blur bg-white/80 border-b border-gray-200">
+    <div className="sticky top-0 z-40 backdrop-blur bg-white/20 border-b border-gray-100">
       <div className="mx-auto max-w-4xl px-4 py-3">
         {/* Logo / praise */}
         <div className="flex items-center justify-between gap-4">
