@@ -52,7 +52,7 @@ body {
 }
 :root {
   /* Fallback page background used by theme-color and overscroll areas */
-  --app-bg-color: #f6fff8; /* light, slightly green-white */
+  --app-bg-color: #ffffff; /* light, slightly green-white */
 }
 
 html,

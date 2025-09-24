@@ -26,10 +26,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, viewport-fit=cover"
-        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body
         style={{
