@@ -187,12 +187,10 @@ const ProgressHeader: React.FC<Props> = ({
             <Image
               src={logo}
               alt="Integrative Psych logo"
-              width={48}
-              height={48}
-              className="h-10 w-10 object-contain"
+              className="h-12 w-12 object-contain"
             />
             <span
-              className={`font-semibold text-2xl ${dm_serif.className}`}
+              className={`font-semibold text-3xl ${dm_serif.className}`}
               style={{ color: intPsychTheme.primary }}
             >
               Integrative Psych Intake Assessment
@@ -284,7 +282,7 @@ const ProgressHeader: React.FC<Props> = ({
         </div>
 
         {/* Steps */}
-        <div className="relative mt-3">
+        <div className="relative mt-1">
           {showLeft && (
             <OverflowSignal side="left" hiddenCount={hiddenLeftCount} />
           )}
@@ -346,7 +344,7 @@ const ProgressHeader: React.FC<Props> = ({
         </div>
 
         {/* Progress bar */}
-        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-gray-200">
+        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-200">
           <motion.div
             className="h-2"
             style={{

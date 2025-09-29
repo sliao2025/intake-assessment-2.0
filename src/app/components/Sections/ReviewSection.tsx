@@ -22,11 +22,11 @@ export default function ReviewSection({
           start strong.
         </p>
         <ul className="mt-4 list-disc pl-5 text-gray-700 space-y-2">
-          <li>Your responses are securely saved.</li>
+          <li>Your data has been securely stored and saved</li>
           <li>
-            If anything changes, you can update details at your first session.
+            Before your first session, your clinician will review the results of
+            your assessment
           </li>
-          <li>We’ll review your information and follow up as needed.</li>
         </ul>
       </div>
 
