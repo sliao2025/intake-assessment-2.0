@@ -3,7 +3,7 @@
 import React, { useRef, useMemo, useState, useEffect } from "react";
 import type { Profile } from "../lib/types/types";
 import { motion } from "framer-motion";
-import { CheckCircle2, ChevronLeft, ChevronRight, Save } from "lucide-react";
+import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import ProgressHeader from "../components/ProgressHeader";
 import ConfettiBurst from "../components/ConfettiBurst";
 import StepTitle from "../components/StepTitle";
@@ -19,6 +19,8 @@ import RelationshipSection from "../components/Sections/RelationshipSection";
 import StorySection from "../components/Sections/StorySection";
 import AssessmentsSection from "../components/Sections/AssessmentsSection";
 import ReviewSection from "../components/Sections/ReviewSection";
+import HIPAASection from "../components/Sections/HIPAASection";
+import WelcomeSection from "../components/Sections/WelcomeSection";
 
 type Step = {
   key: string;
@@ -580,130 +582,16 @@ export default function Page() {
           }}
         >
           {steps[step].key === "welcome" && (
-            <div className="space-y-6">
-              <StepTitle
-                n={step + 1}
-                title={`${(() => {
-                  if (profile.maxVisited === 0) return welcomeMessages[0];
-                  if (profile.maxVisited >= 1 && profile.maxVisited <= 4)
-                    return welcomeMessages[1];
-                  if (profile.maxVisited === 5) return welcomeMessages[2];
-                  if (profile.maxVisited >= 6 && profile.maxVisited <= 8)
-                    return welcomeMessages[3];
-                  return welcomeMessages[4];
-                })()} ${session?.user?.name?.split(" ")[0] ?? ""}!`}
-              />
-
-              {/* At-a-glance cards */}
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="rounded-2xl border border-slate-200 bg-white/80 p-4">
-                  <div className="text-sm text-slate-500">Estimated time</div>
-                  <div className="text-lg font-semibold text-slate-900">
-                    30–60 minutes
-                  </div>
-                  <div className="mt-2 text-sm text-slate-600">
-                    You can move between sections and come back to edit answers.
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-slate-200 bg-white/80 p-4">
-                  <div className="text-sm text-slate-500">Format</div>
-                  <div className="text-lg font-semibold text-slate-900">
-                    Multiple‑choice + Free‑response
-                  </div>
-                  <div className="mt-2 text-sm text-slate-600">
-                    Type your responses or select from options.
-                  </div>
-                </div>
-              </div>
-
-              {/* What to expect */}
-              <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 md:p-5">
-                <h3 className="font-semibold text-slate-900">What to expect</h3>
-                <ul className="mt-3 space-y-2">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 flex-none text-emerald-600" />
-                    <span className="text-slate-700">
-                      This intake helps your clinician{" "}
-                      <b>jumpstart treatment</b> by gathering context that might
-                      otherwise take a full session.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 flex-none text-emerald-600" />
-                    <span className="text-slate-700">
-                      Progress is shown above. You’ll unlock later sections as
-                      you complete earlier ones.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 flex-none text-emerald-600" />
-                    <span className="text-slate-700">
-                      The more <b>detail</b> you provide, the better we can
-                      tailor your care.
-                    </span>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Saving behavior */}
-              <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 md:p-5">
-                <h3 className="font-semibold text-slate-900">
-                  Saving &amp; returning
-                </h3>
-                {session?.user?.role === "guest" ? (
-                  <p className="mt-2 text-slate-700">
-                    You’re using a <b>guest session</b>. If you close this tab,
-                    your progress won’t save. To save and return later, please
-                    create an account or sign in with Google.
-                  </p>
-                ) : (
-                  <div className="mt-2 space-y-2 text-slate-700">
-                    <p>
-                      Your progress saves each time you click <b>Next</b>. You
-                      can return later and pick up where you left off.
-                    </p>
-                    <p className="text-sm text-slate-600">
-                      Note: If you leave a page mid‑way without clicking Next,
-                      answers on that page may not be saved.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <WelcomeSection
+              title={steps[step].title}
+              step={step}
+              profile={profile}
+              session={session}
+            />
           )}
 
           {steps[step].key === "hipaa" && (
-            <div className="space-y-5">
-              <StepTitle n={step + 1} title={steps[step].title} />
-              <p className="text-gray-700 font-sans">Before we start,</p>
-              <p>
-                We want to let you know that your responses will be kept{" "}
-                <b>private</b> and <b>secure</b> compliant under the Health
-                Insurance Portability and Accountability Act <b>(HIPAA)</b>.
-              </p>
-              <p>
-                You may access a longer version of this statement{" "}
-                <a
-                  href="https://www.integrative-psych.org/legal/hipaa"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    color: intPsychTheme.accent,
-                    textDecoration: "underline",
-                    transition: "color 0.2s",
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = intPsychTheme.primary)
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.color = intPsychTheme.accent)
-                  }
-                >
-                  here
-                </a>
-                .
-              </p>
-            </div>
+            <HIPAASection title={steps[step].title} step={step} />
           )}
 
           {steps[step].key === "contact" && (
