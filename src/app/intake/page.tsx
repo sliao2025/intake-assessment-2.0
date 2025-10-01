@@ -410,21 +410,21 @@ export default function Page() {
     if (hasNotifiedRef.current) return;
     hasNotifiedRef.current = true;
 
-    try {
-      await fetch("/api/notify/assessment-complete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          firstName: p.firstName || "",
-          lastInitial: (p.lastName || "").slice(0, 1),
-          email: p.email || "", // optional; remove if you prefer
-          submittedAt: new Date().toISOString(),
-        }),
-      });
-    } catch (e) {
-      console.error("Notification failed", e);
-      // Do not block the UX if email fails.
-    }
+    // try {
+    //   await fetch("/api/notify/assessment-complete", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({
+    //       firstName: p.firstName || "",
+    //       lastInitial: (p.lastName || "").slice(0, 1),
+    //       email: p.email || "", // optional; remove if you prefer
+    //       submittedAt: new Date().toISOString(),
+    //     }),
+    //   });
+    // } catch (e) {
+    //   console.error("Notification failed", e);
+    //   // Do not block the UX if email fails.
+    // }
   }
 
   useEffect(() => {
