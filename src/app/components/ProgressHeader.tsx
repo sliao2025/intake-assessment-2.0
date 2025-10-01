@@ -193,7 +193,7 @@ const ProgressHeader: React.FC<Props> = ({
               className={`font-semibold text-3xl ${dm_serif.className}`}
               style={{ color: intPsychTheme.primary }}
             >
-              Integrative Psych Intake Assessment
+              Integrative Psych Pre-clinical Assessment
             </span>
           </div>
           <div className="flex items-center justify-center gap-4">

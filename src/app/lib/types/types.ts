@@ -93,6 +93,21 @@ export type Assessments = {
     gad7: string;
   };
   selfHarm: { pastMonth: string; lifetime: string };
+  crafft: {
+    partA: {
+      daysAlcohol: string; // "0".."365"
+      daysMarijuana: string; // "0".."365"
+      daysOther: string; // "0".."365"
+    };
+    partB: {
+      car: string; // "yes" | "no"
+      relax: string; // "yes" | "no"
+      alone: string; // "yes" | "no"
+      forget: string; // "yes" | "no"
+      familyFriends: string; // "yes" | "no"
+      trouble: string; // "yes" | "no"
+    };
+  };
   asrs5: {
     asrs1: string;
     asrs2: string;

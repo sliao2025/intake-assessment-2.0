@@ -34,7 +34,7 @@ export default async function RootLayout({
       <body
         style={{
           background:
-            "linear-gradient(to top, rgba(7, 255, 36, 0.3), rgba(150, 236, 178, 0.15), rgba(255, 255, 255, 1))",
+            "linear-gradient(to top, rgba(188, 255, 196, 1), rgba(150, 236, 178, 0.15), rgba(255, 255, 255, 1))",
         }}
         className="min-h-[100dvh] h-full antialiased"
       >

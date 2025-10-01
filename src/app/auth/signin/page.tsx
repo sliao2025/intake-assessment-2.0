@@ -91,7 +91,7 @@ export default function SignInPage() {
                     className={`${dm_serif.className}  `}
                     style={{ color: intPsychTheme.primary }}
                   >
-                    Integrative Psych Intake Form
+                    Integrative Psych Pre-clinical Assessment
                   </span>
                 ) : (
                   <span

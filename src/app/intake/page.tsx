@@ -1,13 +1,13 @@
 "use client";
 
-import React, { Fragment, useMemo, useState, useEffect } from "react";
+import React, { useRef, useMemo, useState, useEffect } from "react";
 import type { Profile } from "../lib/types/types";
-import { motion, progress } from "framer-motion";
+import { motion } from "framer-motion";
 import { CheckCircle2, ChevronLeft, ChevronRight, Save } from "lucide-react";
 import ProgressHeader from "../components/ProgressHeader";
 import ConfettiBurst from "../components/ConfettiBurst";
 import StepTitle from "../components/StepTitle";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { praises, welcomeMessages } from "../components/messages";
 import { theme, ease, intPsychTheme } from "../components/theme";
 import GardenFrame from "../components/Garden/Garden";
@@ -81,6 +81,17 @@ function makeDefaultProfile(): Profile {
         gad7: "",
       },
       selfHarm: { pastMonth: "", lifetime: "" },
+      crafft: {
+        partA: { daysAlcohol: "", daysMarijuana: "", daysOther: "" },
+        partB: {
+          car: "",
+          relax: "",
+          alone: "",
+          forget: "",
+          familyFriends: "",
+          trouble: "",
+        },
+      },
       asrs5: {
         asrs1: "",
         asrs2: "",
@@ -204,6 +215,8 @@ export default function Page() {
   const [burst, setBurst] = useState(false);
   const [profile, setProfile] = useState<Profile>(makeDefaultProfile());
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const hasNotifiedRef = useRef(false); // prevent duplicate notifications
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
   // Prevent re-loading state on tab focus/session refetch
   const hasBootstrapped = React.useRef(false);
@@ -254,7 +267,10 @@ export default function Page() {
   }, [status]);
 
   const canNext = useMemo(() => {
-    const key = steps[step].key;
+    const key = steps[step]?.key;
+    if (!key) {
+      return false;
+    }
 
     // Contact: strict required fields
     if (key === "contact") {
@@ -382,8 +398,43 @@ export default function Page() {
 
   const progressTitles = steps.map((s) => s.title);
 
+  const lastIndex = steps.length - 1;
+
+  useEffect(() => {
+    if (step > lastIndex) setStep(lastIndex);
+  }, [step, lastIndex]);
+
+  async function notifyAssessmentComplete(p: Profile) {
+    if (hasNotifiedRef.current) return;
+    hasNotifiedRef.current = true;
+
+    try {
+      await fetch("/api/notify/assessment-complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: p.firstName || "",
+          lastInitial: (p.lastName || "").slice(0, 1),
+          email: p.email || "", // optional; remove if you prefer
+          submittedAt: new Date().toISOString(),
+        }),
+      });
+    } catch (e) {
+      console.error("Notification failed", e);
+      // Do not block the UX if email fails.
+    }
+  }
+
+  useEffect(() => {
+    // auto-notify once when the user has reached the final step
+    if (!hasNotifiedRef.current && profile.maxVisited >= lastIndex) {
+      notifyAssessmentComplete(profile);
+    }
+  }, [profile.maxVisited, lastIndex]);
+
   const goNext = async () => {
-    const next = Math.min(step + 1, steps.length - 1);
+    const next = Math.min(step + 1, lastIndex);
+    console.log(step);
     if (next !== step) {
       // celebratory UI
       setPraise(praises[Math.floor(Math.random() * praises.length)]);
@@ -392,7 +443,10 @@ export default function Page() {
       setTimeout(() => setPraise(null), 2000);
 
       // compute new profile FIRST to avoid stale closure
-      const newMaxVisited = Math.max(profile.maxVisited, next);
+      const newMaxVisited = Math.min(
+        lastIndex,
+        Math.max(profile.maxVisited, next)
+      );
       const nextProfile: Profile = { ...profile, maxVisited: newMaxVisited };
 
       // update UI state
@@ -413,9 +467,10 @@ export default function Page() {
       await saveProgress(nextProfile);
     }
   };
+
   const goToStep = (index: number) => {
     if (index <= profile.maxVisited) {
-      setStep(index);
+      setStep(Math.min(index, lastIndex));
     }
   };
   const goBack = () => setStep((s) => Math.max(0, s - 1));
@@ -460,6 +515,26 @@ export default function Page() {
       </div>
     );
   }
+  // (B) A dedicated "finalize" handler for the Review step
+  const finalizeSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    try {
+      // 1) Persist any final state
+      const finalized: Profile = { ...profile }; // add a `submitted` flag if you also want to record it server-side
+      await saveProgress(finalized);
+
+      // 2) Fire-and-forget notification email
+      await notifyAssessmentComplete(finalized);
+
+      // 3) UX: jump to the start and show confetti/praise, or route to a "Done" page
+      setStep(0);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div
@@ -713,7 +788,7 @@ export default function Page() {
                   onClick={() =>
                     profile.maxVisited === 0
                       ? goNext()
-                      : setStep(profile.maxVisited)
+                      : setStep(Math.min(profile.maxVisited, lastIndex))
                   }
                   className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95"
                   style={{ background: intPsychTheme.secondary }}
@@ -723,40 +798,48 @@ export default function Page() {
                 </button>
               )}
 
-              {step > 0 && step < steps.length - 1 && (
+              {step > 0 && (
                 <>
-                  {/* <button
-                    onClick={saveProgress}
-                    className="inline-flex mr-2 items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
-                    style={{ background: intPsychTheme.accent }}
-                  >
-                    Save <Save className="h-4 w-4" />
-                  </button> */}
+                  {step === lastIndex && (
+                    <button
+                      onClick={() => {
+                        setStep(0);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className="inline-flex cursor-pointer mr-2 items-center gap-2 rounded-xl px-4 py-2 font-normal text-white transition duration-150 hover:brightness-90 active:scale-95"
+                      style={{ background: intPsychTheme.primary }}
+                    >
+                      Back to Beginning
+                    </button>
+                  )}
                   <button
-                    onClick={goNext}
-                    disabled={!canNext}
-                    className="inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95"
-                    style={{ background: intPsychTheme.secondary }}
+                    onClick={
+                      steps[step].key === "review" ? finalizeSubmit : goNext
+                    }
+                    disabled={
+                      steps[step].key === "review" ? isSubmitting : !canNext
+                    }
+                    className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95 ${
+                      steps[step].key === "review"
+                        ? "bg-gradient-to-r from-lime-400 to-green-600 shadow-md shadow-lime-300/50"
+                        : ""
+                    }`}
+                    style={
+                      steps[step].key !== "review"
+                        ? { background: intPsychTheme.secondary }
+                        : undefined
+                    }
                   >
-                    {steps[step].key === "assessments" ? "Finish" : "Next"}{" "}
+                    {steps[step].key === "review"
+                      ? isSubmitting
+                        ? "Submitting…"
+                        : "Submit"
+                      : "Next"}{" "}
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 </>
               )}
             </div>
-
-            {step === steps.length - 1 && (
-              <button
-                onClick={() => {
-                  setStep(0);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95"
-                style={{ background: theme.primary }}
-              >
-                Back to Beginning
-              </button>
-            )}
           </div>
         </motion.div>
       </div>

@@ -16,6 +16,7 @@ function Collapsible({
   setOpen,
   enabled,
   subtitle,
+  complete,
 }: {
   title: string;
   subtitle?: React.ReactNode;
@@ -23,11 +24,18 @@ function Collapsible({
   setOpen: (v: boolean) => void;
   enabled: boolean;
   children: React.ReactNode;
+  complete: boolean;
 }) {
   return (
     <div
-      className={`rounded-2xl border px-4 py-3 bg-white ${
-        enabled ? "border-slate-300" : "border-slate-200 opacity-60"
+      className={`rounded-2xl border px-4 py-3 ${
+        complete ? "bg-green-50" : "bg-white"
+      } ${
+        enabled
+          ? complete
+            ? "border-green-500"
+            : "border-slate-300"
+          : "border-slate-200 opacity-60"
       }`}
     >
       <button
@@ -40,7 +48,6 @@ function Collapsible({
       >
         <div>
           <div className="font-semibold text-slate-900">{title}</div>
-          {subtitle && <div className="text-slate-500 text-sm">{subtitle}</div>}
         </div>
         <ChevronDown
           className={`h-5 w-5 transition-transform ${
@@ -48,6 +55,9 @@ function Collapsible({
           }`}
         />
       </button>
+      {subtitle && (
+        <div className="mt-1 text-slate-500 text-sm">{subtitle}</div>
+      )}
       {open && <div className="pt-3">{children}</div>}
     </div>
   );
@@ -111,14 +121,16 @@ export default function AssessmentsSection({
   const a = profile.assessments;
 
   // Collapsible open state
-  const [open2, setOpen2] = React.useState(false); // PHQ-9 (start collapsed)
+  const [open2, setOpen2] = React.useState(false); // PHQ-9
   const [open3, setOpen3] = React.useState(false); // GAD-7
+  const [openCRAFFT, setOpenCRAFFT] = React.useState(false); // CRAFFT
   const [open4, setOpen4] = React.useState(false); // Self-harm
   const [open5, setOpen5] = React.useState(false); // ASRS-5
   const [open6, setOpen6] = React.useState(false); // PTSD
   const [open7, setOpen7] = React.useState(false); // ACE
   const [open8, setOpen8] = React.useState(false); // Stress
 
+  // Keys
   const phqKeys = [
     "phq1",
     "phq2",
@@ -165,26 +177,68 @@ export default function AssessmentsSection({
   ] as const;
   const pssKeys = ["pss1", "pss2", "pss3", "pss4"] as const;
 
+  // Completion logic
   const complete1 = phqKeys.every((k) => a.phq9[k] !== "");
   const complete2 = gad7Keys.every((k) => a.gad7[k] !== "");
+
+  // CRAFFT completion logic (2.1 rules)
+  const crafftA = a.crafft?.partA ?? {
+    daysAlcohol: "",
+    daysMarijuana: "",
+    daysOther: "",
+  };
+  const crafftB = a.crafft?.partB ?? {
+    car: "",
+    relax: "",
+    alone: "",
+    forget: "",
+    familyFriends: "",
+    trouble: "",
+  };
+
+  const partAAnswered =
+    crafftA.daysAlcohol !== "" &&
+    crafftA.daysMarijuana !== "" &&
+    crafftA.daysOther !== "";
+
+  const anyUse =
+    Number(crafftA.daysAlcohol || "0") > 0 ||
+    Number(crafftA.daysMarijuana || "0") > 0 ||
+    Number(crafftA.daysOther || "0") > 0;
+
+  // CAR is always visible; remaining five are required only if any use > 0
+  const carAnswered = crafftB.car !== "";
+  const remainingAnswered = anyUse
+    ? crafftB.relax !== "" &&
+      crafftB.alone !== "" &&
+      crafftB.forget !== "" &&
+      crafftB.familyFriends !== "" &&
+      crafftB.trouble !== ""
+    : true;
+
+  const completeCRAFFT = partAAnswered && carAnswered && remainingAnswered;
+
   const complete3 = a.selfHarm.pastMonth !== "" && a.selfHarm.lifetime !== "";
   const complete4 = asrsKeys.every((k) => a.asrs5[k] !== "");
   const complete5 = ptsdKeys.every((k) => a.ptsd[k] !== "");
   const complete6 = aceRKeys.every((k) => a.aceResilience[k] !== "");
   const complete7 = pssKeys.every((k) => a.stress[k] !== "");
 
-  // PHQ-9 is always enabled
-  const [u2, setU2] = React.useState(true); // PHQ-9 always enabled
-  const [u3, setU3] = React.useState(complete1); // GAD-7 after PHQ-9
-  const [u4, setU4] = React.useState(complete2); // Self-harm after GAD-7
-  const [u5, setU5] = React.useState(complete3); // ASRS-5
+  // Gating (sequential):
+  // PHQ-9 (always) -> GAD-7 -> CRAFFT -> Self-harm -> ASRS -> PTSD -> ACE -> PSS
+  const [u2] = React.useState(true); // PHQ-9 always enabled
+  const [u3, setU3] = React.useState(complete1); // GAD-7 after PHQ
+  const [uCRAFFT, setUCRAFFT] = React.useState(complete2); // CRAFFT after GAD-7
+  const [u4, setU4] = React.useState(completeCRAFFT); // Self-harm after CRAFFT
+  const [u5, setU5] = React.useState(complete3); // ASRS
   const [u6, setU6] = React.useState(complete4); // PTSD
   const [u7, setU7] = React.useState(complete5); // ACE
-  const [u8, setU8] = React.useState(complete6); // Stress
+  const [u8, setU8] = React.useState(complete6); // PSS
 
-  // One-time auto-open on first unlock (detect rising edge)
+  // Rising-edge auto-open refs
   const prevComplete1 = React.useRef(complete1);
   const prevComplete2 = React.useRef(complete2);
+  const prevCompleteCRAFFT = React.useRef(completeCRAFFT);
   const prevComplete3 = React.useRef(complete3);
   const prevComplete4 = React.useRef(complete4);
   const prevComplete5 = React.useRef(complete5);
@@ -200,11 +254,19 @@ export default function AssessmentsSection({
 
   React.useEffect(() => {
     if (!prevComplete2.current && complete2) {
-      setU4(true);
-      setOpen4(true);
+      setUCRAFFT(true);
+      setOpenCRAFFT(true);
     }
     prevComplete2.current = complete2;
   }, [complete2]);
+
+  React.useEffect(() => {
+    if (!prevCompleteCRAFFT.current && completeCRAFFT) {
+      setU4(true);
+      setOpen4(true);
+    }
+    prevCompleteCRAFFT.current = completeCRAFFT;
+  }, [completeCRAFFT]);
 
   React.useEffect(() => {
     if (!prevComplete3.current && complete3) {
@@ -246,6 +308,10 @@ export default function AssessmentsSection({
       next.assessments.suicide = { ...p.assessments.suicide };
       next.assessments.phq9 = { ...p.assessments.phq9 };
       next.assessments.gad7 = { ...p.assessments.gad7 };
+      next.assessments.crafft = {
+        partA: { ...(p.assessments as any).crafft?.partA },
+        partB: { ...(p.assessments as any).crafft?.partB },
+      };
       next.assessments.selfHarm = { ...p.assessments.selfHarm };
       next.assessments.asrs5 = { ...p.assessments.asrs5 };
       next.assessments.ptsd = { ...p.assessments.ptsd };
@@ -255,6 +321,7 @@ export default function AssessmentsSection({
       return next;
     });
 
+  /** ------- Optional: PHQ-9 CAT (kept intact) ------- */
   function Phq9CAT() {
     const [sessionId, setSessionId] = React.useState<string | null>(null);
     const [item, setItem] = React.useState<any>(null);
@@ -264,7 +331,7 @@ export default function AssessmentsSection({
     const [done, setDone] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
     const [answered, setAnswered] = React.useState<number>(0);
-    const [selected, setSelected] = React.useState<string>(""); // Local selection state
+    const [selected, setSelected] = React.useState<string>("");
 
     async function createSession() {
       setLoading(true);
@@ -306,7 +373,7 @@ export default function AssessmentsSection({
           await fetch(`/api/cat/next-item?lookup=${data.nextItemId}`)
         ).json();
         setItem(itm);
-        setSelected(""); // Clear selection on new item
+        setSelected("");
       } finally {
         setLoading(false);
       }
@@ -314,7 +381,7 @@ export default function AssessmentsSection({
 
     async function start() {
       const id = await createSession();
-      setSelected(""); // Clear selection when starting new session
+      setSelected("");
       await fetchNext(id);
     }
 
@@ -334,7 +401,6 @@ export default function AssessmentsSection({
     }
 
     React.useEffect(() => {
-      // auto-start on mount
       start();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -348,7 +414,6 @@ export default function AssessmentsSection({
         {item && (
           <div className="space-y-4">
             <Field title={item.stem}>
-              {/* Build Likert options from the CAT item payload to match original PHQ-9 style */}
               {(() => {
                 const opts =
                   item?.options?.labels?.map((lbl: string, i: number) => ({
@@ -409,6 +474,157 @@ export default function AssessmentsSection({
     );
   }
 
+  /** ------- CRAFFT Section ------- */
+  function CRAFFTSection() {
+    const pA = a.crafft.partA;
+    const pB = a.crafft.partB;
+    const showAllB =
+      Number(pA.daysAlcohol || "0") > 0 ||
+      Number(pA.daysMarijuana || "0") > 0 ||
+      Number(pA.daysOther || "0") > 0;
+
+    function DaysField({
+      label,
+      value,
+      onChange,
+    }: {
+      label: string;
+      value: string;
+      onChange: (v: string) => void;
+    }) {
+      return (
+        <div className="flex items-center gap-2">
+          <label className="text-[15px] font-medium text-slate-800 w-56">
+            {label}
+          </label>
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={365}
+            className="w-24 rounded-lg border border-slate-300 px-2 py-1 text-[15px] text-slate-800"
+            value={value}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/[^\d]/g, "");
+              if (raw === "") return onChange("");
+              const n = Math.max(0, Math.min(365, parseInt(raw, 10)));
+              onChange(String(n));
+            }}
+            placeholder="0"
+          />
+          <span className="text-slate-500 text-sm">days</span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        <h1 className="italic text-slate-800">
+          During the <b>past 12 months</b>:
+        </h1>
+
+        {/* Part A */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-3 space-y-2">
+          <div className="text-sm font-semibold text-slate-900">Part A</div>
+          <DaysField
+            label="Alcohol (beer, wine, liquor)"
+            value={pA.daysAlcohol}
+            onChange={(v) =>
+              setA((n) => (n.assessments.crafft.partA.daysAlcohol = v))
+            }
+          />
+          <DaysField
+            label="Marijuana / THC (incl. vapes/edibles)"
+            value={pA.daysMarijuana}
+            onChange={(v) =>
+              setA((n) => (n.assessments.crafft.partA.daysMarijuana = v))
+            }
+          />
+          <DaysField
+            label="Other drugs to get high"
+            value={pA.daysOther}
+            onChange={(v) =>
+              setA((n) => (n.assessments.crafft.partA.daysOther = v))
+            }
+          />
+        </div>
+
+        {/* Part B */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-3">
+          <div className="text-sm font-semibold text-slate-900 mb-2">
+            Part B
+          </div>
+
+          {/* CAR is always present */}
+          <Field title="Have you ever ridden in a CAR driven by someone (including yourself) who was high or had been using alcohol or drugs?">
+            <Likert
+              value={pB.car}
+              onChange={(v) =>
+                setA((n) => (n.assessments.crafft.partB.car = String(v)))
+              }
+              options={yesNo}
+            />
+          </Field>
+
+          {showAllB && (
+            <>
+              <Field title="Do you ever use alcohol or drugs to RELAX, feel better about yourself, or fit in?">
+                <Likert
+                  value={pB.relax}
+                  onChange={(v) =>
+                    setA((n) => (n.assessments.crafft.partB.relax = String(v)))
+                  }
+                  options={yesNo}
+                />
+              </Field>
+              <Field title="Do you ever use alcohol or drugs while you are by yourself, or ALONE?">
+                <Likert
+                  value={pB.alone}
+                  onChange={(v) =>
+                    setA((n) => (n.assessments.crafft.partB.alone = String(v)))
+                  }
+                  options={yesNo}
+                />
+              </Field>
+              <Field title="Do you ever FORGET things you did while using alcohol or drugs?">
+                <Likert
+                  value={pB.forget}
+                  onChange={(v) =>
+                    setA((n) => (n.assessments.crafft.partB.forget = String(v)))
+                  }
+                  options={yesNo}
+                />
+              </Field>
+              <Field title="Do your FAMILY or FRIENDS ever tell you that you should cut down on your drinking or drug use?">
+                <Likert
+                  value={pB.familyFriends}
+                  onChange={(v) =>
+                    setA(
+                      (n) =>
+                        (n.assessments.crafft.partB.familyFriends = String(v))
+                    )
+                  }
+                  options={yesNo}
+                />
+              </Field>
+              <Field title="Have you ever gotten into TROUBLE while you were using alcohol or drugs?">
+                <Likert
+                  value={pB.trouble}
+                  onChange={(v) =>
+                    setA(
+                      (n) => (n.assessments.crafft.partB.trouble = String(v))
+                    )
+                  }
+                  options={yesNo}
+                />
+              </Field>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <StepTitle n={step + 1} title={title} />
@@ -423,12 +639,14 @@ export default function AssessmentsSection({
       >
         <Phq9CAT />
       </Collapsible> */}
+
       <Collapsible
         title="PHQ-9"
         subtitle="Patient Health Questionaire-9"
         open={open2}
         setOpen={setOpen2}
         enabled={u2}
+        complete={complete1}
       >
         <div className="grid md:grid-cols-1 gap-4">
           <h1 className="italic text-slate-800">
@@ -526,6 +744,7 @@ export default function AssessmentsSection({
         open={open3}
         setOpen={setOpen3}
         enabled={u3}
+        complete={complete2}
       >
         <div className="grid md:grid-cols-1 gap-4">
           <h1 className="italic text-slate-800">
@@ -598,6 +817,18 @@ export default function AssessmentsSection({
         </div>
       </Collapsible>
 
+      {/* CRAFFT (after GAD-7) */}
+      <Collapsible
+        title="CRAFFT 2.1"
+        subtitle="Substance Use Screener"
+        open={openCRAFFT}
+        setOpen={setOpenCRAFFT}
+        enabled={uCRAFFT}
+        complete={completeCRAFFT}
+      >
+        <CRAFFTSection />
+      </Collapsible>
+
       {/* 4) Self-Harm */}
       <Collapsible
         title="Self-Harm"
@@ -605,6 +836,7 @@ export default function AssessmentsSection({
         open={open4}
         setOpen={setOpen4}
         enabled={u4}
+        complete={complete3}
       >
         <div className="grid md:grid-cols-1 gap-4">
           <Field title="In the past month, have you intentionally hurt yourself (e.g., cut, burned, scratched) without wanting to die?">
@@ -628,13 +860,14 @@ export default function AssessmentsSection({
         </div>
       </Collapsible>
 
-      {/* 5) ASRS-5 (Adult ADHD Screener - 6 items) */}
+      {/* 5) ASRS-5 */}
       <Collapsible
         title="ASRS-5"
         subtitle="Adult ADHD Self-Report Scale"
         open={open5}
         setOpen={setOpen5}
         enabled={u5}
+        complete={complete4}
       >
         <div className="grid md:grid-cols-1 gap-4">
           <Field title="How often do you have trouble wrapping up the final details of a project, once the challenging parts have been done?">
@@ -694,13 +927,14 @@ export default function AssessmentsSection({
         </div>
       </Collapsible>
 
-      {/* 6) PTSD (PCL-5 short, 5 items) */}
+      {/* 6) PTSD */}
       <Collapsible
         title="PTSD"
         subtitle="PCL-5 Short"
         open={open6}
         setOpen={setOpen6}
         enabled={u6}
+        complete={complete5}
       >
         <div className="grid md:grid-cols-1 gap-4">
           <Field title="In the past month, have you had nightmares or thought about the traumatic event(s) when you did not want to? ">
@@ -751,16 +985,16 @@ export default function AssessmentsSection({
         </div>
       </Collapsible>
 
-      {/* 7) ACE Resilience (13 items, 5‑point truth scale) */}
+      {/* 7) ACE Resilience (13 items, 5-point truth scale) */}
       <Collapsible
         title="ACE"
-        subtitle="Adverse Childhood"
+        subtitle="Adverse Childhood Experiences"
         open={open7}
         setOpen={setOpen7}
         enabled={u7}
+        complete={complete6}
       >
         <div className="grid md:grid-cols-1 gap-4">
-          {/* Block ace_00 */}
           <Field title="I believe that my mother loved me when I was little.">
             <Likert
               value={a.aceResilience.r01}
@@ -798,7 +1032,6 @@ export default function AssessmentsSection({
             />
           </Field>
 
-          {/* Block ace_01 */}
           <Field title="When I was a child, there were relatives who made me feel better if I was sad or worried.">
             <Likert
               value={a.aceResilience.r05}
@@ -827,7 +1060,6 @@ export default function AssessmentsSection({
             />
           </Field>
 
-          {/* Block ace_02 */}
           <Field title="My family, neighbors and friends talked often about making our lives better.">
             <Likert
               value={a.aceResilience.r08}
@@ -856,7 +1088,6 @@ export default function AssessmentsSection({
             />
           </Field>
 
-          {/* Block ace_03 */}
           <Field title="As a youth, people noticed that I was capable and could get things done.">
             <Likert
               value={a.aceResilience.r11}
@@ -866,7 +1097,7 @@ export default function AssessmentsSection({
               options={aceTrue5}
             />
           </Field>
-          <Field title="I was independent and a go‑getter.">
+          <Field title="I was independent and a go-getter.">
             <Likert
               value={a.aceResilience.r12}
               onChange={(v) =>
@@ -891,8 +1122,10 @@ export default function AssessmentsSection({
       <Collapsible
         title="Perceived Stress (PSS-4)"
         open={open8}
+        subtitle="Stress Perception Assessment"
         setOpen={setOpen8}
         enabled={u8}
+        complete={complete7}
       >
         <div className="grid md:grid-cols-1 gap-4">
           <Field title="In the last month, how often have you felt that you were unable to control the important things in your life?">
@@ -933,38 +1166,6 @@ export default function AssessmentsSection({
           </Field>
         </div>
       </Collapsible>
-
-      {/* Minor affordance: hint if next is locked */}
-      {!complete1 && (
-        <div className="text-xs text-slate-500">
-          Complete PHQ-9 to unlock GAD-7.
-        </div>
-      )}
-      {complete1 && !complete2 && (
-        <div className="text-xs text-slate-500">
-          Complete GAD-7 to unlock Self-Harm.
-        </div>
-      )}
-      {complete2 && !complete3 && (
-        <div className="text-xs text-slate-500">
-          Complete Self-Harm to unlock ASRS-5.
-        </div>
-      )}
-      {complete3 && !complete4 && (
-        <div className="text-xs text-slate-500">
-          Complete ASRS-5 to unlock PTSD.
-        </div>
-      )}
-      {complete4 && !complete5 && (
-        <div className="text-xs text-slate-500">
-          Complete PTSD to unlock ACE.
-        </div>
-      )}
-      {complete5 && !complete6 && (
-        <div className="text-xs text-slate-500">
-          Complete ACE to unlock PSS-4.
-        </div>
-      )}
     </div>
   );
 }
