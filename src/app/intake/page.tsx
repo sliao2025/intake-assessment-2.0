@@ -524,7 +524,8 @@ export default function Page() {
 
     try {
       // 1) Persist any final state
-      const finalized: Profile = { ...profile }; // add a `submitted` flag if you also want to record it server-side
+
+      const finalized: Profile = { ...profile, maxVisited: 10 }; // add a `submitted` flag if you also want to record it server-side
       await saveProgress(finalized);
 
       // 2) Fire-and-forget notification email
