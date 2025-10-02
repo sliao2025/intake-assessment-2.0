@@ -1,3 +1,16 @@
+// Helper to format a Date in ET and ISO
+const formatET = (d: Date) =>
+  new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "long",
+    day: "2-digit",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+    timeZoneName: "short", // ET/EST/EDT
+  }).format(d);
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
 
@@ -56,12 +69,26 @@ export async function POST(req: NextRequest) {
       firstName = "",
       lastName = "",
       email = "",
-      submittedAt = new Date(),
+      submittedAtEpoch,
+      submittedAtISO,
       notifyTo,
       notifyCc,
       notifyBcc,
     } = body || {};
-
+    const submitted =
+      typeof submittedAtEpoch === "number"
+        ? new Date(submittedAtEpoch)
+        : submittedAtISO
+          ? new Date(submittedAtISO)
+          : new Date();
+    const submittedIso = submitted.toISOString();
+    const submittedEt = formatET(submitted);
+    console.log(body);
+    console.log("[notify] submitted raw:", {
+      fromBody: { submittedAtEpoch, submittedAtISO },
+      parsedIso: submittedIso,
+      parsedET: submittedEt,
+    });
     const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
     const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
     const REFRESH_TOKEN = process.env.GMAIL_REFRESH_TOKEN;
@@ -121,7 +148,8 @@ export async function POST(req: NextRequest) {
         <table style="border-collapse:collapse; font-size:14px;">
           <tr><td style="padding:4px 8px; color:#555">Name</td><td style="padding:4px 8px"><b>${firstName || "(unknown)"} ${lastName || ""}</b></td></tr>
           <tr><td style="padding:4px 8px; color:#555">Email</td><td style="padding:4px 8px">${email || "(not provided)"}</td></tr>
-          <tr><td style="padding:4px 8px; color:#555">Submitted At</td><td style="padding:4px 8px">${submittedAt}</td></tr>
+          <tr><td style="padding:4px 8px; color:#555">Submitted (ET)</td><td style="padding:4px 8px">${submittedEt}</td></tr>
+          <tr><td style="padding:4px 8px; color:#555">Submitted (ISO/UTC)</td><td style="padding:4px 8px"><code>${submittedIso}</code></td></tr>
         </table>
         <p style="margin:12px 0 0; font-size:14px;">
           You can view the patient’s results here:

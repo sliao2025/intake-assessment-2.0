@@ -417,7 +417,8 @@ export default function Page() {
           firstName: p.firstName || "",
           lastName: p.lastName || "",
           email: p.email || "",
-          submittedAt: new Date().toISOString(),
+          submittedAtEpoch: Date.now(),
+          submittedAtISO: new Date().toISOString(),
         }),
       });
     } catch (e) {
