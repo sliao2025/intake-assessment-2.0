@@ -1,27 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
 
-// Helper to build base64url MIME message
+// Utility to split recipient lists (comma/semicolon/newline)
+const splitList = (s?: string) =>
+  (s || "")
+    .split(/[,;\n]/)
+    .map((x) => x.trim())
+    .filter((x) => x.length > 0);
+
+// Helper to build base64url MIME message (supports arrays and cc/bcc)
 function buildRawEmail({
   from,
   to,
+  cc,
+  bcc,
   subject,
   html,
 }: {
   from: string;
-  to: string;
+  to: string[] | string;
+  cc?: string[] | string;
+  bcc?: string[] | string;
   subject: string;
   html: string;
 }) {
-  const message = [
+  const toHeader = Array.isArray(to) ? to.join(", ") : to;
+  const ccHeader = cc ? (Array.isArray(cc) ? cc.join(", ") : cc) : "";
+  const bccHeader = bcc ? (Array.isArray(bcc) ? bcc.join(", ") : bcc) : "";
+
+  const lines = [
     `From: ${from}`,
-    `To: ${to}`,
+    `To: ${toHeader}`,
+    ccHeader ? `Cc: ${ccHeader}` : "",
+    bccHeader ? `Bcc: ${bccHeader}` : "",
     `Subject: ${subject}`,
     "MIME-Version: 1.0",
     "Content-Type: text/html; charset=UTF-8",
     "",
     html,
-  ].join("\r\n");
+  ].filter(Boolean) as string[];
+
+  const message = lines.join("\r\n");
 
   return Buffer.from(message)
     .toString("base64")
@@ -38,13 +57,41 @@ export async function POST(req: NextRequest) {
       lastName = "",
       email = "",
       submittedAt = new Date().toISOString(),
+      notifyTo,
+      notifyCc,
+      notifyBcc,
     } = body || {};
 
     const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
     const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
     const REFRESH_TOKEN = process.env.GMAIL_REFRESH_TOKEN;
     const SENDER = process.env.GMAIL_SENDER; // e.g., noreply@your-domain.com (must match authorized Gmail account)
-    const NOTIFY_TO = process.env.NOTIFY_TO || SENDER;
+    // Accept comma/semicolon/newline-separated lists in env; allow override from request body
+    const NOTIFY_TO = splitList(process.env.NOTIFY_TO || SENDER);
+    const NOTIFY_CC = splitList(process.env.NOTIFY_CC || "");
+    const NOTIFY_BCC = splitList(process.env.NOTIFY_BCC || "");
+
+    // Compute final recipient lists (body overrides env if present)
+    const toList = (Array.isArray(notifyTo) ? notifyTo : splitList(notifyTo))
+      .length
+      ? Array.isArray(notifyTo)
+        ? notifyTo
+        : splitList(notifyTo)
+      : NOTIFY_TO;
+    const ccList = (Array.isArray(notifyCc) ? notifyCc : splitList(notifyCc))
+      .length
+      ? Array.isArray(notifyCc)
+        ? notifyCc
+        : splitList(notifyCc)
+      : NOTIFY_CC;
+    const bccList = (Array.isArray(notifyBcc)
+      ? notifyBcc
+      : splitList(notifyBcc)
+    ).length
+      ? Array.isArray(notifyBcc)
+        ? notifyBcc
+        : splitList(notifyBcc)
+      : NOTIFY_BCC;
 
     if (!CLIENT_ID || !CLIENT_SECRET || !REFRESH_TOKEN || !SENDER) {
       return NextResponse.json(
@@ -85,8 +132,10 @@ export async function POST(req: NextRequest) {
     `;
 
     const raw = buildRawEmail({
-      from: SENDER,
-      to: NOTIFY_TO || SENDER,
+      from: SENDER!,
+      to: toList,
+      cc: ccList.length ? ccList : undefined,
+      bcc: bccList.length ? bccList : undefined,
       subject,
       html,
     });
@@ -96,7 +145,12 @@ export async function POST(req: NextRequest) {
       requestBody: { raw },
     });
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({
+      ok: true,
+      to: toList,
+      cc: ccList,
+      bcc: bccList,
+    });
   } catch (err: any) {
     console.error(
       "/api/notify/assessment-complete error:",
