@@ -145,6 +145,8 @@ export async function POST(req: NextRequest) {
       requestBody: { raw },
     });
 
+    console.log({ Gmail: raw });
+
     return NextResponse.json({
       ok: true,
       to: toList,
