@@ -26,7 +26,6 @@ export async function PUT(req: NextRequest) {
   } catch {
     return new Response("Invalid JSON", { status: 400 });
   }
-  console.log("PUT profile", body);
   const parsed = ProfileSchema.safeParse(body);
   if (!parsed.success) {
     return new Response("Validation failed", { status: 422 });
