@@ -407,8 +407,8 @@ export default function Page() {
   }, [step, lastIndex]);
 
   async function notifyAssessmentComplete(p: Profile) {
-    if (hasNotifiedRef.current) return;
-    hasNotifiedRef.current = true;
+    // if (hasNotifiedRef.current) return;
+    // hasNotifiedRef.current = true;
     try {
       await fetch("/api/notify/assessment-complete", {
         method: "POST",

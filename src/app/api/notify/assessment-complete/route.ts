@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       firstName = "",
       lastName = "",
       email = "",
-      submittedAt = new Date().toISOString(),
+      submittedAt = new Date(),
       notifyTo,
       notifyCc,
       notifyBcc,
