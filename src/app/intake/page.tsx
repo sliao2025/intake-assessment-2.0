@@ -407,8 +407,6 @@ export default function Page() {
   }, [step, lastIndex]);
 
   async function notifyAssessmentComplete(p: Profile) {
-    // if (hasNotifiedRef.current) return;
-    // hasNotifiedRef.current = true;
     try {
       await fetch("/api/notify/assessment-complete", {
         method: "POST",
@@ -427,12 +425,12 @@ export default function Page() {
     }
   }
 
-  useEffect(() => {
-    // auto-notify once when the user has reached the final step
-    if (!hasNotifiedRef.current && profile.maxVisited >= lastIndex) {
-      notifyAssessmentComplete(profile);
-    }
-  }, [profile.maxVisited, lastIndex]);
+  // useEffect(() => {
+  //   // auto-notify once when the user has reached the final step
+  //   if (!hasNotifiedRef.current && profile.maxVisited >= lastIndex) {
+  //     notifyAssessmentComplete(profile);
+  //   }
+  // }, [profile.maxVisited, lastIndex]);
 
   const goNext = async () => {
     const next = Math.min(step + 1, lastIndex);
