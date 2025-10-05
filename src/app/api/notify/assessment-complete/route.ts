@@ -13,6 +13,9 @@ const formatET = (d: Date) =>
   }).format(d);
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../auth/[...nextauth]/route";
+import { prisma } from "../../../lib/prisma";
 
 // Utility to split recipient lists (comma/semicolon/newline)
 const splitList = (s?: string) =>
@@ -89,6 +92,25 @@ export async function POST(req: NextRequest) {
       parsedIso: submittedIso,
       parsedET: submittedEt,
     });
+
+    // Mark intake as finished for the authenticated user (server-side session)
+    try {
+      const session = await getServerSession(authOptions);
+      const authedUserId = (session?.user as any)?.id as string | undefined;
+      if (authedUserId) {
+        await prisma.user.update({
+          where: { id: authedUserId },
+          data: { intakeFinished: true },
+        });
+      } else {
+        console.warn(
+          "[notify] No authenticated user in session; skipping intakeFinished toggle."
+        );
+      }
+    } catch (e) {
+      console.error("[notify] Failed to set intakeFinished on user:", e);
+      // Do not fail the notification on this.
+    }
     const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
     const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
     const REFRESH_TOKEN = process.env.GMAIL_REFRESH_TOKEN;
