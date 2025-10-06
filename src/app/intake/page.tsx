@@ -218,6 +218,8 @@ export default function Page() {
   const [profile, setProfile] = useState<Profile>(makeDefaultProfile());
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [submittedAt, setSubmittedAt] = useState<string | null>(null);
   const hasNotifiedRef = useRef(false); // prevent duplicate notifications
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
   // Prevent re-loading state on tab focus/session refetch
@@ -433,6 +435,9 @@ export default function Page() {
   // }, [profile.maxVisited, lastIndex]);
 
   const goNext = async () => {
+    if (steps[step].key === "review" && submitted) {
+      return;
+    }
     const next = Math.min(step + 1, lastIndex);
     console.log(step);
     if (next !== step) {
@@ -521,16 +526,26 @@ export default function Page() {
     setIsSubmitting(true);
 
     try {
-      // 1) Persist any final state
-
-      const finalized: Profile = { ...profile, maxVisited: 10 }; // add a `submitted` flag if you also want to record it server-side
+      // 1) Persist any final state (keep maxVisited at last index to lock in completion)
+      const finalized: Profile = { ...profile, maxVisited: steps.length - 1 };
       await saveProgress(finalized);
 
       // 2) Fire-and-forget notification email
       await notifyAssessmentComplete(finalized);
 
-      // 3) UX: jump to the start and show confetti/praise, or route to a "Done" page
-      setStep(0);
+      // 3) UX: mark as submitted and celebrate (stay on the Review page)
+      setSubmitted(true);
+      setSubmittedAt(
+        new Date().toLocaleString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      );
+      setBurst(true);
+      setPraise("All set! 🎉 Your intake was submitted.");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setIsSubmitting(false);
@@ -559,8 +574,8 @@ export default function Page() {
         canNext={canNext}
         maxVisited={profile.maxVisited}
         progressPct={progressPct}
-      />
-
+      />{" "}
+      {/* stays visible; submission locks buttons below */}
       <div
         className="relative z-10 mx-auto max-w-4xl px-4 py-8"
         style={{ scrollbarGutter: "stable both-edges" }}
@@ -580,6 +595,18 @@ export default function Page() {
             touchAction: "pan-y",
           }}
         >
+          {submitted && (
+            <div
+              role="status"
+              className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 text-emerald-800 text-sm shadow-sm"
+            >
+              <span className="font-semibold">Thank you!</span> Your intake was
+              submitted
+              {submittedAt ? ` on ${submittedAt}.` : "."} You can close this tab
+              now.
+            </div>
+          )}
+
           {steps[step].key === "welcome" && (
             <WelcomeSection
               title={steps[step].title}
@@ -664,7 +691,9 @@ export default function Page() {
           <div className="mt-8 flex items-center justify-between gap-3">
             <button
               onClick={goBack}
-              disabled={step === 0}
+              disabled={
+                step === 0 || (steps[step].key === "review" && submitted)
+              }
               className="inline-flex cursor-pointer disabled:cursor-not-allowed bg-white items-center gap-2 rounded-xl px-3 py-2 font-medium border border-gray-300 text-gray-700 disabled:opacity-40 transition duration-150 hover:brightness-95 active:scale-95"
             >
               <ChevronLeft className="h-4 w-4" /> Back
@@ -704,11 +733,15 @@ export default function Page() {
                       steps[step].key === "review" ? finalizeSubmit : goNext
                     }
                     disabled={
-                      steps[step].key === "review" ? isSubmitting : !canNext
-                    }
-                    className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95 ${
                       steps[step].key === "review"
-                        ? "bg-gradient-to-r from-lime-400 to-green-600 shadow-md shadow-lime-300/50"
+                        ? isSubmitting || submitted
+                        : !canNext
+                    }
+                    className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95 ${
+                      steps[step].key === "review"
+                        ? submitted
+                          ? "bg-gradient-to-r from-lime-400 to-green-600 shadow-md shadow-lime-300/50"
+                          : "bg-gradient-to-r from-lime-400 to-green-600 shadow-md shadow-lime-300/50"
                         : ""
                     }`}
                     style={
@@ -716,12 +749,15 @@ export default function Page() {
                         ? { background: intPsychTheme.secondary }
                         : undefined
                     }
+                    aria-live="polite"
                   >
                     {steps[step].key === "review"
                       ? isSubmitting
                         ? "Submitting…"
-                        : "Submit"
-                      : "Next"}{" "}
+                        : submitted
+                          ? "Submitted ✓"
+                          : "Submit"
+                      : "Next"}
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 </>
