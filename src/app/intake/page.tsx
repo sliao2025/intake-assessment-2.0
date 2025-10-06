@@ -211,7 +211,6 @@ function mergeWithDefaults<T extends Record<string, any>>(
 
 export default function Page() {
   const { data: session, status } = useSession();
-
   const [step, setStep] = useState(0);
   const [praise, setPraise] = useState<string | null>(null);
   const [burst, setBurst] = useState(false);
@@ -545,7 +544,7 @@ export default function Page() {
         })
       );
       setBurst(true);
-      setPraise("All set! 🎉 Your intake was submitted.");
+      setPraise("All done!!!🎉");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setIsSubmitting(false);
@@ -600,8 +599,8 @@ export default function Page() {
               role="status"
               className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 text-emerald-800 text-sm shadow-sm"
             >
-              <span className="font-semibold">Thank you!</span> Your intake was
-              submitted
+              <span className="font-semibold">{`Thank you ${session?.user?.name?.split(" ")[0] ?? ""}! `}</span>{" "}
+              Your intake was submitted
               {submittedAt ? ` on ${submittedAt}.` : "."} You can close this tab
               now.
             </div>
