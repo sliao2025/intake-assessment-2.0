@@ -64,13 +64,13 @@ export type RichResponse = {
 
 export type Assessments = {
   suicide: {
-    wishDead: string; // "In the past month, have you wished you were dead, or wished you could go to sleep and not wake up?"
-    thoughts: string; // "In the past month, have you had any actual thoughts about killing yourself?"
-    methodHow: string; // "In the past month, have you been thinking about how you might end your life?"
-    intention: string; // "In the past month, have you had these suicidal thoughts and some intention of acting on them?"
-    plan: string; // "In the past month, have you started to work out the details of how to kill yourself? Do you intend to carry out this plan?"
-    behavior: string; // "Have you done anything, started to do anything, or prepared to do anything, to end your life? ..."
-    behavior3mo: string; // "Was this within the past 3 months?"
+    wishDead: string;
+    thoughts: string;
+    methodHow: string;
+    intention: string;
+    plan: string;
+    behavior: string;
+    behavior3mo: string;
   };
   phq9: {
     phq1: string;
@@ -95,17 +95,17 @@ export type Assessments = {
   selfHarm: { pastMonth: string; lifetime: string };
   crafft: {
     partA: {
-      daysAlcohol: string; // "0".."365"
-      daysMarijuana: string; // "0".."365"
-      daysOther: string; // "0".."365"
+      daysAlcohol: string;
+      daysMarijuana: string;
+      daysOther: string;
     };
     partB: {
-      car: string; // "yes" | "no"
-      relax: string; // "yes" | "no"
-      alone: string; // "yes" | "no"
-      forget: string; // "yes" | "no"
-      familyFriends: string; // "yes" | "no"
-      trouble: string; // "yes" | "no"
+      car: string;
+      relax: string;
+      alone: string;
+      forget: string;
+      familyFriends: string;
+      trouble: string;
     };
   };
   asrs5: {
@@ -124,22 +124,41 @@ export type Assessments = {
     ptsd5: string;
   };
   aceResilience: {
-    r01: string; // Mother loved me when I was little.
-    r02: string; // Father loved me when I was little.
-    r03: string; // Other people helped my parents and they seemed to love me.
-    r04: string; // As an infant, someone enjoyed playing with me, and I enjoyed it too.
-    r05: string; // Relatives made me feel better if I was sad or worried.
-    r06: string; // Neighbors or friends’ parents seemed to like me.
-    r07: string; // Teachers, coaches, youth leaders or ministers were there to help me.
-    r08: string; // Family, neighbors and friends talked about making our lives better.
-    r09: string; // We had rules in our house and were expected to keep them.
-    r10: string; // When I felt really bad, I could find someone I trusted to talk to.
-    r11: string; // As a youth, people noticed I was capable and could get things done.
-    r12: string; // I was independent and a go‑getter.
-    r13: string; // I believed that life is what you make it.
+    r01: string;
+    r02: string;
+    r03: string;
+    r04: string;
+    r05: string;
+    r06: string;
+    r07: string;
+    r08: string;
+    r09: string;
+    r10: string;
+    r11: string;
+    r12: string;
+    r13: string;
   };
   stress: { pss1: string; pss2: string; pss3: string; pss4: string };
 };
+
+// ---- Report output (patient-facing) ----
+export type ReportInterpretations = {
+  gad7: string;
+  phq9: string;
+  pss4: string;
+  asrs5: string;
+  ptsd: string;
+  crafft: string;
+  ace: string;
+};
+
+export type PatientReport = {
+  /** Plain-language summary shown at the top of the ReportSection */
+  text: string;
+  /** Short, scale-specific interpretations rendered beneath each gauge */
+  interpretations: ReportInterpretations;
+};
+// ---------------------------------------
 
 // ---- Social graph ----
 export type Relationship = {
@@ -188,21 +207,20 @@ export type Profile = {
   thoughtChanges: string[];
 
   // Story Section
-  storyNarrative: RichResponse; // “Tell us the story…”
-  goals: RichResponse; // “Your Goals”
-  livingSituation: RichResponse; // “Living Situation”
-  cultureContext?: RichResponse; // optional
+  storyNarrative: RichResponse;
+  goals: RichResponse;
+  livingSituation: RichResponse;
+  cultureContext?: RichResponse;
   hasReceivedMentalHealthTreatment: boolean;
   therapyDuration: string;
   previousDiagnosis: string;
-  prevTreatmentSummary?: RichResponse; // description of previous MH treatment
-  familyHistoryElaboration?: RichResponse; // elaboration when familyHistory is not "none"
-  upbringingEnvironments: RichResponse; // “Describe the environment(s)…”
-  upbringingWhoWith: RichResponse; // “Who did you grow up with?”
-  childhoodNegativeReason?: RichResponse; // when likedChildhood === false
+  prevTreatmentSummary?: RichResponse;
+  familyHistoryElaboration?: RichResponse;
+  upbringingEnvironments: RichResponse;
+  upbringingWhoWith: RichResponse;
+  childhoodNegativeReason?: RichResponse;
   familyHistory: string[];
   likedChildhood: boolean;
-  // --------------------------------------------------------------------
 
   // Relationship Section
   relationships: Relationship[];
@@ -216,4 +234,7 @@ export type Profile = {
 
   // Assessments Section
   assessments: Assessments;
+
+  // Generated patient-facing report (optional; filled after submit)
+  report?: PatientReport;
 };

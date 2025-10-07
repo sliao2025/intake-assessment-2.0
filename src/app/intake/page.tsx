@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import ProgressHeader from "../components/ProgressHeader";
 import ConfettiBurst from "../components/ConfettiBurst";
-import StepTitle from "../components/StepTitle";
 import { useSession } from "next-auth/react";
 import { praises, welcomeMessages } from "../components/messages";
 import { theme, ease, intPsychTheme } from "../components/theme";
@@ -21,6 +20,7 @@ import AssessmentsSection from "../components/Sections/AssessmentsSection";
 import ReviewSection from "../components/Sections/ReviewSection";
 import HIPAASection from "../components/Sections/HIPAASection";
 import WelcomeSection from "../components/Sections/WelcomeSection";
+import ReportSection from "../components/Sections/ReportSection";
 
 type Step = {
   key: string;
@@ -39,6 +39,7 @@ const steps: Step[] = [
   { key: "medical", title: "Medical History", type: "form" },
   { key: "assessments", title: "Assessments", type: "form" },
   { key: "review", title: "Review", type: "review" },
+  { key: "report", title: "Your Report", type: "review" },
 ];
 
 // Build a fresh default profile each time to avoid stale/shared references
@@ -219,10 +220,16 @@ export default function Page() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submittedAt, setSubmittedAt] = useState<string | null>(null);
-  const hasNotifiedRef = useRef(false); // prevent duplicate notifications
+  const [showSubmittedUI, setShowSubmittedUI] = useState(true);
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
   // Prevent re-loading state on tab focus/session refetch
   const hasBootstrapped = React.useRef(false);
+  // Cache for ReportSection so we only POST once
+  const [reportText, setReportText] = useState<string | null>(null);
+  const [reportInterp, setReportInterp] = useState<Record<
+    string,
+    string
+  > | null>(null);
 
   const progressPct = useMemo(() => {
     // Percent of furthest reached step over last index
@@ -386,21 +393,17 @@ export default function Page() {
       );
     }
 
-    // Medical: require that at least one medical data point is provided
-    // (any of: current meds, previous meds, allergies, hospitalizations, or injuries)
-
-    // Assessments: require the minimal baseline (PHQ-9 complete)
+    // Assessments: require the minimal baseline (PSS-4 answered, per your latest)
     if (key === "assessments") {
       const pss4 = profile.assessments.stress.pss4;
       return Boolean(pss4 !== "");
     }
 
-    // All other steps: allow Next (internal components handle their own gating/UI)
+    // All other steps: allow Next
     return true;
   }, [step, profile]);
 
   const progressTitles = steps.map((s) => s.title);
-
   const lastIndex = steps.length - 1;
 
   useEffect(() => {
@@ -426,19 +429,8 @@ export default function Page() {
     }
   }
 
-  // useEffect(() => {
-  //   // auto-notify once when the user has reached the final step
-  //   if (!hasNotifiedRef.current && profile.maxVisited >= lastIndex) {
-  //     notifyAssessmentComplete(profile);
-  //   }
-  // }, [profile.maxVisited, lastIndex]);
-
   const goNext = async () => {
-    if (steps[step].key === "review" && submitted) {
-      return;
-    }
     const next = Math.min(step + 1, lastIndex);
-    console.log(step);
     if (next !== step) {
       // celebratory UI
       setPraise(praises[Math.floor(Math.random() * praises.length)]);
@@ -457,16 +449,6 @@ export default function Page() {
       setStep(next);
       setProfile(nextProfile);
 
-      // helpful logs (old vs new)
-      console.log(
-        "[goNext] prev maxVisited:",
-        profile.maxVisited,
-        "next:",
-        next,
-        "new maxVisited:",
-        newMaxVisited
-      );
-
       // save using the freshly computed snapshot (do not rely on async state)
       await saveProgress(nextProfile);
     }
@@ -483,10 +465,6 @@ export default function Page() {
   async function saveProgress(override?: Profile) {
     try {
       const payload = override ?? profile;
-      console.log(
-        "[saveProgress] storing profile with maxVisited=",
-        payload.maxVisited
-      );
       const r = await fetch("/api/profile/create", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -496,8 +474,7 @@ export default function Page() {
         const msg = await r.text();
         throw new Error(`${r.status} ${msg}`);
       }
-      const data = await r.json();
-      console.log("[saveProgress] updated profile response", data);
+      await r.json();
     } catch (error) {
       console.error("Failed to store profile", error);
     }
@@ -519,7 +496,8 @@ export default function Page() {
       </div>
     );
   }
-  // (B) A dedicated "finalize" handler for the Review step
+
+  // A dedicated "finalize" handler for the Review step
   const finalizeSubmit = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -532,7 +510,53 @@ export default function Page() {
       // 2) Fire-and-forget notification email
       await notifyAssessmentComplete(finalized);
 
-      // 3) UX: mark as submitted and celebrate (stay on the Review page)
+      // 3) Persist denormalized scalars to Profile (firstName, etc.) and stamp firstSubmittedAt once
+      try {
+        const metaPayload = {
+          action: "submitMeta",
+          firstName: finalized.firstName || "",
+          lastName: finalized.lastName || "",
+          email: finalized.email || "",
+          contactNumber: finalized.contactNumber || "",
+          age: finalized.age || "",
+          race: Array.isArray(finalized.ethnicity)
+            ? finalized.ethnicity
+                .map((x: any) =>
+                  typeof x === "string" ? x : (x?.label ?? x?.value ?? "")
+                )
+                .filter(Boolean)
+                .join(", ")
+            : "",
+          genderIdentity: finalized.genderIdentity || "",
+          sexualOrientation: Array.isArray(finalized.sexualOrientation)
+            ? finalized.sexualOrientation
+                .map((x: any) =>
+                  typeof x === "string" ? x : (x?.label ?? x?.value ?? "")
+                )
+                .filter(Boolean)
+                .join(", ")
+            : "",
+          highestDegree: finalized.highestDegree || "",
+          isEmployed:
+            typeof finalized.isEmployed === "boolean"
+              ? finalized.isEmployed
+              : null,
+          // pass JSON along in case row doesn't exist yet
+          profile: finalized,
+          version: (finalized as any).version ?? 1,
+        };
+
+        await fetch("/api/profile/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(metaPayload),
+        });
+      } catch (e) {
+        console.error("Failed to persist denormalized profile meta", e);
+        // non-fatal for UX
+      }
+
+      // 4) UX: mark as submitted and celebrate
       setSubmitted(true);
       setSubmittedAt(
         new Date().toLocaleString(undefined, {
@@ -545,6 +569,14 @@ export default function Page() {
       );
       setBurst(true);
       setPraise("All done!!!🎉");
+
+      // Clear indicators after 3s
+      setShowSubmittedUI(true);
+      window.setTimeout(() => {
+        setPraise(null);
+        setShowSubmittedUI(false);
+      }, 3000);
+
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setIsSubmitting(false);
@@ -573,8 +605,7 @@ export default function Page() {
         canNext={canNext}
         maxVisited={profile.maxVisited}
         progressPct={progressPct}
-      />{" "}
-      {/* stays visible; submission locks buttons below */}
+      />
       <div
         className="relative z-10 mx-auto max-w-4xl px-4 py-8"
         style={{ scrollbarGutter: "stable both-edges" }}
@@ -594,175 +625,219 @@ export default function Page() {
             touchAction: "pan-y",
           }}
         >
-          {submitted && (
+          {submitted && showSubmittedUI && (
             <div
               role="status"
               className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 text-emerald-800 text-sm shadow-sm"
             >
               <span className="font-semibold">{`Thank you ${session?.user?.name?.split(" ")[0] ?? ""}! `}</span>{" "}
               Your intake was submitted
-              {submittedAt ? ` on ${submittedAt}.` : "."} You can close this tab
-              now.
+              {submittedAt ? ` on ${submittedAt}.` : "."}
             </div>
           )}
 
-          {steps[step].key === "welcome" && (
-            <WelcomeSection
-              title={steps[step].title}
-              step={step}
-              profile={profile}
-              session={session}
-            />
-          )}
+          {/* Step content routing */}
+          {(() => {
+            const key = steps[step].key;
 
-          {steps[step].key === "hipaa" && (
-            <HIPAASection title={steps[step].title} step={step} />
-          )}
-
-          {steps[step].key === "contact" && (
-            <ContactSection
-              title={steps[step].title}
-              profile={profile}
-              setProfile={setProfile}
-              step={step}
-            />
-          )}
-
-          {steps[step].key === "profile" && (
-            <ProfileSection
-              title={steps[step].title}
-              profile={profile}
-              setProfile={setProfile}
-              step={step}
-            />
-          )}
-
-          {steps[step].key === "screen" && (
-            <CheckInSection
-              title={steps[step].title}
-              profile={profile}
-              setProfile={setProfile}
-              step={step}
-            />
-          )}
-
-          {steps[step].key === "story" && (
-            <StorySection
-              title={steps[step].title}
-              step={step}
-              profile={profile}
-              setProfile={setProfile}
-            />
-          )}
-
-          {steps[step].key === "relationships" && (
-            <RelationshipSection
-              title={steps[step].title}
-              step={step}
-              profile={profile}
-              setProfile={setProfile}
-              scrollContainerRef={scrollContainerRef}
-            />
-          )}
-
-          {steps[step].key === "medical" && (
-            <MedicalSection
-              title={steps[step].title}
-              profile={profile}
-              setProfile={setProfile}
-              step={step}
-            />
-          )}
-
-          {steps[step].key === "assessments" && (
-            <AssessmentsSection
-              title={steps[step].title}
-              profile={profile}
-              setProfile={setProfile}
-              step={step}
-            />
-          )}
-
-          {steps[step].key === "review" && (
-            <ReviewSection title="You're all set 🎉" step={step} />
-          )}
-
-          <div className="mt-8 flex items-center justify-between gap-3">
-            <button
-              onClick={goBack}
-              disabled={
-                step === 0 || (steps[step].key === "review" && submitted)
-              }
-              className="inline-flex cursor-pointer disabled:cursor-not-allowed bg-white items-center gap-2 rounded-xl px-3 py-2 font-medium border border-gray-300 text-gray-700 disabled:opacity-40 transition duration-150 hover:brightness-95 active:scale-95"
-            >
-              <ChevronLeft className="h-4 w-4" /> Back
-            </button>
-            <div>
-              {step < 1 && (
-                <button
-                  onClick={() =>
-                    profile.maxVisited === 0
-                      ? goNext()
-                      : setStep(Math.min(profile.maxVisited, lastIndex))
-                  }
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95"
-                  style={{ background: intPsychTheme.secondary }}
-                >
-                  {profile.maxVisited === 0 ? "Start" : "Resume"}
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              )}
-
-              {step > 0 && (
+            if (key === "welcome") {
+              return (
+                <WelcomeSection
+                  title={steps[step].title}
+                  step={step}
+                  profile={profile}
+                  session={session}
+                />
+              );
+            }
+            if (key === "hipaa") {
+              return <HIPAASection title={steps[step].title} step={step} />;
+            }
+            if (key === "contact") {
+              return (
+                <ContactSection
+                  title={steps[step].title}
+                  profile={profile}
+                  setProfile={setProfile}
+                  step={step}
+                />
+              );
+            }
+            if (key === "profile") {
+              return (
+                <ProfileSection
+                  title={steps[step].title}
+                  profile={profile}
+                  setProfile={setProfile}
+                  step={step}
+                />
+              );
+            }
+            if (key === "screen") {
+              return (
+                <CheckInSection
+                  title={steps[step].title}
+                  profile={profile}
+                  setProfile={setProfile}
+                  step={step}
+                />
+              );
+            }
+            if (key === "story") {
+              return (
+                <StorySection
+                  title={steps[step].title}
+                  step={step}
+                  profile={profile}
+                  setProfile={setProfile}
+                />
+              );
+            }
+            if (key === "relationships") {
+              return (
+                <RelationshipSection
+                  title={steps[step].title}
+                  step={step}
+                  profile={profile}
+                  setProfile={setProfile}
+                  scrollContainerRef={scrollContainerRef}
+                />
+              );
+            }
+            if (key === "medical") {
+              return (
+                <MedicalSection
+                  title={steps[step].title}
+                  profile={profile}
+                  setProfile={setProfile}
+                  step={step}
+                />
+              );
+            }
+            if (key === "assessments") {
+              return (
+                <AssessmentsSection
+                  title={steps[step].title}
+                  profile={profile}
+                  setProfile={setProfile}
+                  step={step}
+                />
+              );
+            }
+            if (key === "review") {
+              return (
                 <>
-                  {step === lastIndex && (
-                    <button
-                      onClick={() => {
-                        setStep(0);
-                        window.scrollTo({ top: 0, behavior: "smooth" });
-                      }}
-                      className="inline-flex cursor-pointer mr-2 items-center gap-2 rounded-xl px-4 py-2 font-normal text-white transition duration-150 hover:brightness-90 active:scale-95"
-                      style={{ background: intPsychTheme.primary }}
-                    >
-                      Back to Beginning
-                    </button>
-                  )}
+                  <ReviewSection
+                    submitted={submitted}
+                    title="You're all set 🎉"
+                    step={step}
+                  />
+                </>
+              );
+            }
+            if (key === "report") {
+              return (
+                <ReportSection
+                  profile={profile}
+                  cachedText={reportText}
+                  cachedInterp={reportInterp}
+                  onCache={({ text, interpretations }) => {
+                    if (reportText == null) setReportText(text);
+                    if (reportInterp == null) setReportInterp(interpretations);
+                  }}
+                  step={step}
+                  title="Your Personalized Report"
+                />
+              );
+            }
+            return null;
+          })()}
+
+          {
+            <div className="mt-8 flex items-center justify-between gap-3">
+              <button
+                onClick={goBack}
+                className="inline-flex cursor-pointer disabled:cursor-not-allowed bg-white items-center gap-2 rounded-xl px-3 py-2 font-medium border border-gray-300 text-gray-700 disabled:opacity-40 transition duration-150 hover:brightness-95 active:scale-95"
+              >
+                <ChevronLeft className="h-4 w-4" /> Back
+              </button>
+              <div>
+                {step < 1 && (
                   <button
-                    onClick={
-                      steps[step].key === "review" ? finalizeSubmit : goNext
+                    onClick={() =>
+                      profile.maxVisited === 0
+                        ? goNext()
+                        : setStep(Math.min(profile.maxVisited, lastIndex))
                     }
-                    disabled={
-                      steps[step].key === "review"
-                        ? isSubmitting || submitted
-                        : !canNext
-                    }
-                    className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95 ${
-                      steps[step].key === "review"
-                        ? submitted
-                          ? "bg-gradient-to-r from-lime-400 to-green-600 shadow-md shadow-lime-300/50"
-                          : "bg-gradient-to-r from-lime-400 to-green-600 shadow-md shadow-lime-300/50"
-                        : ""
-                    }`}
-                    style={
-                      steps[step].key !== "review"
-                        ? { background: intPsychTheme.secondary }
-                        : undefined
-                    }
-                    aria-live="polite"
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95"
+                    style={{ background: intPsychTheme.secondary }}
                   >
-                    {steps[step].key === "review"
-                      ? isSubmitting
-                        ? "Submitting…"
-                        : submitted
-                          ? "Submitted ✓"
-                          : "Submit"
-                      : "Next"}
+                    {profile.maxVisited === 0 ? "Start" : "Resume"}
                     <ChevronRight className="h-4 w-4" />
                   </button>
-                </>
-              )}
+                )}
+
+                {step > 0 && (
+                  <>
+                    {step === lastIndex - 1 && (
+                      <button
+                        onClick={() => {
+                          setStep(0);
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        className="inline-flex cursor-pointer mr-2 items-center gap-2 rounded-xl px-4 py-2 font-normal text-white transition duration-150 hover:brightness-90 active:scale-95"
+                        style={{ background: intPsychTheme.primary }}
+                      >
+                        Back to Beginning
+                      </button>
+                    )}
+
+                    {steps[step].key !== "report" && (
+                      <button
+                        onClick={
+                          steps[step].key === "review" ? finalizeSubmit : goNext
+                        }
+                        disabled={
+                          steps[step].key === "review"
+                            ? isSubmitting || submitted
+                            : !canNext
+                        }
+                        className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95 ${
+                          steps[step].key === "review"
+                            ? "bg-gradient-to-r from-lime-400 to-green-600 shadow-md shadow-lime-300/50"
+                            : ""
+                        }`}
+                        style={
+                          steps[step].key !== "review"
+                            ? { background: intPsychTheme.secondary }
+                            : undefined
+                        }
+                        aria-live="polite"
+                      >
+                        {steps[step].key === "review"
+                          ? isSubmitting
+                            ? "Submitting…"
+                            : submitted
+                              ? "Submitted ✓"
+                              : "Submit"
+                          : "Next"}
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    )}
+                    {submitted && steps[step].key === "review" && (
+                      <button
+                        className={`inline-flex ml-2 items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95`}
+                        style={{ background: intPsychTheme.secondary }}
+                        onClick={goNext}
+                      >
+                        See Report <ChevronRight className="h-4 w-4" />
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          }
         </motion.div>
       </div>
     </div>
