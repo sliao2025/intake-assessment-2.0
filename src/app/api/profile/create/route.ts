@@ -4,7 +4,6 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 import { prisma } from "../../../lib/prisma";
 import { z } from "zod";
 import { storeData } from "../../../lib/storage";
-import { Prisma } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
   const profile = await req.json();
@@ -44,6 +43,7 @@ export async function PUT(req: NextRequest) {
     create: {
       userId: session.user.id,
       json: jsonProfile,
+      firstSubmittedAt: new Date(),
     },
     select: { userId: true, updatedAt: true, version: true },
   });

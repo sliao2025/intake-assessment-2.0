@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Profile` MODIFY `firstSubmittedAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3);
