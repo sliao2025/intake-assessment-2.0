@@ -46,9 +46,17 @@ export default function CheckInSection({
   return (
     <div className="space-y-6">
       <StepTitle n={step + 1} title={title} />
-      <p className="text-slate-700">
-        In the <b>past two weeks</b>, have you experienced any of the following?
-      </p>
+      {!profile.isChild ? (
+        <p className="text-slate-700">
+          In the <b>past two weeks</b>, have you experienced any of the
+          following?
+        </p>
+      ) : (
+        <p className="text-slate-700">
+          In the <b>past two weeks</b>, have you seen or heard that{" "}
+          <b>your child</b> is experiencing any of the following
+        </p>
+      )}
 
       <Field title="Mood changes:" required>
         <MultiSelectGroup

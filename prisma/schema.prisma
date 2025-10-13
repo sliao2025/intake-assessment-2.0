@@ -79,4 +79,5 @@ model Profile {
   highestDegree     String?
   isEmployed        Boolean?
   firstSubmittedAt  DateTime? @default(now())
+  isChild           Boolean?
 }

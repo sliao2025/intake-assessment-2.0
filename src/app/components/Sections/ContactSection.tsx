@@ -1,9 +1,10 @@
-// src/app/components/Sections/ProfileSection.tsx
+// src/app/components/Sections/ContactSection.tsx
 "use client";
 
 import * as React from "react";
 import StepTitle from "../StepTitle";
 import Field from "../primitives/Field";
+import Separator from "../primitives/Separator"; // <- ensure this path/casing matches your file
 import type { Profile } from "../../lib/types/types";
 import { useSession } from "next-auth/react";
 
@@ -23,6 +24,8 @@ export default function ContactSection({
   return (
     <div className="space-y-6">
       <StepTitle n={step + 1} title={title} />
+
+      {/* Patient contact info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field title="First Name" required>
           <input
@@ -51,7 +54,7 @@ export default function ContactSection({
             type="number"
             min={1}
             className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
-            placeholder="e.g., 28"
+            placeholder="e.g., 20"
             value={profile.age}
             onChange={(e) => setProfile((p) => ({ ...p, age: e.target.value }))}
           />
@@ -93,6 +96,132 @@ export default function ContactSection({
           />
         </Field>
       </div>
+
+      {/* Parent/Guardian block only when Child intake */}
+      {profile.isChild === true && (
+        <>
+          <Separator label="Parent / Guardian Information" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <Field title="Parent/Guardian 1 First Name" required>
+              <input
+                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                placeholder="e.g., Jane"
+                value={profile.parent1FirstName ?? ""}
+                onChange={(e) =>
+                  setProfile((p) => ({
+                    ...p,
+                    parent1FirstName: e.target.value,
+                  }))
+                }
+              />
+            </Field>
+
+            <Field title="Parent/Guardian 1 Last Name" required>
+              <input
+                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                placeholder="e.g., Doe"
+                value={profile.parent1LastName ?? ""}
+                onChange={(e) =>
+                  setProfile((p) => ({ ...p, parent1LastName: e.target.value }))
+                }
+              />
+            </Field>
+            <Field title="Parent/Guardian 2 First Name" required>
+              <input
+                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                placeholder="e.g., Jane"
+                value={profile.parent2FirstName ?? ""}
+                onChange={(e) =>
+                  setProfile((p) => ({
+                    ...p,
+                    parent2FirstName: e.target.value,
+                  }))
+                }
+              />
+            </Field>
+
+            <Field title="Parent/Guardian 2 Last Name" required>
+              <input
+                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                placeholder="e.g., Doe"
+                value={profile.parent2LastName ?? ""}
+                onChange={(e) =>
+                  setProfile((p) => ({ ...p, parent2LastName: e.target.value }))
+                }
+              />
+            </Field>
+
+            <Field title="Parent/Guardian Contact Number" required>
+              <input
+                type="tel"
+                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                placeholder="123-456-7890"
+                value={profile.parentContactNumber ?? ""}
+                onChange={(e) =>
+                  setProfile((p) => ({
+                    ...p,
+                    parentContactNumber: e.target.value,
+                  }))
+                }
+              />
+            </Field>
+
+            <Field title="Parent/Guardian Email" required>
+              <input
+                type="email"
+                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                placeholder="parent@example.com"
+                value={profile.parentEmail ?? ""}
+                onChange={(e) =>
+                  setProfile((p) => ({ ...p, parentEmail: e.target.value }))
+                }
+              />
+            </Field>
+
+            <Field title="Parent/Guardian Occupation" required>
+              <input
+                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                placeholder="e.g., Teacher"
+                value={profile.parentOccupation ?? ""}
+                onChange={(e) =>
+                  setProfile((p) => ({
+                    ...p,
+                    parentOccupation: e.target.value,
+                  }))
+                }
+              />
+            </Field>
+
+            <Field title="Parent/Guardian Employer" required>
+              <input
+                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                placeholder="e.g., NYC DOE"
+                value={profile.parentEmployer ?? ""}
+                onChange={(e) =>
+                  setProfile((p) => ({
+                    ...p,
+                    parentEmployer: e.target.value,
+                  }))
+                }
+              />
+            </Field>
+
+            <Field title="Parent/Guardian Education" required>
+              <input
+                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                placeholder="e.g., Bachelor's"
+                value={profile.parentEducation ?? ""}
+                onChange={(e) =>
+                  setProfile((p) => ({
+                    ...p,
+                    parentEducation: e.target.value,
+                  }))
+                }
+              />
+            </Field>
+          </div>
+        </>
+      )}
     </div>
   );
 }

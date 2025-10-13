@@ -46,6 +46,7 @@ const steps: Step[] = [
 function makeDefaultProfile(): Profile {
   return {
     maxVisited: 0,
+    isChild: null,
     firstName: "",
     lastName: "",
     age: "",
@@ -224,12 +225,6 @@ export default function Page() {
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
   // Prevent re-loading state on tab focus/session refetch
   const hasBootstrapped = React.useRef(false);
-  // Cache for ReportSection so we only POST once
-  const [reportText, setReportText] = useState<string | null>(null);
-  const [reportInterp, setReportInterp] = useState<Record<
-    string,
-    string
-  > | null>(null);
 
   const progressPct = useMemo(() => {
     // Percent of furthest reached step over last index
@@ -281,37 +276,74 @@ export default function Page() {
     if (!key) {
       return false;
     }
+    // Welcome: require Adult/Child selection before proceeding
+    if (key === "welcome") {
+      return profile.isChild !== null;
+    }
 
-    // Contact: strict required fields
+    // Contact: strict required fields (child adds parent/guardian requirements)
     if (key === "contact") {
-      return Boolean(
+      const patientOk = Boolean(
         profile.firstName &&
           profile.lastName &&
           profile.age &&
+          profile.email &&
           profile.email.includes("@") &&
           profile.dob &&
           profile.contactNumber
       );
+
+      if (profile.isChild === true) {
+        const parentOk = Boolean(
+          profile.parent1FirstName &&
+            profile.parent1LastName &&
+            profile.parent2FirstName &&
+            profile.parent2LastName &&
+            profile.parentContactNumber &&
+            profile.parentEmail &&
+            profile.parentEmail.includes("@") &&
+            profile.parentOccupation &&
+            profile.parentEmployer &&
+            profile.parentEducation
+        );
+        return patientOk && parentOk;
+      }
+
+      return patientOk;
     }
 
     // Profile: required demographics + basic anthropometrics
     if (key === "profile") {
-      return Boolean(
+      const baseOk = Boolean(
         profile.genderIdentity &&
-          profile.sexualOrientation.length > 0 &&
-          profile.ethnicity.length > 0 &&
-          profile.religion.length > 0 &&
           profile.pronouns.length > 0 &&
           profile.height.feet !== null &&
           profile.height.inches !== null &&
           profile.weightLbs !== null &&
-          profile.highestDegree &&
           profile.dietType.length > 0 &&
-          profile.alcoholFrequency &&
-          profile.substancesUsed.length > 0 &&
-          profile.jobDetails &&
           profile.hobbies
       );
+
+      const adultExtrasOk = Boolean(
+        profile.sexualOrientation.length > 0 &&
+          profile.ethnicity.length > 0 &&
+          profile.religion.length > 0 &&
+          profile.highestDegree &&
+          profile.alcoholFrequency &&
+          profile.substancesUsed.length > 0
+      );
+
+      if (profile.isChild === true) {
+        // Children must meet all adult fields EXCEPT jobDetails; require jobDetails only if employed
+        return Boolean(
+          baseOk &&
+            adultExtrasOk &&
+            (!profile.isEmployed || (profile.isEmployed && profile.jobDetails))
+        );
+      }
+
+      // Adults require everything including jobDetails
+      return Boolean(baseOk && adultExtrasOk && profile.jobDetails);
     }
 
     // Quick Check-In: require minimal triage + suicide screener (now lives here)
@@ -541,6 +573,8 @@ export default function Page() {
             typeof finalized.isEmployed === "boolean"
               ? finalized.isEmployed
               : null,
+          isChild:
+            typeof finalized.isChild === "boolean" ? finalized.isChild : null,
           // pass JSON along in case row doesn't exist yet
           profile: finalized,
           version: (finalized as any).version ?? 1,
@@ -617,7 +651,7 @@ export default function Page() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -15, opacity: 0 }}
           transition={{ duration: 0.8, ease }}
-          className="w-full rounded-4xl border border-gray-200 bg-white/70 backdrop-blur-sm px-6 py-6  md:py-8 shadow-md max-h-[70vh] scrollable-div overflow-y-auto overflow-x-hidden box-border overscroll-y-contain"
+          className="w-full rounded-4xl  border border-gray-200 bg-white/70 backdrop-blur-sm px-6 py-6  md:py-8 shadow-md max-h-[70vh] scrollable-div overflow-y-auto overflow-x-hidden box-border overscroll-y-contain"
           style={{
             WebkitOverflowScrolling: "touch",
             scrollbarGutter: "stable both-edges",
@@ -647,6 +681,7 @@ export default function Page() {
                   step={step}
                   profile={profile}
                   session={session}
+                  setProfile={setProfile}
                 />
               );
             }
@@ -739,12 +774,7 @@ export default function Page() {
               return (
                 <ReportSection
                   profile={profile}
-                  cachedText={reportText}
-                  cachedInterp={reportInterp}
-                  onCache={({ text, interpretations }) => {
-                    if (reportText == null) setReportText(text);
-                    if (reportInterp == null) setReportInterp(interpretations);
-                  }}
+                  setProfile={setProfile}
                   step={step}
                   title="Your Personalized Report"
                 />
@@ -769,7 +799,8 @@ export default function Page() {
                         ? goNext()
                         : setStep(Math.min(profile.maxVisited, lastIndex))
                     }
-                    className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95"
+                    disabled={profile.maxVisited === 0 && !canNext}
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                     style={{ background: intPsychTheme.secondary }}
                   >
                     {profile.maxVisited === 0 ? "Start" : "Resume"}

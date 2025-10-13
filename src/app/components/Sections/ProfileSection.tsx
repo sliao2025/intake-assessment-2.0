@@ -621,44 +621,46 @@ export default function ContactSection({
             </Listbox>
           </Field>
         </div>
-        <div>
-          <Field title={"Marital Status"} className="mt-6" required>
-            <Likert
-              label="Are you married?"
-              value={profile.isMarried.toString()}
-              onChange={(v) =>
-                setProfile((p) => ({
-                  ...p,
-                  isMarried: v === "true",
-                }))
-              }
-              options={[
-                { key: "true", label: "Yes" },
-                { key: "false", label: "No" },
-              ]}
-            />
-          </Field>
-          {profile.isMarried && (
-            <Field className="mt-6">
+        {!profile.isChild && (
+          <div>
+            <Field title={"Marital Status"} className="mt-6" required>
               <Likert
-                label="How many times have you been married?"
-                value={profile.timesMarried.toString()}
+                label="Are you married?"
+                value={profile.isMarried.toString()}
                 onChange={(v) =>
                   setProfile((p) => ({
                     ...p,
-                    timesMarried: Number(v),
+                    isMarried: v === "true",
                   }))
                 }
                 options={[
-                  { key: "1", label: "1" },
-                  { key: "2", label: "2" },
-                  { key: "3", label: "3" },
-                  { key: "4", label: "4" },
+                  { key: "true", label: "Yes" },
+                  { key: "false", label: "No" },
                 ]}
               />
             </Field>
-          )}
-        </div>
+            {profile.isMarried && (
+              <Field className="mt-6">
+                <Likert
+                  label="How many times have you been married?"
+                  value={profile.timesMarried.toString()}
+                  onChange={(v) =>
+                    setProfile((p) => ({
+                      ...p,
+                      timesMarried: Number(v),
+                    }))
+                  }
+                  options={[
+                    { key: "1", label: "1" },
+                    { key: "2", label: "2" },
+                    { key: "3", label: "3" },
+                    { key: "4", label: "4" },
+                  ]}
+                />
+              </Field>
+            )}
+          </div>
+        )}
 
         <Separator label={"Dietary/Substance Use"} className="md:col-span-2" />
         <div className="grid md:grid-cols-2 gap-4">
@@ -959,7 +961,7 @@ export default function ContactSection({
             </Field>
           </>
         )}
-        {!profile.isEmployed && (
+        {!profile.isEmployed && !profile.isChild && (
           <>
             <Field title="Why are you currently unemployed?" required>
               <textarea

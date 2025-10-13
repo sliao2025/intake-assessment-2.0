@@ -151,11 +151,13 @@ export type ReportInterpretations = {
   crafft: string;
   ace: string;
 };
+export type SummaryPair = {
+  reason_for_eval: string;
+  background: string;
+};
 
 export type PatientReport = {
-  /** Plain-language summary shown at the top of the ReportSection */
-  text: string;
-  /** Short, scale-specific interpretations rendered beneath each gauge */
+  summary: SummaryPair;
   interpretations: ReportInterpretations;
 };
 // ---------------------------------------
@@ -171,6 +173,7 @@ export type Relationship = {
 
 export type Profile = {
   maxVisited: number;
+  isChild: boolean | null;
 
   // Contact Section
   firstName: string;
@@ -179,6 +182,17 @@ export type Profile = {
   email: string;
   contactNumber: string;
   dob: string;
+
+  // Child Contact Section
+  parent1FirstName?: string;
+  parent1LastName?: string;
+  parent2FirstName?: string;
+  parent2LastName?: string;
+  parentContactNumber?: string;
+  parentEmail?: string;
+  parentOccupation?: string;
+  parentEmployer?: string;
+  parentEducation?: string;
 
   // Profile Section
   pronouns: Option[];
