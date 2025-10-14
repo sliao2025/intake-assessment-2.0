@@ -42,9 +42,9 @@ export default function ReviewSection({
         <>
           <div className="mt-4 rounded-xl border border-sky-200 bg-sky-50/90 px-4 py-3 text-sky-900 text-md shadow-sm">
             <p className="mb-2">
-              Thanks again {session?.user?.name?.split(" ")[0]}! Based on your
-              responses, we’ve compiled a short visualization and summary of
-              your symptom screens. Click below to view your{" "}
+              Thanks again <b>{session?.user?.name?.split(" ")[0]}</b>! Based on
+              your responses, we’ve compiled a short visualization and summary
+              of your symptom screens. Click below to view your{" "}
               <span className="font-semibold">personal report</span>.
             </p>
             <p className="text-sky-900/90">
