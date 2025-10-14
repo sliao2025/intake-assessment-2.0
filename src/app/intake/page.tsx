@@ -3,11 +3,11 @@
 import React, { useRef, useMemo, useState, useEffect } from "react";
 import type { Profile } from "../lib/types/types";
 import { motion } from "framer-motion";
-import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import ProgressHeader from "../components/ProgressHeader";
 import ConfettiBurst from "../components/ConfettiBurst";
 import { useSession } from "next-auth/react";
-import { praises, welcomeMessages } from "../components/messages";
+import { praises } from "../components/messages";
 import { theme, ease, intPsychTheme } from "../components/theme";
 import GardenFrame from "../components/Garden/Garden";
 import ContactSection from "../components/Sections/ContactSection";
@@ -821,7 +821,9 @@ export default function Page() {
                       >
                         Back to Beginning
                       </button>
-                    ) : (
+                    ) : null}
+                    {/* {on the last two steps} */}
+                    {step >= lastIndex - 1 && submitted && (
                       <a
                         href={"https://forms.gle/FNvs8LzwZfT2hWb27"}
                         target="_blank"
