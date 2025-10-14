@@ -15,6 +15,7 @@ import {
 import { Option } from "../../lib/types/types";
 import Separator from "../primitives/Separator";
 import Likert from "../primitives/Likert";
+import TextAreaWithEncouragement from "../primitives/TextAreawithEncouragement";
 
 const sexualOrientations: Option[] = [
   { label: "Asexual", value: "asexual" },
@@ -946,17 +947,17 @@ export default function ContactSection({
               title="Tell us about your current employment, how long you've been there etc."
               required
             >
-              <textarea
+              <TextAreaWithEncouragement
                 rows={2}
-                className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
                 placeholder="Share here in your own words…"
                 value={profile.jobDetails}
-                onChange={(e) =>
+                onChangeText={(next) =>
                   setProfile((p) => ({
                     ...p,
-                    jobDetails: e.target.value,
+                    jobDetails: next,
                   }))
                 }
+                recommendedWords={40}
               />
             </Field>
           </>
@@ -964,17 +965,17 @@ export default function ContactSection({
         {!profile.isEmployed && !profile.isChild && (
           <>
             <Field title="Why are you currently unemployed?" required>
-              <textarea
+              <TextAreaWithEncouragement
                 rows={2}
-                className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
                 placeholder="Share here in your own words…"
                 value={profile.jobDetails}
-                onChange={(e) =>
+                onChangeText={(next) =>
                   setProfile((p) => ({
                     ...p,
-                    jobDetails: e.target.value,
+                    jobDetails: next,
                   }))
                 }
+                recommendedWords={15}
               />
             </Field>
           </>
@@ -984,17 +985,17 @@ export default function ContactSection({
           required
           className="mt-6"
         >
-          <textarea
+          <TextAreaWithEncouragement
             rows={2}
-            className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
-            placeholder="Share here in your own words…"
-            value={profile.hobbies}
-            onChange={(e) =>
+            placeholder="Share here in your own words"
+            value={profile.hobbies || ""}
+            onChangeText={(next) =>
               setProfile((p) => ({
                 ...p,
-                hobbies: e.target.value,
+                hobbies: next,
               }))
             }
+            recommendedWords={15}
           />
         </Field>
         <Field title={"Sexual Activity"} className="mt-6" required>

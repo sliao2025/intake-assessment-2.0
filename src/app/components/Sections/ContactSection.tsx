@@ -1,4 +1,3 @@
-// src/app/components/Sections/ContactSection.tsx
 "use client";
 
 import * as React from "react";
@@ -6,7 +5,6 @@ import StepTitle from "../StepTitle";
 import Field from "../primitives/Field";
 import Separator from "../primitives/Separator"; // <- ensure this path/casing matches your file
 import type { Profile } from "../../lib/types/types";
-import { useSession } from "next-auth/react";
 
 export default function ContactSection({
   title,
@@ -19,7 +17,36 @@ export default function ContactSection({
   setProfile: React.Dispatch<React.SetStateAction<Profile>>;
   step: number;
 }) {
-  const { data: session } = useSession();
+  const [dobAgeError, setDobAgeError] = React.useState<string | null>(null);
+
+  const computeAge = (dobStr: string): number | null => {
+    if (!dobStr) return null;
+    const d = new Date(dobStr);
+    if (isNaN(d.getTime())) return null;
+    const today = new Date();
+    let age = today.getFullYear() - d.getFullYear();
+    const m = today.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+    return age;
+  };
+
+  React.useEffect(() => {
+    if (!profile?.dob || !profile?.age) {
+      setDobAgeError(null);
+      return;
+    }
+    const enteredAge = parseInt(String(profile.age), 10);
+    const dobAge = computeAge(profile.dob);
+    if (Number.isNaN(enteredAge) || dobAge === null) {
+      setDobAgeError(null);
+      return;
+    }
+    if (enteredAge !== dobAge) {
+      setDobAgeError("Date of birth does not match the entered age.");
+    } else {
+      setDobAgeError(null);
+    }
+  }, [profile.dob, profile.age]);
 
   return (
     <div className="space-y-6">
@@ -53,11 +80,18 @@ export default function ContactSection({
           <input
             type="number"
             min={1}
-            className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
+            className={`w-full rounded-xl bg-white border px-3 py-2 text-slate-900 ${dobAgeError ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500" : "border-slate-300"} `}
             placeholder="e.g., 20"
             value={profile.age}
             onChange={(e) => setProfile((p) => ({ ...p, age: e.target.value }))}
+            aria-invalid={dobAgeError ? true : undefined}
+            aria-describedby={dobAgeError ? "dob-age-mismatch" : undefined}
           />
+          {dobAgeError && (
+            <p id="dob-age-mismatch" className="mt-1 text-xs text-red-600">
+              {dobAgeError}
+            </p>
+          )}
         </Field>
 
         <Field title="Email" required>
@@ -90,9 +124,11 @@ export default function ContactSection({
         <Field title="Date of Birth" required>
           <input
             type="date"
-            className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
+            className={`w-full rounded-xl bg-white border px-3 py-2 text-slate-900 ${dobAgeError ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500" : "border-slate-300"}`}
             value={profile.dob}
             onChange={(e) => setProfile((p) => ({ ...p, dob: e.target.value }))}
+            aria-invalid={dobAgeError ? true : undefined}
+            aria-describedby={dobAgeError ? "dob-age-mismatch" : undefined}
           />
         </Field>
       </div>
