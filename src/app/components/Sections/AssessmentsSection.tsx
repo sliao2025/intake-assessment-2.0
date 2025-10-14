@@ -100,11 +100,11 @@ const pss0to4 = [
 ];
 
 const aceTrue5 = [
-  { key: "0", label: "Definitely true" },
-  { key: "1", label: "Probably true" },
+  { key: "0", label: "Definitely not true" },
+  { key: "1", label: "Probably not true" },
   { key: "2", label: "Not sure" },
-  { key: "3", label: "Probably not true" },
-  { key: "4", label: "Definitely not true" },
+  { key: "3", label: "Probably true" },
+  { key: "4", label: "Definitely true" },
 ];
 
 export default function AssessmentsSection({

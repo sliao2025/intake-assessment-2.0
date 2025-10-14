@@ -416,19 +416,19 @@ export default function ReportSection({
       max: 24,
     },
     {
-      subject: "PTSD Flags",
-      pct: Math.round((ptsdYes / 5) * 100),
-      raw: ptsdYes,
-      max: 5,
-    },
-    {
       subject: "Substance Risk (CRAFFT)",
       pct: Math.round((crafftScore / 6) * 100),
       raw: crafftScore,
       max: 6,
     },
     {
-      subject: "ACE",
+      subject: "PTSD Flags",
+      pct: Math.round((ptsdYes / 5) * 100),
+      raw: ptsdYes,
+      max: 5,
+    },
+    {
+      subject: "ACE Resilience",
       pct: Math.round((aceScore / 52) * 100),
       raw: aceScore,
       max: 52,
@@ -450,6 +450,24 @@ export default function ReportSection({
   const [error, setError] = useState<string | null>(null);
   const [interpError, setInterpError] = useState<string | null>(null);
   const { data: session } = useSession();
+
+  async function saveProgress(override?: Profile) {
+    try {
+      const payload = override ?? profile;
+      const r = await fetch("/api/profile/create", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!r.ok) {
+        const msg = await r.text();
+        throw new Error(`${r.status} ${msg}`);
+      }
+      await r.json();
+    } catch (error) {
+      console.error("Failed to store profile", error);
+    }
+  }
 
   useEffect(() => {
     if (hasReport) {
@@ -498,6 +516,14 @@ export default function ReportSection({
               interpretations: newInterp,
             },
           }));
+          const nextProfile: Profile = {
+            ...profile,
+            report: {
+              summary: newSummary,
+              interpretations: newInterp,
+            },
+          };
+          await saveProgress(nextProfile);
         }
       } catch (e: any) {
         if (!alive) return;
@@ -675,10 +701,10 @@ export default function ReportSection({
               fallback={useFallback}
             />
             <PdfGauge
-              label="Adverse Childhood Experiences"
+              label="Resilience"
               score={aceScore}
               max={52}
-              caption="higher = more adverse childhood experiences"
+              caption="higher = greater resilience"
               interpretation={interp.ace}
               fallback={useFallback}
             />
@@ -1127,10 +1153,10 @@ export default function ReportSection({
               <div className="group rounded-2xl border border-slate-200 bg-white/80 shadow-sm hover:shadow-md transition-shadow">
                 <div className="p-4">
                   <Gauge
-                    label="Adverse Childhood Experiences"
+                    label="Resilience"
                     score={aceScore}
                     max={52}
-                    caption="higher = more adverse childhood experiences"
+                    caption="higher = more resilience"
                   />
                   <div className="mt-3">
                     {interpLoading ? (

@@ -9,6 +9,73 @@ import VoiceRecorder from "../VoiceRecorder";
 import MultiSelectGroup from "../primitives/MultiSelectGroup";
 import type { Profile } from "../../lib/types/types";
 
+function TextAreaWithEncouragement({
+  value,
+  onChangeText,
+  placeholder,
+  rows = 6,
+  className = "",
+  recommendedWords = 60,
+  lowPct = 0.33,
+  mediumPct = 0.66,
+}: {
+  value: string;
+  onChangeText: (next: string) => void;
+  placeholder?: string;
+  rows?: number;
+  className?: string;
+  recommendedWords?: number;
+  lowPct?: number;
+  mediumPct?: number;
+}) {
+  const wordCount = (text: string) =>
+    (text || "").trim().split(/\s+/).filter(Boolean).length;
+
+  const words = wordCount(value);
+  const pct = Math.min(100, Math.round((words / recommendedWords) * 100));
+  const pctFrac = pct / 100;
+
+  const isLow = pctFrac <= lowPct;
+  const isMedium = pctFrac > lowPct && pctFrac <= mediumPct;
+
+  const textColor = isLow
+    ? "text-red-600"
+    : isMedium
+      ? "text-amber-600"
+      : "text-slate-500";
+  const barColor = isLow
+    ? "bg-red-500"
+    : isMedium
+      ? "bg-amber-500"
+      : "bg-emerald-600";
+
+  return (
+    <div>
+      <textarea
+        rows={rows}
+        className={`w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400 ${className}`}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChangeText(e.target.value)}
+      />
+      <div className="mt-2">
+        <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
+          <div className={`h-full ${barColor}`} style={{ width: `${pct}%` }} />
+        </div>
+        <div className={`mt-1 text-xs ${textColor}`}>
+          {words === 0
+            ? `We recommend about ${recommendedWords}+ words to give your clinician helpful context.`
+            : `You're at ${words} word${words === 1 ? "" : "s"} (~${pct}% of the suggested detail). ${
+                words < recommendedWords
+                  ? "Adding a bit more can help us understand your story."
+                  : "Great detail—thank you!"
+              }`}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type Props = {
   title: string;
   step: number;
@@ -52,17 +119,17 @@ export default function StorySection({
         }
         required
       >
-        <textarea
+        <TextAreaWithEncouragement
           rows={6}
-          className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
           placeholder="Share here in your own words…"
           value={profile.storyNarrative?.text || ""}
-          onChange={(e) =>
+          onChangeText={(next) =>
             setProfile((p) => ({
               ...p,
-              storyNarrative: { ...p.storyNarrative, text: e.target.value },
+              storyNarrative: { ...p.storyNarrative, text: next },
             }))
           }
+          recommendedWords={75}
         />
       </Field>
 
@@ -110,17 +177,17 @@ export default function StorySection({
         }
         required
       >
-        <textarea
+        <TextAreaWithEncouragement
           rows={6}
-          className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
           placeholder="Share here in your own words…"
           value={profile.goals?.text || ""}
-          onChange={(e) =>
+          onChangeText={(next) =>
             setProfile((p) => ({
               ...p,
-              goals: { ...p.goals, text: e.target.value },
+              goals: { ...p.goals, text: next },
             }))
           }
+          recommendedWords={40}
         />
       </Field>
 
@@ -149,15 +216,14 @@ export default function StorySection({
         }
         required
       >
-        <textarea
+        <TextAreaWithEncouragement
           rows={6}
-          className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
           placeholder="Share here in your own words…"
           value={profile.livingSituation?.text || ""}
-          onChange={(e) =>
+          onChangeText={(next) =>
             setProfile((p) => ({
               ...p,
-              livingSituation: { ...p.livingSituation, text: e.target.value },
+              livingSituation: { ...p.livingSituation, text: next },
             }))
           }
         />
@@ -183,17 +249,17 @@ export default function StorySection({
           </>
         }
       >
-        <textarea
+        <TextAreaWithEncouragement
           rows={6}
-          className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
           placeholder="Share here in your own words…"
           value={profile.cultureContext?.text || ""}
-          onChange={(e) =>
+          onChangeText={(next) =>
             setProfile((p) => ({
               ...p,
-              cultureContext: { ...p.cultureContext, text: e.target.value },
+              cultureContext: { ...p.cultureContext, text: next },
             }))
           }
+          recommendedWords={40}
         />
       </Field>
 
@@ -270,20 +336,20 @@ export default function StorySection({
             }
             required
           >
-            <textarea
+            <TextAreaWithEncouragement
               rows={4}
-              className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
               placeholder="Share here in your own words…"
               value={profile.prevTreatmentSummary?.text || ""}
-              onChange={(e) =>
+              onChangeText={(next) =>
                 setProfile((p) => ({
                   ...p,
                   prevTreatmentSummary: {
                     ...p.prevTreatmentSummary,
-                    text: e.target.value,
+                    text: next,
                   },
                 }))
               }
+              recommendedWords={50}
             />
           </Field>
 
@@ -358,20 +424,20 @@ export default function StorySection({
               title={<>Please elaborate on this family history.</>}
               required
             >
-              <textarea
+              <TextAreaWithEncouragement
                 rows={4}
-                className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
                 placeholder="Share here in your own words…"
                 value={profile.familyHistoryElaboration?.text || ""}
-                onChange={(e) =>
+                onChangeText={(next) =>
                   setProfile((p) => ({
                     ...p,
                     familyHistoryElaboration: {
                       ...p.familyHistoryElaboration,
-                      text: e.target.value,
+                      text: next,
                     },
                   }))
                 }
+                recommendedWords={40}
               />
             </Field>
             {/* <VoiceRecorder
@@ -397,20 +463,20 @@ export default function StorySection({
         }
         required
       >
-        <textarea
+        <TextAreaWithEncouragement
           rows={4}
-          className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
           placeholder="Share here in your own words…"
           value={profile.upbringingEnvironments?.text || ""}
-          onChange={(e) =>
+          onChangeText={(next) =>
             setProfile((p) => ({
               ...p,
               upbringingEnvironments: {
                 ...p.upbringingEnvironments,
-                text: e.target.value,
+                text: next,
               },
             }))
           }
+          recommendedWords={50}
         />
       </Field>
       {/* <VoiceRecorder
@@ -435,22 +501,20 @@ export default function StorySection({
         }
         required
       >
-        <textarea
+        <TextAreaWithEncouragement
           rows={4}
-          className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
-          placeholder={
-            "e.g. Mom, 60 years old | Dad, 61 years old | Fred, 12 years old, my cousin"
-          }
+          placeholder="e.g. Mom, 60 years old | Dad, 61 years old | Fred, 12 years old, my cousin"
           value={profile.upbringingWhoWith?.text || ""}
-          onChange={(e) =>
+          onChangeText={(next) =>
             setProfile((p) => ({
               ...p,
               upbringingWhoWith: {
                 ...p.upbringingWhoWith,
-                text: e.target.value,
+                text: next,
               },
             }))
           }
+          recommendedWords={10}
         />
       </Field>
       {/* <VoiceRecorder
@@ -492,17 +556,16 @@ export default function StorySection({
             }
             required
           >
-            <textarea
+            <TextAreaWithEncouragement
               rows={4}
-              className="w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400"
               placeholder="Share here in your own words…"
               value={profile.childhoodNegativeReason?.text || ""}
-              onChange={(e) =>
+              onChangeText={(next) =>
                 setProfile((p) => ({
                   ...p,
                   childhoodNegativeReason: {
                     ...p.childhoodNegativeReason,
-                    text: e.target.value,
+                    text: next,
                   },
                 }))
               }
