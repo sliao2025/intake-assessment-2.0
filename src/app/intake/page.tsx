@@ -810,7 +810,7 @@ export default function Page() {
 
                 {step > 0 && (
                   <>
-                    {step === lastIndex - 1 && (
+                    {step === lastIndex - 1 && !submitted ? (
                       <button
                         onClick={() => {
                           setStep(0);
@@ -821,6 +821,17 @@ export default function Page() {
                       >
                         Back to Beginning
                       </button>
+                    ) : (
+                      <a
+                        href={"https://forms.gle/FNvs8LzwZfT2hWb27"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex cursor-pointer font-semibold mr-2 items-center gap-2 rounded-xl px-4 py-2 font-normal text-white transition duration-150 hover:brightness-90 active:scale-95"
+                        style={{ background: intPsychTheme.primary }}
+                        aria-label="Open feedback form (opens in a new tab)"
+                      >
+                        Give Feedback (2–3 min)
+                      </a>
                     )}
 
                     {steps[step].key !== "report" && (
