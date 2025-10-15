@@ -60,9 +60,22 @@ export type RichResponse = {
   text?: string;
   audio?: AudioAttachment;
 };
+
+export type SetAActions = (mutate: (draft: Profile) => void) => void;
 // -------------------------------------------------------------
 
-export type Assessments = {
+// ---- C-SSRS Screen (Recent) ----
+export type CssrsScreen = {
+  wishDead: string; // Q1
+  thoughts: string; // Q2
+  methodHow: string; // Q3
+  intention: string; // Q4
+  plan: string; // Q5
+  behavior: string; // Q6
+  behavior3mo: string; // Q6 timing follow-up
+};
+
+export type AdultAssessments = {
   suicide: {
     wishDead: string;
     thoughts: string;
@@ -140,6 +153,185 @@ export type Assessments = {
   };
   stress: { pss1: string; pss2: string; pss3: string; pss4: string };
 };
+// ===== Child & Adult flexible assessment typing (preparation only) =====
+// Columbia DISC Teen Depression Scale (Ages 11+) — Teen self-report & Parent-report
+// Items are 22 yes/no questions scored 0/1 within the past 4 weeks (present state).
+// Reference bands are included for optional scoring metadata. fileciteturn0file0
+
+export type DiscTeenItemKey =
+  | "dtds01"
+  | "dtds02"
+  | "dtds03"
+  | "dtds04"
+  | "dtds05"
+  | "dtds06"
+  | "dtds07"
+  | "dtds08"
+  | "dtds09"
+  | "dtds10"
+  | "dtds11"
+  | "dtds12"
+  | "dtds13"
+  | "dtds14"
+  | "dtds15"
+  | "dtds16"
+  | "dtds17"
+  | "dtds18"
+  | "dtds19"
+  | "dtds20"
+  | "dtds21"
+  | "dtds22";
+
+/** DISC Teen Depression Scale response (0/1 as strings to match existing patterns) */
+export type DiscTeenResponses = {
+  [K in DiscTeenItemKey]: string; // "0" | "1" | ""
+};
+
+/** Teen self-report (required for child workflow) */
+export type DiscTeenSelf = {
+  form: "self";
+  responses: DiscTeenResponses;
+};
+
+/** Parent-report (optional adjunct) */
+export type DiscTeenParent = {
+  form: "parent";
+  responses: DiscTeenResponses;
+};
+
+// SNAP‑IV 26‑Item (0–3: Not at all → Very much)
+export type SnapItemKey =
+  | "snap01"
+  | "snap02"
+  | "snap03"
+  | "snap04"
+  | "snap05"
+  | "snap06"
+  | "snap07"
+  | "snap08"
+  | "snap09"
+  | "snap10"
+  | "snap11"
+  | "snap12"
+  | "snap13"
+  | "snap14"
+  | "snap15"
+  | "snap16"
+  | "snap17"
+  | "snap18"
+  | "snap19"
+  | "snap20"
+  | "snap21"
+  | "snap22"
+  | "snap23"
+  | "snap24"
+  | "snap25"
+  | "snap26";
+
+/** SNAP response values stored as strings to match existing Likert pattern */
+export type SnapValue = "" | "0" | "1" | "2" | "3";
+export type SnapResponses = { [K in SnapItemKey]: SnapValue };
+export type SnapScale = { responses: SnapResponses };
+
+/** Child assessment set: replaces PHQ-9 with DISC Teen Depression Scale; all other adult measures retained or adjusted later. */
+// SCARED (Screen for Child Anxiety Related Disorders) — 41 items, 0–2
+export type ScaredItemKey =
+  | "scared01"
+  | "scared02"
+  | "scared03"
+  | "scared04"
+  | "scared05"
+  | "scared06"
+  | "scared07"
+  | "scared08"
+  | "scared09"
+  | "scared10"
+  | "scared11"
+  | "scared12"
+  | "scared13"
+  | "scared14"
+  | "scared15"
+  | "scared16"
+  | "scared17"
+  | "scared18"
+  | "scared19"
+  | "scared20"
+  | "scared21"
+  | "scared22"
+  | "scared23"
+  | "scared24"
+  | "scared25"
+  | "scared26"
+  | "scared27"
+  | "scared28"
+  | "scared29"
+  | "scared30"
+  | "scared31"
+  | "scared32"
+  | "scared33"
+  | "scared34"
+  | "scared35"
+  | "scared36"
+  | "scared37"
+  | "scared38"
+  | "scared39"
+  | "scared40"
+  | "scared41";
+export type ScaredValue = "" | "0" | "1" | "2";
+export type ScaredResponses = { [K in ScaredItemKey]: ScaredValue };
+export type ScaredSelf = { form: "self"; responses: ScaredResponses };
+export type ScaredParent = { form: "parent"; responses: ScaredResponses };
+
+export type ChildAssessments = Omit<AdultAssessments, "phq9"> & {
+  /** Columbia DISC Teen Depression Scale */
+  discTeen: {
+    self: DiscTeenSelf;
+    /** Optional additional informant */
+    parent?: DiscTeenParent;
+  };
+  /** SNAP‑IV ADHD (26 items) */
+  snap: SnapScale;
+  /** SCARED anxiety scale (self + optional parent) */
+  scared: {
+    self: ScaredSelf;
+    parent?: ScaredParent;
+  };
+  cssrs?: CssrsScreen;
+};
+
+/**
+ * Discriminated union to support age-specific assessment payloads without changing existing callers yet.
+ * NOTE: Profile.assessments still uses `Assessments` for now to avoid breaking current code.
+ * When ready to switch, change `Profile.assessments` to `AgeAwareAssessments`.
+ */
+export type AgeAwareAssessments =
+  | { kind: "adult"; data: AdultAssessments }
+  | { kind: "child"; data: ChildAssessments };
+
+// Type guards (optional helpers for future use)
+export function isChildAssessments(
+  a: any
+): a is { kind: "child"; data: ChildAssessments } {
+  return (
+    a &&
+    a.kind === "child" &&
+    a.data &&
+    typeof a.data === "object" &&
+    "discTeen" in a.data
+  );
+}
+export function isAdultAssessments(
+  a: any
+): a is { kind: "adult"; data: AdultAssessments } {
+  return (
+    a &&
+    a.kind === "adult" &&
+    a.data &&
+    typeof a.data === "object" &&
+    "phq9" in a.data
+  );
+}
+// ======================================================================
 
 // ---- Report output (patient-facing) ----
 export type ReportInterpretations = {
@@ -169,6 +361,19 @@ export type Relationship = {
   role: string; // e.g., "Friend", "Mom"
   strength: "really_bad" | "not_great" | "pretty_good" | "really_good";
   happy: boolean;
+};
+
+// --- Child: Past Mental Health & Psychiatric History ---
+export type ChildPsychiatricHistory = {
+  /** Multi-select of treatment kinds (Option[] to match Listbox pattern elsewhere) */
+  treatmentKinds: Option[];
+  /** Date string (yyyy-mm-dd) for first treatment entry */
+  firstTreatmentDate?: string;
+  /** Free-text details for each modality, shown when that modality is selected */
+  individualDetails?: string;
+  groupDetails?: string;
+  familyCouplesDetails?: string;
+  otherDetails?: string;
 };
 
 export type Profile = {
@@ -215,6 +420,33 @@ export type Profile = {
   jobDetails?: string;
   hobbies: string;
 
+  // --- New: School Info Section ---
+  schoolInfo?: {
+    schoolName?: string;
+    schoolPhoneNumber?: string;
+    yearsAtSchool?: number;
+    grade?: string;
+    hasRepeatedGrade?: boolean; // "yes" | "no" | ""
+    repeatedGradeDetail?: string;
+    hasSpecialClasses?: boolean; // "yes" | "no" | ""
+    specialClassesDetail?: string;
+    hasSpecialServices?: boolean; // "yes" | "no" | ""
+    specialServicesDetail?: string;
+    academicGrades?: string;
+  };
+
+  // --- New: Relationships & Abilities (Child-focused) ---
+  relationshipsAbilities?: {
+    teachersPeersRelationship?: string;
+    childRatingNarrative?: string;
+    hadTruancyProceedings?: boolean;
+    truancyProceedingsDetail?: string;
+    receivedSchoolCounseling?: boolean;
+    schoolCounselingDetail?: string;
+    activitiesInterestsStrengths?: string;
+    otherConcerns?: string;
+  };
+
   // Screen Section
   moodChanges: string[];
   behaviorChanges: string[];
@@ -246,8 +478,19 @@ export type Profile = {
   previousHospitalizations: Hospitalization[];
   previousInjuries?: InjuryDetails | null;
 
+  // --- Child-only: Neuropsychological testing history ---
+  childMedicalHistory?: {
+    hasNeuropsychTesting: boolean;
+    neuropsychEvalDate: string;
+    neuropsychEvalReason: string;
+    neuropsychEvaluationsPerformed: string;
+  };
+
+  // --- Child: Past Mental Health & Psychiatric History ---
+  childPsychiatricHistory?: ChildPsychiatricHistory;
+
   // Assessments Section
-  assessments: Assessments;
+  assessments: AgeAwareAssessments;
 
   // Generated patient-facing report (optional; filled after submit)
   report?: PatientReport;

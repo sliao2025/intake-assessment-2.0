@@ -8,6 +8,7 @@ import MultiSelectGroup from "../primitives/MultiSelectGroup";
 import Likert from "../primitives/Likert";
 import { useRouter } from "next/navigation";
 import Separator from "../primitives/Separator";
+import CSSRSForm from "../Scales/Child/C-SSRSForm";
 
 /** Scales reused from AssessmentsSection (yes/no) */
 const yesNo = [
@@ -28,10 +29,14 @@ export default function CheckInSection({
   setProfile: StateSetter<Profile>;
   step: number;
 }) {
+  // Age-aware assessments handle
+  const kind = profile.assessments.kind;
+  const a: any = profile.assessments.data;
+  const isAdult = kind === "adult";
   const router = useRouter();
 
-  // Compute high-risk from profile.assessments.suicide
-  const s = profile.assessments.suicide;
+  // Compute high-risk from profile.assessments.data.suicide
+  const s = a.suicide;
   const highRisk =
     (s.thoughts === "yes" && s.intention === "yes") || s.behavior === "yes";
 
@@ -110,82 +115,39 @@ export default function CheckInSection({
         />
       </Field>
 
-      {/* Suicide screening (moved from Assessments) */}
-      <div className="mt-10">
-        <Separator label="Safety & Suicide Screening" />
-      </div>
+      {!profile.isChild && (
+        <>
+          {" "}
+          <div className="mt-10">
+            <Separator label="Safety & Suicide Screening" />
+          </div>
+          <div className="space-y-6">
+            <p className="italic text-slate-600">
+              These questions ask about any recent suicidal thinking or
+              behavior. If you answer in a way that suggests immediate risk, you
+              will be redirected to urgent resources.
+            </p>
 
-      <div className="space-y-6">
-        <p className="italic text-slate-600">
-          These questions ask about any recent suicidal thinking or behavior. If
-          you answer in a way that suggests immediate risk, you will be
-          redirected to urgent resources.
-        </p>
-
-        <div className="space-y-5">
-          <Field
-            required
-            title="In the past month, have you wished you were dead, or wished you could go to sleep and not wake up?"
-          >
-            <Likert
-              value={profile.assessments.suicide.wishDead}
-              onChange={(v) =>
-                setProfile((p) => {
-                  const next = { ...p };
-                  next.assessments = {
-                    ...p.assessments,
-                    suicide: { ...p.assessments.suicide },
-                  };
-                  next.assessments.suicide.wishDead = String(v);
-                  return next;
-                })
-              }
-              options={yesNo}
-            />
-          </Field>
-
-          <Field
-            required
-            title="In the past month, have you had any actual thoughts about killing yourself?"
-          >
-            <Likert
-              value={profile.assessments.suicide.thoughts}
-              onChange={(v) =>
-                setProfile((p) => {
-                  const next = { ...p };
-                  next.assessments = {
-                    ...p.assessments,
-                    suicide: { ...p.assessments.suicide },
-                  };
-                  next.assessments.suicide.thoughts = String(v);
-                  // clear downstream fields when toggling to 'no'
-                  if (String(v) !== "yes") {
-                    next.assessments.suicide.methodHow = "";
-                    next.assessments.suicide.intention = "";
-                    next.assessments.suicide.plan = "";
-                    next.assessments.suicide.behavior = "";
-                    next.assessments.suicide.behavior3mo = "";
-                  }
-                  return next;
-                })
-              }
-              options={yesNo}
-            />
-          </Field>
-
-          {profile.assessments.suicide.thoughts === "yes" && (
-            <>
-              <Field title="In the past month, have you been thinking about how you might end your life?">
+            <div className="space-y-5">
+              <Field
+                required
+                title="In the past month, have you wished you were dead, or wished you could go to sleep and not wake up?"
+              >
                 <Likert
-                  value={profile.assessments.suicide.methodHow}
+                  value={a.suicide.wishDead}
                   onChange={(v) =>
                     setProfile((p) => {
                       const next = { ...p };
                       next.assessments = {
                         ...p.assessments,
-                        suicide: { ...p.assessments.suicide },
-                      };
-                      next.assessments.suicide.methodHow = String(v);
+                        data: {
+                          ...(p.assessments as any).data,
+                          suicide: {
+                            ...(p.assessments as any).data.suicide,
+                            wishDead: String(v),
+                          },
+                        },
+                      } as any;
                       return next;
                     })
                   }
@@ -193,17 +155,33 @@ export default function CheckInSection({
                 />
               </Field>
 
-              <Field title="In the past month, have you had these suicidal thoughts and some intention of acting on them?">
+              <Field
+                required
+                title="In the past month, have you had any actual thoughts about killing yourself?"
+              >
                 <Likert
-                  value={profile.assessments.suicide.intention}
+                  value={a.suicide.thoughts}
                   onChange={(v) =>
                     setProfile((p) => {
                       const next = { ...p };
+                      const val = String(v);
+                      const suicide = {
+                        ...(p.assessments as any).data.suicide,
+                        thoughts: val,
+                        ...(val !== "yes"
+                          ? {
+                              methodHow: "",
+                              intention: "",
+                              plan: "",
+                              behavior: "",
+                              behavior3mo: "",
+                            }
+                          : {}),
+                      };
                       next.assessments = {
                         ...p.assessments,
-                        suicide: { ...p.assessments.suicide },
-                      };
-                      next.assessments.suicide.intention = String(v);
+                        data: { ...(p.assessments as any).data, suicide },
+                      } as any;
                       return next;
                     })
                   }
@@ -211,67 +189,133 @@ export default function CheckInSection({
                 />
               </Field>
 
-              <Field title="In the past month, have you started to work out the details of how to kill yourself? Do you intend to carry out this plan?">
-                <Likert
-                  value={profile.assessments.suicide.plan}
-                  onChange={(v) =>
-                    setProfile((p) => {
-                      const next = { ...p };
-                      next.assessments = {
-                        ...p.assessments,
-                        suicide: { ...p.assessments.suicide },
-                      };
-                      next.assessments.suicide.plan = String(v);
-                      return next;
-                    })
-                  }
-                  options={yesNo}
-                />
-              </Field>
+              {a.suicide.thoughts === "yes" && (
+                <>
+                  <Field title="In the past month, have you been thinking about how you might end your life?">
+                    <Likert
+                      value={a.suicide.methodHow}
+                      onChange={(v) =>
+                        setProfile((p) => {
+                          const next = { ...p };
+                          next.assessments = {
+                            ...p.assessments,
+                            data: {
+                              ...(p.assessments as any).data,
+                              suicide: {
+                                ...(p.assessments as any).data.suicide,
+                                methodHow: String(v),
+                              },
+                            },
+                          } as any;
+                          return next;
+                        })
+                      }
+                      options={yesNo}
+                    />
+                  </Field>
 
-              <Field title="Have you done anything, started to do anything, or prepared to do anything, to end your life? Such as: collected pills, obtained a gun, wrote a will or suicide note">
-                <Likert
-                  value={profile.assessments.suicide.behavior}
-                  onChange={(v) =>
-                    setProfile((p) => {
-                      const next = { ...p };
-                      next.assessments = {
-                        ...p.assessments,
-                        suicide: { ...p.assessments.suicide },
-                      };
-                      next.assessments.suicide.behavior = String(v);
-                      if (String(v) !== "yes")
-                        next.assessments.suicide.behavior3mo = "";
-                      return next;
-                    })
-                  }
-                  options={yesNo}
-                />
-              </Field>
+                  <Field title="In the past month, have you had these suicidal thoughts and some intention of acting on them?">
+                    <Likert
+                      value={a.suicide.intention}
+                      onChange={(v) =>
+                        setProfile((p) => {
+                          const next = { ...p };
+                          next.assessments = {
+                            ...p.assessments,
+                            data: {
+                              ...(p.assessments as any).data,
+                              suicide: {
+                                ...(p.assessments as any).data.suicide,
+                                intention: String(v),
+                              },
+                            },
+                          } as any;
+                          return next;
+                        })
+                      }
+                      options={yesNo}
+                    />
+                  </Field>
 
-              {profile.assessments.suicide.behavior === "yes" && (
-                <Field title="Was this within the past 3 months?">
-                  <Likert
-                    value={profile.assessments.suicide.behavior3mo}
-                    onChange={(v) =>
-                      setProfile((p) => {
-                        const next = { ...p };
-                        next.assessments = {
-                          ...p.assessments,
-                          suicide: { ...p.assessments.suicide },
-                        };
-                        next.assessments.suicide.behavior3mo = String(v);
-                        return next;
-                      })
-                    }
-                    options={yesNo}
-                  />
-                </Field>
+                  <Field title="In the past month, have you started to work out the details of how to kill yourself? Do you intend to carry out this plan?">
+                    <Likert
+                      value={a.suicide.plan}
+                      onChange={(v) =>
+                        setProfile((p) => {
+                          const next = { ...p };
+                          next.assessments = {
+                            ...p.assessments,
+                            data: {
+                              ...(p.assessments as any).data,
+                              suicide: {
+                                ...(p.assessments as any).data.suicide,
+                                plan: String(v),
+                              },
+                            },
+                          } as any;
+                          return next;
+                        })
+                      }
+                      options={yesNo}
+                    />
+                  </Field>
+
+                  <Field title="Have you done anything, started to do anything, or prepared to do anything, to end your life? Such as: collected pills, obtained a gun, wrote a will or suicide note">
+                    <Likert
+                      value={a.suicide.behavior}
+                      onChange={(v) =>
+                        setProfile((p) => {
+                          const next = { ...p };
+                          const val = String(v);
+                          const suicide = {
+                            ...(p.assessments as any).data.suicide,
+                            behavior: val,
+                            ...(val !== "yes" ? { behavior3mo: "" } : {}),
+                          };
+                          next.assessments = {
+                            ...p.assessments,
+                            data: { ...(p.assessments as any).data, suicide },
+                          } as any;
+                          return next;
+                        })
+                      }
+                      options={yesNo}
+                    />
+                  </Field>
+
+                  {a.suicide.behavior === "yes" && (
+                    <Field title="Was this within the past 3 months?">
+                      <Likert
+                        value={a.suicide.behavior3mo}
+                        onChange={(v) =>
+                          setProfile((p) => {
+                            const next = { ...p };
+                            next.assessments = {
+                              ...p.assessments,
+                              data: {
+                                ...(p.assessments as any).data,
+                                suicide: {
+                                  ...(p.assessments as any).data.suicide,
+                                  behavior3mo: String(v),
+                                },
+                              },
+                            } as any;
+                            return next;
+                          })
+                        }
+                        options={yesNo}
+                      />
+                    </Field>
+                  )}
+                </>
               )}
-            </>
-          )}
-        </div>
-      </div>
+            </div>
+          </div>
+        </>
+      )}
+      {profile.isChild && profile.thoughtChanges.includes("suicidal") && (
+        <CSSRSForm profile={profile} setProfile={setProfile} />
+      )}
     </div>
   );
 }

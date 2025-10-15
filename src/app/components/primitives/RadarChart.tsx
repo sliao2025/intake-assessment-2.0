@@ -7,7 +7,7 @@ import type {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 import type { Props as DotProps } from "recharts/types/shape/Dot";
-import { cx } from "./cx";
+import { cx } from "../cx";
 
 /**
  * Selects evenly spaced items from an array. Used for rendering

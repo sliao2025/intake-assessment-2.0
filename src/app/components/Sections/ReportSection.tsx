@@ -33,6 +33,8 @@ import type {
   PatientReport,
   ReportInterpretations,
   SummaryPair,
+  AdultAssessments,
+  ChildAssessments,
 } from "../../lib/types/types";
 import { intPsychTheme } from "../theme";
 
@@ -351,17 +353,45 @@ export default function ReportSection({
   step,
   setProfile,
 }: Props) {
+  // Discriminant-based typed views
+  const isAdult = profile?.assessments?.kind === "adult";
+  const adultAssess = isAdult
+    ? (profile.assessments.data as AdultAssessments)
+    : null;
+  const childAssess = !isAdult
+    ? (profile.assessments.data as ChildAssessments)
+    : null;
+
   // ---- Compute metrics used in the report request & gauges ----
   const printableRef = useRef<HTMLDivElement | null>(null);
-  const gadScore = scoreSum(profile?.assessments?.gad7);
-  const phqScore = scoreSum(profile?.assessments?.phq9);
-  const pssScore = scoreSum(profile?.assessments?.stress);
-  const asrsScore = scoreSum(profile?.assessments?.asrs5);
+  const gadScore = scoreSum(
+    (isAdult ? adultAssess?.gad7 : childAssess?.gad7) as Record<string, any>
+  );
+  const phqScore = isAdult
+    ? scoreSum((adultAssess as AdultAssessments).phq9)
+    : 0;
+  const discTeenTotal =
+    !isAdult && childAssess?.discTeen?.self?.responses
+      ? Object.values(childAssess.discTeen.self.responses).reduce(
+          (n, v) => n + (Number(v) || 0),
+          0
+        )
+      : 0;
+  const pssScore = scoreSum(
+    (isAdult ? adultAssess?.stress : childAssess?.stress) as Record<string, any>
+  );
+  const asrsScore = scoreSum(
+    (isAdult ? adultAssess?.asrs5 : childAssess?.asrs5) as Record<string, any>
+  );
   const ptsdYes =
-    Object.values(profile?.assessments?.ptsd ?? {}).filter(
-      (v: any) => String(v).toLowerCase() === "yes"
-    ).length || 0;
-  const aceScore = scoreSum(profile?.assessments?.aceResilience);
+    Object.values(
+      (isAdult ? adultAssess?.ptsd : childAssess?.ptsd) ?? {}
+    ).filter((v: any) => String(v).toLowerCase() === "yes").length || 0;
+  const aceScore = scoreSum(
+    (isAdult
+      ? adultAssess?.aceResilience
+      : childAssess?.aceResilience) as Record<string, any>
+  );
 
   const crafftKeys = [
     "car",
@@ -371,23 +401,23 @@ export default function ReportSection({
     "familyFriends",
     "trouble",
   ] as const;
-  const crafftB = (profile?.assessments?.crafft?.partB ?? {}) as Record<
-    string,
-    any
-  >;
+  const crafftB =
+    (isAdult ? adultAssess?.crafft?.partB : childAssess?.crafft?.partB) ??
+    ({} as Record<string, any>);
   const crafftScore = crafftKeys.reduce(
     (n, k) => n + (String(crafftB[k] ?? "").toLowerCase() === "yes" ? 1 : 0),
     0
   );
 
   const metrics = {
+    // Core screens
     gad7: gadScore,
-    phq9: phqScore,
     pss4: pssScore,
     asrs5: asrsScore,
     ptsdFlags: ptsdYes,
     crafft: crafftScore,
     ace: aceScore,
+    phq9: phqScore,
   };
 
   const radarData = [
@@ -398,10 +428,12 @@ export default function ReportSection({
       max: 21,
     },
     {
-      subject: "Depression (PHQ-9)",
-      pct: Math.round((phqScore / 27) * 100),
-      raw: phqScore,
-      max: 27,
+      subject: isAdult ? "Depression (PHQ-9)" : "Depression (DISC Teen)",
+      pct: Math.round(
+        ((isAdult ? phqScore : discTeenTotal) / (isAdult ? 27 : 22)) * 100
+      ),
+      raw: isAdult ? phqScore : discTeenTotal,
+      max: isAdult ? 27 : 22,
     },
     {
       subject: "Stress (PSS-4)",
@@ -470,12 +502,12 @@ export default function ReportSection({
   }
 
   useEffect(() => {
-    if (hasReport) {
-      // Ensure loading indicators are off if we already have data
-      setLoading(false);
-      setInterpLoading(false);
-      return;
-    }
+    // if (hasReport) {
+    //   // Ensure loading indicators are off if we already have data
+    //   setLoading(false);
+    //   setInterpLoading(false);
+    //   return;
+    // }
 
     let alive = true;
     (async () => {
@@ -661,10 +693,14 @@ export default function ReportSection({
               fallback={useFallback}
             />
             <PdfGauge
-              label="Depression"
-              score={phqScore}
-              max={27}
-              caption="0–4 minimal · 5–9 mild · 10–14 moderate · 15–19 moderately severe · 20–27 severe"
+              label={isAdult ? "Depression" : "Depression (DISC Teen)"}
+              score={isAdult ? phqScore : discTeenTotal}
+              max={isAdult ? 27 : 22}
+              caption={
+                isAdult
+                  ? "0–4 minimal · 5–9 mild · 10–14 moderate · 15–19 moderately severe · 20–27 severe"
+                  : "0–6 Very Unlikely · 7–11 Moderately Likely · 12–15 Likely · 16+ Highly Likely"
+              }
               interpretation={interp.phq9}
               fallback={useFallback}
             />
@@ -1028,10 +1064,14 @@ export default function ReportSection({
               <div className="group rounded-2xl border border-slate-200 bg-white/80 shadow-sm hover:shadow-md transition-shadow">
                 <div className="p-4">
                   <Gauge
-                    label="Depression"
-                    score={phqScore}
-                    max={27}
-                    caption="0–4 minimal · 5–9 mild · 10–14 moderate · 15–19 moderately severe · 20–27 severe"
+                    label={isAdult ? "Depression" : "Depression (DISC Teen)"}
+                    score={isAdult ? phqScore : discTeenTotal}
+                    max={isAdult ? 27 : 22}
+                    caption={
+                      isAdult
+                        ? "0–4 minimal · 5–9 mild · 10–14 moderate · 15–19 moderately severe · 20–27 severe"
+                        : "0–6 Very Unlikely · 7–11 Moderately Likely · 12–15 Likely · 16+ Highly Likely"
+                    }
                   />
                   <div className="mt-3">
                     {interpLoading ? (

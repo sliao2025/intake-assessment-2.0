@@ -138,7 +138,7 @@ const alcoholFrequencyLabel = (v: string) =>
 const drinksPerOccasionLabel = (v: string) =>
   drinksPerOccasionOptions.find((o) => o.value === v)?.label ?? "Choose…";
 
-export default function ContactSection({
+export default function ProfileSection({
   title,
   profile,
   setProfile,
@@ -154,7 +154,10 @@ export default function ContactSection({
       <StepTitle n={step + 1} title={title} />
       <div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Field title="Height" required>
+          <Field
+            title={profile.isChild === true ? "Your Child’s Height" : "Height"}
+            required
+          >
             <div className="flex items-center gap-3">
               <div className="flex-1">
                 <div className="relative">
@@ -215,7 +218,10 @@ export default function ContactSection({
             </div>
           </Field>
 
-          <Field title="Weight" required>
+          <Field
+            title={profile.isChild === true ? "Your Child’s Weight" : "Weight"}
+            required
+          >
             <div className="relative">
               <input
                 type="number"
@@ -237,7 +243,14 @@ export default function ContactSection({
               </div>
             </div>
           </Field>
-          <Field title="Gender Identity" required>
+          <Field
+            title={
+              profile.isChild === true
+                ? "Your Child’s Gender Identity"
+                : "Gender Identity"
+            }
+            required
+          >
             <Listbox
               value={profile.genderIdentity}
               onChange={(val: string) =>
@@ -295,7 +308,14 @@ export default function ContactSection({
             </Listbox>
           </Field>
 
-          <Field title="Sexual Identity/Orientation" required>
+          <Field
+            title={
+              profile.isChild === true
+                ? "Your Child’s Sexual Identity/Orientation"
+                : "Sexual Identity/Orientation"
+            }
+            required
+          >
             <Listbox
               value={profile.sexualOrientation}
               onChange={(vals: Option[]) =>
@@ -361,7 +381,14 @@ export default function ContactSection({
             </Listbox>
           </Field>
 
-          <Field required title="What ethnic category best describes you?">
+          <Field
+            required
+            title={
+              profile.isChild === true
+                ? "What ethnic category best describes your child?"
+                : "What ethnic category best describes you?"
+            }
+          >
             <Listbox
               value={profile.ethnicity}
               onChange={(vals: Option[]) =>
@@ -429,7 +456,14 @@ export default function ContactSection({
             </Listbox>
           </Field>
 
-          <Field title="Do you practice a religion?" required>
+          <Field
+            title={
+              profile.isChild === true
+                ? "Does your child practice a religion?"
+                : "Do you practice a religion?"
+            }
+            required
+          >
             <Listbox
               value={profile.religion}
               onChange={(vals: Option[]) =>
@@ -497,7 +531,14 @@ export default function ContactSection({
             </Listbox>
           </Field>
 
-          <Field required title="Preferred Pronouns">
+          <Field
+            required
+            title={
+              profile.isChild === true
+                ? "Your Child’s Preferred Pronouns"
+                : "Preferred Pronouns"
+            }
+          >
             <Listbox
               value={profile.pronouns}
               onChange={(vals: Option[]) =>
@@ -564,63 +605,67 @@ export default function ContactSection({
               </div>
             </Listbox>
           </Field>
-          <Field title="Highest Degree" required>
-            <Listbox
-              value={profile.highestDegree}
-              onChange={(val: string) =>
-                setProfile((p) => ({ ...p, highestDegree: val }))
-              }
-            >
-              <div className="relative">
-                <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
-                  {profile.highestDegree ? (
-                    <span className="text-slate-900">
-                      {degreeLabel(profile.highestDegree)}
-                    </span>
-                  ) : (
-                    <span className="text-slate-400">Choose…</span>
-                  )}
-                  <ChevronDown
-                    className="group pointer-events-none absolute top-3 right-2.5 size-4"
-                    aria-hidden="true"
-                  />
-                </ListboxButton>
-
-                <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
-                  {degreeOptions.map((option) => (
-                    <ListboxOption
-                      key={option.value}
-                      value={option.value}
-                      as={React.Fragment}
-                    >
-                      {({ active, selected }) => (
-                        <li
-                          className={`${
-                            active ? "bg-slate-100" : "bg-white"
-                          } relative cursor-pointer select-none py-2 pl-4 pr-10`}
-                        >
-                          <span
-                            className={`${
-                              selected
-                                ? "font-medium text-slate-900"
-                                : "font-normal text-slate-700"
-                            } block truncate`}
-                          >
-                            {option.label}
-                          </span>
-                          {selected && (
-                            <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
-                              <Check />
-                            </span>
-                          )}
-                        </li>
+          {!profile.isChild && (
+            <>
+              <Field title="Highest Degree" required>
+                <Listbox
+                  value={profile.highestDegree}
+                  onChange={(val: string) =>
+                    setProfile((p) => ({ ...p, highestDegree: val }))
+                  }
+                >
+                  <div className="relative">
+                    <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                      {profile.highestDegree ? (
+                        <span className="text-slate-900">
+                          {degreeLabel(profile.highestDegree)}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400">Choose…</span>
                       )}
-                    </ListboxOption>
-                  ))}
-                </ListboxOptions>
-              </div>
-            </Listbox>
-          </Field>
+                      <ChevronDown
+                        className="group pointer-events-none absolute top-3 right-2.5 size-4"
+                        aria-hidden="true"
+                      />
+                    </ListboxButton>
+
+                    <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                      {degreeOptions.map((option) => (
+                        <ListboxOption
+                          key={option.value}
+                          value={option.value}
+                          as={React.Fragment}
+                        >
+                          {({ active, selected }) => (
+                            <li
+                              className={`${
+                                active ? "bg-slate-100" : "bg-white"
+                              } relative cursor-pointer select-none py-2 pl-4 pr-10`}
+                            >
+                              <span
+                                className={`${
+                                  selected
+                                    ? "font-medium text-slate-900"
+                                    : "font-normal text-slate-700"
+                                } block truncate`}
+                              >
+                                {option.label}
+                              </span>
+                              {selected && (
+                                <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                                  <Check />
+                                </span>
+                              )}
+                            </li>
+                          )}
+                        </ListboxOption>
+                      ))}
+                    </ListboxOptions>
+                  </div>
+                </Listbox>
+              </Field>
+            </>
+          )}
         </div>
         {!profile.isChild && (
           <div>
@@ -662,384 +707,861 @@ export default function ContactSection({
             )}
           </div>
         )}
-
-        <Separator label={"Dietary/Substance Use"} className="md:col-span-2" />
-        <div className="grid md:grid-cols-2 gap-4">
-          <Field title="How often do you consume alcoholic beverages?" required>
-            <Listbox
-              value={profile.alcoholFrequency}
-              onChange={(val: string) =>
-                setProfile((p) => ({ ...p, alcoholFrequency: val }))
-              }
-            >
-              <div className="relative">
-                <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
-                  {profile.alcoholFrequency ? (
-                    <span className="text-slate-900">
-                      {alcoholFrequencyLabel(profile.alcoholFrequency)}
-                    </span>
-                  ) : (
-                    <span className="text-slate-400">Choose…</span>
-                  )}
-                  <ChevronDown
-                    className="group pointer-events-none absolute top-3 right-2.5 size-4"
-                    aria-hidden="true"
-                  />
-                </ListboxButton>
-
-                <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
-                  {alcoholFrequencyOptions.map((option) => (
-                    <ListboxOption
-                      key={option.value}
-                      value={option.value}
-                      as={React.Fragment}
-                    >
-                      {({ active, selected }) => (
-                        <li
-                          className={`${
-                            active ? "bg-slate-100" : "bg-white"
-                          } relative cursor-pointer select-none py-2 pl-4 pr-10`}
-                        >
-                          <span
-                            className={`${
-                              selected
-                                ? "font-medium text-slate-900"
-                                : "font-normal text-slate-700"
-                            } block truncate`}
-                          >
-                            {option.label}
-                          </span>
-                          {selected && (
-                            <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
-                              <Check />
-                            </span>
-                          )}
-                        </li>
-                      )}
-                    </ListboxOption>
-                  ))}
-                </ListboxOptions>
-              </div>
-            </Listbox>
-          </Field>
-          {profile.alcoholFrequency !== "none" && (
-            <Field
-              title="When you do drink, how many drinks do you have?"
-              required
-            >
-              <Listbox
-                value={profile.drinksPerOccasion}
-                onChange={(val: string) =>
-                  setProfile((p) => ({ ...p, drinksPerOccasion: val }))
-                }
-              >
-                <div className="relative">
-                  <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
-                    {profile.drinksPerOccasion ? (
-                      <span className="text-slate-900">
-                        {drinksPerOccasionLabel(profile.drinksPerOccasion)}
-                      </span>
-                    ) : (
-                      <span className="text-slate-400">Choose…</span>
-                    )}
-                    <ChevronDown
-                      className="group pointer-events-none absolute top-3 right-2.5 size-4"
-                      aria-hidden="true"
-                    />
-                  </ListboxButton>
-
-                  <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
-                    {drinksPerOccasionOptions.map((option) => (
-                      <ListboxOption
-                        key={option.value}
-                        value={option.value}
-                        as={React.Fragment}
-                      >
-                        {({ active, selected }) => (
-                          <li
-                            className={`${
-                              active ? "bg-slate-100" : "bg-white"
-                            } relative cursor-pointer select-none py-2 pl-4 pr-10`}
-                          >
-                            <span
-                              className={`${
-                                selected
-                                  ? "font-medium text-slate-900"
-                                  : "font-normal text-slate-700"
-                              } block truncate`}
-                            >
-                              {option.label}
-                            </span>
-                            {selected && (
-                              <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
-                                <Check />
-                              </span>
-                            )}
-                          </li>
-                        )}
-                      </ListboxOption>
-                    ))}
-                  </ListboxOptions>
-                </div>
-              </Listbox>
-            </Field>
-          )}
-
-          <Field
-            required
-            title="Which of these substances do you use frequently?"
-          >
-            <Listbox
-              value={profile.substancesUsed}
-              onChange={(vals: Option[]) =>
-                setProfile((p) => ({ ...p, substancesUsed: vals }))
-              }
-              multiple
-            >
-              <div className="relative">
-                <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
-                  {profile.substancesUsed.length === 0 ? (
-                    <span className="text-slate-400">
-                      Select all that apply…
-                    </span>
-                  ) : (
-                    <span className="flex flex-wrap gap-1">
-                      {profile.substancesUsed.map((o) => (
-                        <span
-                          key={o.value}
-                          className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
-                        >
-                          {o.label}
-                        </span>
-                      ))}
-                    </span>
-                  )}
-                  <ChevronDown
-                    className="group pointer-events-none absolute top-3 right-2.5 size-4"
-                    aria-hidden="true"
-                  />
-                </ListboxButton>
-
-                <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
-                  {substanceOptions.map((option) => (
-                    <ListboxOption
-                      key={option.value}
-                      value={option}
-                      as={React.Fragment}
-                    >
-                      {({ active, selected }) => (
-                        <li
-                          className={`${
-                            active ? "bg-slate-100" : "bg-white"
-                          } relative cursor-pointer select-none py-2 pl-4 pr-10`}
-                        >
-                          <span
-                            className={`${
-                              selected
-                                ? "font-medium text-slate-900"
-                                : "font-normal text-slate-700"
-                            } block truncate`}
-                          >
-                            {option.label}
-                          </span>
-                          {selected && (
-                            <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
-                              <Check />
-                            </span>
-                          )}
-                        </li>
-                      )}
-                    </ListboxOption>
-                  ))}
-                </ListboxOptions>
-              </div>
-            </Listbox>
-          </Field>
-
-          <Field title="Diet Type" required>
-            <Listbox
-              value={profile.dietType}
-              onChange={(vals: Option[]) =>
-                setProfile((p) => ({ ...p, dietType: vals }))
-              }
-              multiple
-            >
-              <div className="relative">
-                <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
-                  {profile.dietType.length === 0 ? (
-                    <span className="text-slate-400">
-                      Select all that apply…
-                    </span>
-                  ) : (
-                    <span className="flex flex-wrap gap-1">
-                      {profile.dietType.map((o) => (
-                        <span
-                          key={o.value}
-                          className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
-                        >
-                          {o.label}
-                        </span>
-                      ))}
-                    </span>
-                  )}
-                  <ChevronDown
-                    className="group pointer-events-none absolute top-3 right-2.5 size-4"
-                    aria-hidden="true"
-                  />
-                </ListboxButton>
-
-                <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
-                  {dietOptions.map((option) => (
-                    <ListboxOption
-                      key={option.value}
-                      value={option}
-                      as={React.Fragment}
-                    >
-                      {({ active, selected }) => (
-                        <li
-                          className={`${
-                            active ? "bg-slate-100" : "bg-white"
-                          } relative cursor-pointer select-none py-2 pl-4 pr-10`}
-                        >
-                          <span
-                            className={`${
-                              selected
-                                ? "font-medium text-slate-900"
-                                : "font-normal text-slate-700"
-                            } block truncate`}
-                          >
-                            {option.label}
-                          </span>
-                          {selected && (
-                            <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
-                              <Check />
-                            </span>
-                          )}
-                        </li>
-                      )}
-                    </ListboxOption>
-                  ))}
-                </ListboxOptions>
-              </div>
-            </Listbox>
-          </Field>
-        </div>
-        <Separator label={"Current Life"} className="md:col-span-2" />
-        <Field title={"Employment Status"} required className="mb-6">
-          <Likert
-            label="Are you currently employed?"
-            value={profile.isEmployed.toString()}
-            onChange={(v) =>
-              setProfile((p) => ({
-                ...p,
-                isEmployed: v === "true",
-              }))
-            }
-            options={[
-              { key: "true", label: "Yes" },
-              { key: "false", label: "No" },
-            ]}
-          ></Likert>
-        </Field>
-        {profile.isEmployed && (
+        {!profile.isChild && (
           <>
-            <Field
-              title="Tell us about your current employment, how long you've been there etc."
-              required
-            >
-              <TextAreaWithEncouragement
-                rows={2}
-                placeholder="Share here in your own words…"
-                value={profile.jobDetails}
-                onChangeText={(next) =>
-                  setProfile((p) => ({
-                    ...p,
-                    jobDetails: next,
-                  }))
-                }
-                recommendedWords={40}
-              />
-            </Field>
+            <Separator
+              label={"Dietary/Substance Use"}
+              className="md:col-span-2"
+            />
+            <div className="grid md:grid-cols-2 gap-4">
+              <Field
+                title="How often do you consume alcoholic beverages?"
+                required
+              >
+                <Listbox
+                  value={profile.alcoholFrequency}
+                  onChange={(val: string) =>
+                    setProfile((p) => ({ ...p, alcoholFrequency: val }))
+                  }
+                >
+                  <div className="relative">
+                    <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                      {profile.alcoholFrequency ? (
+                        <span className="text-slate-900">
+                          {alcoholFrequencyLabel(profile.alcoholFrequency)}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400">Choose…</span>
+                      )}
+                      <ChevronDown
+                        className="group pointer-events-none absolute top-3 right-2.5 size-4"
+                        aria-hidden="true"
+                      />
+                    </ListboxButton>
+
+                    <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                      {alcoholFrequencyOptions.map((option) => (
+                        <ListboxOption
+                          key={option.value}
+                          value={option.value}
+                          as={React.Fragment}
+                        >
+                          {({ active, selected }) => (
+                            <li
+                              className={`${
+                                active ? "bg-slate-100" : "bg-white"
+                              } relative cursor-pointer select-none py-2 pl-4 pr-10`}
+                            >
+                              <span
+                                className={`${
+                                  selected
+                                    ? "font-medium text-slate-900"
+                                    : "font-normal text-slate-700"
+                                } block truncate`}
+                              >
+                                {option.label}
+                              </span>
+                              {selected && (
+                                <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                                  <Check />
+                                </span>
+                              )}
+                            </li>
+                          )}
+                        </ListboxOption>
+                      ))}
+                    </ListboxOptions>
+                  </div>
+                </Listbox>
+              </Field>
+              {profile.alcoholFrequency !== "none" && (
+                <Field
+                  title="When you do drink, how many drinks do you have?"
+                  required
+                >
+                  <Listbox
+                    value={profile.drinksPerOccasion}
+                    onChange={(val: string) =>
+                      setProfile((p) => ({ ...p, drinksPerOccasion: val }))
+                    }
+                  >
+                    <div className="relative">
+                      <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                        {profile.drinksPerOccasion ? (
+                          <span className="text-slate-900">
+                            {drinksPerOccasionLabel(profile.drinksPerOccasion)}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400">Choose…</span>
+                        )}
+                        <ChevronDown
+                          className="group pointer-events-none absolute top-3 right-2.5 size-4"
+                          aria-hidden="true"
+                        />
+                      </ListboxButton>
+
+                      <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                        {drinksPerOccasionOptions.map((option) => (
+                          <ListboxOption
+                            key={option.value}
+                            value={option.value}
+                            as={React.Fragment}
+                          >
+                            {({ active, selected }) => (
+                              <li
+                                className={`${
+                                  active ? "bg-slate-100" : "bg-white"
+                                } relative cursor-pointer select-none py-2 pl-4 pr-10`}
+                              >
+                                <span
+                                  className={`${
+                                    selected
+                                      ? "font-medium text-slate-900"
+                                      : "font-normal text-slate-700"
+                                  } block truncate`}
+                                >
+                                  {option.label}
+                                </span>
+                                {selected && (
+                                  <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                                    <Check />
+                                  </span>
+                                )}
+                              </li>
+                            )}
+                          </ListboxOption>
+                        ))}
+                      </ListboxOptions>
+                    </div>
+                  </Listbox>
+                </Field>
+              )}
+
+              <Field
+                required
+                title="Which of these substances do you use frequently?"
+              >
+                <Listbox
+                  value={profile.substancesUsed}
+                  onChange={(vals: Option[]) =>
+                    setProfile((p) => ({ ...p, substancesUsed: vals }))
+                  }
+                  multiple
+                >
+                  <div className="relative">
+                    <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                      {profile.substancesUsed.length === 0 ? (
+                        <span className="text-slate-400">
+                          Select all that apply…
+                        </span>
+                      ) : (
+                        <span className="flex flex-wrap gap-1">
+                          {profile.substancesUsed.map((o) => (
+                            <span
+                              key={o.value}
+                              className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
+                            >
+                              {o.label}
+                            </span>
+                          ))}
+                        </span>
+                      )}
+                      <ChevronDown
+                        className="group pointer-events-none absolute top-3 right-2.5 size-4"
+                        aria-hidden="true"
+                      />
+                    </ListboxButton>
+
+                    <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                      {substanceOptions.map((option) => (
+                        <ListboxOption
+                          key={option.value}
+                          value={option}
+                          as={React.Fragment}
+                        >
+                          {({ active, selected }) => (
+                            <li
+                              className={`${
+                                active ? "bg-slate-100" : "bg-white"
+                              } relative cursor-pointer select-none py-2 pl-4 pr-10`}
+                            >
+                              <span
+                                className={`${
+                                  selected
+                                    ? "font-medium text-slate-900"
+                                    : "font-normal text-slate-700"
+                                } block truncate`}
+                              >
+                                {option.label}
+                              </span>
+                              {selected && (
+                                <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                                  <Check />
+                                </span>
+                              )}
+                            </li>
+                          )}
+                        </ListboxOption>
+                      ))}
+                    </ListboxOptions>
+                  </div>
+                </Listbox>
+              </Field>
+
+              <Field title="Diet Type" required>
+                <Listbox
+                  value={profile.dietType}
+                  onChange={(vals: Option[]) =>
+                    setProfile((p) => ({ ...p, dietType: vals }))
+                  }
+                  multiple
+                >
+                  <div className="relative">
+                    <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                      {profile.dietType.length === 0 ? (
+                        <span className="text-slate-400">
+                          Select all that apply…
+                        </span>
+                      ) : (
+                        <span className="flex flex-wrap gap-1">
+                          {profile.dietType.map((o) => (
+                            <span
+                              key={o.value}
+                              className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
+                            >
+                              {o.label}
+                            </span>
+                          ))}
+                        </span>
+                      )}
+                      <ChevronDown
+                        className="group pointer-events-none absolute top-3 right-2.5 size-4"
+                        aria-hidden="true"
+                      />
+                    </ListboxButton>
+
+                    <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                      {dietOptions.map((option) => (
+                        <ListboxOption
+                          key={option.value}
+                          value={option}
+                          as={React.Fragment}
+                        >
+                          {({ active, selected }) => (
+                            <li
+                              className={`${
+                                active ? "bg-slate-100" : "bg-white"
+                              } relative cursor-pointer select-none py-2 pl-4 pr-10`}
+                            >
+                              <span
+                                className={`${
+                                  selected
+                                    ? "font-medium text-slate-900"
+                                    : "font-normal text-slate-700"
+                                } block truncate`}
+                              >
+                                {option.label}
+                              </span>
+                              {selected && (
+                                <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                                  <Check />
+                                </span>
+                              )}
+                            </li>
+                          )}
+                        </ListboxOption>
+                      ))}
+                    </ListboxOptions>
+                  </div>
+                </Listbox>
+              </Field>
+            </div>
           </>
         )}
-        {!profile.isEmployed && !profile.isChild && (
+        {!profile.isChild && (
           <>
-            <Field title="Why are you currently unemployed?" required>
+            <Separator label={"Current Life"} className="md:col-span-2" />
+            <Field title={"Employment Status"} required className="mb-6">
+              <Likert
+                label="Are you currently employed?"
+                value={profile.isEmployed.toString()}
+                onChange={(v) =>
+                  setProfile((p) => ({
+                    ...p,
+                    isEmployed: v === "true",
+                  }))
+                }
+                options={[
+                  { key: "true", label: "Yes" },
+                  { key: "false", label: "No" },
+                ]}
+              ></Likert>
+            </Field>
+            {profile.isEmployed && (
+              <>
+                <Field
+                  title="Tell us about your current employment, how long you've been there etc."
+                  required
+                >
+                  <TextAreaWithEncouragement
+                    rows={2}
+                    placeholder="Share here in your own words…"
+                    value={profile.jobDetails}
+                    onChangeText={(next) =>
+                      setProfile((p) => ({
+                        ...p,
+                        jobDetails: next,
+                      }))
+                    }
+                    recommendedWords={40}
+                  />
+                </Field>
+              </>
+            )}
+            {!profile.isEmployed && !profile.isChild && (
+              <>
+                <Field title="Why are you currently unemployed?" required>
+                  <TextAreaWithEncouragement
+                    rows={2}
+                    placeholder="Share here in your own words…"
+                    value={profile.jobDetails}
+                    onChangeText={(next) =>
+                      setProfile((p) => ({
+                        ...p,
+                        jobDetails: next,
+                      }))
+                    }
+                    recommendedWords={15}
+                  />
+                </Field>
+              </>
+            )}
+            <Field
+              title="What are your hobbies and interests?"
+              required
+              className="mt-6"
+            >
               <TextAreaWithEncouragement
                 rows={2}
-                placeholder="Share here in your own words…"
-                value={profile.jobDetails}
+                placeholder="Share here in your own words"
+                value={profile.hobbies || ""}
                 onChangeText={(next) =>
                   setProfile((p) => ({
                     ...p,
-                    jobDetails: next,
+                    hobbies: next,
                   }))
                 }
                 recommendedWords={15}
               />
             </Field>
+            <Field title={"Sexual Activity"} className="mt-6" required>
+              <Likert
+                label="Are you currently sexually active, or will be soon?"
+                value={profile.isSexuallyActive.toString()}
+                onChange={(v) =>
+                  setProfile((p) => ({
+                    ...p,
+                    isSexuallyActive: v === "true",
+                  }))
+                }
+                options={[
+                  { key: "true", label: "Yes" },
+                  { key: "false", label: "No" },
+                ]}
+              />
+            </Field>
+            {profile.isSexuallyActive && (
+              <Field className="mt-6">
+                <Likert
+                  label={
+                    <>
+                      <b>In the past year</b>, how many different sexual
+                      partners have you had?
+                    </>
+                  }
+                  value={profile.sexualPartners.toString()}
+                  onChange={(v) =>
+                    setProfile((p) => ({
+                      ...p,
+                      sexualPartners: String(v),
+                    }))
+                  }
+                  options={[
+                    { key: "1", label: "1" },
+                    { key: "2-4", label: "2 to 4" },
+                    { key: "5-9", label: "5 to 9" },
+                    { key: "10+", label: "10+" },
+                  ]}
+                />
+              </Field>
+            )}
           </>
         )}
-        <Field
-          title="What are your hobbies and interests?"
-          required
-          className="mt-6"
-        >
-          <TextAreaWithEncouragement
-            rows={2}
-            placeholder="Share here in your own words"
-            value={profile.hobbies || ""}
-            onChangeText={(next) =>
-              setProfile((p) => ({
-                ...p,
-                hobbies: next,
-              }))
-            }
-            recommendedWords={15}
-          />
-        </Field>
-        <Field title={"Sexual Activity"} className="mt-6" required>
-          <Likert
-            label="Are you currently sexually active, or will be soon?"
-            value={profile.isSexuallyActive.toString()}
-            onChange={(v) =>
-              setProfile((p) => ({
-                ...p,
-                isSexuallyActive: v === "true",
-              }))
-            }
-            options={[
-              { key: "true", label: "Yes" },
-              { key: "false", label: "No" },
-            ]}
-          />
-        </Field>
-        {profile.isSexuallyActive && (
-          <Field className="mt-6">
-            <Likert
-              label={
-                <>
-                  <b>In the past year</b>, how many different sexual partners
-                  have you had?
-                </>
-              }
-              value={profile.sexualPartners.toString()}
-              onChange={(v) =>
-                setProfile((p) => ({
-                  ...p,
-                  sexualPartners: String(v),
-                }))
-              }
-              options={[
-                { key: "1", label: "1" },
-                { key: "2-4", label: "2 to 4" },
-                { key: "5-9", label: "5 to 9" },
-                { key: "10+", label: "10+" },
-              ]}
+
+        {/* School Info (Child only) */}
+        {profile.isChild === true && (
+          <>
+            <Separator label="School Info" className="md:col-span-2 mt-6" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <Field title="Your Child’s School Name" required>
+                <input
+                  className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                  placeholder="P.S. 321 William Penn"
+                  value={profile.schoolInfo?.schoolName ?? ""}
+                  onChange={(e) =>
+                    setProfile((p) => ({
+                      ...p,
+                      schoolInfo: {
+                        ...(p.schoolInfo ?? {}),
+                        schoolName: e.target.value,
+                      },
+                    }))
+                  }
+                />
+              </Field>
+
+              <Field title="School Phone Number" required>
+                <input
+                  className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                  placeholder="e.g., 123-456-7890"
+                  value={profile.schoolInfo?.schoolPhoneNumber ?? ""}
+                  onChange={(e) =>
+                    setProfile((p) => ({
+                      ...p,
+                      schoolInfo: {
+                        ...(p.schoolInfo ?? {}),
+                        schoolPhoneNumber: e.target.value,
+                      },
+                    }))
+                  }
+                />
+              </Field>
+
+              <Field title="Years at Current School" required>
+                <input
+                  type="number"
+                  min={0}
+                  className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                  placeholder="e.g., 3"
+                  value={profile.schoolInfo?.yearsAtSchool ?? ""}
+                  onChange={(e) =>
+                    setProfile((p) => ({
+                      ...p,
+                      schoolInfo: {
+                        ...(p.schoolInfo ?? {}),
+                        yearsAtSchool:
+                          e.target.value === "" ? null : Number(e.target.value),
+                      },
+                    }))
+                  }
+                />
+              </Field>
+              <Field title="Current Grade" required>
+                <input
+                  className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                  placeholder="e.g., 6th grade"
+                  value={profile.schoolInfo?.grade ?? ""}
+                  onChange={(e) =>
+                    setProfile((p) => ({
+                      ...p,
+                      schoolInfo: {
+                        ...(p.schoolInfo ?? {}),
+                        grade: e.target.value,
+                      },
+                    }))
+                  }
+                />
+              </Field>
+            </div>
+            <div className="mt-4 space-y-4">
+              <Field title="Has your child ever repeated a grade?" required>
+                <Likert
+                  label=""
+                  value={(
+                    profile.schoolInfo?.hasRepeatedGrade ?? false
+                  ).toString()}
+                  onChange={(v) =>
+                    setProfile((p) => ({
+                      ...p,
+                      schoolInfo: {
+                        ...(p.schoolInfo ?? {}),
+                        hasRepeatedGrade: v === "true",
+                        repeatedGradeDetail:
+                          v === "true"
+                            ? (p.schoolInfo?.repeatedGradeDetail ?? "")
+                            : "",
+                      },
+                    }))
+                  }
+                  options={[
+                    { key: "true", label: "Yes" },
+                    { key: "false", label: "No" },
+                  ]}
+                />
+              </Field>
+              {profile.schoolInfo?.hasRepeatedGrade === true && (
+                <Field
+                  title="Please share details (grade, reason, timing)"
+                  required
+                >
+                  <TextAreaWithEncouragement
+                    rows={2}
+                    placeholder="Share here in your own words…"
+                    value={profile.schoolInfo?.repeatedGradeDetail ?? ""}
+                    onChangeText={(next) =>
+                      setProfile((p) => ({
+                        ...p,
+                        schoolInfo: {
+                          ...(p.schoolInfo ?? {}),
+                          repeatedGradeDetail: next,
+                        },
+                      }))
+                    }
+                    recommendedWords={15}
+                  />
+                </Field>
+              )}
+              <Field title="Is your child in any special classes?" required>
+                <Likert
+                  label=""
+                  value={(
+                    profile.schoolInfo?.hasSpecialClasses ?? false
+                  ).toString()}
+                  onChange={(v) =>
+                    setProfile((p) => ({
+                      ...p,
+                      schoolInfo: {
+                        ...(p.schoolInfo ?? {}),
+                        hasSpecialClasses: v === "true",
+                        specialClassesDetail:
+                          v === "true"
+                            ? (p.schoolInfo?.specialClassesDetail ?? "")
+                            : "",
+                      },
+                    }))
+                  }
+                  options={[
+                    { key: "true", label: "Yes" },
+                    { key: "false", label: "No" },
+                  ]}
+                />
+              </Field>
+              {profile.schoolInfo?.hasSpecialClasses === true && (
+                <Field
+                  title="Which special or resource classes does your child attend?"
+                  required
+                >
+                  <TextAreaWithEncouragement
+                    rows={2}
+                    placeholder="Share here in your own words…"
+                    value={profile.schoolInfo?.specialClassesDetail ?? ""}
+                    onChangeText={(next) =>
+                      setProfile((p) => ({
+                        ...p,
+                        schoolInfo: {
+                          ...(p.schoolInfo ?? {}),
+                          specialClassesDetail: next,
+                        },
+                      }))
+                    }
+                    recommendedWords={15}
+                  />
+                </Field>
+              )}
+              <Field title="Does your child receive special services?" required>
+                <Likert
+                  label=""
+                  value={(
+                    profile.schoolInfo?.hasSpecialServices ?? false
+                  ).toString()}
+                  onChange={(v) =>
+                    setProfile((p) => ({
+                      ...p,
+                      schoolInfo: {
+                        ...(p.schoolInfo ?? {}),
+                        hasSpecialServices: v === "true",
+                        specialServicesDetail:
+                          v === "true"
+                            ? (p.schoolInfo?.specialServicesDetail ?? "")
+                            : "",
+                      },
+                    }))
+                  }
+                  options={[
+                    { key: "true", label: "Yes" },
+                    { key: "false", label: "No" },
+                  ]}
+                />
+              </Field>
+              {profile.schoolInfo?.hasSpecialServices === true && (
+                <Field
+                  title="Please share more about the special services."
+                  required
+                >
+                  <TextAreaWithEncouragement
+                    rows={3}
+                    placeholder="Share here in your own words…"
+                    value={profile.schoolInfo?.specialServicesDetail ?? ""}
+                    onChangeText={(next) =>
+                      setProfile((p) => ({
+                        ...p,
+                        schoolInfo: {
+                          ...(p.schoolInfo ?? {}),
+                          specialServicesDetail: next,
+                        },
+                      }))
+                    }
+                    recommendedWords={20}
+                  />
+                </Field>
+              )}
+              <Field
+                required
+                title="Can you tell us little bit about your child's academic grades?"
+              >
+                <TextAreaWithEncouragement
+                  rows={2}
+                  placeholder="e.g., Mostly A’s and B’s; recent decline in math"
+                  value={profile.schoolInfo?.academicGrades ?? ""}
+                  onChangeText={(next) =>
+                    setProfile((p) => ({
+                      ...p,
+                      schoolInfo: {
+                        ...(p.schoolInfo ?? {}),
+                        academicGrades: next,
+                      },
+                    }))
+                  }
+                  recommendedWords={15}
+                />
+              </Field>
+            </div>
+          </>
+        )}
+        {/* Relationships & Abilities (Child only) */}
+        {profile.isChild === true && (
+          <>
+            <Separator
+              label="Relationships and Abilities"
+              className="md:col-span-2 mt-8"
             />
-          </Field>
+            <div className="space-y-4 mt-4">
+              {/* Q11 */}
+              <Field
+                title="What are your child's relationships like with teachers and peers?"
+                required
+              >
+                <TextAreaWithEncouragement
+                  rows={4}
+                  placeholder="e.g., Gets along well with most classmates; a few conflicts at recess; positive relationship with homeroom teacher."
+                  value={
+                    profile.relationshipsAbilities?.teachersPeersRelationship ??
+                    ""
+                  }
+                  onChangeText={(next) =>
+                    setProfile((p) => ({
+                      ...p,
+                      relationshipsAbilities: {
+                        ...(p.relationshipsAbilities ?? {}),
+                        teachersPeersRelationship: next,
+                      },
+                    }))
+                  }
+                  recommendedWords={40}
+                />
+              </Field>
+
+              {/* Q12 */}
+              <Field title="How would you rate your child's (overall)?">
+                <TextAreaWithEncouragement
+                  rows={4}
+                  placeholder="Share brief ratings/notes on academics, behavior, attention, organization, and social skills."
+                  value={
+                    profile.relationshipsAbilities?.childRatingNarrative ?? ""
+                  }
+                  onChangeText={(next) =>
+                    setProfile((p) => ({
+                      ...p,
+                      relationshipsAbilities: {
+                        ...(p.relationshipsAbilities ?? {}),
+                        childRatingNarrative: next,
+                      },
+                    }))
+                  }
+                  recommendedWords={35}
+                />
+              </Field>
+
+              {/* Q13 */}
+              <Field
+                title="Has your child ever had truancy proceedings? (gone to court for truancy)"
+                required
+              >
+                <Likert
+                  label=""
+                  value={(
+                    profile.relationshipsAbilities?.hadTruancyProceedings ??
+                    false
+                  ).toString()}
+                  onChange={(v) =>
+                    setProfile((p) => ({
+                      ...p,
+                      relationshipsAbilities: {
+                        ...(p.relationshipsAbilities ?? {}),
+                        hadTruancyProceedings: v === "true",
+                        truancyProceedingsDetail:
+                          v === "true"
+                            ? (p.relationshipsAbilities
+                                ?.truancyProceedingsDetail ?? "")
+                            : "",
+                      },
+                    }))
+                  }
+                  options={[
+                    { key: "true", label: "Yes" },
+                    { key: "false", label: "No" },
+                  ]}
+                />
+              </Field>
+
+              {/* Q14 (conditional) */}
+              {profile.relationshipsAbilities?.hadTruancyProceedings ===
+                true && (
+                <Field
+                  title="Please share more about the truancy proceedings."
+                  required
+                >
+                  <TextAreaWithEncouragement
+                    rows={3}
+                    placeholder="e.g., Date, school, court outcome, attendance plan, etc."
+                    value={
+                      profile.relationshipsAbilities
+                        ?.truancyProceedingsDetail ?? ""
+                    }
+                    onChangeText={(next) =>
+                      setProfile((p) => ({
+                        ...p,
+                        relationshipsAbilities: {
+                          ...(p.relationshipsAbilities ?? {}),
+                          truancyProceedingsDetail: next,
+                        },
+                      }))
+                    }
+                    recommendedWords={30}
+                  />
+                </Field>
+              )}
+
+              {/* Q15 */}
+              <Field
+                title="Has your child received counseling at school?"
+                required
+              >
+                <Likert
+                  label=""
+                  value={(
+                    profile.relationshipsAbilities?.receivedSchoolCounseling ??
+                    false
+                  ).toString()}
+                  onChange={(v) =>
+                    setProfile((p) => ({
+                      ...p,
+                      relationshipsAbilities: {
+                        ...(p.relationshipsAbilities ?? {}),
+                        receivedSchoolCounseling: v === "true",
+                        schoolCounselingDetail:
+                          v === "true"
+                            ? (p.relationshipsAbilities
+                                ?.schoolCounselingDetail ?? "")
+                            : "",
+                      },
+                    }))
+                  }
+                  options={[
+                    { key: "true", label: "Yes" },
+                    { key: "false", label: "No" },
+                  ]}
+                />
+              </Field>
+
+              {/* Q16 (conditional) */}
+              {profile.relationshipsAbilities?.receivedSchoolCounseling ===
+                true && (
+                <Field
+                  title="Please share more about the counseling received at school."
+                  required
+                >
+                  <TextAreaWithEncouragement
+                    rows={3}
+                    placeholder="e.g., Frequency, provider (school counselor, social worker), focus, outcomes."
+                    value={
+                      profile.relationshipsAbilities?.schoolCounselingDetail ??
+                      ""
+                    }
+                    onChangeText={(next) =>
+                      setProfile((p) => ({
+                        ...p,
+                        relationshipsAbilities: {
+                          ...(p.relationshipsAbilities ?? {}),
+                          schoolCounselingDetail: next,
+                        },
+                      }))
+                    }
+                    recommendedWords={30}
+                  />
+                </Field>
+              )}
+
+              {/* Q17 */}
+              <Field
+                title="Describe your child's activities, interests and strengths:"
+                required
+              >
+                <TextAreaWithEncouragement
+                  rows={3}
+                  placeholder="e.g., Soccer, drawing, robotics; strong memory; leadership; persistence."
+                  value={
+                    profile.relationshipsAbilities
+                      ?.activitiesInterestsStrengths ?? ""
+                  }
+                  onChangeText={(next) =>
+                    setProfile((p) => ({
+                      ...p,
+                      relationshipsAbilities: {
+                        ...(p.relationshipsAbilities ?? {}),
+                        activitiesInterestsStrengths: next,
+                      },
+                    }))
+                  }
+                  recommendedWords={30}
+                />
+              </Field>
+
+              {/* Q18 */}
+              <Field title="Please describe any other concerns you or your child has:">
+                <TextAreaWithEncouragement
+                  rows={3}
+                  placeholder="Anything else you'd like us to know."
+                  value={profile.relationshipsAbilities?.otherConcerns ?? ""}
+                  onChangeText={(next) =>
+                    setProfile((p) => ({
+                      ...p,
+                      relationshipsAbilities: {
+                        ...(p.relationshipsAbilities ?? {}),
+                        otherConcerns: next,
+                      },
+                    }))
+                  }
+                  recommendedWords={25}
+                />
+              </Field>
+            </div>
+          </>
         )}
       </div>
     </div>
   );
+}
+
+{
 }
