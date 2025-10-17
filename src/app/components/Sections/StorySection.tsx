@@ -25,13 +25,20 @@ export default function StorySection({
 }: Props) {
   return (
     <div className="space-y-6">
-      <StepTitle n={step + 1} title="Your Story" />
+      <StepTitle n={step + 1} title={title} />
       <Field
         title={
-          <>
-            <b>Tell us the story</b> of how you got here, why are you asking for
-            help today?
-          </>
+          profile.isChild ? (
+            <>
+              <b>Tell us the story</b> of how your child got here, why are you
+              seeking help for them today?
+            </>
+          ) : (
+            <>
+              <b>Tell us the story</b> of how you got here, why are you asking
+              for help today?
+            </>
+          )
         }
         label={
           <>
@@ -83,10 +90,17 @@ export default function StorySection({
       <Separator label="Your Goals" />
       <Field
         title={
-          <>
-            Please use this space to <b>elaborate</b> on your mental health
-            treatment goals.
-          </>
+          profile.isChild ? (
+            <>
+              Please use this space to <b>elaborate</b> on your child's mental
+              health treatment goals.
+            </>
+          ) : (
+            <>
+              Please use this space to <b>elaborate</b> on your mental health
+              treatment goals.
+            </>
+          )
         }
         label={
           <>
@@ -139,13 +153,26 @@ export default function StorySection({
       /> */}
       <Separator label="Living Situation" />
       <Field
-        title={<>Please describe your living situation.</>}
+        title={
+          profile.isChild ? (
+            <>Please describe your child's living situation.</>
+          ) : (
+            <>Please describe your living situation.</>
+          )
+        }
         label={
           <div>
-            <i>
-              Include who you live with, neighborhood safety, access to
-              resources, and environmental stressors
-            </i>
+            {profile.isChild ? (
+              <i>
+                Give the names, ages and relationships of the people living in
+                your home(s)
+              </i>
+            ) : (
+              <i>
+                Include who you live with, neighborhood safety, access to
+                resources, and environmental stressors
+              </i>
+            )}
           </div>
         }
         required
@@ -177,10 +204,17 @@ export default function StorySection({
       <Separator label="Culture & Context (optional)" />
       <Field
         title={
-          <>
-            What role does culture (religion, ethnicity, nationality,
-            spirituality) play in your life? <i>(optional)</i>
-          </>
+          !profile.isChild ? (
+            <>
+              What role does culture (religion, ethnicity, nationality,
+              spirituality) play in your life? <i>(optional)</i>
+            </>
+          ) : (
+            <>
+              What role does culture (religion, ethnicity, nationality,
+              spirituality) play in your child's life? <i>(optional)</i>
+            </>
+          )
         }
       >
         <TextAreaWithEncouragement
@@ -213,7 +247,11 @@ export default function StorySection({
       <Separator label="Previous Treatment" />
       <Field title={"Previous Mental Health Treatment"} required>
         <Likert
-          label="Are you currently or have you previously received mental health treatment?"
+          label={
+            profile.isChild
+              ? "Is your child currently or have they previously received mental health treatment?"
+              : "Are you currently or have you previously received mental health treatment?"
+          }
           value={profile.hasReceivedMentalHealthTreatment.toString()}
           onChange={(v) =>
             setProfile((p) => ({
@@ -359,7 +397,7 @@ export default function StorySection({
               required
             >
               <TextAreaWithEncouragement
-                rows={4}
+                rows={2}
                 placeholder="Share here in your own words…"
                 value={profile.familyHistoryElaboration?.text || ""}
                 onChangeText={(next) =>
@@ -371,7 +409,7 @@ export default function StorySection({
                     },
                   }))
                 }
-                recommendedWords={40}
+                recommendedWords={20}
               />
             </Field>
             {/* <VoiceRecorder
@@ -388,32 +426,72 @@ export default function StorySection({
           /> */}
           </>
         )}
-      <Field
-        title={
-          <>
-            Describe the environment(s) in which you grew up (# of places,
-            locations, etc.).
-          </>
-        }
-        required
-      >
-        <TextAreaWithEncouragement
-          rows={4}
-          placeholder="Share here in your own words…"
-          value={profile.upbringingEnvironments?.text || ""}
-          onChangeText={(next) =>
-            setProfile((p) => ({
-              ...p,
-              upbringingEnvironments: {
-                ...p.upbringingEnvironments,
-                text: next,
-              },
-            }))
-          }
-          recommendedWords={50}
-        />
-      </Field>
-      {/* <VoiceRecorder
+      {profile.isChild && (
+        <>
+          <Field
+            required
+            title="Please provide information about significant medical issues on the FATHER's side."
+          >
+            <TextAreaWithEncouragement
+              value={profile.fatherSideMedicalIssues}
+              rows={2}
+              recommendedWords={20}
+              placeholder="Share here in your own words"
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  fatherSideMedicalIssues: next,
+                }))
+              }
+            />
+          </Field>
+          <Field
+            required
+            title="Please provide information about significant medical issues on the MOTHER's side."
+          >
+            <TextAreaWithEncouragement
+              value={profile.motherSideMedicalIssues}
+              rows={2}
+              recommendedWords={20}
+              placeholder="Share here in your own words"
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  motherSideMedicalIssues: next,
+                }))
+              }
+            />
+          </Field>
+        </>
+      )}
+      {!profile.isChild && (
+        <>
+          <Field
+            title={
+              <>
+                Describe the environment(s) in which you grew up (# of places,
+                locations, etc.).
+              </>
+            }
+            required
+          >
+            <TextAreaWithEncouragement
+              rows={4}
+              placeholder="Share here in your own words…"
+              value={profile.upbringingEnvironments?.text || ""}
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  upbringingEnvironments: {
+                    ...p.upbringingEnvironments,
+                    text: next,
+                  },
+                }))
+              }
+              recommendedWords={50}
+            />
+          </Field>
+          {/* <VoiceRecorder
         audioState={profile.upbringingEnvironments?.audio?.url || null}
         onAttach={(url) =>
           setProfile((p) => ({
@@ -425,33 +503,33 @@ export default function StorySection({
           }))
         }
       /> */}
-      <Field
-        title={<>Who did you grow up with?</>}
-        label={
-          <>
-            Please share as much information as you can about the people that
-            you grew up around (include ages and relationship to you)
-          </>
-        }
-        required
-      >
-        <TextAreaWithEncouragement
-          rows={4}
-          placeholder="e.g. Mom, 60 years old | Dad, 61 years old | Fred, 12 years old, my cousin"
-          value={profile.upbringingWhoWith?.text || ""}
-          onChangeText={(next) =>
-            setProfile((p) => ({
-              ...p,
-              upbringingWhoWith: {
-                ...p.upbringingWhoWith,
-                text: next,
-              },
-            }))
-          }
-          recommendedWords={10}
-        />
-      </Field>
-      {/* <VoiceRecorder
+          <Field
+            title={<>Who did you grow up with?</>}
+            label={
+              <>
+                Please share as much information as you can about the people
+                that you grew up around (include ages and relationship to you)
+              </>
+            }
+            required
+          >
+            <TextAreaWithEncouragement
+              rows={4}
+              placeholder="e.g. Mom, 60 years old | Dad, 61 years old | Fred, 12 years old, my cousin"
+              value={profile.upbringingWhoWith?.text || ""}
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  upbringingWhoWith: {
+                    ...p.upbringingWhoWith,
+                    text: next,
+                  },
+                }))
+              }
+              recommendedWords={10}
+            />
+          </Field>
+          {/* <VoiceRecorder
         audioState={profile.upbringingWhoWith?.audio?.url || null}
         onAttach={(url) =>
           setProfile((p) => ({
@@ -463,49 +541,49 @@ export default function StorySection({
           }))
         }
       /> */}
-      <Field title={<>Childhood Questions</>} required>
-        <Likert
-          label="Do you think of your childhood in a positive way?"
-          value={profile.likedChildhood.toString()}
-          onChange={(v) =>
-            setProfile((p) => ({
-              ...p,
-              likedChildhood: v === "true",
-            }))
-          }
-          options={[
-            { key: "true", label: "Yes" },
-            { key: "false", label: "No" },
-          ]}
-        />
-      </Field>
-      {profile.likedChildhood === false && (
-        <>
-          <Field
-            title={
-              <>
-                Please tell us why you did not experience your childhood in a
-                positive way
-              </>
-            }
-            required
-          >
-            <TextAreaWithEncouragement
-              rows={4}
-              placeholder="Share here in your own words…"
-              value={profile.childhoodNegativeReason?.text || ""}
-              onChangeText={(next) =>
+          <Field title={<>Childhood Questions</>} required>
+            <Likert
+              label="Do you think of your childhood in a positive way?"
+              value={profile.likedChildhood.toString()}
+              onChange={(v) =>
                 setProfile((p) => ({
                   ...p,
-                  childhoodNegativeReason: {
-                    ...p.childhoodNegativeReason,
-                    text: next,
-                  },
+                  likedChildhood: v === "true",
                 }))
               }
+              options={[
+                { key: "true", label: "Yes" },
+                { key: "false", label: "No" },
+              ]}
             />
           </Field>
-          {/* <VoiceRecorder
+          {profile.likedChildhood === false && (
+            <>
+              <Field
+                title={
+                  <>
+                    Please tell us why you did not experience your childhood in
+                    a positive way
+                  </>
+                }
+                required
+              >
+                <TextAreaWithEncouragement
+                  rows={4}
+                  placeholder="Share here in your own words…"
+                  value={profile.childhoodNegativeReason?.text || ""}
+                  onChangeText={(next) =>
+                    setProfile((p) => ({
+                      ...p,
+                      childhoodNegativeReason: {
+                        ...p.childhoodNegativeReason,
+                        text: next,
+                      },
+                    }))
+                  }
+                />
+              </Field>
+              {/* <VoiceRecorder
             audioState={profile.childhoodNegativeReason?.audio?.url || null}
             onAttach={(url) =>
               setProfile((p) => ({
@@ -517,6 +595,8 @@ export default function StorySection({
               }))
             }
           /> */}
+            </>
+          )}
         </>
       )}
     </div>

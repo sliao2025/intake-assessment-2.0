@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import type { Profile } from "../lib/types/types";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -263,15 +263,6 @@ function makeDefaultChildProfile(): Profile {
     assessments: {
       kind: "child",
       data: {
-        suicide: {
-          wishDead: "",
-          thoughts: "",
-          methodHow: "",
-          intention: "",
-          plan: "",
-          behavior: "",
-          behavior3mo: "",
-        },
         discTeen: {
           self: { form: "self", responses: blankDiscResponses() },
           parent: { form: "parent", responses: blankDiscResponses() },
@@ -290,52 +281,6 @@ function makeDefaultChildProfile(): Profile {
           behavior: "",
           behavior3mo: "",
         },
-        gad7: {
-          gad1: "",
-          gad2: "",
-          gad3: "",
-          gad4: "",
-          gad5: "",
-          gad6: "",
-          gad7: "",
-        },
-        selfHarm: { pastMonth: "", lifetime: "" },
-        crafft: {
-          partA: { daysAlcohol: "", daysMarijuana: "", daysOther: "" },
-          partB: {
-            car: "",
-            relax: "",
-            alone: "",
-            forget: "",
-            familyFriends: "",
-            trouble: "",
-          },
-        },
-        asrs5: {
-          asrs1: "",
-          asrs2: "",
-          asrs3: "",
-          asrs4: "",
-          asrs5: "",
-          asrs6: "",
-        },
-        ptsd: { ptsd1: "", ptsd2: "", ptsd3: "", ptsd4: "", ptsd5: "" },
-        aceResilience: {
-          r01: "",
-          r02: "",
-          r03: "",
-          r04: "",
-          r05: "",
-          r06: "",
-          r07: "",
-          r08: "",
-          r09: "",
-          r10: "",
-          r11: "",
-          r12: "",
-          r13: "",
-        },
-        stress: { pss1: "", pss2: "", pss3: "", pss4: "" },
       },
     },
     height: { feet: null, inches: null },
@@ -368,7 +313,6 @@ function makeDefaultChildProfile(): Profile {
     jobDetails: "",
     hobbies: "",
     familyHistory: [],
-    likedChildhood: false,
     relationships: [],
     storyNarrative: { text: "" },
     goals: { text: "" },
@@ -378,7 +322,6 @@ function makeDefaultChildProfile(): Profile {
     familyHistoryElaboration: { text: "" },
     upbringingEnvironments: { text: "" },
     upbringingWhoWith: { text: "" },
-    childhoodNegativeReason: { text: "" },
     parent1FirstName: undefined,
     parent1LastName: undefined,
     parent2FirstName: undefined,
@@ -411,11 +354,63 @@ function makeDefaultChildProfile(): Profile {
       activitiesInterestsStrengths: "",
       otherConcerns: "",
     },
+    fatherSideMedicalIssues: "",
+    motherSideMedicalIssues: "",
     childMedicalHistory: {
       hasNeuropsychTesting: false,
       neuropsychEvalDate: "",
       neuropsychEvalReason: "",
       neuropsychEvaluationsPerformed: "",
+      psychiatricHospitalized: false,
+      psychiatricHospitalizationDetails: "",
+      suicideThoughtsEver: false,
+      suicideThoughtsLastTimePlan: "",
+      suicideAttemptEver: false,
+      suicideAttemptDetails: "",
+      selfHarmEver: false,
+      selfHarmStill: false,
+      selfHarmFrequencyDetails: "",
+      substanceUseEver: false,
+      substanceUseDetails: "",
+      medicalConditions: [],
+      medicalConditionsOther: "",
+      immunizationsUpToDate: true,
+      recentPhysicalExam: "",
+      physicalExamDetails: "",
+    },
+    // --- Child: Prenatal & Birth History ---
+    childPrenatalHistory: {
+      pregnancyHealthy: false,
+      fullTerm: false,
+      laborType: "",
+      birthWeight: "",
+      hasComplications: false,
+      complicationsDetails: "",
+      hadMedsDuringPregnancy: false,
+      medsDuringPregnancyDetails: "",
+      hadAlcoholDuringPregnancy: false,
+      alcoholDuringPregnancyDetails: "",
+      hadDrugsDuringPregnancy: false,
+      drugsDuringPregnancyDetails: "",
+      motherSmokedDuringPregnancy: false,
+      motherSmokedDuringPregnancyDetails: "",
+      deliveryNormal: true,
+      deliveryProblems: "",
+      presentationAtBirth: "",
+      troubleStartingToBreathe: false,
+      jaundiced: false,
+      jaundiceTreatmentRequired: false,
+      jaundiceTreatmentDetails: "",
+      feedingMethod: "",
+      breastFeedingDuration: "",
+      hadFeedingProblems: false,
+      feedingProblemsDetails: "",
+      gainedWeightWell: true,
+      hadEarlyProblems: false,
+      earlyProblemsDetails: "",
+      totalPregnancies: 0,
+      liveBirths: 0,
+      birthOrder: 0,
     },
     childPsychiatricHistory: {
       treatmentKinds: [],
@@ -424,6 +419,26 @@ function makeDefaultChildProfile(): Profile {
       groupDetails: "",
       familyCouplesDetails: "",
       otherDetails: "",
+    },
+    childDevelopmentalHistory: {
+      activityLevel: "",
+      activityLevelOther: "",
+      earlyAffectiveStyle: "",
+      earlyAffectiveStyleOther: "",
+      cryingPattern: "",
+      cryingPatternOther: "",
+      soothingWhenUpset: "",
+      soothingWhenUpsetOther: "",
+      responseToBeingHeld: "",
+      reactionToStrangers: "",
+      eatingHabitsNotes: "",
+      sleepingHabitsNotes: "",
+    },
+    childDevelopmentalMilestones: {
+      motor: [],
+      language: [],
+      adaptive: [],
+      notes: "",
     },
   };
 }
@@ -688,7 +703,7 @@ export default function Page() {
         Array.isArray(profile.thoughtChanges) &&
         profile.thoughtChanges.length > 0;
 
-      if (profile.isChild !== true) {
+      if (profile.isChild !== true && profile.assessments.kind === "adult") {
         const s = profile.assessments.data.suicide;
 
         // Base required suicide items
@@ -763,8 +778,13 @@ export default function Page() {
 
     // Assessments: require the minimal baseline (PSS-4 answered, per your latest)
     if (key === "assessments") {
-      const pss4 = profile.assessments.data.stress.pss4;
-      return Boolean(pss4 !== "");
+      // Use the discriminant on assessments to ensure we only access adult-only fields
+      if (profile.assessments.kind === "adult") {
+        const pss4 = profile.assessments.data.stress.pss4;
+        return Boolean(pss4 !== "");
+      } else {
+        return true;
+      }
     }
 
     // All other steps: allow Next
