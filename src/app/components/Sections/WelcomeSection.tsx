@@ -4,6 +4,12 @@ import type { StateSetter } from "../../lib/types/types";
 import { welcomeMessages } from "../messages";
 import StepTitle from "../StepTitle";
 import { Session } from "next-auth";
+import React from "react";
+import { useState } from "react";
+import {
+  makeDefaultAdultProfile,
+  makeDefaultChildProfile,
+} from "../../intake/page";
 
 export default function WelcomeSection({
   title,
@@ -45,8 +51,9 @@ export default function WelcomeSection({
           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               type="button"
-              onClick={() => setProfile({ ...profile, isChild: false })}
-              aria-pressed={profile.isChild === false}
+              onClick={() =>
+                setProfile({ ...makeDefaultAdultProfile(), isChild: false })
+              }
               className={`w-full text-left rounded-xl border p-4 transition hover:brightness-95 active:scale-95 ${
                 profile.isChild === false
                   ? "border-emerald-500 bg-emerald-50/80"
@@ -61,8 +68,9 @@ export default function WelcomeSection({
 
             <button
               type="button"
-              onClick={() => setProfile({ ...profile, isChild: true })}
-              aria-pressed={profile.isChild === true}
+              onClick={() => {
+                setProfile({ ...makeDefaultChildProfile(), isChild: true });
+              }}
               className={`w-full text-left rounded-xl border p-4 transition hover:brightness-95 active:scale-95 ${
                 profile.isChild === true
                   ? "border-emerald-500 bg-emerald-50/80"

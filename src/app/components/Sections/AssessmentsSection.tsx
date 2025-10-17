@@ -4,7 +4,7 @@ import * as React from "react";
 import StepTitle from "../StepTitle";
 import Field from "../primitives/Field";
 import Likert from "../primitives/Likert";
-import type { Profile, SetAActions } from "../../lib/types/types";
+import type { Profile } from "../../lib/types/types";
 import { ArrowRight } from "lucide-react";
 import { intPsychTheme } from "../theme";
 import Collapsible from "../primitives/Collapsible";
@@ -199,51 +199,63 @@ export default function AssessmentsSection({
         } as any,
       };
       const data: any = (next.assessments as any).data;
-      data.suicide = { ...data.suicide };
-      if (data.phq9) data.phq9 = { ...data.phq9 };
-      if (data.discTeen) {
-        data.discTeen = {
-          ...data.discTeen,
-          self: {
-            ...data.discTeen.self,
-            responses: { ...(data.discTeen.self?.responses ?? {}) },
-          },
-        };
-        if (data.discTeen.parent) {
-          data.discTeen.parent = {
-            ...data.discTeen.parent,
-            responses: { ...(data.discTeen.parent.responses ?? {}) },
+
+      // Child-specific fields
+      if (p.isChild === true) {
+        if (data.cssrs) data.cssrs = { ...data.cssrs };
+        if (data.discTeen) {
+          data.discTeen = {
+            ...data.discTeen,
+            self: {
+              ...data.discTeen.self,
+              responses: { ...(data.discTeen.self?.responses ?? {}) },
+            },
           };
+          if (data.discTeen.parent) {
+            data.discTeen.parent = {
+              ...data.discTeen.parent,
+              responses: { ...(data.discTeen.parent.responses ?? {}) },
+            };
+          }
+        }
+        if (data.snap) {
+          data.snap = { ...(data.snap ?? {}) };
+        }
+        if (data.scared) {
+          data.scared = {
+            ...data.scared,
+            self: {
+              ...data.scared.self,
+              responses: { ...(data.scared.self?.responses ?? {}) },
+            },
+          };
+          if (data.scared.parent) {
+            data.scared.parent = {
+              ...data.scared.parent,
+              responses: { ...(data.scared.parent.responses ?? {}) },
+            };
+          }
         }
       }
-      if (data.snap) {
-        data.snap = { ...(data.snap ?? {}) };
-      }
-      if (data.scared) {
-        data.scared = {
-          ...data.scared,
-          self: {
-            ...data.scared.self,
-            responses: { ...(data.scared.self?.responses ?? {}) },
-          },
-        };
-        if (data.scared.parent) {
-          data.scared.parent = {
-            ...data.scared.parent,
-            responses: { ...(data.scared.parent.responses ?? {}) },
+
+      // Adult-specific fields
+      if (p.isChild !== true) {
+        if (data.suicide) data.suicide = { ...data.suicide };
+        if (data.phq9) data.phq9 = { ...data.phq9 };
+        if (data.gad7) data.gad7 = { ...data.gad7 };
+        if (data.crafft) {
+          data.crafft = {
+            partA: { ...(data.crafft?.partA ?? {}) },
+            partB: { ...(data.crafft?.partB ?? {}) },
           };
         }
+        if (data.selfHarm) data.selfHarm = { ...data.selfHarm };
+        if (data.asrs5) data.asrs5 = { ...data.asrs5 };
+        if (data.ptsd) data.ptsd = { ...data.ptsd };
+        if (data.aceResilience) data.aceResilience = { ...data.aceResilience };
+        if (data.stress) data.stress = { ...data.stress };
       }
-      data.gad7 = { ...data.gad7 };
-      data.crafft = {
-        partA: { ...(data.crafft?.partA ?? {}) },
-        partB: { ...(data.crafft?.partB ?? {}) },
-      };
-      data.selfHarm = { ...data.selfHarm };
-      data.asrs5 = { ...data.asrs5 };
-      data.ptsd = { ...data.ptsd };
-      data.aceResilience = { ...data.aceResilience };
-      data.stress = { ...data.stress };
+
       mutate(next);
       return next;
     });
@@ -402,29 +414,42 @@ export default function AssessmentsSection({
   }
 
   // Completion logic — first section differs by age (PHQ vs DISC), plus SNAP for children
-  const phqDone = a?.phq9
-    ? (phqKeys as readonly string[]).every((k) => a.phq9[k] !== "")
-    : false;
-  const discSelfDone = a?.discTeen?.self?.responses
-    ? (dtdsKeys as readonly string[]).every(
-        (k) => a.discTeen.self.responses[k] !== ""
-      )
-    : false;
-  const discParentDone = a?.discTeen?.parent?.responses
-    ? (dtdsKeys as readonly string[]).every(
-        (k) => a.discTeen.parent.responses[k] !== ""
-      )
-    : false;
+  // Adult-only assessments
+  const phqDone =
+    profile.isChild !== true && a?.phq9
+      ? (phqKeys as readonly string[]).every((k) => a.phq9[k] !== "")
+      : false;
+
+  // Child-only assessments
+  const discSelfDone =
+    profile.isChild === true && a?.discTeen?.self?.responses
+      ? (dtdsKeys as readonly string[]).every(
+          (k) => a.discTeen.self.responses[k] !== ""
+        )
+      : false;
+  const discParentDone =
+    profile.isChild === true && a?.discTeen?.parent?.responses
+      ? (dtdsKeys as readonly string[]).every(
+          (k) => a.discTeen.parent.responses[k] !== ""
+        )
+      : false;
   const discDone = discSelfDone && discParentDone;
-  const snapDone = allAnswered(a?.snap, snapKeys as readonly string[]);
-  const scaredSelfDone = allAnswered(
-    a?.scared?.self?.responses,
-    scaredKeys as readonly string[]
-  );
-  const scaredParentDone = allAnswered(
-    a?.scared?.parent?.responses,
-    scaredKeys as readonly string[]
-  );
+  const snapDone =
+    profile.isChild === true
+      ? allAnswered(a?.snap, snapKeys as readonly string[])
+      : false;
+  const scaredSelfDone =
+    profile.isChild === true
+      ? allAnswered(a?.scared?.self?.responses, scaredKeys as readonly string[])
+      : false;
+  const scaredParentDone =
+    profile.isChild === true
+      ? allAnswered(
+          a?.scared?.parent?.responses,
+          scaredKeys as readonly string[]
+        )
+      : false;
+
   const complete1 = profile.isChild === true ? discSelfDone : phqDone;
   const gateAfterDepression =
     profile.isChild === true
@@ -432,58 +457,93 @@ export default function AssessmentsSection({
       : complete1;
   const complete1Parent = discParentDone;
 
+  // GAD-7 (Adult only)
   const gad7KeysArr = gad7Keys as readonly string[];
-  const complete2 = gad7KeysArr.every((k) => a.gad7[k] !== "");
+  const complete2 =
+    profile.isChild !== true && a?.gad7
+      ? gad7KeysArr.every((k) => a.gad7[k] !== "")
+      : false;
 
-  // CRAFFT completion logic (2.1 rules)
-  const crafftA = a.crafft?.partA ?? {
-    daysAlcohol: "",
-    daysMarijuana: "",
-    daysOther: "",
-  };
-  const crafftB = a.crafft?.partB ?? {
-    car: "",
-    relax: "",
-    alone: "",
-    forget: "",
-    familyFriends: "",
-    trouble: "",
-  };
+  // CRAFFT completion logic (Adult only - 2.1 rules)
+  const crafftA =
+    profile.isChild !== true && a?.crafft?.partA
+      ? a.crafft.partA
+      : {
+          daysAlcohol: "",
+          daysMarijuana: "",
+          daysOther: "",
+        };
+  const crafftB =
+    profile.isChild !== true && a?.crafft?.partB
+      ? a.crafft.partB
+      : {
+          car: "",
+          relax: "",
+          alone: "",
+          forget: "",
+          familyFriends: "",
+          trouble: "",
+        };
 
   const partAAnswered =
+    profile.isChild !== true &&
     crafftA.daysAlcohol !== "" &&
     crafftA.daysMarijuana !== "" &&
     crafftA.daysOther !== "";
 
   const anyUse =
-    Number(crafftA.daysAlcohol || "0") > 0 ||
-    Number(crafftA.daysMarijuana || "0") > 0 ||
-    Number(crafftA.daysOther || "0") > 0;
+    profile.isChild !== true &&
+    (Number(crafftA.daysAlcohol || "0") > 0 ||
+      Number(crafftA.daysMarijuana || "0") > 0 ||
+      Number(crafftA.daysOther || "0") > 0);
 
-  const carAnswered = crafftB.car !== "";
-  const remainingAnswered = anyUse
-    ? crafftB.relax !== "" &&
-      crafftB.alone !== "" &&
-      crafftB.forget !== "" &&
-      crafftB.familyFriends !== "" &&
-      crafftB.trouble !== ""
-    : true;
+  const carAnswered = profile.isChild !== true && crafftB.car !== "";
+  const remainingAnswered =
+    profile.isChild !== true
+      ? anyUse
+        ? crafftB.relax !== "" &&
+          crafftB.alone !== "" &&
+          crafftB.forget !== "" &&
+          crafftB.familyFriends !== "" &&
+          crafftB.trouble !== ""
+        : true
+      : false;
 
-  const completeCRAFFT = partAAnswered && carAnswered && remainingAnswered;
+  const completeCRAFFT =
+    profile.isChild !== true &&
+    partAAnswered &&
+    carAnswered &&
+    remainingAnswered;
 
-  const complete3 = a.selfHarm.pastMonth !== "" && a.selfHarm.lifetime !== "";
-  const complete4 = (asrsKeys as readonly string[]).every(
-    (k) => a.asrs5[k] !== ""
-  );
-  const complete5 = (ptsdKeys as readonly string[]).every(
-    (k) => a.ptsd[k] !== ""
-  );
-  const complete6 = (aceRKeys as readonly string[]).every(
-    (k) => a.aceResilience[k] !== ""
-  );
-  const complete7 = (pssKeys as readonly string[]).every(
-    (k) => a.stress[k] !== ""
-  );
+  // Self-harm (Adult only)
+  const complete3 =
+    profile.isChild !== true && a?.selfHarm
+      ? a.selfHarm.pastMonth !== "" && a.selfHarm.lifetime !== ""
+      : false;
+
+  // ASRS-5 (Adult only)
+  const complete4 =
+    profile.isChild !== true && a?.asrs5
+      ? (asrsKeys as readonly string[]).every((k) => a.asrs5[k] !== "")
+      : false;
+
+  // PTSD (Adult only)
+  const complete5 =
+    profile.isChild !== true && a?.ptsd
+      ? (ptsdKeys as readonly string[]).every((k) => a.ptsd[k] !== "")
+      : false;
+
+  // ACE Resilience (Adult only)
+  const complete6 =
+    profile.isChild !== true && a?.aceResilience
+      ? (aceRKeys as readonly string[]).every((k) => a.aceResilience[k] !== "")
+      : false;
+
+  // PSS-4 (Adult only)
+  const complete7 =
+    profile.isChild !== true && a?.stress
+      ? (pssKeys as readonly string[]).every((k) => a.stress[k] !== "")
+      : false;
 
   // Gating (sequential):
   // First depression block (PHQ-9 or DISC) (+ SNAP for child) -> GAD-7 -> CRAFFT -> Self-harm -> ASRS -> PTSD -> ACE -> PSS
@@ -515,61 +575,66 @@ export default function AssessmentsSection({
   const prevComplete5 = React.useRef(complete5);
   const prevComplete6 = React.useRef(complete6);
 
+  // Adult-only gating effects
   React.useEffect(() => {
-    if (!prevGate.current && gateAfterDepression) {
+    if (profile.isChild !== true && !prevGate.current && gateAfterDepression) {
       setU3(true);
       setOpenGAD(true);
     }
     prevGate.current = gateAfterDepression;
-  }, [gateAfterDepression]);
+  }, [gateAfterDepression, profile.isChild]);
 
   React.useEffect(() => {
-    if (!prevComplete2.current && complete2) {
+    if (profile.isChild !== true && !prevComplete2.current && complete2) {
       setUCRAFFT(true);
       setOpenCRAFFT(true);
     }
     prevComplete2.current = complete2;
-  }, [complete2]);
+  }, [complete2, profile.isChild]);
 
   React.useEffect(() => {
-    if (!prevCompleteCRAFFT.current && completeCRAFFT) {
+    if (
+      profile.isChild !== true &&
+      !prevCompleteCRAFFT.current &&
+      completeCRAFFT
+    ) {
       setU4(true);
       setOpen4(true);
     }
     prevCompleteCRAFFT.current = completeCRAFFT;
-  }, [completeCRAFFT]);
+  }, [completeCRAFFT, profile.isChild]);
 
   React.useEffect(() => {
-    if (!prevComplete3.current && complete3) {
+    if (profile.isChild !== true && !prevComplete3.current && complete3) {
       setU5(true);
       setOpen5(true);
     }
     prevComplete3.current = complete3;
-  }, [complete3]);
+  }, [complete3, profile.isChild]);
 
   React.useEffect(() => {
-    if (!prevComplete4.current && complete4) {
+    if (profile.isChild !== true && !prevComplete4.current && complete4) {
       setU6(true);
       setOpen6(true);
     }
     prevComplete4.current = complete4;
-  }, [complete4]);
+  }, [complete4, profile.isChild]);
 
   React.useEffect(() => {
-    if (!prevComplete5.current && complete5) {
+    if (profile.isChild !== true && !prevComplete5.current && complete5) {
       setU7(true);
       setOpen7(true);
     }
     prevComplete5.current = complete5;
-  }, [complete5]);
+  }, [complete5, profile.isChild]);
 
   React.useEffect(() => {
-    if (!prevComplete6.current && complete6) {
+    if (profile.isChild !== true && !prevComplete6.current && complete6) {
       setU8(true);
       setOpen8(true);
     }
     prevComplete6.current = complete6;
-  }, [complete6]);
+  }, [complete6, profile.isChild]);
 
   const prevDiscDone = React.useRef(discDone);
   const prevSnapDone = React.useRef(snapDone);

@@ -513,7 +513,9 @@ export type Profile = {
   };
   relationshipsAbilities?: {
     teachersPeersRelationship?: string;
-    childRatingNarrative?: string;
+    childAbilityWorkIndependently?: "good" | "average" | "poor" | "";
+    childAbilityOrganizeSelf?: "good" | "average" | "poor" | "";
+    childAttendance?: "good" | "average" | "poor" | "";
     hadTruancyProceedings?: boolean;
     truancyProceedingsDetail?: string;
     receivedSchoolCounseling?: boolean;

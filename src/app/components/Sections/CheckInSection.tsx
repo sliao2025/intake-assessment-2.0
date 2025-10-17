@@ -32,13 +32,16 @@ export default function CheckInSection({
   // Age-aware assessments handle
   const kind = profile.assessments.kind;
   const a: any = profile.assessments.data;
-  const isAdult = kind === "adult";
   const router = useRouter();
 
   // Compute high-risk from profile.assessments.data.suicide
-  const s = a.suicide;
-  const highRisk =
-    (s.thoughts === "yes" && s.intention === "yes") || s.behavior === "yes";
+
+  const highRisk = !profile.isChild
+    ? (a.suicide.thoughts === "yes" && a.suicide.intention === "yes") ||
+      a.suicide.behavior === "yes"
+    : (a.cssrs.intention === "yes" && a.cssrs.thoughts === "yes") ||
+      (a.cssrs.behavior === "yes" && a.cssrs.behavior3mo === "yes") ||
+      (a.cssrs.thoughts === "yes" && a.cssrs.behavior === "yes");
 
   // If highRisk becomes true, redirect to the suicide-redirect page
   useEffect(() => {

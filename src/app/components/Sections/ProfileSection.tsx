@@ -1371,24 +1371,89 @@ export default function ProfileSection({
                 />
               </Field>
 
-              {/* Q12 */}
-              <Field title="How would you rate your child's (overall)?">
-                <TextAreaWithEncouragement
-                  rows={4}
-                  placeholder="Share brief ratings/notes on academics, behavior, attention, organization, and social skills."
+              <Field
+                required
+                className="mt-4"
+                title="How would you rate your child's ability to work independently?"
+              >
+                <Likert
                   value={
-                    profile.relationshipsAbilities?.childRatingNarrative ?? ""
+                    profile.relationshipsAbilities
+                      ?.childAbilityWorkIndependently ?? ""
                   }
-                  onChangeText={(next) =>
+                  onChange={(v) =>
                     setProfile((p) => ({
                       ...p,
                       relationshipsAbilities: {
                         ...(p.relationshipsAbilities ?? {}),
-                        childRatingNarrative: next,
+                        childAbilityWorkIndependently: v as
+                          | "good"
+                          | "average"
+                          | "poor"
+                          | "",
                       },
                     }))
                   }
-                  recommendedWords={35}
+                  options={[
+                    { key: "good", label: "Good" },
+                    { key: "average", label: "Average" },
+                    { key: "poor", label: "Poor" },
+                  ]}
+                />
+              </Field>
+
+              <Field
+                required
+                className="mt-4"
+                title="How would you rate your child's ability to organize themselves?"
+              >
+                <Likert
+                  value={
+                    profile.relationshipsAbilities?.childAbilityOrganizeSelf ??
+                    ""
+                  }
+                  onChange={(v) =>
+                    setProfile((p) => ({
+                      ...p,
+                      relationshipsAbilities: {
+                        ...(p.relationshipsAbilities ?? {}),
+                        childAbilityOrganizeSelf: v as
+                          | "good"
+                          | "average"
+                          | "poor"
+                          | "",
+                      },
+                    }))
+                  }
+                  options={[
+                    { key: "good", label: "Good" },
+                    { key: "average", label: "Average" },
+                    { key: "poor", label: "Poor" },
+                  ]}
+                />
+              </Field>
+
+              <Field
+                required
+                className="mt-4"
+                title="How would you rate your child's school attendance?"
+              >
+                <Likert
+                  value={profile.relationshipsAbilities?.childAttendance ?? ""}
+                  onChange={(v) =>
+                    setProfile((p) => ({
+                      ...p,
+                      relationshipsAbilities: {
+                        ...(p.relationshipsAbilities ?? {}),
+                        childAttendance: v as "good" | "average" | "poor" | "",
+                      },
+                    }))
+                  }
+                  options={[
+                    { key: "good", label: "Good" },
+                    { key: "average", label: "Average" },
+                    { key: "poor", label: "Poor" },
+                  ]}
                 />
               </Field>
 

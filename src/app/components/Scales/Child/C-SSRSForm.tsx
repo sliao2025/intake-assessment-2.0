@@ -19,64 +19,36 @@ export default function CSSRSForm({
   const yesNo = [
     { key: "yes", label: "Yes" },
     { key: "no", label: "No" },
-  ] as const;
-
-  // Stable keys for C-SSRS Screen — map to types.CssrsScreen
-  const keys = [
-    "wishDead", // Q1
-    "thoughts", // Q2
-    "methodHow", // Q3
-    "intention", // Q4
-    "plan", // Q5
-    "behavior", // Q6
-  ] as const;
+  ];
 
   const isChild = profile.assessments.kind === "child";
   const data =
     (profile.assessments.data as ChildAssessments) ?? ({} as ChildAssessments);
   const cssrs: CssrsScreen | undefined = isChild
-    ? (data.cssrs as CssrsScreen | undefined)
+    ? ((data.cssrs as CssrsScreen | undefined) ?? undefined)
     : undefined;
 
-  const questions: string[] = [
-    "Have you wished you were dead or wished you could go to sleep and not wake up?",
-    "Have you actually had any thoughts of killing yourself?",
-    "Have you been thinking about how you might do this?",
-    "Have you had these thoughts and had some intention of acting on them?",
-    "Have you started to work out or worked out the details of how to kill yourself? Do you intend to carry out this plan?",
-    "Have you ever done anything, started to do anything, or prepared to do anything to end your life?",
-  ];
+  // Simple conditionals
+  const showMethodHow = cssrs?.thoughts === "yes";
+  const showIntention = cssrs?.thoughts === "yes";
+  const showPlan = cssrs?.thoughts === "yes";
+  const showBehavior3mo = cssrs?.behavior === "yes";
 
-  function updateCssrs<K extends keyof CssrsScreen>(key: K, value: string) {
-    setProfile((prev) => {
-      if (prev.assessments.kind !== "child") return prev; // ignore if not child
-      const next = { ...prev } as Profile;
-      const d = next.assessments.data as ChildAssessments;
-      // ensure cssrs object exists
-      if (!d.cssrs) {
-        d.cssrs = {
-          wishDead: "",
-          thoughts: "",
-          methodHow: "",
-          intention: "",
-          plan: "",
-          behavior: "",
-          behavior3mo: "",
-        };
-      }
-      d.cssrs[key] = String(value);
-      // If Q2 set to "no", clear Q3–Q5
-      if (key === "thoughts" && String(value) === "no") {
-        d.cssrs.methodHow = "";
-        d.cssrs.intention = "";
-        d.cssrs.plan = "";
-      }
-      // If behavior toggled to "no", clear timing follow-up
-      if (key === "behavior" && String(value) !== "yes") {
-        d.cssrs.behavior3mo = "";
-      }
-      return next;
-    });
+  // Helper: ensure cssrs object exists
+  function ensureCssrs(prev: Profile): CssrsScreen {
+    const d = prev.assessments.data as ChildAssessments;
+    if (!d.cssrs) {
+      d.cssrs = {
+        wishDead: "",
+        thoughts: "",
+        methodHow: "",
+        intention: "",
+        plan: "",
+        behavior: "",
+        behavior3mo: "",
+      };
+    }
+    return d.cssrs;
   }
 
   return (
@@ -99,39 +71,155 @@ export default function CSSRSForm({
         </p>
       </div>
 
-      {questions.map((q, idx) => {
-        const k = keys[idx] as (typeof keys)[number];
-        const value = cssrs?.[k] ?? "";
+      {/* Q1 */}
+      <Field
+        required
+        title="Have you wished you were dead or wished you could go to sleep and not wake up?"
+      >
+        <Likert
+          value={cssrs?.wishDead ?? ""}
+          onChange={(v) =>
+            setProfile((prev) => {
+              if (prev.assessments.kind !== "child") return prev;
+              const next = { ...prev };
+              const c = ensureCssrs(next);
+              c.wishDead = String(v);
+              return next;
+            })
+          }
+          options={yesNo}
+        />
+      </Field>
 
-        // If Q2 is NO, skip rendering Q3–Q5 entirely
-        if (
-          cssrs?.thoughts === "no" &&
-          (k === "methodHow" || k === "intention" || k === "plan")
-        ) {
-          return null;
-        }
+      {/* Q2 */}
+      <Field
+        required
+        title="In the past month have you had any actual thoughts of killing yourself?"
+      >
+        <Likert
+          value={cssrs?.thoughts ?? ""}
+          onChange={(v) =>
+            setProfile((prev) => {
+              if (prev.assessments.kind !== "child") return prev;
+              const next = { ...prev };
+              const c = ensureCssrs(next);
+              const val = String(v);
+              c.thoughts = val;
+              if (val === "no") {
+                c.methodHow = "";
+                c.intention = "";
+                c.plan = "";
+              }
+              return next;
+            })
+          }
+          options={yesNo}
+        />
+      </Field>
 
-        return (
-          <Field key={String(k)} title={`${idx + 1}. ${q}`}>
-            <Likert
-              value={value}
-              onChange={(v) => updateCssrs(k, String(v))}
-              options={yesNo as any}
-            />
-          </Field>
-        );
-      })}
+      {/* Q3 */}
+      {showMethodHow && (
+        <Field
+          required
+          title="Have you been thinking about how you might do this?"
+        >
+          <Likert
+            value={cssrs?.methodHow ?? ""}
+            onChange={(v) =>
+              setProfile((prev) => {
+                if (prev.assessments.kind !== "child") return prev;
+                const next = { ...prev };
+                const c = ensureCssrs(next);
+                c.methodHow = String(v);
+                return next;
+              })
+            }
+            options={yesNo}
+          />
+        </Field>
+      )}
 
-      {/* Q6 Timing follow-up */}
-      {cssrs?.behavior === "yes" && (
-        <Field title="7. Was this within the past three months?">
+      {/* Q4 */}
+      {showIntention && (
+        <Field
+          required
+          title="Have you had these thoughts and had some intention of acting on them?"
+        >
+          <Likert
+            value={cssrs?.intention ?? ""}
+            onChange={(v) =>
+              setProfile((prev) => {
+                if (prev.assessments.kind !== "child") return prev;
+                const next = { ...prev };
+                const c = ensureCssrs(next);
+                c.intention = String(v);
+                return next;
+              })
+            }
+            options={yesNo}
+          />
+        </Field>
+      )}
+
+      {/* Q5 */}
+      {showPlan && (
+        <Field
+          required
+          title="Have you started to work out or worked out the details of how to kill yourself? Do you intend to carry out this plan?"
+        >
+          <Likert
+            value={cssrs?.plan ?? ""}
+            onChange={(v) =>
+              setProfile((prev) => {
+                if (prev.assessments.kind !== "child") return prev;
+                const next = { ...prev };
+                const c = ensureCssrs(next);
+                c.plan = String(v);
+                return next;
+              })
+            }
+            options={yesNo}
+          />
+        </Field>
+      )}
+
+      {/* Q6 */}
+      <Field
+        required
+        title="Have you ever done anything, started to do anything, or prepared to do anything to end your life?"
+      >
+        <Likert
+          value={cssrs?.behavior ?? ""}
+          onChange={(v) =>
+            setProfile((prev) => {
+              if (prev.assessments.kind !== "child") return prev;
+              const next = { ...prev };
+              const c = ensureCssrs(next);
+              const val = String(v);
+              c.behavior = val;
+              if (val !== "yes") c.behavior3mo = "";
+              return next;
+            })
+          }
+          options={yesNo}
+        />
+      </Field>
+
+      {/* Q7 */}
+      {showBehavior3mo && (
+        <Field required title="Was this within the past three months?">
           <Likert
             value={cssrs?.behavior3mo ?? ""}
-            onChange={(v) => updateCssrs("behavior3mo", String(v))}
-            options={[
-              { key: "yes", label: "Yes" },
-              { key: "no", label: "No" },
-            ]}
+            onChange={(v) =>
+              setProfile((prev) => {
+                if (prev.assessments.kind !== "child") return prev;
+                const next = { ...prev };
+                const c = ensureCssrs(next);
+                c.behavior3mo = String(v);
+                return next;
+              })
+            }
+            options={yesNo}
           />
         </Field>
       )}

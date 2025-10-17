@@ -75,10 +75,10 @@ function blankDiscResponses(): Record<(typeof dtdsKeys)[number], string> {
 }
 
 // ---- Default Profile Factories ----
-function makeDefaultAdultProfile(): Profile {
+export function makeDefaultAdultProfile(): Profile {
   return {
     maxVisited: 0,
-    isChild: false,
+    isChild: null,
     firstName: "",
     lastName: "",
     age: "",
@@ -249,10 +249,10 @@ function blankScaredResponses(): Record<(typeof scaredKeys)[number], string> {
   }, {} as any);
 }
 
-function makeDefaultChildProfile(): Profile {
+export function makeDefaultChildProfile(): Profile {
   return {
     maxVisited: 0,
-    isChild: true,
+    isChild: null,
     firstName: "",
     lastName: "",
     age: "",
@@ -346,7 +346,9 @@ function makeDefaultChildProfile(): Profile {
     },
     relationshipsAbilities: {
       teachersPeersRelationship: "",
-      childRatingNarrative: "",
+      childAbilityWorkIndependently: "",
+      childAbilityOrganizeSelf: "",
+      childAttendance: "",
       hadTruancyProceedings: false,
       truancyProceedingsDetail: "",
       receivedSchoolCounseling: false,
@@ -525,15 +527,19 @@ export default function Page() {
         const data = await profileResp.json();
         const incoming = data?.profile ?? null;
         if (incoming) {
+          // Use the correct default based on what's in the database
           const baseDefaults =
             incoming.isChild === true
               ? makeDefaultChildProfile()
               : makeDefaultAdultProfile();
-
+          console.log(incoming, "incoming profile");
+          console.log(incoming.isChild, "incoming isChild");
+          console.log(baseDefaults, "base defaults");
           const merged = mergeWithDefaults(baseDefaults, incoming);
           setProfile(merged);
           console.log("Loaded profile (merged)", merged);
         } else {
+          // No saved profile - use adult default and fill in session info
           setProfile((p) => ({
             ...p,
             firstName: session?.user?.name?.split(" ")[0] ?? "",
@@ -652,8 +658,6 @@ export default function Page() {
         const relOk = Boolean(
           ra.teachersPeersRelationship &&
             ra.teachersPeersRelationship.trim().length > 0 &&
-            ra.childRatingNarrative &&
-            ra.childRatingNarrative.trim().length > 0 &&
             typeof ra.hadTruancyProceedings === "boolean" &&
             (ra.hadTruancyProceedings
               ? Boolean(
@@ -669,7 +673,11 @@ export default function Page() {
                 )
               : true) &&
             ra.activitiesInterestsStrengths &&
-            ra.activitiesInterestsStrengths.trim().length > 0
+            ra.activitiesInterestsStrengths.trim().length > 0 &&
+            // NEW: require all three Likert ratings to be selected
+            ra.childAbilityWorkIndependently &&
+            ra.childAbilityOrganizeSelf &&
+            ra.childAttendance
           // ra.otherConcerns is optional
         );
 
@@ -734,6 +742,7 @@ export default function Page() {
 
     // Story: require minimal narrative + goals (either text or audio counts)
     if (key === "story") {
+      // Common required fields for both adult & child
       const hasStory = Boolean(
         (profile.storyNarrative?.text &&
           profile.storyNarrative.text.trim().length > 0) ||
@@ -748,6 +757,62 @@ export default function Page() {
           profile.livingSituation.text.trim().length > 0) ||
           profile.livingSituation?.audio?.url
       );
+
+      // Previous treatment (required for both)
+      const hasTreatmentAnswer =
+        typeof profile.hasReceivedMentalHealthTreatment === "boolean";
+
+      let treatmentDetailsOk = true;
+      if (profile.hasReceivedMentalHealthTreatment) {
+        const hasTreatmentSummary = Boolean(
+          (profile.prevTreatmentSummary?.text &&
+            profile.prevTreatmentSummary.text.trim().length > 0) ||
+            profile.prevTreatmentSummary?.audio?.url
+        );
+        treatmentDetailsOk = Boolean(
+          profile.therapyDuration &&
+            profile.previousDiagnosis &&
+            profile.previousDiagnosis.trim().length > 0 &&
+            hasTreatmentSummary
+        );
+      }
+
+      // Family history (required for both, but elaboration only if items selected)
+      const hasFamilyHistory = Array.isArray(profile.familyHistory);
+      let familyHistoryOk = hasFamilyHistory;
+      if (
+        hasFamilyHistory &&
+        profile.familyHistory.length > 0 &&
+        !profile.familyHistory.includes("none")
+      ) {
+        const hasElaboration = Boolean(
+          (profile.familyHistoryElaboration?.text &&
+            profile.familyHistoryElaboration.text.trim().length > 0) ||
+            profile.familyHistoryElaboration?.audio?.url
+        );
+        familyHistoryOk = hasElaboration;
+      }
+
+      const commonOk =
+        hasStory &&
+        hasGoals &&
+        hasLiving &&
+        hasTreatmentAnswer &&
+        treatmentDetailsOk &&
+        familyHistoryOk;
+
+      // Child-specific required fields
+      if (profile.isChild === true) {
+        const childOk = Boolean(
+          profile.fatherSideMedicalIssues &&
+            profile.fatherSideMedicalIssues.trim().length > 0 &&
+            profile.motherSideMedicalIssues &&
+            profile.motherSideMedicalIssues.trim().length > 0
+        );
+        return commonOk && childOk;
+      }
+
+      // Adult-specific required fields
       const hasEnvironments = Boolean(
         (profile.upbringingEnvironments?.text &&
           profile.upbringingEnvironments.text.trim().length > 0) ||
@@ -760,13 +825,24 @@ export default function Page() {
           profile.upbringingWhoWith?.audio?.url
       );
 
-      return (
-        hasStory &&
-        hasGoals &&
-        hasLiving &&
+      const hasChildhoodAnswer = typeof profile.likedChildhood === "boolean";
+
+      let childhoodReasonOk = true;
+      if (profile.likedChildhood === false) {
+        childhoodReasonOk = Boolean(
+          (profile.childhoodNegativeReason?.text &&
+            profile.childhoodNegativeReason.text.trim().length > 0) ||
+            profile.childhoodNegativeReason?.audio?.url
+        );
+      }
+
+      const adultOk =
         hasEnvironments &&
-        hasUpbringingWhoWith
-      );
+        hasUpbringingWhoWith &&
+        hasChildhoodAnswer &&
+        childhoodReasonOk;
+
+      return commonOk && adultOk;
     }
 
     // Relationships: require at least one mapped relationship
@@ -783,7 +859,9 @@ export default function Page() {
         const pss4 = profile.assessments.data.stress.pss4;
         return Boolean(pss4 !== "");
       } else {
-        return true;
+        const scaredParentLast =
+          profile.assessments.data.scared.parent.responses.scared41;
+        return Boolean(scaredParentLast !== "");
       }
     }
 
