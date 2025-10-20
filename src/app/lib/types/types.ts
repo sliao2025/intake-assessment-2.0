@@ -343,6 +343,17 @@ export type ReportInterpretations = {
   crafft: string;
   ace: string;
 };
+
+export type ReportInterpretationsChild = {
+  discChild: string;
+  discParent: string;
+  snapInattention: string;
+  snapHyperactivity: string;
+  snapOpposition: string;
+  scaredChild: string;
+  scaredParent: string;
+};
+
 export type SummaryPair = {
   reason_for_eval: string;
   background: string;
@@ -350,7 +361,7 @@ export type SummaryPair = {
 
 export type PatientReport = {
   summary: SummaryPair;
-  interpretations: ReportInterpretations;
+  interpretations: ReportInterpretations | ReportInterpretationsChild;
 };
 // ---------------------------------------
 
@@ -468,8 +479,6 @@ export type Profile = {
   parent1LastName?: string;
   parent2FirstName?: string;
   parent2LastName?: string;
-  parentContactNumber?: string;
-  parentEmail?: string;
   parentOccupation?: string;
   parentEmployer?: string;
   parentEducation?: string;

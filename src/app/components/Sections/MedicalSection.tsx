@@ -333,7 +333,10 @@ export default function MedicalSection({
             </div>
             {profile.childMedicalHistory?.hasNeuropsychTesting === true && (
               <>
-                <Field title="What was the date of the evaluation? (mm/dd/yyyy)">
+                <Field
+                  required
+                  title="What was the date of the evaluation? (mm/dd/yyyy)"
+                >
                   <input
                     type="date" /* change to type="date" if you prefer a date picker */
                     placeholder="mm/dd/yyyy"
@@ -358,7 +361,10 @@ export default function MedicalSection({
                   />
                 </Field>
                 <div className="md:col-span-2">
-                  <Field title="What was the reason for the evaluation?">
+                  <Field
+                    required
+                    title="What was the reason for the evaluation?"
+                  >
                     <TextAreaWithEncouragement
                       rows={3}
                       placeholder="Briefly describe the reason for testing…"
@@ -384,7 +390,7 @@ export default function MedicalSection({
                   </Field>
                 </div>
                 <div className="md:col-span-2">
-                  <Field title="What evaluations were performed?">
+                  <Field required title="What evaluations were performed?">
                     <TextAreaWithEncouragement
                       rows={3}
                       placeholder="List any evaluations (e.g., WISC, WIAT, CPT)…"

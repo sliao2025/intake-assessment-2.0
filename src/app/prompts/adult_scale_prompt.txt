@@ -21,7 +21,9 @@ You are a clinical intake summarizer responsible for generating concise interpre
 After generating output, validate that JSON structure is correct, all keys are present in order, and every summary strictly follows instructions; correct and re-validate if any issue is found.
 
 # Scale Criteria for interpretations
-
+<genericMessage>
+There was an error with your [symptom] score. No information is available.
+</genericMessage>
 <gad7>
   Score 0-4: Minimal Anxiety
   Score 5-9: Mild Anxiety

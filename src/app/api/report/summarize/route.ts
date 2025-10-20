@@ -18,21 +18,43 @@ export async function POST(req: Request) {
     // --- New: support for metrics/profile combinations ---
     const hasMetrics = !!payload.metrics;
     const hasProfile = !!payload.profile;
+    const isChild = payload.profile?.isChild;
     if (hasMetrics && hasProfile) {
       // Both metrics and profile present: generate both interpretations and summary concurrently
-      const metrics = {
-        gad7: Number(payload.metrics?.gad7 ?? 0),
-        phq9: Number(payload.metrics?.phq9 ?? 0),
-        pss4: Number(payload.metrics?.pss4 ?? 0),
-        asrs5: Number(payload.metrics?.asrs5 ?? 0),
-        ptsdFlags: Number(payload.metrics?.ptsdFlags ?? 0),
-        crafft: Number(payload.metrics?.crafft ?? 0),
-        ace: Number(payload.metrics?.ace ?? 0),
-      };
-      const scaleInstructions = await fs.readFile(
-        "src/app/prompts/scale_prompt.txt",
-        "utf-8"
-      );
+      let metrics: any = {};
+      let scaleInstructions = "";
+      if (isChild) {
+        // Child metrics: 7 fields for child assessments
+        metrics = {
+          discChild: Number(payload.metrics?.discChild ?? 0),
+          discParent: Number(payload.metrics?.discParent ?? 0),
+          snapInattention: Number(payload.metrics?.snapInattention ?? 0),
+          snapHyperactivity: Number(payload.metrics?.snapHyperactivity ?? 0),
+          snapOpposition: Number(payload.metrics?.snapOpposition ?? 0),
+          scaredChild: Number(payload.metrics?.scaredChild ?? 0),
+          scaredParent: Number(payload.metrics?.scaredParent ?? 0),
+        };
+        scaleInstructions = await fs.readFile(
+          "src/app/prompts/child_scale_prompt.txt",
+          "utf-8"
+        );
+      } else {
+        // Adult metrics: 7 fields for adult assessments
+        metrics = {
+          gad7: Number(payload.metrics?.gad7 ?? 0),
+          phq9: Number(payload.metrics?.phq9 ?? 0),
+          pss4: Number(payload.metrics?.pss4 ?? 0),
+          asrs5: Number(payload.metrics?.asrs5 ?? 0),
+          ptsdFlags: Number(payload.metrics?.ptsdFlags ?? 0),
+          crafft: Number(payload.metrics?.crafft ?? 0),
+          ace: Number(payload.metrics?.ace ?? 0),
+        };
+        scaleInstructions = await fs.readFile(
+          "src/app/prompts/adult_scale_prompt.txt",
+          "utf-8"
+        );
+      }
+
       const summaryInstructions = await fs.readFile(
         "src/app/prompts/summary_prompt.txt",
         "utf-8"
@@ -71,18 +93,35 @@ export async function POST(req: Request) {
       } catch {
         parsedInterpretations = null;
       }
-      const safeInterp =
-        parsedInterpretations && typeof parsedInterpretations === "object"
-          ? parsedInterpretations
-          : {
-              gad7: interpText,
-              phq9: interpText,
-              pss4: interpText,
-              asrs5: interpText,
-              ptsd: interpText,
-              crafft: interpText,
-              ace: interpText,
-            };
+
+      // Create fallback interpretation structure based on profile type
+      let safeInterp: any;
+      if (parsedInterpretations && typeof parsedInterpretations === "object") {
+        safeInterp = parsedInterpretations;
+      } else {
+        // Fallback: use raw text for all fields
+        if (isChild) {
+          safeInterp = {
+            discChild: interpText,
+            discParent: interpText,
+            snapInattention: interpText,
+            snapHyperactivity: interpText,
+            snapOpposition: interpText,
+            scaredChild: interpText,
+            scaredParent: interpText,
+          };
+        } else {
+          safeInterp = {
+            gad7: interpText,
+            phq9: interpText,
+            pss4: interpText,
+            asrs5: interpText,
+            ptsd: interpText,
+            crafft: interpText,
+            ace: interpText,
+          };
+        }
+      }
       const rawSummary =
         (summaryResp as any)?.output_text ?? "No summary generated.";
 
@@ -117,105 +156,6 @@ ${String(summaryObj.background || "").trim()}`.trim();
           background: String(summaryObj.background || ""),
         },
         interpretations: safeInterp,
-      });
-    }
-    // Only metrics present
-    if (hasMetrics && !hasProfile) {
-      const metrics = {
-        gad7: Number(payload.metrics?.gad7 ?? 0),
-        phq9: Number(payload.metrics?.phq9 ?? 0),
-        pss4: Number(payload.metrics?.pss4 ?? 0),
-        asrs5: Number(payload.metrics?.asrs5 ?? 0),
-        ptsdFlags: Number(payload.metrics?.ptsdFlags ?? 0),
-        crafft: Number(payload.metrics?.crafft ?? 0),
-        ace: Number(payload.metrics?.ace ?? 0),
-      };
-      const scaleInstructions = await fs.readFile(
-        "src/app/prompts/scale_prompt.txt",
-        "utf-8"
-      );
-      const response = await client.responses.create({
-        model: "gpt-5-mini",
-        input: [
-          { role: "developer", content: scaleInstructions },
-          {
-            role: "user",
-            content: `Metrics: ${JSON.stringify(metrics)}. Using only these numbers, return JSON exactly with those keys, each value a single paragraph (<=3 short sentences).`,
-          },
-        ],
-        reasoning: { effort: "low" },
-        text: { verbosity: "low" },
-      });
-      const interpText =
-        (response as any)?.output_text ?? "No interpretation generated.";
-      let parsedInterpretations: any = null;
-      try {
-        parsedInterpretations = JSON.parse(interpText);
-      } catch {
-        parsedInterpretations = null;
-      }
-      const safeInterp =
-        parsedInterpretations && typeof parsedInterpretations === "object"
-          ? parsedInterpretations
-          : {
-              gad7: interpText,
-              phq9: interpText,
-              pss4: interpText,
-              asrs5: interpText,
-              ptsd: interpText,
-              crafft: interpText,
-              ace: interpText,
-            };
-      return NextResponse.json({ ok: true, interpretations: safeInterp });
-    }
-    // Only profile present
-    if (hasProfile && !hasMetrics) {
-      const summaryInstructions = await fs.readFile(
-        "src/app/prompts/summary_prompt.txt",
-        "utf-8"
-      );
-      const response = await client.responses.create({
-        model: "gpt-5-mini",
-        input: [
-          { role: "developer", content: summaryInstructions },
-          { role: "user", content: JSON.stringify(payload.profile) },
-        ],
-        reasoning: { effort: "low" },
-        text: { verbosity: "low" },
-      });
-      const rawSummary =
-        (response as any)?.output_text ?? "No summary generated.";
-
-      // Parse the model's JSON per summary_prompt.txt: must contain "reason_for_eval" and "background"
-      let summaryObj: any = null;
-      try {
-        summaryObj = JSON.parse(rawSummary);
-      } catch {
-        summaryObj = null;
-      }
-      if (
-        !summaryObj ||
-        typeof summaryObj !== "object" ||
-        !("reason_for_eval" in summaryObj) ||
-        !("background" in summaryObj)
-      ) {
-        throw new Error(
-          "Summary JSON missing required keys 'reason_for_eval' and 'background'."
-        );
-      }
-
-      // Maintain backward compatibility with existing UI by also returning a joined text version
-      const combinedText = `${String(summaryObj.reason_for_eval || "").trim()}
-
-${String(summaryObj.background || "").trim()}`.trim();
-
-      return NextResponse.json({
-        ok: true,
-        text: combinedText,
-        summary: {
-          reason_for_eval: String(summaryObj.reason_for_eval || ""),
-          background: String(summaryObj.background || ""),
-        },
       });
     }
   } catch (err: any) {

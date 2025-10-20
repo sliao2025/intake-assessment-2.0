@@ -116,7 +116,18 @@ export default function ContactSection({
           )}
         </Field>
 
-        <Field title="Email" required>
+        <Field title="Date of Birth" required>
+          <input
+            type="date"
+            className={`w-full rounded-xl bg-white border px-3 py-2 text-slate-900 ${dobAgeError ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500" : "border-slate-300"}`}
+            value={profile.dob}
+            onChange={(e) => setProfile((p) => ({ ...p, dob: e.target.value }))}
+            aria-invalid={dobAgeError ? true : undefined}
+            aria-describedby={dobAgeError ? "dob-age-mismatch" : undefined}
+          />
+        </Field>
+
+        <Field title={profile.isChild ? "Parent Email" : "Email"} required>
           <input
             type="email"
             className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
@@ -128,7 +139,10 @@ export default function ContactSection({
           />
         </Field>
 
-        <Field title="Contact Number" required>
+        <Field
+          title={profile.isChild ? "Parent Contact Number" : "Contact Number"}
+          required
+        >
           <input
             type="tel"
             className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
@@ -140,17 +154,6 @@ export default function ContactSection({
                 contactNumber: e.target.value,
               }))
             }
-          />
-        </Field>
-
-        <Field title="Date of Birth" required>
-          <input
-            type="date"
-            className={`w-full rounded-xl bg-white border px-3 py-2 text-slate-900 ${dobAgeError ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500" : "border-slate-300"}`}
-            value={profile.dob}
-            onChange={(e) => setProfile((p) => ({ ...p, dob: e.target.value }))}
-            aria-invalid={dobAgeError ? true : undefined}
-            aria-describedby={dobAgeError ? "dob-age-mismatch" : undefined}
           />
         </Field>
       </div>
@@ -205,33 +208,6 @@ export default function ContactSection({
                 value={profile.parent2LastName ?? ""}
                 onChange={(e) =>
                   setProfile((p) => ({ ...p, parent2LastName: e.target.value }))
-                }
-              />
-            </Field>
-
-            <Field title="Parent/Guardian Contact Number" required>
-              <input
-                type="tel"
-                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
-                placeholder="123-456-7890"
-                value={profile.parentContactNumber ?? ""}
-                onChange={(e) =>
-                  setProfile((p) => ({
-                    ...p,
-                    parentContactNumber: e.target.value,
-                  }))
-                }
-              />
-            </Field>
-
-            <Field title="Parent/Guardian Email" required>
-              <input
-                type="email"
-                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
-                placeholder="parent@example.com"
-                value={profile.parentEmail ?? ""}
-                onChange={(e) =>
-                  setProfile((p) => ({ ...p, parentEmail: e.target.value }))
                 }
               />
             </Field>

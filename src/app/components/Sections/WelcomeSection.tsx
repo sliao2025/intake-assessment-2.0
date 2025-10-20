@@ -40,7 +40,7 @@ export default function WelcomeSection({
       />
 
       {/* Adult vs Child selector (only if unanswered) */}
-      {profile.isChild === null && (
+      {profile.maxVisited === 0 && (
         <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 md:p-5">
           <h3 className="font-semibold text-slate-900">
             Who is completing this intake?

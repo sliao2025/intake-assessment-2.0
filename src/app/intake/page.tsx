@@ -326,8 +326,6 @@ export function makeDefaultChildProfile(): Profile {
     parent1LastName: undefined,
     parent2FirstName: undefined,
     parent2LastName: undefined,
-    parentContactNumber: undefined,
-    parentEmail: undefined,
     parentOccupation: undefined,
     parentEmployer: undefined,
     parentEducation: undefined,
@@ -587,9 +585,6 @@ export default function Page() {
             profile.parent1LastName &&
             profile.parent2FirstName &&
             profile.parent2LastName &&
-            profile.parentContactNumber &&
-            profile.parentEmail &&
-            profile.parentEmail.includes("@") &&
             profile.parentOccupation &&
             profile.parentEmployer &&
             profile.parentEducation
