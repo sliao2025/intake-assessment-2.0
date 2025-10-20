@@ -60,9 +60,22 @@ export type RichResponse = {
   text?: string;
   audio?: AudioAttachment;
 };
+
+export type SetAActions = (mutate: (draft: Profile) => void) => void;
 // -------------------------------------------------------------
 
-export type Assessments = {
+// ---- C-SSRS Screen (Recent) ----
+export type CssrsScreen = {
+  wishDead: string; // Q1
+  thoughts: string; // Q2
+  methodHow: string; // Q3
+  intention: string; // Q4
+  plan: string; // Q5
+  behavior: string; // Q6
+  behavior3mo: string; // Q6 timing follow-up
+};
+
+export type AdultAssessments = {
   suicide: {
     wishDead: string;
     thoughts: string;
@@ -140,6 +153,185 @@ export type Assessments = {
   };
   stress: { pss1: string; pss2: string; pss3: string; pss4: string };
 };
+// ===== Child & Adult flexible assessment typing (preparation only) =====
+// Columbia DISC Teen Depression Scale (Ages 11+) — Teen self-report & Parent-report
+// Items are 22 yes/no questions scored 0/1 within the past 4 weeks (present state).
+// Reference bands are included for optional scoring metadata. fileciteturn0file0
+
+export type DiscTeenItemKey =
+  | "dtds01"
+  | "dtds02"
+  | "dtds03"
+  | "dtds04"
+  | "dtds05"
+  | "dtds06"
+  | "dtds07"
+  | "dtds08"
+  | "dtds09"
+  | "dtds10"
+  | "dtds11"
+  | "dtds12"
+  | "dtds13"
+  | "dtds14"
+  | "dtds15"
+  | "dtds16"
+  | "dtds17"
+  | "dtds18"
+  | "dtds19"
+  | "dtds20"
+  | "dtds21"
+  | "dtds22";
+
+/** DISC Teen Depression Scale response (0/1 as strings to match existing patterns) */
+export type DiscTeenResponses = {
+  [K in DiscTeenItemKey]: string; // "0" | "1" | ""
+};
+
+/** Teen self-report (required for child workflow) */
+export type DiscTeenSelf = {
+  form: "self";
+  responses: DiscTeenResponses;
+};
+
+/** Parent-report (optional adjunct) */
+export type DiscTeenParent = {
+  form: "parent";
+  responses: DiscTeenResponses;
+};
+
+// SNAP‑IV 26‑Item (0–3: Not at all → Very much)
+export type SnapItemKey =
+  | "snap01"
+  | "snap02"
+  | "snap03"
+  | "snap04"
+  | "snap05"
+  | "snap06"
+  | "snap07"
+  | "snap08"
+  | "snap09"
+  | "snap10"
+  | "snap11"
+  | "snap12"
+  | "snap13"
+  | "snap14"
+  | "snap15"
+  | "snap16"
+  | "snap17"
+  | "snap18"
+  | "snap19"
+  | "snap20"
+  | "snap21"
+  | "snap22"
+  | "snap23"
+  | "snap24"
+  | "snap25"
+  | "snap26";
+
+/** SNAP response values stored as strings to match existing Likert pattern */
+export type SnapValue = "" | "0" | "1" | "2" | "3";
+export type SnapResponses = { [K in SnapItemKey]: SnapValue };
+export type SnapScale = { responses: SnapResponses };
+
+/** Child assessment set: replaces PHQ-9 with DISC Teen Depression Scale; all other adult measures retained or adjusted later. */
+// SCARED (Screen for Child Anxiety Related Disorders) — 41 items, 0–2
+export type ScaredItemKey =
+  | "scared01"
+  | "scared02"
+  | "scared03"
+  | "scared04"
+  | "scared05"
+  | "scared06"
+  | "scared07"
+  | "scared08"
+  | "scared09"
+  | "scared10"
+  | "scared11"
+  | "scared12"
+  | "scared13"
+  | "scared14"
+  | "scared15"
+  | "scared16"
+  | "scared17"
+  | "scared18"
+  | "scared19"
+  | "scared20"
+  | "scared21"
+  | "scared22"
+  | "scared23"
+  | "scared24"
+  | "scared25"
+  | "scared26"
+  | "scared27"
+  | "scared28"
+  | "scared29"
+  | "scared30"
+  | "scared31"
+  | "scared32"
+  | "scared33"
+  | "scared34"
+  | "scared35"
+  | "scared36"
+  | "scared37"
+  | "scared38"
+  | "scared39"
+  | "scared40"
+  | "scared41";
+export type ScaredValue = "" | "0" | "1" | "2";
+export type ScaredResponses = { [K in ScaredItemKey]: ScaredValue };
+export type ScaredSelf = { form: "self"; responses: ScaredResponses };
+export type ScaredParent = { form: "parent"; responses: ScaredResponses };
+
+export type ChildAssessments = {
+  /** Columbia DISC Teen Depression Scale */
+  discTeen: {
+    self: DiscTeenSelf;
+    /** Optional additional informant */
+    parent?: DiscTeenParent;
+  };
+  /** SNAP‑IV ADHD (26 items) */
+  snap: SnapScale;
+  /** SCARED anxiety scale (self + optional parent) */
+  scared: {
+    self: ScaredSelf;
+    parent?: ScaredParent;
+  };
+  cssrs?: CssrsScreen;
+};
+
+/**
+ * Discriminated union to support age-specific assessment payloads without changing existing callers yet.
+ * NOTE: Profile.assessments still uses `Assessments` for now to avoid breaking current code.
+ * When ready to switch, change `Profile.assessments` to `AgeAwareAssessments`.
+ */
+export type AgeAwareAssessments =
+  | { kind: "adult"; data: AdultAssessments }
+  | { kind: "child"; data: ChildAssessments };
+
+// Type guards (optional helpers for future use)
+export function isChildAssessments(
+  a: any
+): a is { kind: "child"; data: ChildAssessments } {
+  return (
+    a &&
+    a.kind === "child" &&
+    a.data &&
+    typeof a.data === "object" &&
+    "discTeen" in a.data
+  );
+}
+export function isAdultAssessments(
+  a: any
+): a is { kind: "adult"; data: AdultAssessments } {
+  return (
+    a &&
+    a.kind === "adult" &&
+    a.data &&
+    typeof a.data === "object" &&
+    "phq9" in a.data
+  );
+}
+// ======================================================================
 
 // ---- Report output (patient-facing) ----
 export type ReportInterpretations = {
@@ -152,11 +344,24 @@ export type ReportInterpretations = {
   ace: string;
 };
 
+export type ReportInterpretationsChild = {
+  discChild: string;
+  discParent: string;
+  snapInattention: string;
+  snapHyperactivity: string;
+  snapOpposition: string;
+  scaredChild: string;
+  scaredParent: string;
+};
+
+export type SummaryPair = {
+  reason_for_eval: string;
+  background: string;
+};
+
 export type PatientReport = {
-  /** Plain-language summary shown at the top of the ReportSection */
-  text: string;
-  /** Short, scale-specific interpretations rendered beneath each gauge */
-  interpretations: ReportInterpretations;
+  summary: SummaryPair;
+  interpretations: ReportInterpretations | ReportInterpretationsChild;
 };
 // ---------------------------------------
 
@@ -169,8 +374,97 @@ export type Relationship = {
   happy: boolean;
 };
 
+// --- Child: Prenatal & Birth History ---
+export type ChildPrenatalHistory = {
+  // Pregnancy & labor
+  pregnancyHealthy?: boolean; // Q53
+  fullTerm?: boolean; // Q54
+  laborType?: "spontaneous" | "induced" | ""; // Q55
+  // Birth stats
+  birthWeight?: string; // Q56 (free text like "7 lb 8 oz" or grams)
+  // Maternal exposures / complications (yes/no with conditional details)
+  hasComplications?: boolean; // Q57
+  complicationsDetails?: string; // Q57 follow-up
+  hadMedsDuringPregnancy?: boolean; // Q58
+  medsDuringPregnancyDetails?: string; // Q58 follow-up
+  hadAlcoholDuringPregnancy?: boolean; // Q59
+  alcoholDuringPregnancyDetails?: string; // Q59 follow-up
+  hadDrugsDuringPregnancy?: boolean; // Q60
+  drugsDuringPregnancyDetails?: string; // Q60 follow-up
+  motherSmokedDuringPregnancy?: boolean; // Q61
+  motherSmokedDuringPregnancyDetails?: string; // Q61 follow-up
+  // Delivery & presentation
+  deliveryNormal?: boolean; // Q62 (No → capture problems below)
+  deliveryProblems?: string; // Q62 follow‑up
+  presentationAtBirth?: "head" | "feet" | ""; // Q63
+  troubleStartingToBreathe?: boolean; // Q64
+  // Neonatal course & feeding
+  jaundiced?: boolean; // Q65
+  jaundiceTreatmentRequired?: boolean; // Q65a (required treatment?)
+  jaundiceTreatmentDetails?: string; // Q65b follow‑up if treatment required
+  feedingMethod?: "bottle" | "breast" | "both" | ""; // Q66
+  breastFeedingDuration?: string; // Q66 follow‑up
+  hadFeedingProblems?: boolean; // Q67
+  feedingProblemsDetails?: string; // Q67 follow-up
+  gainedWeightWell?: boolean; // Q68
+  hadEarlyProblems?: boolean; // Q69
+  earlyProblemsDetails?: string; // Q69 follow-up
+  // Parity
+  totalPregnancies?: number; // Q70
+  liveBirths?: number; // Q71
+  birthOrder?: number; // Q72
+};
+
+// --- Child: Past Mental Health & Psychiatric History ---
+export type ChildPsychiatricHistory = {
+  /** Multi-select of treatment kinds (Option[] to match Listbox pattern elsewhere) */
+  treatmentKinds: Option[];
+  /** Date string (yyyy-mm-dd) for first treatment entry */
+  firstTreatmentDate?: string;
+  /** Free-text details for each modality, shown when that modality is selected */
+  individualDetails?: string;
+  groupDetails?: string;
+  familyCouplesDetails?: string;
+  otherDetails?: string;
+};
+
+// --- Child: Developmental History ---
+export type ChildDevelopmentalHistory = {
+  // Temperament / activity level
+  activityLevel?: "active" | "active_but_calm" | "passive" | "other" | "";
+  activityLevelOther?: string;
+  // Early affective style
+  earlyAffectiveStyle?: "cuddly" | "irritable" | "withdrawn" | "other" | "";
+  earlyAffectiveStyleOther?: string;
+  // Crying frequency
+  cryingPattern?: "easily_frequently" | "reasonable" | "seldom" | "other" | "";
+  cryingPatternOther?: string;
+  // Soothing when upset
+  soothingWhenUpset?:
+    | "soothed_easily"
+    | "difficult_to_soothe"
+    | "average"
+    | "other"
+    | "";
+  soothingWhenUpsetOther?: string;
+  // Free-text responses
+  responseToBeingHeld?: string; // Describe child's response to being held (Q78)
+  reactionToStrangers?: "friendly" | "indifferent" | "fearful" | ""; // Q79
+  eatingHabitsNotes?: string; // Q80
+  sleepingHabitsNotes?: string; // Q81
+};
+
+// --- Child: Developmental Milestones ---
+export type ChildDevelopmentalMilestones = {
+  motor: string[]; // multi-select
+  language: string[]; // multi-select
+  adaptive: string[]; // multi-select
+  notes?: string; // optional free text if needed later
+};
+
 export type Profile = {
   maxVisited: number;
+  isChild: boolean | null;
 
   // Contact Section
   firstName: string;
@@ -180,6 +474,15 @@ export type Profile = {
   contactNumber: string;
   dob: string;
 
+  // Child Contact Section
+  parent1FirstName?: string;
+  parent1LastName?: string;
+  parent2FirstName?: string;
+  parent2LastName?: string;
+  parentOccupation?: string;
+  parentEmployer?: string;
+  parentEducation?: string;
+
   // Profile Section
   pronouns: Option[];
   height: { feet: number | null; inches: number | null };
@@ -188,18 +491,47 @@ export type Profile = {
   sexualOrientation: Option[];
   ethnicity: Option[];
   religion: Option[];
-  highestDegree: string;
-  isMarried: boolean;
+
+  // Adult Profile Section
+  highestDegree?: string;
+  isMarried?: boolean;
   timesMarried?: number;
-  isSexuallyActive: boolean;
-  sexualPartners: string;
-  dietType: Option[];
-  alcoholFrequency: string;
+  isSexuallyActive?: boolean;
+  sexualPartners?: string;
+  dietType?: Option[];
+  alcoholFrequency?: string;
   drinksPerOccasion?: string;
-  substancesUsed: Option[];
-  isEmployed: boolean;
+  substancesUsed?: Option[];
+  isEmployed?: boolean;
   jobDetails?: string;
-  hobbies: string;
+  hobbies?: string;
+
+  // Child Profile Section
+  schoolInfo?: {
+    schoolName?: string;
+    schoolPhoneNumber?: string;
+    yearsAtSchool?: number;
+    grade?: string;
+    hasRepeatedGrade?: boolean; // "yes" | "no" | ""
+    repeatedGradeDetail?: string;
+    hasSpecialClasses?: boolean; // "yes" | "no" | ""
+    specialClassesDetail?: string;
+    hasSpecialServices?: boolean; // "yes" | "no" | ""
+    specialServicesDetail?: string;
+    academicGrades?: string;
+  };
+  relationshipsAbilities?: {
+    teachersPeersRelationship?: string;
+    childAbilityWorkIndependently?: "good" | "average" | "poor" | "";
+    childAbilityOrganizeSelf?: "good" | "average" | "poor" | "";
+    childAttendance?: "good" | "average" | "poor" | "";
+    hadTruancyProceedings?: boolean;
+    truancyProceedingsDetail?: string;
+    receivedSchoolCounseling?: boolean;
+    schoolCounselingDetail?: string;
+    activitiesInterestsStrengths?: string;
+    otherConcerns?: string;
+  };
 
   // Screen Section
   moodChanges: string[];
@@ -216,11 +548,17 @@ export type Profile = {
   previousDiagnosis: string;
   prevTreatmentSummary?: RichResponse;
   familyHistoryElaboration?: RichResponse;
-  upbringingEnvironments: RichResponse;
-  upbringingWhoWith: RichResponse;
-  childhoodNegativeReason?: RichResponse;
   familyHistory: string[];
-  likedChildhood: boolean;
+
+  // Child Story Section
+  fatherSideMedicalIssues?: string;
+  motherSideMedicalIssues?: string;
+
+  // Adult Story Section
+  upbringingEnvironments?: RichResponse;
+  likedChildhood?: boolean;
+  childhoodNegativeReason?: RichResponse;
+  upbringingWhoWith?: RichResponse;
 
   // Relationship Section
   relationships: Relationship[];
@@ -232,8 +570,45 @@ export type Profile = {
   previousHospitalizations: Hospitalization[];
   previousInjuries?: InjuryDetails | null;
 
+  // --- Child-only: Neuropsychological testing history & Medical History ---
+  childMedicalHistory?: {
+    // Neuropsychological testing (existing)
+    hasNeuropsychTesting: boolean;
+    neuropsychEvalDate: string;
+    neuropsychEvalReason: string;
+    neuropsychEvaluationsPerformed: string;
+    // --- Medical History (new) ---
+    psychiatricHospitalized?: boolean;
+    psychiatricHospitalizationDetails?: string;
+    suicideThoughtsEver?: boolean;
+    suicideThoughtsLastTimePlan?: string;
+    suicideAttemptEver?: boolean;
+    suicideAttemptDetails?: string;
+    selfHarmEver?: boolean;
+    selfHarmStill?: boolean;
+    selfHarmFrequencyDetails?: string;
+    substanceUseEver?: boolean;
+    substanceUseDetails?: string;
+    medicalConditions?: string[];
+    medicalConditionsOther?: string;
+    immunizationsUpToDate?: boolean;
+    recentPhysicalExam?: string;
+    physicalExamDetails?: string;
+  };
+
+  // --- Child: Prenatal & Birth History ---
+  childPrenatalHistory?: ChildPrenatalHistory;
+
+  // --- Child: Past Mental Health & Psychiatric History ---
+  childPsychiatricHistory?: ChildPsychiatricHistory;
+
+  // --- Child: Developmental History ---
+  childDevelopmentalHistory?: ChildDevelopmentalHistory;
+  // --- Child: Developmental Milestones ---
+  childDevelopmentalMilestones?: ChildDevelopmentalMilestones;
+
   // Assessments Section
-  assessments: Assessments;
+  assessments: AgeAwareAssessments;
 
   // Generated patient-facing report (optional; filled after submit)
   report?: PatientReport;

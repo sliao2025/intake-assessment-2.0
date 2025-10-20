@@ -116,7 +116,7 @@ export default function SignInPage() {
                 {mode === "signin" && (
                   <>
                     <button
-                      className={`${roboto.className} w-full cursor-pointer border-1 inline-flex items-center gap-3 rounded-full px-5 py-3 font-medium text-black transition-all`}
+                      className={`${roboto.className} w-full cursor-pointer inline-flex items-center justify-center gap-3 rounded-full px-5 py-3 font-medium text-white transition-all`}
                       onClick={async () => {
                         const res = await signIn("google", {
                           callbackUrl,
@@ -125,6 +125,11 @@ export default function SignInPage() {
                         if (res?.url) {
                           router.push(res.url);
                         }
+                      }}
+                      style={{
+                        background: `linear-gradient(0deg, ${intPsychTheme.primary}, ${intPsychTheme.accent})`,
+                        boxShadow: "0 2px 8px 0 rgba(0,0,0,0.08)",
+                        transition: `transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), filter 0.2s`,
                       }}
                     >
                       <svg
@@ -208,7 +213,7 @@ export default function SignInPage() {
                     {mode === "signup" && (
                       <>
                         <input
-                          className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                          className="w-full rounded-full bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
                           type="text"
                           placeholder="First Name"
                           value={firstName}
@@ -216,7 +221,7 @@ export default function SignInPage() {
                           required
                         />
                         <input
-                          className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                          className="w-full rounded-full bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
                           type="text"
                           placeholder="Last Name"
                           value={lastName}
@@ -226,7 +231,7 @@ export default function SignInPage() {
                       </>
                     )}
                     <input
-                      className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                      className="w-full rounded-full bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
                       type="email"
                       placeholder="Your email"
                       value={email}
@@ -234,7 +239,7 @@ export default function SignInPage() {
                       required
                     />
                     <input
-                      className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                      className="w-full rounded-full bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
                       type="password"
                       placeholder="Your password"
                       value={password}
@@ -244,12 +249,7 @@ export default function SignInPage() {
                   </div>
 
                   <button
-                    className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 font-semibold text-white bg-[color:var(--accent)] hover:bg-[color:var(--accent-hover)] transition-colors duration-200 ease-in-out"
-                    style={{
-                      // fallback if you don’t use CSS vars
-                      ["--accent" as any]: intPsychTheme.accent,
-                      ["--accent-hover" as any]: "#0f5caeff", // a slightly darker shade
-                    }}
+                    className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 font-medium text-white bg-black/75 bg-[color:var(--accent)] hover:bg-black/85 transition-colors duration-200 ease-in-out"
                     type="submit"
                   >
                     {mode === "signin" ? "Sign in" : "Create account"}
@@ -258,17 +258,25 @@ export default function SignInPage() {
 
                 <div>
                   {mode === "signin" ? (
-                    <div className="flex justify-center ">
+                    <div className="flex gap-3 mt-4">
                       <button
-                        className="text-sm underline cursor-pointer"
+                        className="flex-1 cursor-pointer rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors"
                         onClick={() => setMode("signup")}
-                        style={{ color: intPsychTheme.primary }}
                       >
                         Create an account
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => setMode("guest")}
+                        className="flex-1 cursor-pointer rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+                        aria-label="Continue as a guest (limited)"
+                        title="Continue as a guest (limited)"
+                      >
+                        Continue as guest
+                      </button>
                     </div>
                   ) : (
-                    <div className="flex justify-center">
+                    <div className="flex justify-center mt-4">
                       <button
                         className="text-sm underline cursor-pointer"
                         onClick={() => setMode("signin")}
@@ -277,33 +285,6 @@ export default function SignInPage() {
                         Already have an account? Sign in
                       </button>
                     </div>
-                  )}
-                </div>
-                <div className="mt-4 space-y-4">
-                  {mode === "signin" && (
-                    <>
-                      <div className="my-4 flex items-center gap-3">
-                        <div className="h-px bg-gray-300 flex-1" />
-                        <span className="text-xs uppercase tracking-wide text-gray-500">
-                          or
-                        </span>
-                        <div className="h-px bg-gray-300 flex-1" />
-                      </div>
-                      <button
-                        className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 font-semibold text-white bg-[color:var(--accent)] hover:bg-[color:var(--accent-hover)] transition-colors duration-200 ease-in-out"
-                        style={{
-                          // fallback if you don’t use CSS vars
-                          ["--accent" as any]: intPsychTheme.secondary,
-                          ["--accent-hover" as any]: "#e28929ff", // a slightly darker shade
-                        }}
-                        type="button"
-                        onClick={() => {
-                          setMode("guest");
-                        }}
-                      >
-                        Continue as a Guest
-                      </button>
-                    </>
                   )}
                 </div>
               </div>
@@ -327,31 +308,39 @@ export default function SignInPage() {
                 onChange={(e) => setLastName(e.target.value)}
                 required
               />
-              <button
-                className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 font-semibold text-white bg-[color:var(--accent)] hover:bg-[color:var(--accent-hover)] transition-colors duration-200 ease-in-out"
-                style={{
-                  ["--accent" as any]: intPsychTheme.accent,
-                  ["--accent-hover" as any]: "#0f5caeff",
-                }}
-                type="button"
-                onClick={async (e) => {
-                  e.preventDefault();
-                  const res = await signIn("credentials", {
-                    redirect: false,
-                    guest: "true",
-                    firstName,
-                    lastName,
-                    callbackUrl,
-                  });
-                  if (res?.ok) {
-                    router.push(callbackUrl);
-                  } else {
-                    setErrorTip("Guest sign-in failed. Please try again.");
-                  }
-                }}
-              >
-                Continue
-              </button>
+              <div className="flex justify-between gap-4">
+                <button
+                  onClick={() => setMode("signin")}
+                  className="px-4 py-2 cursor-pointer rounded-full border border-slate-300 bg-gray-100 "
+                >
+                  Back
+                </button>
+                <button
+                  className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 font-semibold text-white bg-[color:var(--accent)] hover:bg-[color:var(--accent-hover)] transition-colors duration-200 ease-in-out"
+                  style={{
+                    ["--accent" as any]: intPsychTheme.accent,
+                    ["--accent-hover" as any]: "#0f5caeff",
+                  }}
+                  type="button"
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    const res = await signIn("credentials", {
+                      redirect: false,
+                      guest: "true",
+                      firstName,
+                      lastName,
+                      callbackUrl,
+                    });
+                    if (res?.ok) {
+                      router.push(callbackUrl);
+                    } else {
+                      setErrorTip("Guest sign-in failed. Please try again.");
+                    }
+                  }}
+                >
+                  Continue
+                </button>
+              </div>
             </form>
           )}
         </motion.div>

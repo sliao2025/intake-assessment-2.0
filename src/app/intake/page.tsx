@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useRef, useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import type { Profile } from "../lib/types/types";
 import { motion } from "framer-motion";
-import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import ProgressHeader from "../components/ProgressHeader";
 import ConfettiBurst from "../components/ConfettiBurst";
 import { useSession } from "next-auth/react";
-import { praises, welcomeMessages } from "../components/messages";
+import { praises } from "../components/messages";
 import { theme, ease, intPsychTheme } from "../components/theme";
 import GardenFrame from "../components/Garden/Garden";
 import ContactSection from "../components/Sections/ContactSection";
@@ -42,10 +42,43 @@ const steps: Step[] = [
   { key: "report", title: "Your Report", type: "review" },
 ];
 
-// Build a fresh default profile each time to avoid stale/shared references
-function makeDefaultProfile(): Profile {
+// --- DISC Teen Depression Scale (DTDS) blank responses helper ---
+const dtdsKeys = [
+  "dtds01",
+  "dtds02",
+  "dtds03",
+  "dtds04",
+  "dtds05",
+  "dtds06",
+  "dtds07",
+  "dtds08",
+  "dtds09",
+  "dtds10",
+  "dtds11",
+  "dtds12",
+  "dtds13",
+  "dtds14",
+  "dtds15",
+  "dtds16",
+  "dtds17",
+  "dtds18",
+  "dtds19",
+  "dtds20",
+  "dtds21",
+  "dtds22",
+] as const;
+function blankDiscResponses(): Record<(typeof dtdsKeys)[number], string> {
+  return dtdsKeys.reduce((acc, k) => {
+    (acc as any)[k] = "";
+    return acc;
+  }, {} as any);
+}
+
+// ---- Default Profile Factories ----
+export function makeDefaultAdultProfile(): Profile {
   return {
     maxVisited: 0,
+    isChild: null,
     firstName: "",
     lastName: "",
     age: "",
@@ -54,72 +87,75 @@ function makeDefaultProfile(): Profile {
     contactNumber: "",
     dob: "",
     assessments: {
-      suicide: {
-        wishDead: "",
-        thoughts: "",
-        methodHow: "",
-        intention: "",
-        plan: "",
-        behavior: "",
-        behavior3mo: "",
-      },
-      phq9: {
-        phq1: "",
-        phq2: "",
-        phq3: "",
-        phq4: "",
-        phq5: "",
-        phq6: "",
-        phq7: "",
-        phq8: "",
-        phq9: "",
-      },
-      gad7: {
-        gad1: "",
-        gad2: "",
-        gad3: "",
-        gad4: "",
-        gad5: "",
-        gad6: "",
-        gad7: "",
-      },
-      selfHarm: { pastMonth: "", lifetime: "" },
-      crafft: {
-        partA: { daysAlcohol: "", daysMarijuana: "", daysOther: "" },
-        partB: {
-          car: "",
-          relax: "",
-          alone: "",
-          forget: "",
-          familyFriends: "",
-          trouble: "",
+      kind: "adult",
+      data: {
+        suicide: {
+          wishDead: "",
+          thoughts: "",
+          methodHow: "",
+          intention: "",
+          plan: "",
+          behavior: "",
+          behavior3mo: "",
         },
+        phq9: {
+          phq1: "",
+          phq2: "",
+          phq3: "",
+          phq4: "",
+          phq5: "",
+          phq6: "",
+          phq7: "",
+          phq8: "",
+          phq9: "",
+        },
+        gad7: {
+          gad1: "",
+          gad2: "",
+          gad3: "",
+          gad4: "",
+          gad5: "",
+          gad6: "",
+          gad7: "",
+        },
+        selfHarm: { pastMonth: "", lifetime: "" },
+        crafft: {
+          partA: { daysAlcohol: "", daysMarijuana: "", daysOther: "" },
+          partB: {
+            car: "",
+            relax: "",
+            alone: "",
+            forget: "",
+            familyFriends: "",
+            trouble: "",
+          },
+        },
+        asrs5: {
+          asrs1: "",
+          asrs2: "",
+          asrs3: "",
+          asrs4: "",
+          asrs5: "",
+          asrs6: "",
+        },
+        ptsd: { ptsd1: "", ptsd2: "", ptsd3: "", ptsd4: "", ptsd5: "" },
+        aceResilience: {
+          r01: "",
+          r02: "",
+          r03: "",
+          r04: "",
+          r05: "",
+          r06: "",
+          r07: "",
+          r08: "",
+          r09: "",
+          r10: "",
+          r11: "",
+          r12: "",
+          r13: "",
+        },
+        stress: { pss1: "", pss2: "", pss3: "", pss4: "" },
       },
-      asrs5: {
-        asrs1: "",
-        asrs2: "",
-        asrs3: "",
-        asrs4: "",
-        asrs5: "",
-        asrs6: "",
-      },
-      ptsd: { ptsd1: "", ptsd2: "", ptsd3: "", ptsd4: "", ptsd5: "" },
-      aceResilience: {
-        r01: "",
-        r02: "",
-        r03: "",
-        r04: "",
-        r05: "",
-        r06: "",
-        r07: "",
-        r08: "",
-        r09: "",
-        r10: "",
-        r11: "",
-        r12: "",
-        r13: "",
-      },
-      stress: { pss1: "", pss2: "", pss3: "", pss4: "" },
     },
     height: { feet: null, inches: null },
     weightLbs: null,
@@ -162,6 +198,248 @@ function makeDefaultProfile(): Profile {
     upbringingEnvironments: { text: "" },
     upbringingWhoWith: { text: "" },
     childhoodNegativeReason: { text: "" },
+  };
+}
+
+// --- SNAP‑IV (26) blank responses helper ---
+const snapKeys = [
+  "snap01",
+  "snap02",
+  "snap03",
+  "snap04",
+  "snap05",
+  "snap06",
+  "snap07",
+  "snap08",
+  "snap09",
+  "snap10",
+  "snap11",
+  "snap12",
+  "snap13",
+  "snap14",
+  "snap15",
+  "snap16",
+  "snap17",
+  "snap18",
+  "snap19",
+  "snap20",
+  "snap21",
+  "snap22",
+  "snap23",
+  "snap24",
+  "snap25",
+  "snap26",
+] as const;
+function blankSnapResponses(): Record<(typeof snapKeys)[number], string> {
+  return snapKeys.reduce((acc, k) => {
+    (acc as any)[k] = "";
+    return acc;
+  }, {} as any);
+}
+
+// --- SCARED (41) blank responses helper ---
+const scaredKeys = Array.from(
+  { length: 41 },
+  (_, i) => `scared${String(i + 1).padStart(2, "0")}`
+);
+function blankScaredResponses(): Record<(typeof scaredKeys)[number], string> {
+  return scaredKeys.reduce((acc, k) => {
+    (acc as any)[k] = "";
+    return acc;
+  }, {} as any);
+}
+
+export function makeDefaultChildProfile(): Profile {
+  return {
+    maxVisited: 0,
+    isChild: null,
+    firstName: "",
+    lastName: "",
+    age: "",
+    pronouns: [],
+    email: "",
+    contactNumber: "",
+    dob: "",
+    assessments: {
+      kind: "child",
+      data: {
+        discTeen: {
+          self: { form: "self", responses: blankDiscResponses() },
+          parent: { form: "parent", responses: blankDiscResponses() },
+        },
+        snap: { ...(blankSnapResponses() as any) },
+        scared: {
+          self: { form: "self", responses: blankScaredResponses() as any },
+          parent: { form: "parent", responses: blankScaredResponses() as any },
+        },
+        cssrs: {
+          wishDead: "",
+          thoughts: "",
+          methodHow: "",
+          intention: "",
+          plan: "",
+          behavior: "",
+          behavior3mo: "",
+        },
+      },
+    },
+    height: { feet: null, inches: null },
+    weightLbs: null,
+    genderIdentity: "",
+    sexualOrientation: [],
+    ethnicity: [],
+    religion: [],
+    highestDegree: "",
+    isMarried: false,
+    timesMarried: 0,
+    isSexuallyActive: false,
+    sexualPartners: "",
+    hasReceivedMentalHealthTreatment: false,
+    therapyDuration: "",
+    previousDiagnosis: "",
+    moodChanges: [],
+    behaviorChanges: [],
+    thoughtChanges: [],
+    dietType: [],
+    alcoholFrequency: "",
+    drinksPerOccasion: "",
+    substancesUsed: [],
+    currentMedications: [],
+    previousMedications: [],
+    medicalAllergies: [],
+    previousHospitalizations: [],
+    previousInjuries: null,
+    isEmployed: false,
+    jobDetails: "",
+    hobbies: "",
+    familyHistory: [],
+    relationships: [],
+    storyNarrative: { text: "" },
+    goals: { text: "" },
+    livingSituation: { text: "" },
+    cultureContext: { text: "" },
+    prevTreatmentSummary: { text: "" },
+    familyHistoryElaboration: { text: "" },
+    upbringingEnvironments: { text: "" },
+    upbringingWhoWith: { text: "" },
+    parent1FirstName: undefined,
+    parent1LastName: undefined,
+    parent2FirstName: undefined,
+    parent2LastName: undefined,
+    parentOccupation: undefined,
+    parentEmployer: undefined,
+    parentEducation: undefined,
+    schoolInfo: {
+      schoolName: "",
+      schoolPhoneNumber: "",
+      yearsAtSchool: 0,
+      grade: "",
+      hasRepeatedGrade: false,
+      repeatedGradeDetail: "",
+      hasSpecialClasses: false,
+      specialClassesDetail: "",
+      hasSpecialServices: false,
+      specialServicesDetail: "",
+      academicGrades: "",
+    },
+    relationshipsAbilities: {
+      teachersPeersRelationship: "",
+      childAbilityWorkIndependently: "",
+      childAbilityOrganizeSelf: "",
+      childAttendance: "",
+      hadTruancyProceedings: false,
+      truancyProceedingsDetail: "",
+      receivedSchoolCounseling: false,
+      schoolCounselingDetail: "",
+      activitiesInterestsStrengths: "",
+      otherConcerns: "",
+    },
+    fatherSideMedicalIssues: "",
+    motherSideMedicalIssues: "",
+    childMedicalHistory: {
+      hasNeuropsychTesting: false,
+      neuropsychEvalDate: "",
+      neuropsychEvalReason: "",
+      neuropsychEvaluationsPerformed: "",
+      psychiatricHospitalized: false,
+      psychiatricHospitalizationDetails: "",
+      suicideThoughtsEver: false,
+      suicideThoughtsLastTimePlan: "",
+      suicideAttemptEver: false,
+      suicideAttemptDetails: "",
+      selfHarmEver: false,
+      selfHarmStill: false,
+      selfHarmFrequencyDetails: "",
+      substanceUseEver: false,
+      substanceUseDetails: "",
+      medicalConditions: [],
+      medicalConditionsOther: "",
+      immunizationsUpToDate: true,
+      recentPhysicalExam: "",
+      physicalExamDetails: "",
+    },
+    // --- Child: Prenatal & Birth History ---
+    childPrenatalHistory: {
+      pregnancyHealthy: false,
+      fullTerm: false,
+      laborType: "",
+      birthWeight: "",
+      hasComplications: false,
+      complicationsDetails: "",
+      hadMedsDuringPregnancy: false,
+      medsDuringPregnancyDetails: "",
+      hadAlcoholDuringPregnancy: false,
+      alcoholDuringPregnancyDetails: "",
+      hadDrugsDuringPregnancy: false,
+      drugsDuringPregnancyDetails: "",
+      motherSmokedDuringPregnancy: false,
+      motherSmokedDuringPregnancyDetails: "",
+      deliveryNormal: true,
+      deliveryProblems: "",
+      presentationAtBirth: "",
+      troubleStartingToBreathe: false,
+      jaundiced: false,
+      jaundiceTreatmentRequired: false,
+      jaundiceTreatmentDetails: "",
+      feedingMethod: "",
+      breastFeedingDuration: "",
+      hadFeedingProblems: false,
+      feedingProblemsDetails: "",
+      gainedWeightWell: true,
+      hadEarlyProblems: false,
+      earlyProblemsDetails: "",
+      totalPregnancies: 0,
+      liveBirths: 0,
+      birthOrder: 0,
+    },
+    childPsychiatricHistory: {
+      treatmentKinds: [],
+      firstTreatmentDate: "",
+      individualDetails: "",
+      groupDetails: "",
+      familyCouplesDetails: "",
+      otherDetails: "",
+    },
+    childDevelopmentalHistory: {
+      activityLevel: "",
+      activityLevelOther: "",
+      earlyAffectiveStyle: "",
+      earlyAffectiveStyleOther: "",
+      cryingPattern: "",
+      cryingPatternOther: "",
+      soothingWhenUpset: "",
+      soothingWhenUpsetOther: "",
+      responseToBeingHeld: "",
+      reactionToStrangers: "",
+      eatingHabitsNotes: "",
+      sleepingHabitsNotes: "",
+    },
+    childDevelopmentalMilestones: {
+      motor: [],
+      language: [],
+      adaptive: [],
+      notes: "",
+    },
   };
 }
 
@@ -215,7 +493,7 @@ export default function Page() {
   const [step, setStep] = useState(0);
   const [praise, setPraise] = useState<string | null>(null);
   const [burst, setBurst] = useState(false);
-  const [profile, setProfile] = useState<Profile>(makeDefaultProfile());
+  const [profile, setProfile] = useState<Profile>(makeDefaultAdultProfile());
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -224,12 +502,6 @@ export default function Page() {
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
   // Prevent re-loading state on tab focus/session refetch
   const hasBootstrapped = React.useRef(false);
-  // Cache for ReportSection so we only POST once
-  const [reportText, setReportText] = useState<string | null>(null);
-  const [reportInterp, setReportInterp] = useState<Record<
-    string,
-    string
-  > | null>(null);
 
   const progressPct = useMemo(() => {
     // Percent of furthest reached step over last index
@@ -253,10 +525,19 @@ export default function Page() {
         const data = await profileResp.json();
         const incoming = data?.profile ?? null;
         if (incoming) {
-          const merged = mergeWithDefaults(makeDefaultProfile(), incoming);
+          // Use the correct default based on what's in the database
+          const baseDefaults =
+            incoming.isChild === true
+              ? makeDefaultChildProfile()
+              : makeDefaultAdultProfile();
+          console.log(incoming, "incoming profile");
+          console.log(incoming.isChild, "incoming isChild");
+          console.log(baseDefaults, "base defaults");
+          const merged = mergeWithDefaults(baseDefaults, incoming);
           setProfile(merged);
           console.log("Loaded profile (merged)", merged);
         } else {
+          // No saved profile - use adult default and fill in session info
           setProfile((p) => ({
             ...p,
             firstName: session?.user?.name?.split(" ")[0] ?? "",
@@ -281,40 +562,140 @@ export default function Page() {
     if (!key) {
       return false;
     }
+    // Welcome: require Adult/Child selection before proceeding
+    if (key === "welcome") {
+      return profile.isChild !== null;
+    }
 
-    // Contact: strict required fields
+    // Contact: strict required fields (child adds parent/guardian requirements)
     if (key === "contact") {
-      return Boolean(
+      const patientOk = Boolean(
         profile.firstName &&
           profile.lastName &&
           profile.age &&
+          profile.email &&
           profile.email.includes("@") &&
           profile.dob &&
           profile.contactNumber
       );
+
+      if (profile.isChild === true) {
+        const parentOk = Boolean(
+          profile.parent1FirstName &&
+            profile.parent1LastName &&
+            profile.parent2FirstName &&
+            profile.parent2LastName &&
+            profile.parentOccupation &&
+            profile.parentEmployer &&
+            profile.parentEducation
+        );
+        return patientOk && parentOk;
+      }
+
+      return patientOk;
     }
 
     // Profile: required demographics + basic anthropometrics
+    // Profile: required demographics + step-specific logic
     if (key === "profile") {
-      return Boolean(
+      // ---- Common required demographics shown to both adult & child ----
+      // (sexualOrientation, ethnicity, religion are required in the UI for both)
+      const baseCommonOk = Boolean(
         profile.genderIdentity &&
+          profile.pronouns.length > 0 &&
           profile.sexualOrientation.length > 0 &&
           profile.ethnicity.length > 0 &&
           profile.religion.length > 0 &&
-          profile.pronouns.length > 0 &&
           profile.height.feet !== null &&
           profile.height.inches !== null &&
-          profile.weightLbs !== null &&
-          profile.highestDegree &&
+          profile.weightLbs !== null
+      );
+
+      // ---- CHILD PATH ----
+      if (profile.isChild === true) {
+        const si = profile.schoolInfo ?? {};
+        const ra = profile.relationshipsAbilities ?? {};
+
+        // School Info (all required except detail fields that depend on booleans)
+        const schoolOk = Boolean(
+          si.schoolName &&
+            si.schoolPhoneNumber &&
+            typeof si.yearsAtSchool === "number" &&
+            si.yearsAtSchool >= 0 &&
+            si.grade &&
+            typeof si.hasRepeatedGrade === "boolean" &&
+            (si.hasRepeatedGrade
+              ? Boolean(
+                  si.repeatedGradeDetail &&
+                    si.repeatedGradeDetail.trim().length > 0
+                )
+              : true) &&
+            typeof si.hasSpecialClasses === "boolean" &&
+            (si.hasSpecialClasses
+              ? Boolean(
+                  si.specialClassesDetail &&
+                    si.specialClassesDetail.trim().length > 0
+                )
+              : true) &&
+            typeof si.hasSpecialServices === "boolean" &&
+            (si.hasSpecialServices
+              ? Boolean(
+                  si.specialServicesDetail &&
+                    si.specialServicesDetail.trim().length > 0
+                )
+              : true) &&
+            Boolean(
+              si.academicGrades && String(si.academicGrades).trim().length > 0
+            )
+        );
+
+        // Relationships & Abilities (all required except boolean-gated details and otherConcerns)
+        const relOk = Boolean(
+          ra.teachersPeersRelationship &&
+            ra.teachersPeersRelationship.trim().length > 0 &&
+            typeof ra.hadTruancyProceedings === "boolean" &&
+            (ra.hadTruancyProceedings
+              ? Boolean(
+                  ra.truancyProceedingsDetail &&
+                    ra.truancyProceedingsDetail.trim().length > 0
+                )
+              : true) &&
+            typeof ra.receivedSchoolCounseling === "boolean" &&
+            (ra.receivedSchoolCounseling
+              ? Boolean(
+                  ra.schoolCounselingDetail &&
+                    ra.schoolCounselingDetail.trim().length > 0
+                )
+              : true) &&
+            ra.activitiesInterestsStrengths &&
+            ra.activitiesInterestsStrengths.trim().length > 0 &&
+            // NEW: require all three Likert ratings to be selected
+            ra.childAbilityWorkIndependently &&
+            ra.childAbilityOrganizeSelf &&
+            ra.childAttendance
+          // ra.otherConcerns is optional
+        );
+
+        return Boolean(baseCommonOk && schoolOk && relOk);
+      }
+
+      // ---- ADULT PATH ----
+      // Adult-only extras shown in UI: highestDegree, diet/alcohol/substances, plus jobDetails always required
+      const adultExtrasOk = Boolean(
+        profile.highestDegree &&
           profile.dietType.length > 0 &&
           profile.alcoholFrequency &&
           profile.substancesUsed.length > 0 &&
-          profile.jobDetails &&
-          profile.hobbies
+          profile.hobbies &&
+          profile.isMarried !== null &&
+          profile.isSexuallyActive !== null &&
+          profile.isEmployed !== null &&
+          profile.jobDetails
       );
+
+      return Boolean(baseCommonOk && adultExtrasOk);
     }
 
-    // Quick Check-In: require minimal triage + suicide screener (now lives here)
     if (key === "screen") {
       const hasMood =
         Array.isArray(profile.moodChanges) && profile.moodChanges.length > 0;
@@ -325,32 +706,38 @@ export default function Page() {
         Array.isArray(profile.thoughtChanges) &&
         profile.thoughtChanges.length > 0;
 
-      const s = profile.assessments.suicide;
+      if (profile.isChild !== true && profile.assessments.kind === "adult") {
+        const s = profile.assessments.data.suicide;
 
-      // Base required suicide items
-      const baseSuicideAnswered = s.wishDead !== "" && s.thoughts !== "";
+        // Base required suicide items
+        const baseSuicideAnswered = s.wishDead !== "" && s.thoughts !== "";
 
-      // Conditional follow-ups only if there are suicidal thoughts
-      let suicideOk = baseSuicideAnswered;
-      if (s.thoughts === "yes") {
-        suicideOk =
-          suicideOk &&
-          s.methodHow !== "" &&
-          s.intention !== "" &&
-          s.plan !== "" &&
-          s.behavior !== "";
+        // Conditional follow-ups only if there are suicidal thoughts
+        let suicideOk = baseSuicideAnswered;
+        if (s.thoughts === "yes") {
+          suicideOk =
+            suicideOk &&
+            s.methodHow !== "" &&
+            s.intention !== "" &&
+            s.plan !== "" &&
+            s.behavior !== "";
 
-        // If behavior is yes, require timing follow-up
-        if (s.behavior === "yes") {
-          suicideOk = suicideOk && s.behavior3mo !== "";
+          // If behavior is yes, require timing follow-up
+          if (s.behavior === "yes") {
+            suicideOk = suicideOk && s.behavior3mo !== "";
+          }
         }
-      }
 
-      return hasMood && hasBehavior && hasThought && suicideOk;
+        return hasMood && hasBehavior && hasThought && suicideOk;
+      } else {
+        //if child
+        return hasMood && hasBehavior && hasThought;
+      }
     }
 
     // Story: require minimal narrative + goals (either text or audio counts)
     if (key === "story") {
+      // Common required fields for both adult & child
       const hasStory = Boolean(
         (profile.storyNarrative?.text &&
           profile.storyNarrative.text.trim().length > 0) ||
@@ -365,6 +752,62 @@ export default function Page() {
           profile.livingSituation.text.trim().length > 0) ||
           profile.livingSituation?.audio?.url
       );
+
+      // Previous treatment (required for both)
+      const hasTreatmentAnswer =
+        typeof profile.hasReceivedMentalHealthTreatment === "boolean";
+
+      let treatmentDetailsOk = true;
+      if (profile.hasReceivedMentalHealthTreatment) {
+        const hasTreatmentSummary = Boolean(
+          (profile.prevTreatmentSummary?.text &&
+            profile.prevTreatmentSummary.text.trim().length > 0) ||
+            profile.prevTreatmentSummary?.audio?.url
+        );
+        treatmentDetailsOk = Boolean(
+          profile.therapyDuration &&
+            profile.previousDiagnosis &&
+            profile.previousDiagnosis.trim().length > 0 &&
+            hasTreatmentSummary
+        );
+      }
+
+      // Family history (required for both, but elaboration only if items selected)
+      const hasFamilyHistory = Array.isArray(profile.familyHistory);
+      let familyHistoryOk = hasFamilyHistory;
+      if (
+        hasFamilyHistory &&
+        profile.familyHistory.length > 0 &&
+        !profile.familyHistory.includes("none")
+      ) {
+        const hasElaboration = Boolean(
+          (profile.familyHistoryElaboration?.text &&
+            profile.familyHistoryElaboration.text.trim().length > 0) ||
+            profile.familyHistoryElaboration?.audio?.url
+        );
+        familyHistoryOk = hasElaboration;
+      }
+
+      const commonOk =
+        hasStory &&
+        hasGoals &&
+        hasLiving &&
+        hasTreatmentAnswer &&
+        treatmentDetailsOk &&
+        familyHistoryOk;
+
+      // Child-specific required fields
+      if (profile.isChild === true) {
+        const childOk = Boolean(
+          profile.fatherSideMedicalIssues &&
+            profile.fatherSideMedicalIssues.trim().length > 0 &&
+            profile.motherSideMedicalIssues &&
+            profile.motherSideMedicalIssues.trim().length > 0
+        );
+        return commonOk && childOk;
+      }
+
+      // Adult-specific required fields
       const hasEnvironments = Boolean(
         (profile.upbringingEnvironments?.text &&
           profile.upbringingEnvironments.text.trim().length > 0) ||
@@ -377,13 +820,24 @@ export default function Page() {
           profile.upbringingWhoWith?.audio?.url
       );
 
-      return (
-        hasStory &&
-        hasGoals &&
-        hasLiving &&
+      const hasChildhoodAnswer = typeof profile.likedChildhood === "boolean";
+
+      let childhoodReasonOk = true;
+      if (profile.likedChildhood === false) {
+        childhoodReasonOk = Boolean(
+          (profile.childhoodNegativeReason?.text &&
+            profile.childhoodNegativeReason.text.trim().length > 0) ||
+            profile.childhoodNegativeReason?.audio?.url
+        );
+      }
+
+      const adultOk =
         hasEnvironments &&
-        hasUpbringingWhoWith
-      );
+        hasUpbringingWhoWith &&
+        hasChildhoodAnswer &&
+        childhoodReasonOk;
+
+      return commonOk && adultOk;
     }
 
     // Relationships: require at least one mapped relationship
@@ -395,8 +849,15 @@ export default function Page() {
 
     // Assessments: require the minimal baseline (PSS-4 answered, per your latest)
     if (key === "assessments") {
-      const pss4 = profile.assessments.stress.pss4;
-      return Boolean(pss4 !== "");
+      // Use the discriminant on assessments to ensure we only access adult-only fields
+      if (profile.assessments.kind === "adult") {
+        const pss4 = profile.assessments.data.stress.pss4;
+        return Boolean(pss4 !== "");
+      } else {
+        const scaredParentLast =
+          profile.assessments.data.scared.parent.responses.scared41;
+        return Boolean(scaredParentLast !== "");
+      }
     }
 
     // All other steps: allow Next
@@ -541,6 +1002,8 @@ export default function Page() {
             typeof finalized.isEmployed === "boolean"
               ? finalized.isEmployed
               : null,
+          isChild:
+            typeof finalized.isChild === "boolean" ? finalized.isChild : null,
           // pass JSON along in case row doesn't exist yet
           profile: finalized,
           version: (finalized as any).version ?? 1,
@@ -617,7 +1080,7 @@ export default function Page() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -15, opacity: 0 }}
           transition={{ duration: 0.8, ease }}
-          className="w-full rounded-4xl border border-gray-200 bg-white/70 backdrop-blur-sm px-6 py-6  md:py-8 shadow-md max-h-[70vh] scrollable-div overflow-y-auto overflow-x-hidden box-border overscroll-y-contain"
+          className="w-full rounded-4xl  border border-gray-200 bg-white/70 backdrop-blur-sm px-6 py-6  md:py-8 shadow-md max-h-[70vh] scrollable-div overflow-y-auto overflow-x-hidden box-border overscroll-y-contain"
           style={{
             WebkitOverflowScrolling: "touch",
             scrollbarGutter: "stable both-edges",
@@ -647,6 +1110,7 @@ export default function Page() {
                   step={step}
                   profile={profile}
                   session={session}
+                  setProfile={setProfile}
                 />
               );
             }
@@ -739,12 +1203,7 @@ export default function Page() {
               return (
                 <ReportSection
                   profile={profile}
-                  cachedText={reportText}
-                  cachedInterp={reportInterp}
-                  onCache={({ text, interpretations }) => {
-                    if (reportText == null) setReportText(text);
-                    if (reportInterp == null) setReportInterp(interpretations);
-                  }}
+                  setProfile={setProfile}
                   step={step}
                   title="Your Personalized Report"
                 />
@@ -769,7 +1228,8 @@ export default function Page() {
                         ? goNext()
                         : setStep(Math.min(profile.maxVisited, lastIndex))
                     }
-                    className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95"
+                    disabled={profile.maxVisited === 0 && !canNext}
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                     style={{ background: intPsychTheme.secondary }}
                   >
                     {profile.maxVisited === 0 ? "Start" : "Resume"}
@@ -779,7 +1239,7 @@ export default function Page() {
 
                 {step > 0 && (
                   <>
-                    {step === lastIndex - 1 && (
+                    {step === lastIndex - 1 && !submitted ? (
                       <button
                         onClick={() => {
                           setStep(0);
@@ -790,6 +1250,19 @@ export default function Page() {
                       >
                         Back to Beginning
                       </button>
+                    ) : null}
+                    {/* {on the last two steps} */}
+                    {step >= lastIndex - 1 && submitted && (
+                      <a
+                        href={"https://forms.gle/FNvs8LzwZfT2hWb27"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex cursor-pointer font-semibold mr-2 items-center gap-2 rounded-xl px-4 py-2 font-normal text-white transition duration-150 hover:brightness-90 active:scale-95"
+                        style={{ background: intPsychTheme.primary }}
+                        aria-label="Open feedback form (opens in a new tab)"
+                      >
+                        Give Feedback (2–3 min)
+                      </a>
                     )}
 
                     {steps[step].key !== "report" && (
