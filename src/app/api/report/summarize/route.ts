@@ -35,7 +35,7 @@ export async function POST(req: Request) {
           scaredParent: Number(payload.metrics?.scaredParent ?? 0),
         };
         scaleInstructions = await fs.readFile(
-          "src/app/prompts/child_scale_prompt.txt",
+          "public/prompts/child_scale_prompt.txt",
           "utf-8"
         );
       } else {
@@ -50,13 +50,13 @@ export async function POST(req: Request) {
           ace: Number(payload.metrics?.ace ?? 0),
         };
         scaleInstructions = await fs.readFile(
-          "src/app/prompts/adult_scale_prompt.txt",
+          "public/prompts/adult_scale_prompt.txt",
           "utf-8"
         );
       }
 
       const summaryInstructions = await fs.readFile(
-        "src/app/prompts/summary_prompt.txt",
+        "public/prompts/summary_prompt.txt",
         "utf-8"
       );
       // Prepare OpenAI calls
