@@ -72,6 +72,7 @@ export async function POST(req: NextRequest) {
       firstName = "",
       lastName = "",
       email = "",
+      isChild = null,
       submittedAtEpoch,
       submittedAtISO,
       notifyTo,
@@ -162,10 +163,13 @@ export async function POST(req: NextRequest) {
 
     const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
-    const subject = "New Intake Assessment Completed";
+    const subject =
+      isChild === true
+        ? "New Child Intake Assessment Completed"
+        : "New Adult Intake Assessment Completed";
     const html = `
       <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; line-height:1.5;">
-        <h2 style="margin:0 0 8px">Intake Submitted</h2>
+        <h2 style="margin:0 0 8px">${isChild === true ? "Child" : "Adult"} Intake Submitted</h2>
         <p style="margin:0 0 8px">A patient just completed the intake assessment.</p>
         <table style="border-collapse:collapse; font-size:14px;">
           <tr><td style="padding:4px 8px; color:#555">Name</td><td style="padding:4px 8px"><b>${firstName || "(unknown)"} ${lastName || ""}</b></td></tr>

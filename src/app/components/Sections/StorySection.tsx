@@ -243,28 +243,31 @@ export default function StorySection({
           }))
         }
       /> */}
-
-      <Separator label="Previous Treatment" />
-      <Field title={"Previous Mental Health Treatment"} required>
-        <Likert
-          label={
-            profile.isChild
-              ? "Is your child currently or have they previously received mental health treatment?"
-              : "Are you currently or have you previously received mental health treatment?"
-          }
-          value={profile.hasReceivedMentalHealthTreatment.toString()}
-          onChange={(v) =>
-            setProfile((p) => ({
-              ...p,
-              hasReceivedMentalHealthTreatment: v === "true",
-            }))
-          }
-          options={[
-            { key: "true", label: "Yes" },
-            { key: "false", label: "No" },
-          ]}
-        />
-      </Field>
+      {!profile.isChild && (
+        <>
+          <Separator label="Previous Treatment" />
+          <Field title={"Previous Mental Health Treatment"} required>
+            <Likert
+              label={
+                profile.isChild
+                  ? "Is your child currently or have they previously received mental health treatment?"
+                  : "Are you currently or have you previously received mental health treatment?"
+              }
+              value={profile.hasReceivedMentalHealthTreatment.toString()}
+              onChange={(v) =>
+                setProfile((p) => ({
+                  ...p,
+                  hasReceivedMentalHealthTreatment: v === "true",
+                }))
+              }
+              options={[
+                { key: "true", label: "Yes" },
+                { key: "false", label: "No" },
+              ]}
+            />
+          </Field>
+        </>
+      )}
 
       {profile.hasReceivedMentalHealthTreatment && (
         <>

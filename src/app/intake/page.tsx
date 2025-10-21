@@ -880,6 +880,7 @@ export default function Page() {
           firstName: p.firstName || "",
           lastName: p.lastName || "",
           email: p.email || "",
+          isChild: p.isChild || "",
           submittedAtEpoch: Date.now(),
           submittedAtISO: new Date().toISOString(),
         }),
