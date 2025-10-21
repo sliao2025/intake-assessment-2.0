@@ -3,10 +3,10 @@ import { prisma } from "../../../../lib/prisma";
 
 export async function POST(
   req: Request,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const { userId } = params;
+    const { userId } = await params;
     const body = await req.json();
 
     // Validate incoming data
@@ -97,10 +97,10 @@ export async function POST(
 // GET endpoint to fetch existing collateral responses (optional, for review)
 export async function GET(
   req: Request,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const { userId } = params;
+    const { userId } = await params;
 
     const profileRecord = await prisma.profile.findUnique({
       where: { userId },
