@@ -3,7 +3,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import type { Profile } from "../lib/types/types";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, User } from "lucide-react";
 import ProgressHeader from "../components/ProgressHeader";
 import ConfettiBurst from "../components/ConfettiBurst";
 import { useSession } from "next-auth/react";
@@ -268,6 +268,7 @@ export function makeDefaultChildProfile(): Profile {
           parent: { form: "parent", responses: blankDiscResponses() },
         },
         snap: { ...(blankSnapResponses() as any) },
+        snapCollateral: [],
         scared: {
           self: { form: "self", responses: blankScaredResponses() as any },
           parent: { form: "parent", responses: blankScaredResponses() as any },
@@ -869,6 +870,7 @@ export default function Page() {
 
   useEffect(() => {
     if (step > lastIndex) setStep(lastIndex);
+    console.log(session.user.id);
   }, [step, lastIndex]);
 
   async function notifyAssessmentComplete(p: Profile) {

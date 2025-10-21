@@ -5,8 +5,9 @@ import StepTitle from "../StepTitle";
 import Field from "../primitives/Field";
 import Likert from "../primitives/Likert";
 import type { Profile } from "../../lib/types/types";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Copy, Check } from "lucide-react";
 import { intPsychTheme } from "../theme";
+import { useSession } from "next-auth/react";
 import Collapsible from "../primitives/Collapsible";
 import DiscTeenForm from "../Scales/Child/DiscTeenForm";
 import SNAPForm from "../Scales/Child/SNAPForm";
@@ -78,6 +79,7 @@ export default function AssessmentsSection({
   // === NEW: union-aware handles ===
   const kind = profile.assessments.kind;
   const a: any = profile.assessments.data;
+  const { data: session } = useSession();
 
   // Ensure child/adult payload matches toggle
   const dtdsKeys = [
@@ -109,6 +111,8 @@ export default function AssessmentsSection({
   const [open2, setOpen2] = React.useState(false); // First depression block (PHQ-9 or DISC)
   const [open2Parent, setOpen2Parent] = React.useState(false);
   const [openSnap, setOpenSnap] = React.useState(false); // SNAP-IV
+  const [openSnapCollateral, setOpenSnapCollateral] = React.useState(false); // SNAP Collateral
+  const [copiedLink, setCopiedLink] = React.useState(false); // Clipboard state
   const [openScaredSelf, setOpenScaredSelf] = React.useState(false); // SCARED — self
   const [openScaredParent, setOpenScaredParent] = React.useState(false); // SCARED — parent
   const [openGAD, setOpenGAD] = React.useState(false); // GAD-7
@@ -438,6 +442,10 @@ export default function AssessmentsSection({
     profile.isChild === true
       ? allAnswered(a?.snap, snapKeys as readonly string[])
       : false;
+
+  // SNAP Collateral state
+  const [snapCollateralDone, setSnapCollateralDone] = React.useState(false);
+
   const scaredSelfDone =
     profile.isChild === true
       ? allAnswered(a?.scared?.self?.responses, scaredKeys as readonly string[])
@@ -653,6 +661,7 @@ export default function AssessmentsSection({
   React.useEffect(() => {
     if (profile.isChild === true) {
       if (!prevSnapDone.current && snapDone) {
+        setOpenSnapCollateral(true);
         setUScaredSelf(true);
         setOpenScaredSelf(true);
       }
@@ -709,6 +718,99 @@ export default function AssessmentsSection({
           >
             <SNAPForm a={a} setA={setA} snap0to3={snap0to3} />
           </Collapsible>
+
+          <Collapsible
+            title="SNAP-IV Collateral (Optional)"
+            subtitle="Share link for teachers, coaches, or other informants"
+            open={openSnapCollateral}
+            setOpen={setOpenSnapCollateral}
+            enabled={snapDone}
+            complete={snapCollateralDone}
+          >
+            <div className="space-y-4">
+              <p className="text-sm text-slate-700">
+                You can optionally share this assessment with teachers, coaches,
+                or other adults who know the child well. Their responses will
+                provide additional perspective on the child's behavior.
+              </p>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <p className="text-sm font-medium text-gray-900 mb-3">
+                  Share this link:
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={`${typeof window !== "undefined" ? window.location.origin : ""}/external/snap/${(session?.user as any)?.id || ""}`}
+                    className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-xl text-sm font-mono text-gray-700"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const link = `${typeof window !== "undefined" ? window.location.origin : ""}/external/snap/${(session?.user as any)?.id || ""}`;
+                      navigator.clipboard.writeText(link);
+                      setCopiedLink(true);
+                      setSnapCollateralDone(true);
+                      setTimeout(() => setCopiedLink(false), 2000);
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition flex items-center gap-2 text-sm font-medium"
+                  >
+                    {copiedLink ? (
+                      <>
+                        <Check className="w-4 h-4" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4" />
+                        Copy
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSnapCollateralDone(true);
+                    setOpenSnapCollateral(false);
+                    setOpenScaredSelf(true);
+                  }}
+                  className="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition font-medium"
+                >
+                  Skip this step
+                </button>
+              </div>
+
+              {a.snapCollateral && a.snapCollateral.length > 0 && (
+                <div className="mt-4 border-t border-gray-200 pt-4">
+                  <p className="text-sm font-medium text-gray-900 mb-2">
+                    Received responses ({a.snapCollateral.length}):
+                  </p>
+                  <ul className="space-y-2">
+                    {a.snapCollateral.map((col: any, idx: number) => (
+                      <li
+                        key={idx}
+                        className="text-sm text-gray-600 flex items-center gap-2"
+                      >
+                        <Check className="w-4 h-4 text-green-600" />
+                        <span>
+                          <strong>{col.informantName}</strong> (
+                          {col.informantRelation})
+                          {col.submittedAt &&
+                            ` • ${new Date(col.submittedAt).toLocaleDateString()}`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </Collapsible>
+
           <Collapsible
             title="SCARED — Child Self-Report"
             subtitle="Screen for Child Anxiety Related Disorders (past 3 months)"

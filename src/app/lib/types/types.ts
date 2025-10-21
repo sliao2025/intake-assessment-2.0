@@ -229,6 +229,13 @@ export type SnapItemKey =
   | "snap26";
 
 /** SNAP response values stored as strings to match existing Likert pattern */
+export type SnapCollateralResponse = {
+  id: string; // unique ID for this response
+  informantName: string; // "Mrs. Smith", "Coach Johnson"
+  informantRelation: string; // "parent", "teacher", "coach", etc.
+  submittedAt: string; // ISO timestamp
+  responses: SnapResponses; // reuse existing SNAP responses type
+};
 export type SnapValue = "" | "0" | "1" | "2" | "3";
 export type SnapResponses = { [K in SnapItemKey]: SnapValue };
 export type SnapScale = { responses: SnapResponses };
@@ -291,6 +298,7 @@ export type ChildAssessments = {
   };
   /** SNAP‑IV ADHD (26 items) */
   snap: SnapScale;
+  snapCollateral: SnapCollateralResponse[];
   /** SCARED anxiety scale (self + optional parent) */
   scared: {
     self: ScaredSelf;
