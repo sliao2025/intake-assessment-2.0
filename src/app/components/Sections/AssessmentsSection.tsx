@@ -731,10 +731,10 @@ export default function AssessmentsSection({
               <p className="text-sm text-slate-700">
                 You can optionally share this assessment with teachers, coaches,
                 or other adults who know the child well. Their responses will
-                provide additional perspective on the child's behavior.
+                provide valuable perspectives on the child's behavior.
               </p>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
                 <p className="text-sm font-medium text-gray-900 mb-3">
                   Share this link:
                 </p>
@@ -754,7 +754,8 @@ export default function AssessmentsSection({
                       setSnapCollateralDone(true);
                       setTimeout(() => setCopiedLink(false), 2000);
                     }}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition flex items-center gap-2 text-sm font-medium"
+                    className="px-4 py-2 cursor-pointer text-white rounded-xl transition hover:brightness-90 flex items-center gap-2 text-sm font-medium"
+                    style={{ background: intPsychTheme.secondary }}
                   >
                     {copiedLink ? (
                       <>
@@ -779,7 +780,7 @@ export default function AssessmentsSection({
                     setOpenSnapCollateral(false);
                     setOpenScaredSelf(true);
                   }}
-                  className="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition font-medium"
+                  className="px-6 py-2 bg-gray-100 text-gray-700 cursor-pointer rounded-xl hover:bg-gray-200 transition font-medium"
                 >
                   Skip this step
                 </button>

@@ -74,7 +74,7 @@ export default function StorySection({
         />
       </Field>
 
-      {/* <VoiceRecorder
+      <VoiceRecorder
         audioState={profile.storyNarrative?.audio?.url || null}
         onAttach={(url) =>
           setProfile((p) => ({
@@ -85,7 +85,7 @@ export default function StorySection({
             },
           }))
         }
-      /> */}
+      />
 
       <Separator label="Your Goals" />
       <Field
