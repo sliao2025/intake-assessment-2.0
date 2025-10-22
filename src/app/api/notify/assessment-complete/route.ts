@@ -93,11 +93,12 @@ export async function POST(req: NextRequest) {
       parsedIso: submittedIso,
       parsedET: submittedEt,
     });
-
+    const session = await getServerSession(authOptions);
+    const authedUserId = (session?.user as any)?.id as string | undefined;
     // Mark intake as finished for the authenticated user (server-side session)
+    console.log("[notify] authedUserId:", authedUserId);
+    console.log("[notify] session:", JSON.stringify(session, null, 2));
     try {
-      const session = await getServerSession(authOptions);
-      const authedUserId = (session?.user as any)?.id as string | undefined;
       if (authedUserId) {
         await prisma.user.update({
           where: { id: authedUserId },
@@ -179,7 +180,7 @@ export async function POST(req: NextRequest) {
         </table>
         <p style="margin:12px 0 0; font-size:14px;">
           You can view the patient’s results here:
-          <a href="https://integrative-psych-clinician-report-34615113909.us-east4.run.app/" target="_blank" rel="noopener noreferrer">https://integrative-psych-clinician-report-34615113909.us-east4.run.app/</a>.
+          <a href="https://integrative-psych-clinician-report-34615113909.us-east4.run.app/report/${authedUserId}" target="_blank" rel="noopener noreferrer">Integrative Psych Intake Assessment Clinician Portal</a>.
           Please input the name exactly as written in this email.
         </p>
       </div>
