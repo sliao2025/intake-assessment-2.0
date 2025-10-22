@@ -181,7 +181,6 @@ export async function POST(req: NextRequest) {
         <p style="margin:12px 0 0; font-size:14px;">
           You can view the patient’s results here:
           <a href="https://integrative-psych-clinician-report-34615113909.us-east4.run.app/report/${authedUserId}" target="_blank" rel="noopener noreferrer">Integrative Psych Intake Assessment Clinician Portal</a>.
-          Please input the name exactly as written in this email.
         </p>
       </div>
     `;
