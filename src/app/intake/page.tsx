@@ -16,6 +16,7 @@ import CheckInSection from "../components/Sections/CheckInSection";
 import MedicalSection from "../components/Sections/MedicalSection";
 import RelationshipSection from "../components/Sections/RelationshipSection";
 import StorySection from "../components/Sections/StorySection";
+import { VoiceRecorderHandle } from "../components/VoiceRecorder";
 import AssessmentsSection from "../components/Sections/AssessmentsSection";
 import ReviewSection from "../components/Sections/ReviewSection";
 import HIPAASection from "../components/Sections/HIPAASection";
@@ -504,6 +505,11 @@ export default function Page() {
   // Prevent re-loading state on tab focus/session refetch
   const hasBootstrapped = React.useRef(false);
 
+  // Ref to store all VoiceRecorder component refs
+  const voiceRecorderRefs = React.useRef<{
+    [key: string]: VoiceRecorderHandle | null;
+  }>({});
+
   const progressPct = useMemo(() => {
     // Percent of furthest reached step over last index
     return Math.min(100, (profile.maxVisited / steps.length) * 100);
@@ -913,7 +919,7 @@ export default function Page() {
       setStep(next);
       setProfile(nextProfile);
 
-      // save using the freshly computed snapshot (do not rely on async state)
+      // save using the freshly computed snapshot (saveProgress will merge audio uploads)
       await saveProgress(nextProfile);
     }
   };
@@ -928,7 +934,12 @@ export default function Page() {
 
   async function saveProgress(override?: Profile) {
     try {
+      console.log("[saveProgress] Saving profile (audio already uploaded)");
+
+      // Audio is uploaded immediately after recording and SQL is updated in onAttach
+      // This is just a final checkpoint save
       const payload = override ?? profile;
+
       const r = await fetch("/api/profile/create", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -938,7 +949,8 @@ export default function Page() {
         const msg = await r.text();
         throw new Error(`${r.status} ${msg}`);
       }
-      await r.json();
+      const saved = await r.json();
+      console.log("[saveProgress] Profile saved successfully:", saved);
     } catch (error) {
       console.error("Failed to store profile", error);
     }
@@ -1157,6 +1169,7 @@ export default function Page() {
                   step={step}
                   profile={profile}
                   setProfile={setProfile}
+                  voiceRecorderRefs={voiceRecorderRefs}
                 />
               );
             }

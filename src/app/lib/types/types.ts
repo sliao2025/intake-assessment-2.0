@@ -49,10 +49,16 @@ export type InjuryDetails = {
 export type AudioAttachment = {
   /** public URL or local blob URL returned by the recorder */
   url: string;
+  /** GCS file path (e.g., "userId/storyNarrative-1234567890.webm") */
+  fileName?: string;
   /** optional metadata from recorder */
   durationSec?: number;
   mimeType?: string;
   sizeBytes?: number;
+  /** ISO timestamp of when the file was uploaded to GCS */
+  uploadedAt?: string;
+  transcription?: string;
+  translation?: string;
 };
 
 /** Rich input that can hold written text, an audio recording, or both */

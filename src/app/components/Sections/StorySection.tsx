@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import StepTitle from "../StepTitle";
 import Field from "../primitives/Field";
 import Likert from "../primitives/Likert";
 import Separator from "../primitives/Separator";
-import VoiceRecorder from "../VoiceRecorder";
+import VoiceRecorder, { VoiceRecorderHandle } from "../VoiceRecorder";
 import MultiSelectGroup from "../primitives/MultiSelectGroup";
 import type { Profile } from "../../lib/types/types";
 import TextAreaWithEncouragement from "../primitives/TextAreawithEncouragement";
@@ -15,6 +15,9 @@ type Props = {
   step: number;
   profile: Profile;
   setProfile: React.Dispatch<React.SetStateAction<Profile>>;
+  voiceRecorderRefs?: React.MutableRefObject<{
+    [key: string]: VoiceRecorderHandle | null;
+  }>;
 };
 
 export default function StorySection({
@@ -22,7 +25,27 @@ export default function StorySection({
   step,
   profile,
   setProfile,
+  voiceRecorderRefs,
 }: Props) {
+  // Function to save a specific profile state to SQL
+  const saveProfileToSQL = async (profileToSave: typeof profile) => {
+    try {
+      console.log("[StorySection] Saving profile to SQL...");
+      const response = await fetch("/api/profile/create", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profileToSave),
+      });
+      if (!response.ok) {
+        throw new Error(`SQL save failed: ${response.status}`);
+      }
+      console.log("[StorySection] Profile saved to SQL successfully");
+    } catch (err) {
+      console.error("[StorySection] Failed to save profile to SQL:", err);
+      throw err;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <StepTitle n={step + 1} title={title} />
@@ -74,18 +97,48 @@ export default function StorySection({
         />
       </Field>
 
-      {/* <VoiceRecorder
+      <VoiceRecorder
+        ref={(el) => {
+          if (voiceRecorderRefs) {
+            voiceRecorderRefs.current.storyNarrative = el;
+          }
+        }}
+        fieldName="storyNarrative"
         audioState={profile.storyNarrative?.audio?.url || null}
-        onAttach={(url) =>
-          setProfile((p) => ({
-            ...p,
+        fileName={profile.storyNarrative?.audio?.fileName || null}
+        onAttach={async (data) => {
+          console.log("[StorySection] onAttach called with data:", data);
+
+          // Compute the updated profile synchronously
+          // When deleting (data is null), we explicitly remove the audio field
+          const updatedProfile: typeof profile = {
+            ...profile,
             storyNarrative: {
-              ...p.storyNarrative,
-              audio: url ? { url } : undefined,
+              text: profile.storyNarrative?.text || "",
+              ...(data && {
+                audio: {
+                  url: data.url,
+                  fileName: data.fileName,
+                  uploadedAt: data.uploadedAt,
+                },
+              }),
+              // When data is null, audio field is not included (truly deleted)
             },
-          }))
-        }
-      /> */}
+          };
+
+          // Save to SQL first (this ensures cloud and SQL are in sync)
+          console.log("[StorySection] Saving updated profile to SQL...", {
+            hasAudio: !!updatedProfile.storyNarrative?.audio,
+            audioFileName: updatedProfile.storyNarrative?.audio?.fileName,
+          });
+          await saveProfileToSQL(updatedProfile);
+          console.log("[StorySection] SQL save completed");
+
+          // Then update local state
+          setProfile(updatedProfile);
+          console.log("[StorySection] Local state updated");
+        }}
+      />
 
       <Separator label="Your Goals" />
       <Field
@@ -139,18 +192,47 @@ export default function StorySection({
         />
       </Field>
 
-      {/* <VoiceRecorder
+      <VoiceRecorder
+        ref={(el) => {
+          if (voiceRecorderRefs) {
+            voiceRecorderRefs.current.goals = el;
+          }
+        }}
+        fieldName="goals"
         audioState={profile.goals?.audio?.url || null}
-        onAttach={(url) =>
-          setProfile((p) => ({
-            ...p,
+        fileName={profile.goals?.audio?.fileName || null}
+        onAttach={async (data) => {
+          console.log("[StorySection] goals onAttach called with data:", data);
+
+          // Compute the updated profile synchronously
+          const updatedProfile: typeof profile = {
+            ...profile,
             goals: {
-              ...p.goals,
-              audio: url ? { url } : undefined,
+              text: profile.goals?.text || "",
+              ...(data && {
+                audio: {
+                  url: data.url,
+                  fileName: data.fileName,
+                  uploadedAt: data.uploadedAt,
+                },
+              }),
             },
-          }))
-        }
-      /> */}
+          };
+
+          // Save to SQL first
+          console.log("[StorySection] Saving updated profile to SQL...", {
+            hasAudio: !!updatedProfile.goals?.audio,
+            audioFileName: updatedProfile.goals?.audio?.fileName,
+          });
+          await saveProfileToSQL(updatedProfile);
+          console.log("[StorySection] SQL save completed");
+
+          // Then update local state
+          setProfile(updatedProfile);
+          console.log("[StorySection] Local state updated");
+        }}
+      />
+
       <Separator label="Living Situation" />
       <Field
         title={
@@ -189,18 +271,51 @@ export default function StorySection({
           }
         />
       </Field>
-      {/* <VoiceRecorder
+
+      <VoiceRecorder
+        ref={(el) => {
+          if (voiceRecorderRefs) {
+            voiceRecorderRefs.current.livingSituation = el;
+          }
+        }}
+        fieldName="livingSituation"
         audioState={profile.livingSituation?.audio?.url || null}
-        onAttach={(url) =>
-          setProfile((p) => ({
-            ...p,
+        fileName={profile.livingSituation?.audio?.fileName || null}
+        onAttach={async (data) => {
+          console.log(
+            "[StorySection] livingSituation onAttach called with data:",
+            data
+          );
+
+          // Compute the updated profile synchronously
+          const updatedProfile: typeof profile = {
+            ...profile,
             livingSituation: {
-              ...p.livingSituation,
-              audio: url ? { url } : undefined,
+              text: profile.livingSituation?.text || "",
+              ...(data && {
+                audio: {
+                  url: data.url,
+                  fileName: data.fileName,
+                  uploadedAt: data.uploadedAt,
+                },
+              }),
             },
-          }))
-        }
-      /> */}
+          };
+
+          // Save to SQL first
+          console.log("[StorySection] Saving updated profile to SQL...", {
+            hasAudio: !!updatedProfile.livingSituation?.audio,
+            audioFileName: updatedProfile.livingSituation?.audio?.fileName,
+          });
+          await saveProfileToSQL(updatedProfile);
+          console.log("[StorySection] SQL save completed");
+
+          // Then update local state
+          setProfile(updatedProfile);
+          console.log("[StorySection] Local state updated");
+        }}
+      />
+
       <Separator label="Culture & Context (optional)" />
       <Field
         title={
@@ -231,18 +346,50 @@ export default function StorySection({
         />
       </Field>
 
-      {/* <VoiceRecorder
+      <VoiceRecorder
+        ref={(el) => {
+          if (voiceRecorderRefs) {
+            voiceRecorderRefs.current.cultureContext = el;
+          }
+        }}
+        fieldName="cultureContext"
         audioState={profile.cultureContext?.audio?.url || null}
-        onAttach={(url) =>
-          setProfile((p) => ({
-            ...p,
+        fileName={profile.cultureContext?.audio?.fileName || null}
+        onAttach={async (data) => {
+          console.log(
+            "[StorySection] cultureContext onAttach called with data:",
+            data
+          );
+
+          // Compute the updated profile synchronously
+          const updatedProfile: typeof profile = {
+            ...profile,
             cultureContext: {
-              ...p.cultureContext,
-              audio: url ? { url } : undefined,
+              text: profile.cultureContext?.text || "",
+              ...(data && {
+                audio: {
+                  url: data.url,
+                  fileName: data.fileName,
+                  uploadedAt: data.uploadedAt,
+                },
+              }),
             },
-          }))
-        }
-      /> */}
+          };
+
+          // Save to SQL first
+          console.log("[StorySection] Saving updated profile to SQL...", {
+            hasAudio: !!updatedProfile.cultureContext?.audio,
+            audioFileName: updatedProfile.cultureContext?.audio?.fileName,
+          });
+          await saveProfileToSQL(updatedProfile);
+          console.log("[StorySection] SQL save completed");
+
+          // Then update local state
+          setProfile(updatedProfile);
+          console.log("[StorySection] Local state updated");
+        }}
+      />
+
       {!profile.isChild && (
         <>
           <Separator label="Previous Treatment" />
