@@ -19,7 +19,7 @@ const StoryStep: React.FC<Props> = ({
       <h2 className="font-serif text-xl">Your Story</h2>
       <label className="block">
         <div className="mb-1 text-sm text-slate-700">
-          What’s the main goal you’d like us to help you with? (type or record)
+          What's the main goal you'd like us to help you with? (type or record)
         </div>
         <textarea
           rows={6}
@@ -29,7 +29,13 @@ const StoryStep: React.FC<Props> = ({
           onChange={(e) => setStoryText(e.target.value)}
         />
       </label>
-      <VoiceRecorder onAttach={setStoryAudio} />
+      <VoiceRecorder
+        fieldName="story"
+        onAttach={(data) => {
+          // Extract just the URL from the data object to match the parent component's API
+          setStoryAudio(data ? data.url : null);
+        }}
+      />
     </div>
   );
 };
