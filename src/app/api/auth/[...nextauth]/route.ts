@@ -6,6 +6,9 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "../../../lib/prisma";
 import argon2 from "argon2";
 
+// Default clinic ID for Integrative Psych (can be overridden by env var)
+const DEFAULT_CLINIC_ID = process.env.DEFAULT_CLINIC_ID || "uvfoatdxzh7c1s395kc61u7i";
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt", maxAge: 60 * 60 * 24 * 7 }, // 7 days
@@ -31,7 +34,12 @@ export const authOptions: NextAuthOptions = {
             "Guest";
           const email = `guest-${randomUUID()}@guest.local`;
           const user = await prisma.user.create({
-            data: { email, name, guest: true },
+            data: { 
+              email, 
+              name, 
+              guest: true,
+              clinicId: DEFAULT_CLINIC_ID
+            },
           });
           return {
             id: user.id,
@@ -53,7 +61,14 @@ export const authOptions: NextAuthOptions = {
         const password = creds?.password || "";
         if (!email || !password) return null;
 
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await prisma.user.findUnique({ 
+          where: { 
+            email_clinicId: {
+              email,
+              clinicId: DEFAULT_CLINIC_ID
+            }
+          } 
+        });
         if (!user || !user.passwordHash) return null;
 
         const ok = await argon2.verify(user.passwordHash, password);
@@ -76,6 +91,19 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: { signIn: "/auth/signin" },
+  events: {
+    async createUser({ user }) {
+      // When a user is created via Google OAuth, ensure they have a clinicId
+      if (user.id) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { 
+            clinicId: DEFAULT_CLINIC_ID
+          }
+        });
+      }
+    }
+  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
