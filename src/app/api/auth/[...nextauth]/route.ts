@@ -2,8 +2,8 @@ import { randomUUID } from "crypto";
 import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "../../../lib/prisma";
+import { CustomPrismaAdapter } from "../../../lib/prisma-adapter";
 import argon2 from "argon2";
 
 // Default clinic ID for Integrative Psych (can be overridden by env var)
@@ -11,7 +11,7 @@ const DEFAULT_CLINIC_ID =
   process.env.DEFAULT_CLINIC_ID || "uvfoatdxzh7c1s395kc61u7i";
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: CustomPrismaAdapter(prisma),
   session: { strategy: "jwt", maxAge: 60 * 60 * 24 * 7 }, // 7 days
   providers: [
     GoogleProvider({
@@ -92,19 +92,6 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: { signIn: "/auth/signin" },
-  events: {
-    async createUser({ user }) {
-      // When a user is created via Google OAuth, ensure they have a clinicId
-      if (user.id) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            clinicId: DEFAULT_CLINIC_ID,
-          },
-        });
-      }
-    },
-  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
