@@ -624,6 +624,22 @@ export type Profile = {
   // Assessments Section
   assessments: AgeAwareAssessments;
 
+  // Follow-up Questions Section
+  followupQuestions?: {
+    question1: {
+      question: string;
+      answer: RichResponse;
+    };
+    question2: {
+      question: string;
+      answer: RichResponse;
+    };
+    question3: {
+      question: string;
+      answer: RichResponse;
+    };
+  };
+
   // Generated patient-facing report (optional; filled after submit)
   report?: PatientReport;
 };

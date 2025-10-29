@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
 import { AssessmentSessions, Assessments } from "../../lib/store/memory";
-import { ASSESSMENTS } from "../../seed/assessments";
 
 export async function POST(req: NextRequest) {
   const { assessmentSlug, userId, scaleCode } = await req.json();

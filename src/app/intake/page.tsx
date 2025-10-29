@@ -18,6 +18,7 @@ import RelationshipSection from "../components/Sections/RelationshipSection";
 import StorySection from "../components/Sections/StorySection";
 import { VoiceRecorderHandle } from "../components/VoiceRecorder";
 import AssessmentsSection from "../components/Sections/AssessmentsSection";
+import FollowUpSection from "../components/Sections/FollowUpSection";
 import ReviewSection from "../components/Sections/ReviewSection";
 import HIPAASection from "../components/Sections/HIPAASection";
 import WelcomeSection from "../components/Sections/WelcomeSection";
@@ -39,6 +40,7 @@ const steps: Step[] = [
   { key: "relationships", title: "Relationships", type: "form" },
   { key: "medical", title: "Medical History", type: "form" },
   { key: "assessments", title: "Assessments", type: "form" },
+  { key: "follow up", title: "Follow-Up Questions", type: "form" },
   { key: "review", title: "Review", type: "review" },
   { key: "report", title: "Your Report", type: "review" },
 ];
@@ -199,6 +201,11 @@ export function makeDefaultAdultProfile(): Profile {
     upbringingEnvironments: { text: "" },
     upbringingWhoWith: { text: "" },
     childhoodNegativeReason: { text: "" },
+    followupQuestions: {
+      question1: { question: "", answer: { text: "" } },
+      question2: { question: "", answer: { text: "" } },
+      question3: { question: "", answer: { text: "" } },
+    },
   };
 }
 
@@ -441,6 +448,11 @@ export function makeDefaultChildProfile(): Profile {
       language: [],
       adaptive: [],
       notes: "",
+    },
+    followupQuestions: {
+      question1: { question: "", answer: { text: "" } },
+      question2: { question: "", answer: { text: "" } },
+      question3: { question: "", answer: { text: "" } },
     },
   };
 }
@@ -1201,6 +1213,17 @@ export default function Page() {
                   profile={profile}
                   setProfile={setProfile}
                   step={step}
+                />
+              );
+            }
+            if (key === "follow up") {
+              return (
+                <FollowUpSection
+                  title={steps[step].title}
+                  profile={profile}
+                  setProfile={setProfile}
+                  step={step}
+                  voiceRecorderRefs={voiceRecorderRefs}
                 />
               );
             }

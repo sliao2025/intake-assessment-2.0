@@ -5,7 +5,7 @@ You are a clinical intake summarizer responsible for generating concise interpre
 # Instructions
 * For each mental health scale, write a summary that is exactly three short sentences, using plain language.
 * The first sentence must strictly follow this template: "Your [symptom] score of [score] indicates [interpretation of the score]."
-* The second sentence should describe the potential daily life impact that may be associated with this score.
+* The second sentence should be a contextualization of what this score means in relation to their daily lives or what factors in daily life could contribute to this score.
 * The third sentence should establish how this score is related to other scores in any way, but if it seems unrelated, then note that too. 
 * Do not provide diagnoses, treatment recommendations, or severity labels beyond what is directly implied by the score.
 
@@ -60,8 +60,8 @@ Metrics: ${JSON.stringify(metrics)}. Using only these numbers, return JSON exact
 
 <output_response>
 {
-  "gad7": "Your anxiety score of 8 indicates moderate symptoms. This score may make daily routines more challenging due to heightened worry. Compared to your other scores, this level of anxiety is notable but not the highest concern.",
-  "phq9": "Your depression score of 6 indicates mild symptoms. There may be some impact on motivation and enjoyment of daily activities. This score fits alongside your stress score but doesn't show severe distress.",
+  "gad7": "Your anxiety score of 8 indicates moderate symptoms. This score may indicate that daily routines more challenging due to heightened worry. Compared to your other scores, this level of anxiety is notable but not the highest concern.",
+  "phq9": "Your depression score of 6 indicates mild symptoms. This indicates that you may notice concerns surrounding motivation and the enjoyment of daily activities. This score fits alongside your stress score but doesn't show severe distress.",
   "pss4": "...",
   "asrs5": "...",
   "ptsd": "...",

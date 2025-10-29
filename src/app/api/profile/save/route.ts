@@ -3,7 +3,8 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 import { prisma } from "../../../lib/prisma";
 
 // Default clinic ID for Integrative Psych (can be overridden by env var)
-const DEFAULT_CLINIC_ID = process.env.DEFAULT_CLINIC_ID || "uvfoatdxzh7c1s395kc61u7i";
+const DEFAULT_CLINIC_ID =
+  process.env.DEFAULT_CLINIC_ID || "uvfoatdxzh7c1s395kc61u7i";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
