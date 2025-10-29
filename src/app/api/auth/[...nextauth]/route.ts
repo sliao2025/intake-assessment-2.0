@@ -7,7 +7,8 @@ import { prisma } from "../../../lib/prisma";
 import argon2 from "argon2";
 
 // Default clinic ID for Integrative Psych (can be overridden by env var)
-const DEFAULT_CLINIC_ID = "uvfoatdxzh7c1s395kc61u7i";
+const DEFAULT_CLINIC_ID =
+  process.env.DEFAULT_CLINIC_ID || "uvfoatdxzh7c1s395kc61u7i";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
