@@ -7,19 +7,56 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// --- Clinic (Multi-Tenant) ---
+model Clinic {
+  id                String   @id @default(cuid())
+  name              String
+  subdomain         String   @unique  // e.g., "integrative-psych"
+  customDomain      String?  @unique  // e.g., "intake.intpsych.com"
+  
+  // Branding
+  logoUrl           String?
+  primaryColor      String?  @default("#3B82F6")
+  secondaryColor    String?  @default("#10B981")
+  
+  // Configuration (JSON for flexibility)
+  config            Json?
+  
+  // Status
+  isActive          Boolean  @default(true)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  // Relations
+  users             User[]
+  profiles          Profile[]
+  
+  @@index([subdomain])
+  @@index([customDomain])
+}
+
 /// --- Auth.js (NextAuth) tables ---
 model User {
   id            String    @id @default(cuid())
-  email         String?   @unique
+  email         String?   
   name          String?
   image         String?
   emailVerified DateTime?
   passwordHash  String?
   guest         Boolean?  @default(false)
   intakeFinished Boolean @default(false)
+  
+  // 🔥 Multi-tenant key
+  clinicId      String
+  clinic        Clinic    @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
   accounts      Account[]
   profile       Profile?
   sessions      Session[]
+  
+  @@unique([email, clinicId]) // Email unique per clinic, not globally
+  @@index([clinicId])
 }
 
 model Account {
@@ -66,6 +103,10 @@ model Profile {
   version   Int      @default(1)
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // 🔥 Multi-tenant key
+  clinicId  String
+  clinic    Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
 
   // --- Denormalized scalars for faster querying/analytics ---
   firstName         String?
@@ -80,4 +121,7 @@ model Profile {
   isEmployed        Boolean?
   firstSubmittedAt  DateTime? @default(now())
   isChild           Boolean?
+  
+  @@index([clinicId])
+  @@index([clinicId, firstSubmittedAt])
 }

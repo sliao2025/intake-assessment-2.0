@@ -2,6 +2,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { prisma } from "../../../lib/prisma";
 
+// Default clinic ID for Integrative Psych (can be overridden by env var)
+const DEFAULT_CLINIC_ID = process.env.DEFAULT_CLINIC_ID || "uvfoatdxzh7c1s395kc61u7i";
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session) return new Response("Unauthorized", { status: 401 });
@@ -18,7 +21,7 @@ export async function POST(req: Request) {
     await prisma.profile.upsert({
       where: { userId },
       update: { json: profile, version },
-      create: { userId, json: profile, version },
+      create: { userId, json: profile, version, clinicId: DEFAULT_CLINIC_ID },
     });
 
     return Response.json({ ok: true, mode: "saveJson" });
@@ -66,6 +69,7 @@ export async function POST(req: Request) {
         version: typeof version === "number" ? version : 1,
         ...updateData,
         firstSubmittedAt: new Date(),
+        clinicId: DEFAULT_CLINIC_ID,
       },
     });
 
