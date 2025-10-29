@@ -7,7 +7,7 @@ import { prisma } from "../../../lib/prisma";
 import argon2 from "argon2";
 
 // Default clinic ID for Integrative Psych (can be overridden by env var)
-const DEFAULT_CLINIC_ID = process.env.DEFAULT_CLINIC_ID || "uvfoatdxzh7c1s395kc61u7i";
+const DEFAULT_CLINIC_ID = "uvfoatdxzh7c1s395kc61u7i";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -34,11 +34,11 @@ export const authOptions: NextAuthOptions = {
             "Guest";
           const email = `guest-${randomUUID()}@guest.local`;
           const user = await prisma.user.create({
-            data: { 
-              email, 
-              name, 
+            data: {
+              email,
+              name,
               guest: true,
-              clinicId: DEFAULT_CLINIC_ID
+              clinicId: DEFAULT_CLINIC_ID,
             },
           });
           return {
@@ -61,13 +61,13 @@ export const authOptions: NextAuthOptions = {
         const password = creds?.password || "";
         if (!email || !password) return null;
 
-        const user = await prisma.user.findUnique({ 
-          where: { 
+        const user = await prisma.user.findUnique({
+          where: {
             email_clinicId: {
               email,
-              clinicId: DEFAULT_CLINIC_ID
-            }
-          } 
+              clinicId: DEFAULT_CLINIC_ID,
+            },
+          },
         });
         if (!user || !user.passwordHash) return null;
 
@@ -97,12 +97,12 @@ export const authOptions: NextAuthOptions = {
       if (user.id) {
         await prisma.user.update({
           where: { id: user.id },
-          data: { 
-            clinicId: DEFAULT_CLINIC_ID
-          }
+          data: {
+            clinicId: DEFAULT_CLINIC_ID,
+          },
         });
       }
-    }
+    },
   },
   callbacks: {
     async jwt({ token, user }) {
