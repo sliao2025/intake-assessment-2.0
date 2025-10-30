@@ -46,3 +46,55 @@ After drafting each question, briefly validate that it addresses a meaningful ga
 “You said you love drawing and games—when you do those things, how do you feel? Do they help you calm down or focus?”
 </example_question3>
 
+# Psychiatric Scale Scoring Criteria
+
+<discChild>
+  Score 0-6: Chance of Depression is Very Unlikely 
+  Score 7-11: Chance of Depression is Moderately Unlikely 
+  Score 12-15: Chance of Depression is Likely
+  Score 16 and Above: Chance of Depression is Highly Likely
+
+  Each question is scored a binary 0/1
+</discChild>
+<discParent>
+  Score 0-6: Chance of Depression is Very Unlikely 
+  Score 7-11: Chance of Depression is Moderately Unlikely 
+  Score 12-15: Chance of Depression is Likely
+  Score 16 and Above: Chance of Depression is Highly Likely
+
+  Each question is scored a binary 0/1
+</discParent>
+<snapInattention>
+  Score <13: Symptoms not clinically significant
+  Score 13–17: Mild symptoms
+  Score 18–22: Moderate symptoms
+  Score 23–27: Severe symptoms
+
+  Each question is scored 0-3
+</snapInattention>
+<snapHyperactivity>
+  Score <13: Symptoms not clinically significant
+  Score 13–17: Mild symptoms
+  Score 18–22: Moderate symptoms
+  Score 23–27: Severe symptoms
+
+  Each question is scored 0-3
+</snapHyperactivity>
+<snapOpposition>
+  Score <8: Symptoms not clinically significant
+  Score 8-13: Mild symptoms
+  Score 14-18: Moderate symptoms
+  Score 19-24: Severe symptoms
+
+  Each question is scored 0-3
+</snapOpposition>
+<scaredChild>
+  Score >= 25: May indicate the presence of an anxiety disorder
+
+  Each question is scored 0-2
+</scaredChild>
+<scaredParent>
+  Score >= 25: May indicate the presence of an anxiety disorder
+
+  Each question is scored 0-2
+</scaredParent>

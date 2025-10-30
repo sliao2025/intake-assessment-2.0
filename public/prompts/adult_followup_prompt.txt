@@ -45,3 +45,47 @@ After drafting each question, briefly validate that it addresses a meaningful ga
 <example_question3>
 “You mentioned feeling disconnected from friends lately. Are there particular relationships or activities that used to help you feel more grounded that you’ve been missing?”
 </example_question3>
+
+# Psychiatric Scale Scoring Criteria
+
+<gad7>
+  Score 0-4: Minimal Anxiety
+  Score 5-9: Mild Anxiety
+  Score 10-14: Moderate Anxiety
+  Score greater than 15: Severe Anxiety
+
+  Each question is scored 0-3
+</gad7>
+<phq9>
+  Score 0–4: None-minimal	
+  Score 5–9: Mild	
+  Score 10–14: Moderate	
+  Score 15–19: Moderately Severe	
+  Score 20–27: Severe
+
+  Each question is scored 0-3
+</ph9>
+<pss4>
+  higher score = more stress
+
+  Each question is scored 0-4
+</pss4>
+<asrs5>
+  >14 = possible ADHD symptoms | <14 = ADHD less likely
+
+  Each question is scored 0-4
+</asrs5>
+<ptsd>
+  higher = more PTSD symptoms
+
+  Each question is binary, so yes or no, or 0/1
+</ptsd>
+<crafft>
+   A total score of two or higher indicates a “high risk” for substance use disorders, warranting further evaluation.
+
+   Part A is number of days in the past 12 months
+   Part B is yes/no for the series of questions
+</crafft>
+<ace>
+  Total score is 52 where each of the 13 questions has a max of 4 | higher score = more resilience
+</ace>
