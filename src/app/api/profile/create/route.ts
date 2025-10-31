@@ -47,8 +47,9 @@ export async function PUT(req: NextRequest) {
     create: {
       userId: session.user.id,
       json: jsonProfile,
-      firstSubmittedAt: new Date(),
       clinicId: DEFAULT_CLINIC_ID,
+      // Do NOT set firstSubmittedAt here - it should only be set when intake is finished
+      // via /api/profile/save with action: "submitMeta"
     },
     select: { userId: true, updatedAt: true, version: true },
   });

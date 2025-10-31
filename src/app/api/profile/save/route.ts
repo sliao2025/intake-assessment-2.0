@@ -60,7 +60,7 @@ export async function POST(req: Request) {
       isEmployed: typeof isEmployed === "boolean" ? isEmployed : null,
     };
 
-    // Upsert without pre-read. We only set firstSubmittedAt on CREATE.
+    // Note: firstSubmittedAt is set in /api/notify/assessment-complete when intake finishes
     await prisma.profile.upsert({
       where: { userId },
       update: updateData,
@@ -69,7 +69,6 @@ export async function POST(req: Request) {
         json: profileJson ?? {},
         version: typeof version === "number" ? version : 1,
         ...updateData,
-        firstSubmittedAt: new Date(),
         clinicId: DEFAULT_CLINIC_ID,
       },
     });

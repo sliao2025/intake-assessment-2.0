@@ -100,10 +100,24 @@ export async function POST(req: NextRequest) {
     console.log("[notify] session:", JSON.stringify(session, null, 2));
     try {
       if (authedUserId) {
+        // Update user to mark intake as finished
         await prisma.user.update({
           where: { id: authedUserId },
           data: { intakeFinished: true },
         });
+
+        // Set firstSubmittedAt on the profile if not already set
+        const profile = await prisma.profile.findUnique({
+          where: { userId: authedUserId },
+          select: { firstSubmittedAt: true },
+        });
+
+        if (!profile?.firstSubmittedAt) {
+          await prisma.profile.update({
+            where: { userId: authedUserId },
+            data: { firstSubmittedAt: submitted },
+          });
+        }
       } else {
         console.warn(
           "[notify] No authenticated user in session; skipping intakeFinished toggle."
