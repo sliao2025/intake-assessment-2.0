@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import StepTitle from "../StepTitle";
 import Field from "../primitives/Field";
 import Likert from "../primitives/Likert";
@@ -9,6 +9,7 @@ import VoiceRecorder, { VoiceRecorderHandle } from "../VoiceRecorder";
 import MultiSelectGroup from "../primitives/MultiSelectGroup";
 import type { Profile } from "../../lib/types/types";
 import TextAreaWithEncouragement from "../primitives/TextAreawithEncouragement";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 type Props = {
   title: string;
@@ -27,6 +28,11 @@ export default function StorySection({
   setProfile,
   voiceRecorderRefs,
 }: Props) {
+  const [showStoryText, setShowStoryText] = useState(false);
+  const [showGoalsText, setShowGoalsText] = useState(false);
+  const [showLivingText, setShowLivingText] = useState(false);
+  const [showCultureText, setShowCultureText] = useState(false);
+
   // Function to save a specific profile state to SQL
   const saveProfileToSQL = async (profileToSave: typeof profile) => {
     try {
@@ -83,62 +89,74 @@ export default function StorySection({
         }
         required
       >
-        <TextAreaWithEncouragement
-          rows={6}
-          placeholder="Share here in your own words…"
-          value={profile.storyNarrative?.text || ""}
-          onChangeText={(next) =>
-            setProfile((p) => ({
-              ...p,
-              storyNarrative: { ...p.storyNarrative, text: next },
-            }))
-          }
-          recommendedWords={75}
-        />
-      </Field>
+        <div className="space-y-3">
+          <VoiceRecorder
+            ref={(el) => {
+              if (voiceRecorderRefs) {
+                voiceRecorderRefs.current.storyNarrative = el;
+              }
+            }}
+            fieldName="storyNarrative"
+            audioState={profile.storyNarrative?.audio?.url || null}
+            fileName={profile.storyNarrative?.audio?.fileName || null}
+            onAttach={async (data) => {
+              console.log("[StorySection] onAttach called with data:", data);
 
-      <VoiceRecorder
-        ref={(el) => {
-          if (voiceRecorderRefs) {
-            voiceRecorderRefs.current.storyNarrative = el;
-          }
-        }}
-        fieldName="storyNarrative"
-        audioState={profile.storyNarrative?.audio?.url || null}
-        fileName={profile.storyNarrative?.audio?.fileName || null}
-        onAttach={async (data) => {
-          console.log("[StorySection] onAttach called with data:", data);
-
-          // Compute the updated profile synchronously
-          // When deleting (data is null), we explicitly remove the audio field
-          const updatedProfile: typeof profile = {
-            ...profile,
-            storyNarrative: {
-              text: profile.storyNarrative?.text || "",
-              ...(data && {
-                audio: {
-                  url: data.url,
-                  fileName: data.fileName,
-                  uploadedAt: data.uploadedAt,
+              const updatedProfile: typeof profile = {
+                ...profile,
+                storyNarrative: {
+                  text: profile.storyNarrative?.text || "",
+                  ...(data && {
+                    audio: {
+                      url: data.url,
+                      fileName: data.fileName,
+                      uploadedAt: data.uploadedAt,
+                    },
+                  }),
                 },
-              }),
-              // When data is null, audio field is not included (truly deleted)
-            },
-          };
+              };
 
-          // Save to SQL first (this ensures cloud and SQL are in sync)
-          console.log("[StorySection] Saving updated profile to SQL...", {
-            hasAudio: !!updatedProfile.storyNarrative?.audio,
-            audioFileName: updatedProfile.storyNarrative?.audio?.fileName,
-          });
-          await saveProfileToSQL(updatedProfile);
-          console.log("[StorySection] SQL save completed");
+              console.log("[StorySection] Saving updated profile to SQL...", {
+                hasAudio: !!updatedProfile.storyNarrative?.audio,
+                audioFileName: updatedProfile.storyNarrative?.audio?.fileName,
+              });
+              await saveProfileToSQL(updatedProfile);
+              console.log("[StorySection] SQL save completed");
 
-          // Then update local state
-          setProfile(updatedProfile);
-          console.log("[StorySection] Local state updated");
-        }}
-      />
+              setProfile(updatedProfile);
+              console.log("[StorySection] Local state updated");
+            }}
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowStoryText(!showStoryText)}
+            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
+          >
+            {showStoryText ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+            {showStoryText ? "Hide text option" : "Prefer to type instead?"}
+          </button>
+
+          {showStoryText && (
+            <TextAreaWithEncouragement
+              rows={6}
+              placeholder="Share here in your own words…"
+              value={profile.storyNarrative?.text || ""}
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  storyNarrative: { ...p.storyNarrative, text: next },
+                }))
+              }
+              recommendedWords={75}
+            />
+          )}
+        </div>
+      </Field>
 
       <Separator label="Your Goals" />
       <Field
@@ -178,60 +196,77 @@ export default function StorySection({
         }
         required
       >
-        <TextAreaWithEncouragement
-          rows={6}
-          placeholder="Share here in your own words…"
-          value={profile.goals?.text || ""}
-          onChangeText={(next) =>
-            setProfile((p) => ({
-              ...p,
-              goals: { ...p.goals, text: next },
-            }))
-          }
-          recommendedWords={40}
-        />
-      </Field>
+        <div className="space-y-3">
+          <VoiceRecorder
+            ref={(el) => {
+              if (voiceRecorderRefs) {
+                voiceRecorderRefs.current.goals = el;
+              }
+            }}
+            fieldName="goals"
+            audioState={profile.goals?.audio?.url || null}
+            fileName={profile.goals?.audio?.fileName || null}
+            onAttach={async (data) => {
+              console.log(
+                "[StorySection] goals onAttach called with data:",
+                data
+              );
 
-      <VoiceRecorder
-        ref={(el) => {
-          if (voiceRecorderRefs) {
-            voiceRecorderRefs.current.goals = el;
-          }
-        }}
-        fieldName="goals"
-        audioState={profile.goals?.audio?.url || null}
-        fileName={profile.goals?.audio?.fileName || null}
-        onAttach={async (data) => {
-          console.log("[StorySection] goals onAttach called with data:", data);
-
-          // Compute the updated profile synchronously
-          const updatedProfile: typeof profile = {
-            ...profile,
-            goals: {
-              text: profile.goals?.text || "",
-              ...(data && {
-                audio: {
-                  url: data.url,
-                  fileName: data.fileName,
-                  uploadedAt: data.uploadedAt,
+              const updatedProfile: typeof profile = {
+                ...profile,
+                goals: {
+                  text: profile.goals?.text || "",
+                  ...(data && {
+                    audio: {
+                      url: data.url,
+                      fileName: data.fileName,
+                      uploadedAt: data.uploadedAt,
+                    },
+                  }),
                 },
-              }),
-            },
-          };
+              };
 
-          // Save to SQL first
-          console.log("[StorySection] Saving updated profile to SQL...", {
-            hasAudio: !!updatedProfile.goals?.audio,
-            audioFileName: updatedProfile.goals?.audio?.fileName,
-          });
-          await saveProfileToSQL(updatedProfile);
-          console.log("[StorySection] SQL save completed");
+              console.log("[StorySection] Saving updated profile to SQL...", {
+                hasAudio: !!updatedProfile.goals?.audio,
+                audioFileName: updatedProfile.goals?.audio?.fileName,
+              });
+              await saveProfileToSQL(updatedProfile);
+              console.log("[StorySection] SQL save completed");
 
-          // Then update local state
-          setProfile(updatedProfile);
-          console.log("[StorySection] Local state updated");
-        }}
-      />
+              setProfile(updatedProfile);
+              console.log("[StorySection] Local state updated");
+            }}
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowGoalsText(!showGoalsText)}
+            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
+          >
+            {showGoalsText ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+            {showGoalsText ? "Hide text option" : "Prefer to type instead?"}
+          </button>
+
+          {showGoalsText && (
+            <TextAreaWithEncouragement
+              rows={6}
+              placeholder="Share here in your own words…"
+              value={profile.goals?.text || ""}
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  goals: { ...p.goals, text: next },
+                }))
+              }
+              recommendedWords={40}
+            />
+          )}
+        </div>
+      </Field>
 
       <Separator label="Living Situation" />
       <Field
@@ -259,62 +294,76 @@ export default function StorySection({
         }
         required
       >
-        <TextAreaWithEncouragement
-          rows={6}
-          placeholder="Share here in your own words…"
-          value={profile.livingSituation?.text || ""}
-          onChangeText={(next) =>
-            setProfile((p) => ({
-              ...p,
-              livingSituation: { ...p.livingSituation, text: next },
-            }))
-          }
-        />
-      </Field>
+        <div className="space-y-3">
+          <VoiceRecorder
+            ref={(el) => {
+              if (voiceRecorderRefs) {
+                voiceRecorderRefs.current.livingSituation = el;
+              }
+            }}
+            fieldName="livingSituation"
+            audioState={profile.livingSituation?.audio?.url || null}
+            fileName={profile.livingSituation?.audio?.fileName || null}
+            onAttach={async (data) => {
+              console.log(
+                "[StorySection] livingSituation onAttach called with data:",
+                data
+              );
 
-      <VoiceRecorder
-        ref={(el) => {
-          if (voiceRecorderRefs) {
-            voiceRecorderRefs.current.livingSituation = el;
-          }
-        }}
-        fieldName="livingSituation"
-        audioState={profile.livingSituation?.audio?.url || null}
-        fileName={profile.livingSituation?.audio?.fileName || null}
-        onAttach={async (data) => {
-          console.log(
-            "[StorySection] livingSituation onAttach called with data:",
-            data
-          );
-
-          // Compute the updated profile synchronously
-          const updatedProfile: typeof profile = {
-            ...profile,
-            livingSituation: {
-              text: profile.livingSituation?.text || "",
-              ...(data && {
-                audio: {
-                  url: data.url,
-                  fileName: data.fileName,
-                  uploadedAt: data.uploadedAt,
+              const updatedProfile: typeof profile = {
+                ...profile,
+                livingSituation: {
+                  text: profile.livingSituation?.text || "",
+                  ...(data && {
+                    audio: {
+                      url: data.url,
+                      fileName: data.fileName,
+                      uploadedAt: data.uploadedAt,
+                    },
+                  }),
                 },
-              }),
-            },
-          };
+              };
 
-          // Save to SQL first
-          console.log("[StorySection] Saving updated profile to SQL...", {
-            hasAudio: !!updatedProfile.livingSituation?.audio,
-            audioFileName: updatedProfile.livingSituation?.audio?.fileName,
-          });
-          await saveProfileToSQL(updatedProfile);
-          console.log("[StorySection] SQL save completed");
+              console.log("[StorySection] Saving updated profile to SQL...", {
+                hasAudio: !!updatedProfile.livingSituation?.audio,
+                audioFileName: updatedProfile.livingSituation?.audio?.fileName,
+              });
+              await saveProfileToSQL(updatedProfile);
+              console.log("[StorySection] SQL save completed");
 
-          // Then update local state
-          setProfile(updatedProfile);
-          console.log("[StorySection] Local state updated");
-        }}
-      />
+              setProfile(updatedProfile);
+              console.log("[StorySection] Local state updated");
+            }}
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowLivingText(!showLivingText)}
+            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
+          >
+            {showLivingText ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+            {showLivingText ? "Hide text option" : "Prefer to type instead?"}
+          </button>
+
+          {showLivingText && (
+            <TextAreaWithEncouragement
+              rows={6}
+              placeholder="Share here in your own words…"
+              value={profile.livingSituation?.text || ""}
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  livingSituation: { ...p.livingSituation, text: next },
+                }))
+              }
+            />
+          )}
+        </div>
+      </Field>
 
       <Separator label="Culture & Context (optional)" />
       <Field
@@ -332,63 +381,77 @@ export default function StorySection({
           )
         }
       >
-        <TextAreaWithEncouragement
-          rows={6}
-          placeholder="Share here in your own words…"
-          value={profile.cultureContext?.text || ""}
-          onChangeText={(next) =>
-            setProfile((p) => ({
-              ...p,
-              cultureContext: { ...p.cultureContext, text: next },
-            }))
-          }
-          recommendedWords={40}
-        />
-      </Field>
+        <div className="space-y-3">
+          <VoiceRecorder
+            ref={(el) => {
+              if (voiceRecorderRefs) {
+                voiceRecorderRefs.current.cultureContext = el;
+              }
+            }}
+            fieldName="cultureContext"
+            audioState={profile.cultureContext?.audio?.url || null}
+            fileName={profile.cultureContext?.audio?.fileName || null}
+            onAttach={async (data) => {
+              console.log(
+                "[StorySection] cultureContext onAttach called with data:",
+                data
+              );
 
-      <VoiceRecorder
-        ref={(el) => {
-          if (voiceRecorderRefs) {
-            voiceRecorderRefs.current.cultureContext = el;
-          }
-        }}
-        fieldName="cultureContext"
-        audioState={profile.cultureContext?.audio?.url || null}
-        fileName={profile.cultureContext?.audio?.fileName || null}
-        onAttach={async (data) => {
-          console.log(
-            "[StorySection] cultureContext onAttach called with data:",
-            data
-          );
-
-          // Compute the updated profile synchronously
-          const updatedProfile: typeof profile = {
-            ...profile,
-            cultureContext: {
-              text: profile.cultureContext?.text || "",
-              ...(data && {
-                audio: {
-                  url: data.url,
-                  fileName: data.fileName,
-                  uploadedAt: data.uploadedAt,
+              const updatedProfile: typeof profile = {
+                ...profile,
+                cultureContext: {
+                  text: profile.cultureContext?.text || "",
+                  ...(data && {
+                    audio: {
+                      url: data.url,
+                      fileName: data.fileName,
+                      uploadedAt: data.uploadedAt,
+                    },
+                  }),
                 },
-              }),
-            },
-          };
+              };
 
-          // Save to SQL first
-          console.log("[StorySection] Saving updated profile to SQL...", {
-            hasAudio: !!updatedProfile.cultureContext?.audio,
-            audioFileName: updatedProfile.cultureContext?.audio?.fileName,
-          });
-          await saveProfileToSQL(updatedProfile);
-          console.log("[StorySection] SQL save completed");
+              console.log("[StorySection] Saving updated profile to SQL...", {
+                hasAudio: !!updatedProfile.cultureContext?.audio,
+                audioFileName: updatedProfile.cultureContext?.audio?.fileName,
+              });
+              await saveProfileToSQL(updatedProfile);
+              console.log("[StorySection] SQL save completed");
 
-          // Then update local state
-          setProfile(updatedProfile);
-          console.log("[StorySection] Local state updated");
-        }}
-      />
+              setProfile(updatedProfile);
+              console.log("[StorySection] Local state updated");
+            }}
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowCultureText(!showCultureText)}
+            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
+          >
+            {showCultureText ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+            {showCultureText ? "Hide text option" : "Prefer to type instead?"}
+          </button>
+
+          {showCultureText && (
+            <TextAreaWithEncouragement
+              rows={6}
+              placeholder="Share here in your own words…"
+              value={profile.cultureContext?.text || ""}
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  cultureContext: { ...p.cultureContext, text: next },
+                }))
+              }
+              recommendedWords={40}
+            />
+          )}
+        </div>
+      </Field>
 
       {!profile.isChild && (
         <>

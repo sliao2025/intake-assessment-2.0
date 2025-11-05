@@ -911,6 +911,26 @@ export default function Page() {
     }
   }
 
+  async function runSentimentAnalysis() {
+    try {
+      const response = await fetch("/api/sentiment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Sentiment analysis failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Sentiment analysis completed:", data);
+      return data;
+    } catch (e) {
+      console.error("Sentiment analysis failed", e);
+      // Do not block the UX if sentiment analysis fails
+    }
+  }
+
   const goNext = async () => {
     const next = Math.min(step + 1, lastIndex);
     if (next !== step) {
@@ -998,7 +1018,10 @@ export default function Page() {
       // 2) Fire-and-forget notification email
       await notifyAssessmentComplete(finalized);
 
-      // 3) Persist denormalized scalars to Profile (firstName, etc.) and stamp firstSubmittedAt once
+      // 3) Run sentiment analysis (fire-and-forget, saves to profile JSON automatically)
+      runSentimentAnalysis();
+
+      // 4) Persist denormalized scalars to Profile (firstName, etc.) and stamp firstSubmittedAt once
       try {
         const metaPayload = {
           action: "submitMeta",
@@ -1046,7 +1069,7 @@ export default function Page() {
         // non-fatal for UX
       }
 
-      // 4) UX: mark as submitted and celebrate
+      // 5) UX: mark as submitted and celebrate
       setSubmitted(true);
       setSubmittedAt(
         new Date().toLocaleString(undefined, {

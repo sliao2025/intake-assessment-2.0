@@ -8,6 +8,7 @@ import StepTitle from "../StepTitle";
 import TextAreaWithEncouragement from "../primitives/TextAreawithEncouragement";
 import VoiceRecorder, { VoiceRecorderHandle } from "../VoiceRecorder";
 import { intPsychTheme } from "../theme";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 type Props = {
   title: string;
@@ -30,6 +31,9 @@ export default function FollowUpSection({
   const [questionsGenerated, setQuestionsGenerated] = useState(false);
   const [loadingPhrase, setLoadingPhrase] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
+  const [showText1, setShowText1] = useState(false);
+  const [showText2, setShowText2] = useState(false);
+  const [showText3, setShowText3] = useState(false);
 
   const loadingPhrases = [
     "Creating your personalized questions...",
@@ -199,217 +203,271 @@ export default function FollowUpSection({
 
       <p className="text-gray-700 italic mb-6">
         Based on your responses, we have a few follow-up questions to help us
-        better understand your situation. Feel free to{" "}
-        <b>record a response, write it out, or both</b> – whatever feels most
-        comfortable for you.
+        better understand your situation.{" "}
+        <b>We encourage you to use your voice</b> – it helps us understand your
+        story better.
       </p>
 
       {/* Question 1 */}
       <Field title={profile.followupQuestions.question1.question} required>
-        <TextAreaWithEncouragement
-          rows={4}
-          placeholder="Share here in your own words…"
-          value={profile.followupQuestions.question1.answer.text || ""}
-          onChangeText={(next) =>
-            setProfile((p) => ({
-              ...p,
-              followupQuestions: {
-                ...p.followupQuestions!,
-                question1: {
-                  ...p.followupQuestions!.question1,
-                  answer: {
-                    ...p.followupQuestions!.question1.answer,
-                    text: next,
+        <div className="space-y-3">
+          <VoiceRecorder
+            ref={(el) => {
+              if (voiceRecorderRefs) {
+                voiceRecorderRefs.current["followupQuestion1"] = el;
+              }
+            }}
+            fieldName="followupQuestions.question1.question"
+            audioState={
+              profile.followupQuestions.question1.answer.audio?.url || null
+            }
+            fileName={
+              profile.followupQuestions.question1.answer.audio?.fileName || null
+            }
+            onAttach={async (data) => {
+              console.log(
+                "[FollowUpSection] question1 onAttach called with data:",
+                data
+              );
+
+              const updatedProfile: typeof profile = {
+                ...profile,
+                followupQuestions: {
+                  ...profile.followupQuestions!,
+                  question1: {
+                    ...profile.followupQuestions!.question1,
+                    answer: {
+                      text:
+                        profile.followupQuestions!.question1.answer.text || "",
+                      ...(data && {
+                        audio: {
+                          url: data.url,
+                          fileName: data.fileName,
+                          uploadedAt: data.uploadedAt,
+                        },
+                      }),
+                    },
                   },
                 },
-              },
-            }))
-          }
-          recommendedWords={50}
-        />
-      </Field>
+              };
 
-      <VoiceRecorder
-        ref={(el) => {
-          if (voiceRecorderRefs) {
-            voiceRecorderRefs.current["followupQuestion1"] = el;
-          }
-        }}
-        fieldName="followupQuestions.question1.question"
-        audioState={
-          profile.followupQuestions.question1.answer.audio?.url || null
-        }
-        fileName={
-          profile.followupQuestions.question1.answer.audio?.fileName || null
-        }
-        onAttach={async (data) => {
-          console.log(
-            "[FollowUpSection] question1 onAttach called with data:",
-            data
-          );
+              await saveProfileToSQL(updatedProfile);
+              setProfile(updatedProfile);
+            }}
+          />
 
-          const updatedProfile: typeof profile = {
-            ...profile,
-            followupQuestions: {
-              ...profile.followupQuestions!,
-              question1: {
-                ...profile.followupQuestions!.question1,
-                answer: {
-                  text: profile.followupQuestions!.question1.answer.text || "",
-                  ...(data && {
-                    audio: {
-                      url: data.url,
-                      fileName: data.fileName,
-                      uploadedAt: data.uploadedAt,
+          <button
+            type="button"
+            onClick={() => setShowText1(!showText1)}
+            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
+          >
+            {showText1 ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+            {showText1 ? "Hide text option" : "Prefer to type instead?"}
+          </button>
+
+          {showText1 && (
+            <TextAreaWithEncouragement
+              rows={4}
+              placeholder="Share here in your own words…"
+              value={profile.followupQuestions.question1.answer.text || ""}
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  followupQuestions: {
+                    ...p.followupQuestions!,
+                    question1: {
+                      ...p.followupQuestions!.question1,
+                      answer: {
+                        ...p.followupQuestions!.question1.answer,
+                        text: next,
+                      },
                     },
-                  }),
-                },
-              },
-            },
-          };
-
-          await saveProfileToSQL(updatedProfile);
-          setProfile(updatedProfile);
-        }}
-      />
+                  },
+                }))
+              }
+              recommendedWords={50}
+            />
+          )}
+        </div>
+      </Field>
 
       {/* Question 2 */}
       <Field title={profile.followupQuestions.question2.question} required>
-        <TextAreaWithEncouragement
-          rows={4}
-          placeholder="Share here in your own words…"
-          value={profile.followupQuestions.question2.answer.text || ""}
-          onChangeText={(next) =>
-            setProfile((p) => ({
-              ...p,
-              followupQuestions: {
-                ...p.followupQuestions!,
-                question2: {
-                  ...p.followupQuestions!.question2,
-                  answer: {
-                    ...p.followupQuestions!.question2.answer,
-                    text: next,
+        <div className="space-y-3">
+          <VoiceRecorder
+            ref={(el) => {
+              if (voiceRecorderRefs) {
+                voiceRecorderRefs.current["followupQuestion2"] = el;
+              }
+            }}
+            fieldName="followupQuestions.question2.question"
+            audioState={
+              profile.followupQuestions.question2.answer.audio?.url || null
+            }
+            fileName={
+              profile.followupQuestions.question2.answer.audio?.fileName || null
+            }
+            onAttach={async (data) => {
+              console.log(
+                "[FollowUpSection] question2 onAttach called with data:",
+                data
+              );
+
+              const updatedProfile: typeof profile = {
+                ...profile,
+                followupQuestions: {
+                  ...profile.followupQuestions!,
+                  question2: {
+                    ...profile.followupQuestions!.question2,
+                    answer: {
+                      text:
+                        profile.followupQuestions!.question2.answer.text || "",
+                      ...(data && {
+                        audio: {
+                          url: data.url,
+                          fileName: data.fileName,
+                          uploadedAt: data.uploadedAt,
+                        },
+                      }),
+                    },
                   },
                 },
-              },
-            }))
-          }
-          recommendedWords={50}
-        />
-      </Field>
+              };
 
-      <VoiceRecorder
-        ref={(el) => {
-          if (voiceRecorderRefs) {
-            voiceRecorderRefs.current["followupQuestion2"] = el;
-          }
-        }}
-        fieldName="followupQuestions.question2.question"
-        audioState={
-          profile.followupQuestions.question2.answer.audio?.url || null
-        }
-        fileName={
-          profile.followupQuestions.question2.answer.audio?.fileName || null
-        }
-        onAttach={async (data) => {
-          console.log(
-            "[FollowUpSection] question2 onAttach called with data:",
-            data
-          );
+              await saveProfileToSQL(updatedProfile);
+              setProfile(updatedProfile);
+            }}
+          />
 
-          const updatedProfile: typeof profile = {
-            ...profile,
-            followupQuestions: {
-              ...profile.followupQuestions!,
-              question2: {
-                ...profile.followupQuestions!.question2,
-                answer: {
-                  text: profile.followupQuestions!.question2.answer.text || "",
-                  ...(data && {
-                    audio: {
-                      url: data.url,
-                      fileName: data.fileName,
-                      uploadedAt: data.uploadedAt,
+          <button
+            type="button"
+            onClick={() => setShowText2(!showText2)}
+            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
+          >
+            {showText2 ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+            {showText2 ? "Hide text option" : "Prefer to type instead?"}
+          </button>
+
+          {showText2 && (
+            <TextAreaWithEncouragement
+              rows={4}
+              placeholder="Share here in your own words…"
+              value={profile.followupQuestions.question2.answer.text || ""}
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  followupQuestions: {
+                    ...p.followupQuestions!,
+                    question2: {
+                      ...p.followupQuestions!.question2,
+                      answer: {
+                        ...p.followupQuestions!.question2.answer,
+                        text: next,
+                      },
                     },
-                  }),
-                },
-              },
-            },
-          };
-
-          await saveProfileToSQL(updatedProfile);
-          setProfile(updatedProfile);
-        }}
-      />
+                  },
+                }))
+              }
+              recommendedWords={50}
+            />
+          )}
+        </div>
+      </Field>
 
       {/* Question 3 */}
       <Field title={profile.followupQuestions.question3.question} required>
-        <TextAreaWithEncouragement
-          rows={4}
-          placeholder="Share here in your own words…"
-          value={profile.followupQuestions.question3.answer.text || ""}
-          onChangeText={(next) =>
-            setProfile((p) => ({
-              ...p,
-              followupQuestions: {
-                ...p.followupQuestions!,
-                question3: {
-                  ...p.followupQuestions!.question3,
-                  answer: {
-                    ...p.followupQuestions!.question3.answer,
-                    text: next,
+        <div className="space-y-3">
+          <VoiceRecorder
+            ref={(el) => {
+              if (voiceRecorderRefs) {
+                voiceRecorderRefs.current["followupQuestion3"] = el;
+              }
+            }}
+            fieldName="followupQuestions.question3.question"
+            audioState={
+              profile.followupQuestions.question3.answer.audio?.url || null
+            }
+            fileName={
+              profile.followupQuestions.question3.answer.audio?.fileName || null
+            }
+            onAttach={async (data) => {
+              console.log(
+                "[FollowUpSection] question3 onAttach called with data:",
+                data
+              );
+
+              const updatedProfile: typeof profile = {
+                ...profile,
+                followupQuestions: {
+                  ...profile.followupQuestions!,
+                  question3: {
+                    ...profile.followupQuestions!.question3,
+                    answer: {
+                      text:
+                        profile.followupQuestions!.question3.answer.text || "",
+                      ...(data && {
+                        audio: {
+                          url: data.url,
+                          fileName: data.fileName,
+                          uploadedAt: data.uploadedAt,
+                        },
+                      }),
+                    },
                   },
                 },
-              },
-            }))
-          }
-          recommendedWords={50}
-        />
-      </Field>
+              };
 
-      <VoiceRecorder
-        ref={(el) => {
-          if (voiceRecorderRefs) {
-            voiceRecorderRefs.current["followupQuestion3"] = el;
-          }
-        }}
-        fieldName="followupQuestions.question3.question"
-        audioState={
-          profile.followupQuestions.question3.answer.audio?.url || null
-        }
-        fileName={
-          profile.followupQuestions.question3.answer.audio?.fileName || null
-        }
-        onAttach={async (data) => {
-          console.log(
-            "[FollowUpSection] question3 onAttach called with data:",
-            data
-          );
+              await saveProfileToSQL(updatedProfile);
+              setProfile(updatedProfile);
+            }}
+          />
 
-          const updatedProfile: typeof profile = {
-            ...profile,
-            followupQuestions: {
-              ...profile.followupQuestions!,
-              question3: {
-                ...profile.followupQuestions!.question3,
-                answer: {
-                  text: profile.followupQuestions!.question3.answer.text || "",
-                  ...(data && {
-                    audio: {
-                      url: data.url,
-                      fileName: data.fileName,
-                      uploadedAt: data.uploadedAt,
+          <button
+            type="button"
+            onClick={() => setShowText3(!showText3)}
+            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
+          >
+            {showText3 ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+            {showText3 ? "Hide text option" : "Prefer to type instead?"}
+          </button>
+
+          {showText3 && (
+            <TextAreaWithEncouragement
+              rows={4}
+              placeholder="Share here in your own words…"
+              value={profile.followupQuestions.question3.answer.text || ""}
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  followupQuestions: {
+                    ...p.followupQuestions!,
+                    question3: {
+                      ...p.followupQuestions!.question3,
+                      answer: {
+                        ...p.followupQuestions!.question3.answer,
+                        text: next,
+                      },
                     },
-                  }),
-                },
-              },
-            },
-          };
-
-          await saveProfileToSQL(updatedProfile);
-          setProfile(updatedProfile);
-        }}
-      />
+                  },
+                }))
+              }
+              recommendedWords={50}
+            />
+          )}
+        </div>
+      </Field>
     </motion.div>
   );
 }
