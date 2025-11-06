@@ -286,10 +286,10 @@ export default function StorySection({
           <VoiceRecorder
             ref={(el) => {
               if (voiceRecorderRefs) {
-                voiceRecorderRefs.current.living = el;
+                voiceRecorderRefs.current.livingSituation = el;
               }
             }}
-            fieldName="living"
+            fieldName="livingSituation"
             label="Record your answer"
             audioState={profile.livingSituation?.audio?.url || null}
             fileName={profile.livingSituation?.audio?.fileName || null}

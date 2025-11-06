@@ -220,7 +220,7 @@ export default function FollowUpSection({
                 voiceRecorderRefs.current["followupQuestion1"] = el;
               }
             }}
-            fieldName="followupQuestions.question1.question"
+            fieldName="followupQuestions.question1.answer"
             label="Record your answer"
             audioState={
               profile.followupQuestions.question1.answer.audio?.url || null
@@ -300,7 +300,7 @@ export default function FollowUpSection({
                 voiceRecorderRefs.current["followupQuestion2"] = el;
               }
             }}
-            fieldName="followupQuestions.question2.question"
+            fieldName="followupQuestions.question2.answer"
             label="Record your answer"
             audioState={
               profile.followupQuestions.question2.answer.audio?.url || null
@@ -380,7 +380,7 @@ export default function FollowUpSection({
                 voiceRecorderRefs.current["followupQuestion3"] = el;
               }
             }}
-            fieldName="followupQuestions.question3.question"
+            fieldName="followupQuestions.question3.answer"
             label="Record your answer"
             audioState={
               profile.followupQuestions.question3.answer.audio?.url || null
