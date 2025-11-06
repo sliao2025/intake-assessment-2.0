@@ -57,7 +57,13 @@ export type AudioAttachment = {
   sizeBytes?: number;
   /** ISO timestamp of when the file was uploaded to GCS */
   uploadedAt?: string;
+  /** Full transcription text from transcription service */
   transcription?: string;
+  /** Transcription chunks with timestamps (from transcription service) */
+  chunks?: Array<{ text: string; timestamp: [number, number] }>;
+  /** ISO timestamp of when transcription completed */
+  transcribedAt?: string;
+  /** Translation (if applicable) */
   translation?: string;
 };
 

@@ -103,37 +103,67 @@ export default function StorySection({
             audioState={profile.storyNarrative?.audio?.url || null}
             fileName={profile.storyNarrative?.audio?.fileName || null}
             onAttach={async (data) => {
-              console.log("[StorySection] onAttach called with data:", data);
+              console.log(
+                "[StorySection] storyNarrative onAttach called with data:",
+                data
+              );
 
-              const updatedProfile: typeof profile = {
-                ...profile,
+              // ✅ Update local state immediately for UI responsiveness
+              setProfile((p) => ({
+                ...p,
                 storyNarrative: {
-                  text: profile.storyNarrative?.text || "",
+                  text: p.storyNarrative?.text || "",
                   ...(data && {
                     audio: {
                       url: data.url,
                       fileName: data.fileName,
                       uploadedAt: data.uploadedAt,
+                      // Preserve existing transcription fields if they exist
+                      ...(p.storyNarrative?.audio?.transcription && {
+                        transcription: p.storyNarrative.audio.transcription,
+                        chunks: p.storyNarrative.audio.chunks,
+                        transcribedAt: p.storyNarrative.audio.transcribedAt,
+                      }),
                     },
                   }),
                 },
-              };
+              }));
 
-              // ✅ Save to DB in both cases:
-              // - Upload: Save initial metadata {url, fileName, uploadedAt}
-              // - Delete: Clear audio reference
-              // Transcription service will later add transcription fields via fetch-modify-save
-              console.log(
-                data === null
-                  ? "[StorySection] Deletion - clearing audio reference in DB"
-                  : "[StorySection] Upload - saving initial metadata to DB"
-              );
-              await saveProfileToSQL(updatedProfile);
+              // ✅ Save ONLY this field to DB using field-level update (prevents race conditions)
+              try {
+                const response = await fetch("/api/profile/update-field", {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    fieldName: "storyNarrative",
+                    fieldValue: {
+                      text: profile.storyNarrative?.text || "",
+                      ...(data && {
+                        audio: {
+                          url: data.url,
+                          fileName: data.fileName,
+                          uploadedAt: data.uploadedAt,
+                        },
+                      }),
+                    },
+                  }),
+                });
 
-              setProfile(updatedProfile);
-              console.log(
-                "[StorySection] Profile updated in DB and local state"
-              );
+                if (!response.ok) {
+                  console.error(
+                    "[StorySection] Failed to save storyNarrative to DB"
+                  );
+                } else {
+                  console.log(
+                    "[StorySection] Successfully saved storyNarrative to DB"
+                  );
+                }
+              } catch (err) {
+                console.error(
+                  "[StorySection] Error saving storyNarrative to DB:",
+                  err
+                );
+              }
             }}
           />
 
@@ -214,35 +244,54 @@ export default function StorySection({
                 data
               );
 
-              const updatedProfile: typeof profile = {
-                ...profile,
+              // ✅ Update local state immediately
+              setProfile((p) => ({
+                ...p,
                 goals: {
-                  text: profile.goals?.text || "",
+                  text: p.goals?.text || "",
                   ...(data && {
                     audio: {
                       url: data.url,
                       fileName: data.fileName,
                       uploadedAt: data.uploadedAt,
+                      ...(p.goals?.audio?.transcription && {
+                        transcription: p.goals.audio.transcription,
+                        chunks: p.goals.audio.chunks,
+                        transcribedAt: p.goals.audio.transcribedAt,
+                      }),
                     },
                   }),
                 },
-              };
+              }));
 
-              // ✅ Save to DB in both cases:
-              // - Upload: Save initial metadata {url, fileName, uploadedAt}
-              // - Delete: Clear audio reference
-              // Transcription service will later add transcription fields via fetch-modify-save
-              console.log(
-                data === null
-                  ? "[StorySection] Deletion - clearing audio reference in DB"
-                  : "[StorySection] Upload - saving initial metadata to DB"
-              );
-              await saveProfileToSQL(updatedProfile);
+              // ✅ Save ONLY this field to DB
+              try {
+                const response = await fetch("/api/profile/update-field", {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    fieldName: "goals",
+                    fieldValue: {
+                      text: profile.goals?.text || "",
+                      ...(data && {
+                        audio: {
+                          url: data.url,
+                          fileName: data.fileName,
+                          uploadedAt: data.uploadedAt,
+                        },
+                      }),
+                    },
+                  }),
+                });
 
-              setProfile(updatedProfile);
-              console.log(
-                "[StorySection] Profile updated in DB and local state"
-              );
+                if (!response.ok) {
+                  console.error("[StorySection] Failed to save goals to DB");
+                } else {
+                  console.log("[StorySection] Successfully saved goals to DB");
+                }
+              } catch (err) {
+                console.error("[StorySection] Error saving goals to DB:", err);
+              }
             }}
           />
 
@@ -311,35 +360,61 @@ export default function StorySection({
                 data
               );
 
-              const updatedProfile: typeof profile = {
-                ...profile,
+              // ✅ Update local state immediately
+              setProfile((p) => ({
+                ...p,
                 livingSituation: {
-                  text: profile.livingSituation?.text || "",
+                  text: p.livingSituation?.text || "",
                   ...(data && {
                     audio: {
                       url: data.url,
                       fileName: data.fileName,
                       uploadedAt: data.uploadedAt,
+                      ...(p.livingSituation?.audio?.transcription && {
+                        transcription: p.livingSituation.audio.transcription,
+                        chunks: p.livingSituation.audio.chunks,
+                        transcribedAt: p.livingSituation.audio.transcribedAt,
+                      }),
                     },
                   }),
                 },
-              };
+              }));
 
-              // ✅ Save to DB in both cases:
-              // - Upload: Save initial metadata {url, fileName, uploadedAt}
-              // - Delete: Clear audio reference
-              // Transcription service will later add transcription fields via fetch-modify-save
-              console.log(
-                data === null
-                  ? "[StorySection] Deletion - clearing audio reference in DB"
-                  : "[StorySection] Upload - saving initial metadata to DB"
-              );
-              await saveProfileToSQL(updatedProfile);
+              // ✅ Save ONLY this field to DB
+              try {
+                const response = await fetch("/api/profile/update-field", {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    fieldName: "livingSituation",
+                    fieldValue: {
+                      text: profile.livingSituation?.text || "",
+                      ...(data && {
+                        audio: {
+                          url: data.url,
+                          fileName: data.fileName,
+                          uploadedAt: data.uploadedAt,
+                        },
+                      }),
+                    },
+                  }),
+                });
 
-              setProfile(updatedProfile);
-              console.log(
-                "[StorySection] Profile updated in DB and local state"
-              );
+                if (!response.ok) {
+                  console.error(
+                    "[StorySection] Failed to save livingSituation to DB"
+                  );
+                } else {
+                  console.log(
+                    "[StorySection] Successfully saved livingSituation to DB"
+                  );
+                }
+              } catch (err) {
+                console.error(
+                  "[StorySection] Error saving livingSituation to DB:",
+                  err
+                );
+              }
             }}
           />
 
@@ -397,35 +472,61 @@ export default function StorySection({
                 data
               );
 
-              const updatedProfile: typeof profile = {
-                ...profile,
+              // ✅ Update local state immediately
+              setProfile((p) => ({
+                ...p,
                 cultureContext: {
-                  text: profile.cultureContext?.text || "",
+                  text: p.cultureContext?.text || "",
                   ...(data && {
                     audio: {
                       url: data.url,
                       fileName: data.fileName,
                       uploadedAt: data.uploadedAt,
+                      ...(p.cultureContext?.audio?.transcription && {
+                        transcription: p.cultureContext.audio.transcription,
+                        chunks: p.cultureContext.audio.chunks,
+                        transcribedAt: p.cultureContext.audio.transcribedAt,
+                      }),
                     },
                   }),
                 },
-              };
+              }));
 
-              // ✅ Save to DB in both cases:
-              // - Upload: Save initial metadata {url, fileName, uploadedAt}
-              // - Delete: Clear audio reference
-              // Transcription service will later add transcription fields via fetch-modify-save
-              console.log(
-                data === null
-                  ? "[StorySection] Deletion - clearing audio reference in DB"
-                  : "[StorySection] Upload - saving initial metadata to DB"
-              );
-              await saveProfileToSQL(updatedProfile);
+              // ✅ Save ONLY this field to DB
+              try {
+                const response = await fetch("/api/profile/update-field", {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    fieldName: "cultureContext",
+                    fieldValue: {
+                      text: profile.cultureContext?.text || "",
+                      ...(data && {
+                        audio: {
+                          url: data.url,
+                          fileName: data.fileName,
+                          uploadedAt: data.uploadedAt,
+                        },
+                      }),
+                    },
+                  }),
+                });
 
-              setProfile(updatedProfile);
-              console.log(
-                "[StorySection] Profile updated in DB and local state"
-              );
+                if (!response.ok) {
+                  console.error(
+                    "[StorySection] Failed to save cultureContext to DB"
+                  );
+                } else {
+                  console.log(
+                    "[StorySection] Successfully saved cultureContext to DB"
+                  );
+                }
+              } catch (err) {
+                console.error(
+                  "[StorySection] Error saving cultureContext to DB:",
+                  err
+                );
+              }
             }}
           />
 
