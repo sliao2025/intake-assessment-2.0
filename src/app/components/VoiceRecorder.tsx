@@ -15,6 +15,8 @@ import {
   Trash2,
   Upload,
   Loader2,
+  Check,
+  CheckCircle2,
 } from "lucide-react";
 import { intPsychTheme } from "./theme";
 
@@ -87,9 +89,14 @@ function useRecorder(audioState?: string | null, fileName?: string | null) {
   };
 
   const stop = () => {
-    mediaRecorderRef.current?.stop();
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.stop();
+    }
     setRecording(false);
-    if (timerRef.current) window.clearInterval(timerRef.current);
+    if (timerRef.current) {
+      window.clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
   };
 
   const reset = () => {
@@ -170,6 +177,7 @@ const VoiceRecorder = forwardRef<
 ) {
   const [playing, setPlaying] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isUploaded, setIsUploaded] = useState(!!existingFileName);
   const [currentFileName, setCurrentFileName] = useState<string | null>(
@@ -177,6 +185,7 @@ const VoiceRecorder = forwardRef<
   );
   const [actualDuration, setActualDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const deletingRef = useRef(false);
 
   // Update state when props change (e.g., when navigating back to the page)
   useEffect(() => {
@@ -389,6 +398,15 @@ const VoiceRecorder = forwardRef<
   };
 
   const handleDelete = async () => {
+    if (deletingRef.current) {
+      console.log(
+        `[VoiceRecorder ${fieldName}] Delete already in progress, skipping`
+      );
+      return;
+    }
+
+    deletingRef.current = true;
+    setDeleting(true);
     console.log(`[VoiceRecorder ${fieldName}] Starting delete operation...`);
 
     try {
@@ -434,6 +452,9 @@ const VoiceRecorder = forwardRef<
       );
       setUploadError("Failed to delete recording");
       throw err;
+    } finally {
+      deletingRef.current = false;
+      setDeleting(false);
     }
   };
 
@@ -512,20 +533,23 @@ const VoiceRecorder = forwardRef<
   };
 
   const handleStart = async () => {
-    // If there's an existing recording, delete it first
+    // Prevent starting if already uploading or deleting
+    if (uploadingRef.current || deletingRef.current || uploading || deleting) {
+      console.log(
+        `[VoiceRecorder ${fieldName}] Cannot start - operation in progress`
+      );
+      return;
+    }
+
+    // If there's an existing recording, user must delete it first
     if (audioURL || currentFileName) {
       console.log(
-        `[VoiceRecorder ${fieldName}] Deleting existing recording before new recording`
+        `[VoiceRecorder ${fieldName}] Cannot start - existing recording must be deleted first`
       );
-      try {
-        await handleDelete();
-      } catch (err) {
-        console.error(
-          `[VoiceRecorder ${fieldName}] Failed to delete existing recording:`,
-          err
-        );
-        // Continue with recording even if delete fails
-      }
+      setUploadError(
+        "Please delete the existing recording before recording a new one"
+      );
+      return;
     }
 
     try {
@@ -584,14 +608,28 @@ const VoiceRecorder = forwardRef<
         <div className="flex items-center gap-2">
           {!recording ? (
             <button
-              onClick={handleStart}
-              className="inline-flex items-center gap-2 hover:bg-red-600 cursor-pointer bg-red-500 text-white rounded-full px-3 py-2 text-sm font-semibold shadow-sm"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                handleStart();
+              }}
+              disabled={uploading || deleting || !!audioURL}
+              className="inline-flex items-center gap-2 hover:bg-red-600 cursor-pointer bg-red-500 text-white rounded-full px-3 py-2 text-sm font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              title={
+                audioURL
+                  ? "Delete the existing recording first"
+                  : "Start recording"
+              }
             >
               <Mic className="h-4 w-4" /> Record
             </button>
           ) : (
             <button
-              onClick={handleStop}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                handleStop();
+              }}
               className="inline-flex items-center gap-2 hover:bg-red-600 cursor-pointer rounded-full px-3 py-2 text-sm font-semibold bg-red-500 text-white shadow-sm"
             >
               <Square className="h-4 w-4" /> Stop
@@ -599,16 +637,38 @@ const VoiceRecorder = forwardRef<
           )}
         </div>
       </div>
-      <div className="mt-3 flex items-center justify-between text-xs text-slate-600">
-        <span>
-          {recording
-            ? "Recording…"
-            : audioURL
-              ? `Recorded clip (${mmss(actualDuration)})`
-              : "No recording yet"}
-        </span>
-        <span className="font-mono">{recording ? mmss(elapsed) : ""}</span>
+
+      {/* Recording Status */}
+      <div className="mt-3">
+        {recording ? (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-red-600 font-medium flex items-center gap-2">
+              <span className="animate-pulse">●</span> Recording…
+            </span>
+            <span className="font-mono text-lg font-bold text-slate-700">
+              {mmss(elapsed)}
+            </span>
+          </div>
+        ) : audioURL ? (
+          <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-600" />
+
+                <span className="text-sm font-medium text-slate-700">
+                  Recording saved
+                </span>
+              </div>
+              <span className="font-mono text-xl font-bold text-slate-700">
+                {mmss(actualDuration)}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <span className="text-sm text-slate-500">No recording yet</span>
+        )}
       </div>
+
       {recording && (
         <div className="mt-3 rounded-xl bg-slate-100 p-4 border border-slate-200">
           <canvas
@@ -619,46 +679,66 @@ const VoiceRecorder = forwardRef<
           />
         </div>
       )}
+
       {audioURL && (
         <div className="mt-3 space-y-2">
           <audio ref={audioRef} src={audioURL} />
           <div className="flex items-center gap-2 flex-wrap">
             {!playing ? (
               <button
-                onClick={() => {
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
                   setPlaying(true);
                   audioRef.current?.play();
                 }}
-                className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-300 text-slate-800 hover:bg-slate-100"
+                disabled={uploading}
+                className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-300 text-slate-800 hover:bg-slate-100 transition-colors disabled:opacity-50"
               >
                 <Play className="h-4 w-4" /> Play
               </button>
             ) : (
               <button
-                onClick={() => {
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
                   audioRef.current?.pause();
                   setPlaying(false);
                 }}
-                className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-300 text-slate-800 hover:bg-slate-100"
+                className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-300 text-slate-800 hover:bg-slate-100 transition-colors"
               >
                 <Pause className="h-4 w-4" /> Pause
               </button>
             )}
             <button
-              onClick={async () => {
+              type="button"
+              onClick={async (e) => {
+                e.preventDefault();
                 audioRef.current?.pause();
                 setPlaying(false);
                 await handleDelete();
               }}
-              className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-300 text-slate-800 hover:bg-slate-100"
+              disabled={deleting || uploading}
+              className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-300 text-slate-800 hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Trash2 className="h-4 w-4" /> Remove
+              {deleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4" /> Delete
+                </>
+              )}
             </button>
+            {uploading && (
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold bg-blue-50 text-blue-700 rounded-full border border-blue-200">
+                <Loader2 className="h-4 w-4 animate-spin" /> Uploading...
+              </div>
+            )}
           </div>
           {uploadError && (
-            <p className="text-xs text-red-600 mt-1">
-              Upload error: {uploadError}
-            </p>
+            <p className="text-xs text-red-600 mt-1">⚠️ {uploadError}</p>
           )}
         </div>
       )}

@@ -1,4 +1,10 @@
-import { CheckCircle2, Clock2Icon } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock2Icon,
+  Mic,
+  RotateCcw,
+  FileAudio,
+} from "lucide-react";
 import type { Profile } from "../../lib/types/types";
 import type { StateSetter } from "../../lib/types/types";
 import { welcomeMessages } from "../messages";
@@ -25,7 +31,7 @@ export default function WelcomeSection({
   setProfile: StateSetter<Profile>;
 }) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <StepTitle
         n={step + 1}
         title={`${(() => {
@@ -133,6 +139,35 @@ export default function WelcomeSection({
                 <span className="text-slate-700">
                   The more <b>detail</b> you provide, the better we can tailor
                   your care.
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Voice Recordings */}
+          <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 md:p-5">
+            <h3 className="font-semibold text-slate-900">Voice Recordings</h3>
+            <ul className="mt-3 space-y-2">
+              <li className="flex items-start gap-2">
+                <Mic className="mt-0.5 h-5 w-5 shrink-0 flex-none text-red-600" />
+                <span className="text-slate-700">
+                  <b>Record your answers</b> instead of typing—your clinician
+                  will gain a richer, more nuanced understanding of your
+                  situation.
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <FileAudio className="mt-0.5 h-5 w-5 shrink-0 flex-none text-red-600" />
+                <span className="text-slate-700">
+                  You can record, type, or use <b>both methods</b> for each
+                  question.
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <RotateCcw className="mt-0.5 h-5 w-5 shrink-0 flex-none text-red-600" />
+                <span className="text-slate-700">
+                  To re-record, click <b>Delete</b> first, then click{" "}
+                  <b>Record</b> again.
                 </span>
               </li>
             </ul>

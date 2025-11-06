@@ -8,7 +8,7 @@ import StepTitle from "../StepTitle";
 import TextAreaWithEncouragement from "../primitives/TextAreawithEncouragement";
 import VoiceRecorder, { VoiceRecorderHandle } from "../VoiceRecorder";
 import { intPsychTheme } from "../theme";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { Info } from "lucide-react";
 
 type Props = {
   title: string;
@@ -31,9 +31,6 @@ export default function FollowUpSection({
   const [questionsGenerated, setQuestionsGenerated] = useState(false);
   const [loadingPhrase, setLoadingPhrase] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
-  const [showText1, setShowText1] = useState(false);
-  const [showText2, setShowText2] = useState(false);
-  const [showText3, setShowText3] = useState(false);
 
   const loadingPhrases = [
     "Creating your personalized questions...",
@@ -203,14 +200,20 @@ export default function FollowUpSection({
 
       <p className="text-gray-700 italic mb-6">
         Based on your responses, we have a few follow-up questions to help us
-        better understand your situation.{" "}
-        <b>We encourage you to use your voice</b> – it helps us understand your
-        story better.
+        better understand your situation. You can record your answer or type it
+        below.
       </p>
 
       {/* Question 1 */}
       <Field title={profile.followupQuestions.question1.question} required>
         <div className="space-y-3">
+          <div className="flex items-start gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-xl">
+            <Info className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-orange-900 font-medium">
+              You can record your answer, type it below, or both – whatever you
+              prefer
+            </p>
+          </div>
           <VoiceRecorder
             ref={(el) => {
               if (voiceRecorderRefs) {
@@ -218,6 +221,7 @@ export default function FollowUpSection({
               }
             }}
             fieldName="followupQuestions.question1.question"
+            label="Record your answer"
             audioState={
               profile.followupQuestions.question1.answer.audio?.url || null
             }
@@ -256,48 +260,40 @@ export default function FollowUpSection({
             }}
           />
 
-          <button
-            type="button"
-            onClick={() => setShowText1(!showText1)}
-            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
-          >
-            {showText1 ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-            {showText1 ? "Hide text option" : "Prefer to type instead?"}
-          </button>
-
-          {showText1 && (
-            <TextAreaWithEncouragement
-              rows={4}
-              placeholder="Share here in your own words…"
-              value={profile.followupQuestions.question1.answer.text || ""}
-              onChangeText={(next) =>
-                setProfile((p) => ({
-                  ...p,
-                  followupQuestions: {
-                    ...p.followupQuestions!,
-                    question1: {
-                      ...p.followupQuestions!.question1,
-                      answer: {
-                        ...p.followupQuestions!.question1.answer,
-                        text: next,
-                      },
+          <TextAreaWithEncouragement
+            rows={4}
+            placeholder="Or type here in your own words…"
+            value={profile.followupQuestions.question1.answer.text || ""}
+            onChangeText={(next) =>
+              setProfile((p) => ({
+                ...p,
+                followupQuestions: {
+                  ...p.followupQuestions!,
+                  question1: {
+                    ...p.followupQuestions!.question1,
+                    answer: {
+                      ...p.followupQuestions!.question1.answer,
+                      text: next,
                     },
                   },
-                }))
-              }
-              recommendedWords={50}
-            />
-          )}
+                },
+              }))
+            }
+            recommendedWords={50}
+          />
         </div>
       </Field>
 
       {/* Question 2 */}
       <Field title={profile.followupQuestions.question2.question} required>
         <div className="space-y-3">
+          <div className="flex items-start gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-xl">
+            <Info className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-orange-900 font-medium">
+              You can record your answer, type it below, or both – whatever you
+              prefer
+            </p>
+          </div>
           <VoiceRecorder
             ref={(el) => {
               if (voiceRecorderRefs) {
@@ -305,6 +301,7 @@ export default function FollowUpSection({
               }
             }}
             fieldName="followupQuestions.question2.question"
+            label="Record your answer"
             audioState={
               profile.followupQuestions.question2.answer.audio?.url || null
             }
@@ -343,48 +340,40 @@ export default function FollowUpSection({
             }}
           />
 
-          <button
-            type="button"
-            onClick={() => setShowText2(!showText2)}
-            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
-          >
-            {showText2 ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-            {showText2 ? "Hide text option" : "Prefer to type instead?"}
-          </button>
-
-          {showText2 && (
-            <TextAreaWithEncouragement
-              rows={4}
-              placeholder="Share here in your own words…"
-              value={profile.followupQuestions.question2.answer.text || ""}
-              onChangeText={(next) =>
-                setProfile((p) => ({
-                  ...p,
-                  followupQuestions: {
-                    ...p.followupQuestions!,
-                    question2: {
-                      ...p.followupQuestions!.question2,
-                      answer: {
-                        ...p.followupQuestions!.question2.answer,
-                        text: next,
-                      },
+          <TextAreaWithEncouragement
+            rows={4}
+            placeholder="Or type here in your own words…"
+            value={profile.followupQuestions.question2.answer.text || ""}
+            onChangeText={(next) =>
+              setProfile((p) => ({
+                ...p,
+                followupQuestions: {
+                  ...p.followupQuestions!,
+                  question2: {
+                    ...p.followupQuestions!.question2,
+                    answer: {
+                      ...p.followupQuestions!.question2.answer,
+                      text: next,
                     },
                   },
-                }))
-              }
-              recommendedWords={50}
-            />
-          )}
+                },
+              }))
+            }
+            recommendedWords={50}
+          />
         </div>
       </Field>
 
       {/* Question 3 */}
       <Field title={profile.followupQuestions.question3.question} required>
         <div className="space-y-3">
+          <div className="flex items-start gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-xl">
+            <Info className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-orange-900 font-medium">
+              You can record your answer, type it below, or both – whatever you
+              prefer
+            </p>
+          </div>
           <VoiceRecorder
             ref={(el) => {
               if (voiceRecorderRefs) {
@@ -392,6 +381,7 @@ export default function FollowUpSection({
               }
             }}
             fieldName="followupQuestions.question3.question"
+            label="Record your answer"
             audioState={
               profile.followupQuestions.question3.answer.audio?.url || null
             }
@@ -430,42 +420,27 @@ export default function FollowUpSection({
             }}
           />
 
-          <button
-            type="button"
-            onClick={() => setShowText3(!showText3)}
-            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
-          >
-            {showText3 ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-            {showText3 ? "Hide text option" : "Prefer to type instead?"}
-          </button>
-
-          {showText3 && (
-            <TextAreaWithEncouragement
-              rows={4}
-              placeholder="Share here in your own words…"
-              value={profile.followupQuestions.question3.answer.text || ""}
-              onChangeText={(next) =>
-                setProfile((p) => ({
-                  ...p,
-                  followupQuestions: {
-                    ...p.followupQuestions!,
-                    question3: {
-                      ...p.followupQuestions!.question3,
-                      answer: {
-                        ...p.followupQuestions!.question3.answer,
-                        text: next,
-                      },
+          <TextAreaWithEncouragement
+            rows={4}
+            placeholder="Or type here in your own words…"
+            value={profile.followupQuestions.question3.answer.text || ""}
+            onChangeText={(next) =>
+              setProfile((p) => ({
+                ...p,
+                followupQuestions: {
+                  ...p.followupQuestions!,
+                  question3: {
+                    ...p.followupQuestions!.question3,
+                    answer: {
+                      ...p.followupQuestions!.question3.answer,
+                      text: next,
                     },
                   },
-                }))
-              }
-              recommendedWords={50}
-            />
-          )}
+                },
+              }))
+            }
+            recommendedWords={50}
+          />
         </div>
       </Field>
     </motion.div>

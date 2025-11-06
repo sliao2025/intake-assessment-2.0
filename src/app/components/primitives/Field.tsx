@@ -9,14 +9,14 @@ const Field: React.FC<{
   children: React.ReactNode;
   className?: string;
 }> = ({ title, label, required, children, className }) => (
-  <label className={`block ${className || ""}`}>
+  <div className={`block ${className || ""}`}>
     <div className="mb-1 text-md semibold text-slate-700">
       {required && <span className="text-rose-600">* </span>}
       {title}
     </div>
     <div className="mb-1 text-sm semibold text-slate-700">{label}</div>
     {children}
-  </label>
+  </div>
 );
 
 export default Field;

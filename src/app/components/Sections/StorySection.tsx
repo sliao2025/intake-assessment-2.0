@@ -9,7 +9,7 @@ import VoiceRecorder, { VoiceRecorderHandle } from "../VoiceRecorder";
 import MultiSelectGroup from "../primitives/MultiSelectGroup";
 import type { Profile } from "../../lib/types/types";
 import TextAreaWithEncouragement from "../primitives/TextAreawithEncouragement";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { Info } from "lucide-react";
 
 type Props = {
   title: string;
@@ -28,11 +28,6 @@ export default function StorySection({
   setProfile,
   voiceRecorderRefs,
 }: Props) {
-  const [showStoryText, setShowStoryText] = useState(false);
-  const [showGoalsText, setShowGoalsText] = useState(false);
-  const [showLivingText, setShowLivingText] = useState(false);
-  const [showCultureText, setShowCultureText] = useState(false);
-
   // Function to save a specific profile state to SQL
   const saveProfileToSQL = async (profileToSave: typeof profile) => {
     try {
@@ -90,6 +85,13 @@ export default function StorySection({
         required
       >
         <div className="space-y-3">
+          <div className="flex items-start gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-xl">
+            <Info className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-orange-900 font-medium">
+              You can record your answer, type it below, or both – whatever you
+              prefer
+            </p>
+          </div>
           <VoiceRecorder
             ref={(el) => {
               if (voiceRecorderRefs) {
@@ -97,6 +99,7 @@ export default function StorySection({
               }
             }}
             fieldName="storyNarrative"
+            label="Record your answer"
             audioState={profile.storyNarrative?.audio?.url || null}
             fileName={profile.storyNarrative?.audio?.fileName || null}
             onAttach={async (data) => {
@@ -128,33 +131,18 @@ export default function StorySection({
             }}
           />
 
-          <button
-            type="button"
-            onClick={() => setShowStoryText(!showStoryText)}
-            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
-          >
-            {showStoryText ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-            {showStoryText ? "Hide text option" : "Prefer to type instead?"}
-          </button>
-
-          {showStoryText && (
-            <TextAreaWithEncouragement
-              rows={6}
-              placeholder="Share here in your own words…"
-              value={profile.storyNarrative?.text || ""}
-              onChangeText={(next) =>
-                setProfile((p) => ({
-                  ...p,
-                  storyNarrative: { ...p.storyNarrative, text: next },
-                }))
-              }
-              recommendedWords={75}
-            />
-          )}
+          <TextAreaWithEncouragement
+            rows={6}
+            placeholder="Or type here in your own words…"
+            value={profile.storyNarrative?.text || ""}
+            onChangeText={(next) =>
+              setProfile((p) => ({
+                ...p,
+                storyNarrative: { ...p.storyNarrative, text: next },
+              }))
+            }
+            recommendedWords={75}
+          />
         </div>
       </Field>
 
@@ -197,6 +185,13 @@ export default function StorySection({
         required
       >
         <div className="space-y-3">
+          <div className="flex items-start gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-xl">
+            <Info className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-orange-900 font-medium">
+              You can record your answer, type it below, or both – whatever you
+              prefer
+            </p>
+          </div>
           <VoiceRecorder
             ref={(el) => {
               if (voiceRecorderRefs) {
@@ -204,6 +199,7 @@ export default function StorySection({
               }
             }}
             fieldName="goals"
+            label="Record your answer"
             audioState={profile.goals?.audio?.url || null}
             fileName={profile.goals?.audio?.fileName || null}
             onAttach={async (data) => {
@@ -238,33 +234,18 @@ export default function StorySection({
             }}
           />
 
-          <button
-            type="button"
-            onClick={() => setShowGoalsText(!showGoalsText)}
-            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
-          >
-            {showGoalsText ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-            {showGoalsText ? "Hide text option" : "Prefer to type instead?"}
-          </button>
-
-          {showGoalsText && (
-            <TextAreaWithEncouragement
-              rows={6}
-              placeholder="Share here in your own words…"
-              value={profile.goals?.text || ""}
-              onChangeText={(next) =>
-                setProfile((p) => ({
-                  ...p,
-                  goals: { ...p.goals, text: next },
-                }))
-              }
-              recommendedWords={40}
-            />
-          )}
+          <TextAreaWithEncouragement
+            rows={6}
+            placeholder="Or type here in your own words…"
+            value={profile.goals?.text || ""}
+            onChangeText={(next) =>
+              setProfile((p) => ({
+                ...p,
+                goals: { ...p.goals, text: next },
+              }))
+            }
+            recommendedWords={40}
+          />
         </div>
       </Field>
 
@@ -295,13 +276,21 @@ export default function StorySection({
         required
       >
         <div className="space-y-3">
+          <div className="flex items-start gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-xl">
+            <Info className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-orange-900 font-medium">
+              You can record your answer, type it below, or both – whatever you
+              prefer
+            </p>
+          </div>
           <VoiceRecorder
             ref={(el) => {
               if (voiceRecorderRefs) {
-                voiceRecorderRefs.current.livingSituation = el;
+                voiceRecorderRefs.current.living = el;
               }
             }}
-            fieldName="livingSituation"
+            fieldName="living"
+            label="Record your answer"
             audioState={profile.livingSituation?.audio?.url || null}
             fileName={profile.livingSituation?.audio?.fileName || null}
             onAttach={async (data) => {
@@ -336,32 +325,17 @@ export default function StorySection({
             }}
           />
 
-          <button
-            type="button"
-            onClick={() => setShowLivingText(!showLivingText)}
-            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
-          >
-            {showLivingText ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-            {showLivingText ? "Hide text option" : "Prefer to type instead?"}
-          </button>
-
-          {showLivingText && (
-            <TextAreaWithEncouragement
-              rows={6}
-              placeholder="Share here in your own words…"
-              value={profile.livingSituation?.text || ""}
-              onChangeText={(next) =>
-                setProfile((p) => ({
-                  ...p,
-                  livingSituation: { ...p.livingSituation, text: next },
-                }))
-              }
-            />
-          )}
+          <TextAreaWithEncouragement
+            rows={6}
+            placeholder="Or type here in your own words…"
+            value={profile.livingSituation?.text || ""}
+            onChangeText={(next) =>
+              setProfile((p) => ({
+                ...p,
+                livingSituation: { ...p.livingSituation, text: next },
+              }))
+            }
+          />
         </div>
       </Field>
 
@@ -382,6 +356,13 @@ export default function StorySection({
         }
       >
         <div className="space-y-3">
+          <div className="flex items-start gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-xl">
+            <Info className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-orange-900 font-medium">
+              You can record your answer, type it below, or both – whatever you
+              prefer
+            </p>
+          </div>
           <VoiceRecorder
             ref={(el) => {
               if (voiceRecorderRefs) {
@@ -389,6 +370,7 @@ export default function StorySection({
               }
             }}
             fieldName="cultureContext"
+            label="Record your answer"
             audioState={profile.cultureContext?.audio?.url || null}
             fileName={profile.cultureContext?.audio?.fileName || null}
             onAttach={async (data) => {
@@ -423,33 +405,18 @@ export default function StorySection({
             }}
           />
 
-          <button
-            type="button"
-            onClick={() => setShowCultureText(!showCultureText)}
-            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 transition-colors"
-          >
-            {showCultureText ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-            {showCultureText ? "Hide text option" : "Prefer to type instead?"}
-          </button>
-
-          {showCultureText && (
-            <TextAreaWithEncouragement
-              rows={6}
-              placeholder="Share here in your own words…"
-              value={profile.cultureContext?.text || ""}
-              onChangeText={(next) =>
-                setProfile((p) => ({
-                  ...p,
-                  cultureContext: { ...p.cultureContext, text: next },
-                }))
-              }
-              recommendedWords={40}
-            />
-          )}
+          <TextAreaWithEncouragement
+            rows={6}
+            placeholder="Or type here in your own words…"
+            value={profile.cultureContext?.text || ""}
+            onChangeText={(next) =>
+              setProfile((p) => ({
+                ...p,
+                cultureContext: { ...p.cultureContext, text: next },
+              }))
+            }
+            recommendedWords={40}
+          />
         </div>
       </Field>
 
