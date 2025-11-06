@@ -236,6 +236,7 @@ const VoiceRecorder = forwardRef<
     setUploadError(null);
 
     try {
+      // ✅ STEP 1: Upload to GCS to get the actual fileName (includes userId)
       const formData = new FormData();
       formData.append("audio", blob, `${fieldName}.webm`);
       formData.append("fieldName", fieldName);
@@ -243,6 +244,7 @@ const VoiceRecorder = forwardRef<
       console.log(
         `[VoiceRecorder ${fieldName}] Uploading to /api/upload/audio`
       );
+
       const response = await fetch("/api/upload/audio", {
         method: "POST",
         body: formData,
@@ -254,40 +256,73 @@ const VoiceRecorder = forwardRef<
       }
 
       const data = await response.json();
-      console.log(
-        `[VoiceRecorder ${fieldName}] Cloud upload successful:`,
-        data
-      );
+      console.log(`[VoiceRecorder ${fieldName}] GCS upload successful:`, data);
 
-      // Mark as uploaded and return full data object
-      if (data.url && data.fileName) {
-        setIsUploaded(true);
-        setCurrentFileName(data.fileName);
-
-        const uploadData = {
-          url: data.url,
-          fileName: data.fileName,
-          uploadedAt: data.uploadedAt,
-        };
-
-        console.log(
-          `[VoiceRecorder ${fieldName}] Saving to SQL database via onAttach...`
+      if (!data.url || !data.fileName) {
+        console.warn(
+          `[VoiceRecorder ${fieldName}] Upload response missing url or fileName`
         );
-
-        // Update parent state AND save to SQL (parent is responsible for SQL save)
-        if (onAttach) {
-          await onAttach(uploadData);
-        }
-
-        console.log(
-          `[VoiceRecorder ${fieldName}] Upload and SQL save complete`
-        );
-        return uploadData;
+        return null;
       }
-      console.warn(
-        `[VoiceRecorder ${fieldName}] Upload response missing url or fileName`
+
+      const uploadData = {
+        url: data.url,
+        fileName: data.fileName,
+        uploadedAt: data.uploadedAt,
+      };
+
+      // ✅ STEP 2: Call onAttach IMMEDIATELY to update state and save to DB
+      console.log(
+        `[VoiceRecorder ${fieldName}] Calling onAttach to update state and save to DB...`
       );
-      return null;
+
+      if (onAttach) {
+        await onAttach(uploadData);
+      }
+
+      console.log(
+        `[VoiceRecorder ${fieldName}] State updated and saved to DB.`
+      );
+
+      // ✅ STEP 3: Trigger transcription in background (fire-and-forget)
+      console.log(
+        `[VoiceRecorder ${fieldName}] Triggering transcription for ${data.fileName}...`
+      );
+
+      fetch("/api/transcribe/trigger", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fileName: data.fileName,
+          fieldType: fieldName,
+        }),
+      })
+        .then((res) => {
+          if (res.ok) {
+            console.log(
+              `[VoiceRecorder ${fieldName}] Transcription triggered successfully`
+            );
+          } else {
+            console.error(
+              `[VoiceRecorder ${fieldName}] Transcription trigger failed:`,
+              res.status
+            );
+          }
+        })
+        .catch((err) => {
+          console.error(
+            `[VoiceRecorder ${fieldName}] Transcription trigger error:`,
+            err
+          );
+        });
+
+      // Mark as uploaded
+      setIsUploaded(true);
+      setCurrentFileName(data.fileName);
+
+      return uploadData;
     } catch (err: any) {
       setUploadError(err?.message || "Failed to upload audio");
       console.error(`[VoiceRecorder ${fieldName}] Upload error:`, err);

@@ -119,15 +119,21 @@ export default function StorySection({
                 },
               };
 
-              console.log("[StorySection] Saving updated profile to SQL...", {
-                hasAudio: !!updatedProfile.storyNarrative?.audio,
-                audioFileName: updatedProfile.storyNarrative?.audio?.fileName,
-              });
+              // ✅ Save to DB in both cases:
+              // - Upload: Save initial metadata {url, fileName, uploadedAt}
+              // - Delete: Clear audio reference
+              // Transcription service will later add transcription fields via fetch-modify-save
+              console.log(
+                data === null
+                  ? "[StorySection] Deletion - clearing audio reference in DB"
+                  : "[StorySection] Upload - saving initial metadata to DB"
+              );
               await saveProfileToSQL(updatedProfile);
-              console.log("[StorySection] SQL save completed");
 
               setProfile(updatedProfile);
-              console.log("[StorySection] Local state updated");
+              console.log(
+                "[StorySection] Profile updated in DB and local state"
+              );
             }}
           />
 
@@ -222,15 +228,21 @@ export default function StorySection({
                 },
               };
 
-              console.log("[StorySection] Saving updated profile to SQL...", {
-                hasAudio: !!updatedProfile.goals?.audio,
-                audioFileName: updatedProfile.goals?.audio?.fileName,
-              });
+              // ✅ Save to DB in both cases:
+              // - Upload: Save initial metadata {url, fileName, uploadedAt}
+              // - Delete: Clear audio reference
+              // Transcription service will later add transcription fields via fetch-modify-save
+              console.log(
+                data === null
+                  ? "[StorySection] Deletion - clearing audio reference in DB"
+                  : "[StorySection] Upload - saving initial metadata to DB"
+              );
               await saveProfileToSQL(updatedProfile);
-              console.log("[StorySection] SQL save completed");
 
               setProfile(updatedProfile);
-              console.log("[StorySection] Local state updated");
+              console.log(
+                "[StorySection] Profile updated in DB and local state"
+              );
             }}
           />
 
@@ -313,15 +325,21 @@ export default function StorySection({
                 },
               };
 
-              console.log("[StorySection] Saving updated profile to SQL...", {
-                hasAudio: !!updatedProfile.livingSituation?.audio,
-                audioFileName: updatedProfile.livingSituation?.audio?.fileName,
-              });
+              // ✅ Save to DB in both cases:
+              // - Upload: Save initial metadata {url, fileName, uploadedAt}
+              // - Delete: Clear audio reference
+              // Transcription service will later add transcription fields via fetch-modify-save
+              console.log(
+                data === null
+                  ? "[StorySection] Deletion - clearing audio reference in DB"
+                  : "[StorySection] Upload - saving initial metadata to DB"
+              );
               await saveProfileToSQL(updatedProfile);
-              console.log("[StorySection] SQL save completed");
 
               setProfile(updatedProfile);
-              console.log("[StorySection] Local state updated");
+              console.log(
+                "[StorySection] Profile updated in DB and local state"
+              );
             }}
           />
 
@@ -393,15 +411,21 @@ export default function StorySection({
                 },
               };
 
-              console.log("[StorySection] Saving updated profile to SQL...", {
-                hasAudio: !!updatedProfile.cultureContext?.audio,
-                audioFileName: updatedProfile.cultureContext?.audio?.fileName,
-              });
+              // ✅ Save to DB in both cases:
+              // - Upload: Save initial metadata {url, fileName, uploadedAt}
+              // - Delete: Clear audio reference
+              // Transcription service will later add transcription fields via fetch-modify-save
+              console.log(
+                data === null
+                  ? "[StorySection] Deletion - clearing audio reference in DB"
+                  : "[StorySection] Upload - saving initial metadata to DB"
+              );
               await saveProfileToSQL(updatedProfile);
-              console.log("[StorySection] SQL save completed");
 
               setProfile(updatedProfile);
-              console.log("[StorySection] Local state updated");
+              console.log(
+                "[StorySection] Profile updated in DB and local state"
+              );
             }}
           />
 

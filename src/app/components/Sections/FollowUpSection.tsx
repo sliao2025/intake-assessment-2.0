@@ -255,8 +255,21 @@ export default function FollowUpSection({
                 },
               };
 
+              // ✅ Save to DB in both cases:
+              // - Upload: Save initial metadata {url, fileName, uploadedAt}
+              // - Delete: Clear audio reference
+              // Transcription service will later add transcription fields via fetch-modify-save
+              console.log(
+                data === null
+                  ? "[FollowUpSection] Deletion - clearing audio reference in DB"
+                  : "[FollowUpSection] Upload - saving initial metadata to DB"
+              );
               await saveProfileToSQL(updatedProfile);
+
               setProfile(updatedProfile);
+              console.log(
+                "[FollowUpSection] Profile updated in DB and local state"
+              );
             }}
           />
 
@@ -335,8 +348,21 @@ export default function FollowUpSection({
                 },
               };
 
+              // ✅ Save to DB in both cases:
+              // - Upload: Save initial metadata {url, fileName, uploadedAt}
+              // - Delete: Clear audio reference
+              // Transcription service will later add transcription fields via fetch-modify-save
+              console.log(
+                data === null
+                  ? "[FollowUpSection] Deletion - clearing audio reference in DB"
+                  : "[FollowUpSection] Upload - saving initial metadata to DB"
+              );
               await saveProfileToSQL(updatedProfile);
+
               setProfile(updatedProfile);
+              console.log(
+                "[FollowUpSection] Profile updated in DB and local state"
+              );
             }}
           />
 
@@ -415,8 +441,21 @@ export default function FollowUpSection({
                 },
               };
 
+              // ✅ Save to DB in both cases:
+              // - Upload: Save initial metadata {url, fileName, uploadedAt}
+              // - Delete: Clear audio reference
+              // Transcription service will later add transcription fields via fetch-modify-save
+              console.log(
+                data === null
+                  ? "[FollowUpSection] Deletion - clearing audio reference in DB"
+                  : "[FollowUpSection] Upload - saving initial metadata to DB"
+              );
               await saveProfileToSQL(updatedProfile);
+
               setProfile(updatedProfile);
+              console.log(
+                "[FollowUpSection] Profile updated in DB and local state"
+              );
             }}
           />
 

@@ -81,12 +81,13 @@ export async function POST(req: NextRequest) {
     // Return proxy URL that will be served through our API with auth check
     // The fileName contains the userId, so we can verify ownership on access
     const proxyUrl = `/api/upload/audio/stream?fileName=${encodeURIComponent(fileName)}`;
+    const uploadedAt = new Date().toISOString();
 
     return NextResponse.json({
       ok: true,
       url: proxyUrl, // Proxy URL through our API with auth check
       fileName, // Store this for reference
-      uploadedAt: new Date().toISOString(),
+      uploadedAt,
     });
   } catch (error: any) {
     console.error("[upload/audio] Error:", error);
