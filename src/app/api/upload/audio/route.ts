@@ -45,9 +45,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Normalize field name for use in filename
+    // Convert "followupQuestions.question1.answer" -> "followupQuestion1"
+    // Keep other fields unchanged (storyNarrative, goals, etc.)
+    let normalizedFieldName = fieldName;
+    if (fieldName.startsWith("followupQuestions.question")) {
+      const match = fieldName.match(/followupQuestions\.question(\d)\.answer/);
+      if (match) {
+        normalizedFieldName = `followupQuestion${match[1]}`;
+      }
+    }
+
+    console.log(
+      `[upload/audio] Field name: ${fieldName}, normalized: ${normalizedFieldName}`
+    );
+
     // Create filename WITH timestamp - unique file per recording
     const timestamp = Date.now();
-    const fileName = `${userId}/${fieldName}-${timestamp}.webm`;
+    const fileName = `${userId}/${normalizedFieldName}-${timestamp}.webm`;
 
     // Convert File to Buffer
     const arrayBuffer = await audioFile.arrayBuffer();

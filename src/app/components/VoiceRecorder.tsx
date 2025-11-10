@@ -289,6 +289,23 @@ const VoiceRecorder = forwardRef<
         `[VoiceRecorder ${fieldName}] Triggering transcription for ${data.fileName}...`
       );
 
+      // Normalize field name for backend transcription service
+      // Frontend uses: "followupQuestions.question1.answer"
+      // Backend expects: "followupQuestion1"
+      let transcriptionFieldType = fieldName;
+      if (fieldName.startsWith("followupQuestions.question")) {
+        const match = fieldName.match(
+          /followupQuestions\.question(\d)\.answer/
+        );
+        if (match) {
+          transcriptionFieldType = `followupQuestion${match[1]}`;
+        }
+      }
+
+      console.log(
+        `[VoiceRecorder ${fieldName}] Normalized fieldType for transcription: ${transcriptionFieldType}`
+      );
+
       fetch("/api/transcribe/trigger", {
         method: "POST",
         headers: {
@@ -296,7 +313,7 @@ const VoiceRecorder = forwardRef<
         },
         body: JSON.stringify({
           fileName: data.fileName,
-          fieldType: fieldName,
+          fieldType: transcriptionFieldType,
         }),
       })
         .then((res) => {

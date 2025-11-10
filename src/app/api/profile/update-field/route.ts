@@ -62,21 +62,54 @@ export async function PATCH(request: NextRequest) {
               const questionKey = parts[1]; // "question1", "question2", etc.
               const answerKey = parts[2]; // "answer"
 
+              console.log(
+                `[update-field] Updating nested field: ${questionKey}.${answerKey}`
+              );
+
               if (!profileData.followupQuestions) {
+                console.log(
+                  `[update-field] Creating followupQuestions structure`
+                );
                 profileData.followupQuestions = {};
               }
               if (!profileData.followupQuestions[questionKey]) {
+                console.log(`[update-field] Creating ${questionKey} structure`);
                 profileData.followupQuestions[questionKey] = {};
               }
               if (!profileData.followupQuestions[questionKey][answerKey]) {
+                console.log(
+                  `[update-field] Creating ${questionKey}.${answerKey} structure`
+                );
                 profileData.followupQuestions[questionKey][answerKey] = {};
               }
+
+              console.log(
+                `[update-field] Before merge:`,
+                JSON.stringify(
+                  profileData.followupQuestions[questionKey][answerKey],
+                  null,
+                  2
+                )
+              );
+              console.log(
+                `[update-field] Merging fieldValue:`,
+                JSON.stringify(fieldValue, null, 2)
+              );
 
               // Merge field value, preserving existing fields (like transcription)
               profileData.followupQuestions[questionKey][answerKey] = {
                 ...profileData.followupQuestions[questionKey][answerKey],
                 ...fieldValue,
               };
+
+              console.log(
+                `[update-field] After merge:`,
+                JSON.stringify(
+                  profileData.followupQuestions[questionKey][answerKey],
+                  null,
+                  2
+                )
+              );
             }
           } else {
             // Standard top-level field update

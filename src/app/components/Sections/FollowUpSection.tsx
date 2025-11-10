@@ -235,48 +235,48 @@ export default function FollowUpSection({
               );
 
               // ✅ Update local state immediately
-              setProfile((p) => ({
-                ...p,
-                followupQuestions: {
-                  ...p.followupQuestions!,
-                  question1: {
-                    ...p.followupQuestions!.question1,
-                    answer: {
-                      text: p.followupQuestions!.question1.answer.text || "",
-                      ...(data && {
-                        audio: {
-                          url: data.url,
-                          fileName: data.fileName,
-                          uploadedAt: data.uploadedAt,
-                          ...(p.followupQuestions!.question1.answer.audio
-                            ?.transcription && {
-                            transcription:
-                              p.followupQuestions!.question1.answer.audio
-                                .transcription,
-                            chunks:
-                              p.followupQuestions!.question1.answer.audio
-                                .chunks,
-                            transcribedAt:
-                              p.followupQuestions!.question1.answer.audio
-                                .transcribedAt,
-                          }),
-                        },
-                      }),
+              setProfile((p) => {
+                const updatedProfile = {
+                  ...p,
+                  followupQuestions: {
+                    ...p.followupQuestions!,
+                    question1: {
+                      ...p.followupQuestions!.question1,
+                      answer: {
+                        text: p.followupQuestions!.question1.answer.text || "",
+                        ...(data && {
+                          audio: {
+                            url: data.url,
+                            fileName: data.fileName,
+                            uploadedAt: data.uploadedAt,
+                            ...(p.followupQuestions!.question1.answer.audio
+                              ?.transcription && {
+                              transcription:
+                                p.followupQuestions!.question1.answer.audio
+                                  .transcription,
+                              chunks:
+                                p.followupQuestions!.question1.answer.audio
+                                  .chunks,
+                              transcribedAt:
+                                p.followupQuestions!.question1.answer.audio
+                                  .transcribedAt,
+                            }),
+                          },
+                        }),
+                      },
                     },
                   },
-                },
-              }));
+                };
 
-              // ✅ Save ONLY this field to DB using field-level update
-              try {
-                const response = await fetch("/api/profile/update-field", {
+                // ✅ Save ONLY this field to DB using field-level update
+                // Use the UPDATED profile data, not the stale closure
+                fetch("/api/profile/update-field", {
                   method: "PATCH",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                     fieldName: "followupQuestions.question1.answer",
                     fieldValue: {
-                      text:
-                        profile.followupQuestions!.question1.answer.text || "",
+                      text: p.followupQuestions!.question1.answer.text || "",
                       ...(data && {
                         audio: {
                           url: data.url,
@@ -286,23 +286,27 @@ export default function FollowUpSection({
                       }),
                     },
                   }),
-                });
+                })
+                  .then((response) => {
+                    if (!response.ok) {
+                      console.error(
+                        "[FollowUpSection] Failed to save question1 to DB"
+                      );
+                    } else {
+                      console.log(
+                        "[FollowUpSection] Successfully saved question1 to DB"
+                      );
+                    }
+                  })
+                  .catch((err) => {
+                    console.error(
+                      "[FollowUpSection] Error saving question1 to DB:",
+                      err
+                    );
+                  });
 
-                if (!response.ok) {
-                  console.error(
-                    "[FollowUpSection] Failed to save question1 to DB"
-                  );
-                } else {
-                  console.log(
-                    "[FollowUpSection] Successfully saved question1 to DB"
-                  );
-                }
-              } catch (err) {
-                console.error(
-                  "[FollowUpSection] Error saving question1 to DB:",
-                  err
-                );
-              }
+                return updatedProfile;
+              });
             }}
           />
 
@@ -361,48 +365,47 @@ export default function FollowUpSection({
               );
 
               // ✅ Update local state immediately
-              setProfile((p) => ({
-                ...p,
-                followupQuestions: {
-                  ...p.followupQuestions!,
-                  question2: {
-                    ...p.followupQuestions!.question2,
-                    answer: {
-                      text: p.followupQuestions!.question2.answer.text || "",
-                      ...(data && {
-                        audio: {
-                          url: data.url,
-                          fileName: data.fileName,
-                          uploadedAt: data.uploadedAt,
-                          ...(p.followupQuestions!.question2.answer.audio
-                            ?.transcription && {
-                            transcription:
-                              p.followupQuestions!.question2.answer.audio
-                                .transcription,
-                            chunks:
-                              p.followupQuestions!.question2.answer.audio
-                                .chunks,
-                            transcribedAt:
-                              p.followupQuestions!.question2.answer.audio
-                                .transcribedAt,
-                          }),
-                        },
-                      }),
+              setProfile((p) => {
+                const updatedProfile = {
+                  ...p,
+                  followupQuestions: {
+                    ...p.followupQuestions!,
+                    question2: {
+                      ...p.followupQuestions!.question2,
+                      answer: {
+                        text: p.followupQuestions!.question2.answer.text || "",
+                        ...(data && {
+                          audio: {
+                            url: data.url,
+                            fileName: data.fileName,
+                            uploadedAt: data.uploadedAt,
+                            ...(p.followupQuestions!.question2.answer.audio
+                              ?.transcription && {
+                              transcription:
+                                p.followupQuestions!.question2.answer.audio
+                                  .transcription,
+                              chunks:
+                                p.followupQuestions!.question2.answer.audio
+                                  .chunks,
+                              transcribedAt:
+                                p.followupQuestions!.question2.answer.audio
+                                  .transcribedAt,
+                            }),
+                          },
+                        }),
+                      },
                     },
                   },
-                },
-              }));
+                };
 
-              // ✅ Save ONLY this field to DB
-              try {
-                const response = await fetch("/api/profile/update-field", {
+                // ✅ Save ONLY this field to DB
+                fetch("/api/profile/update-field", {
                   method: "PATCH",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                     fieldName: "followupQuestions.question2.answer",
                     fieldValue: {
-                      text:
-                        profile.followupQuestions!.question2.answer.text || "",
+                      text: p.followupQuestions!.question2.answer.text || "",
                       ...(data && {
                         audio: {
                           url: data.url,
@@ -412,23 +415,27 @@ export default function FollowUpSection({
                       }),
                     },
                   }),
-                });
+                })
+                  .then((response) => {
+                    if (!response.ok) {
+                      console.error(
+                        "[FollowUpSection] Failed to save question2 to DB"
+                      );
+                    } else {
+                      console.log(
+                        "[FollowUpSection] Successfully saved question2 to DB"
+                      );
+                    }
+                  })
+                  .catch((err) => {
+                    console.error(
+                      "[FollowUpSection] Error saving question2 to DB:",
+                      err
+                    );
+                  });
 
-                if (!response.ok) {
-                  console.error(
-                    "[FollowUpSection] Failed to save question2 to DB"
-                  );
-                } else {
-                  console.log(
-                    "[FollowUpSection] Successfully saved question2 to DB"
-                  );
-                }
-              } catch (err) {
-                console.error(
-                  "[FollowUpSection] Error saving question2 to DB:",
-                  err
-                );
-              }
+                return updatedProfile;
+              });
             }}
           />
 
@@ -487,48 +494,47 @@ export default function FollowUpSection({
               );
 
               // ✅ Update local state immediately
-              setProfile((p) => ({
-                ...p,
-                followupQuestions: {
-                  ...p.followupQuestions!,
-                  question3: {
-                    ...p.followupQuestions!.question3,
-                    answer: {
-                      text: p.followupQuestions!.question3.answer.text || "",
-                      ...(data && {
-                        audio: {
-                          url: data.url,
-                          fileName: data.fileName,
-                          uploadedAt: data.uploadedAt,
-                          ...(p.followupQuestions!.question3.answer.audio
-                            ?.transcription && {
-                            transcription:
-                              p.followupQuestions!.question3.answer.audio
-                                .transcription,
-                            chunks:
-                              p.followupQuestions!.question3.answer.audio
-                                .chunks,
-                            transcribedAt:
-                              p.followupQuestions!.question3.answer.audio
-                                .transcribedAt,
-                          }),
-                        },
-                      }),
+              setProfile((p) => {
+                const updatedProfile = {
+                  ...p,
+                  followupQuestions: {
+                    ...p.followupQuestions!,
+                    question3: {
+                      ...p.followupQuestions!.question3,
+                      answer: {
+                        text: p.followupQuestions!.question3.answer.text || "",
+                        ...(data && {
+                          audio: {
+                            url: data.url,
+                            fileName: data.fileName,
+                            uploadedAt: data.uploadedAt,
+                            ...(p.followupQuestions!.question3.answer.audio
+                              ?.transcription && {
+                              transcription:
+                                p.followupQuestions!.question3.answer.audio
+                                  .transcription,
+                              chunks:
+                                p.followupQuestions!.question3.answer.audio
+                                  .chunks,
+                              transcribedAt:
+                                p.followupQuestions!.question3.answer.audio
+                                  .transcribedAt,
+                            }),
+                          },
+                        }),
+                      },
                     },
                   },
-                },
-              }));
+                };
 
-              // ✅ Save ONLY this field to DB
-              try {
-                const response = await fetch("/api/profile/update-field", {
+                // ✅ Save ONLY this field to DB
+                fetch("/api/profile/update-field", {
                   method: "PATCH",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                     fieldName: "followupQuestions.question3.answer",
                     fieldValue: {
-                      text:
-                        profile.followupQuestions!.question3.answer.text || "",
+                      text: p.followupQuestions!.question3.answer.text || "",
                       ...(data && {
                         audio: {
                           url: data.url,
@@ -538,23 +544,27 @@ export default function FollowUpSection({
                       }),
                     },
                   }),
-                });
+                })
+                  .then((response) => {
+                    if (!response.ok) {
+                      console.error(
+                        "[FollowUpSection] Failed to save question3 to DB"
+                      );
+                    } else {
+                      console.log(
+                        "[FollowUpSection] Successfully saved question3 to DB"
+                      );
+                    }
+                  })
+                  .catch((err) => {
+                    console.error(
+                      "[FollowUpSection] Error saving question3 to DB:",
+                      err
+                    );
+                  });
 
-                if (!response.ok) {
-                  console.error(
-                    "[FollowUpSection] Failed to save question3 to DB"
-                  );
-                } else {
-                  console.log(
-                    "[FollowUpSection] Successfully saved question3 to DB"
-                  );
-                }
-              } catch (err) {
-                console.error(
-                  "[FollowUpSection] Error saving question3 to DB:",
-                  err
-                );
-              }
+                return updatedProfile;
+              });
             }}
           />
 
