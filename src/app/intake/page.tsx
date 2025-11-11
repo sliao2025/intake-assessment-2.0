@@ -911,23 +911,23 @@ export default function Page() {
     }
   }
 
-  async function runSentimentAnalysis() {
+  async function runInsights() {
     try {
-      const response = await fetch("/api/sentiment", {
+      const response = await fetch("/api/insights", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
 
       if (!response.ok) {
-        throw new Error(`Sentiment analysis failed: ${response.status}`);
+        throw new Error(`Insights generation failed: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log("Sentiment analysis completed:", data);
+      console.log("Insights generation completed:", data);
       return data;
     } catch (e) {
-      console.error("Sentiment analysis failed", e);
-      // Do not block the UX if sentiment analysis fails
+      console.error("Insights generation failed", e);
+      // Do not block the UX if insights generation fails
     }
   }
 
@@ -1018,8 +1018,8 @@ export default function Page() {
       // 2) Fire-and-forget notification email
       await notifyAssessmentComplete(finalized);
 
-      // 3) Run sentiment analysis (fire-and-forget, saves to profile JSON automatically)
-      runSentimentAnalysis();
+      // 3) Run insights generation (sentiment + summarization) in background
+      runInsights();
 
       // 4) Persist denormalized scalars to Profile (firstName, etc.) and stamp firstSubmittedAt once
       try {
