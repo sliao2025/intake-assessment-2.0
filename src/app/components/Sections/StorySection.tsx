@@ -432,7 +432,7 @@ export default function StorySection({
         </div>
       </Field>
 
-      <Separator label="Culture & Context (optional)" />
+      <Separator label="Culture & Context" />
       <Field
         title={
           !profile.isChild ? (
@@ -447,6 +447,7 @@ export default function StorySection({
             </>
           )
         }
+        required
       >
         <div className="space-y-3">
           <div className="flex items-start gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-xl">
