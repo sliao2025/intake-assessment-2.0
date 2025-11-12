@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       firstName = "",
       lastName = "",
       email = "",
-      isChild = null,
+      isChild = "",
       submittedAtEpoch,
       submittedAtISO,
       notifyTo,
@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
     }
     const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
     const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-    const REFRESH_TOKEN = process.env.GMAIL_REFRESH_TOKEN;
+    const REFRESH_TOKEN = process.env.GMAIL_REFRESH_TOKEN2;
     const SENDER = process.env.GMAIL_SENDER; // e.g., noreply@your-domain.com (must match authorized Gmail account)
     // Accept comma/semicolon/newline-separated lists in env; allow override from request body
     const NOTIFY_TO = splitList(process.env.NOTIFY_TO || SENDER);

@@ -893,6 +893,7 @@ export default function Page() {
 
   async function notifyAssessmentComplete(p: Profile) {
     try {
+      console.log("[NotifyAssessmentComplete]", p.isChild);
       await fetch("/api/notify/assessment-complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -900,7 +901,7 @@ export default function Page() {
           firstName: p.firstName || "",
           lastName: p.lastName || "",
           email: p.email || "",
-          isChild: p.isChild || "",
+          isChild: p.isChild ?? null,
           submittedAtEpoch: Date.now(),
           submittedAtISO: new Date().toISOString(),
         }),
@@ -1023,6 +1024,7 @@ export default function Page() {
 
       // 4) Persist denormalized scalars to Profile (firstName, etc.) and stamp firstSubmittedAt once
       try {
+        console.log("[Finalize Submit]", finalized.isChild);
         const metaPayload = {
           action: "submitMeta",
           firstName: finalized.firstName || "",

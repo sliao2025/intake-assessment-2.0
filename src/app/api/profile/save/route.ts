@@ -42,6 +42,7 @@ export async function POST(req: Request) {
       highestDegree,
       isEmployed,
       version,
+      isChild,
       // optionally allow passing the full JSON to create row if it doesn't exist
       profile: profileJson,
     } = body;
@@ -58,6 +59,7 @@ export async function POST(req: Request) {
       sexualOrientation: sexualOrientation ?? null,
       highestDegree: highestDegree ?? null,
       isEmployed: typeof isEmployed === "boolean" ? isEmployed : null,
+      isChild: typeof isChild === "boolean" ? isChild : null,
     };
 
     // Note: firstSubmittedAt is set in /api/notify/assessment-complete when intake finishes
