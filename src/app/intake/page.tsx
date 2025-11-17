@@ -1107,6 +1107,7 @@ export default function Page() {
         overflowX: "hidden",
         overscrollBehaviorX: "none",
         touchAction: "pan-y",
+        paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
       <ConfettiBurst show={burst} />
@@ -1122,7 +1123,7 @@ export default function Page() {
         progressPct={progressPct}
       />
       <div
-        className="relative z-10 mx-auto max-w-4xl px-4 py-8"
+        className="relative z-10 mx-auto max-w-4xl px-4 py-4 md:py-8 pb-8"
         style={{ scrollbarGutter: "stable both-edges" }}
       >
         <motion.div
@@ -1132,12 +1133,9 @@ export default function Page() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -15, opacity: 0 }}
           transition={{ duration: 0.8, ease }}
-          className="w-full rounded-4xl  border border-gray-200 bg-white/70 backdrop-blur-sm px-6 py-6  md:py-8 shadow-md max-h-[70vh] scrollable-div overflow-y-auto overflow-x-hidden box-border overscroll-y-contain"
+          className="w-full rounded-4xl border border-gray-200 bg-white/70 backdrop-blur-sm px-6 py-6 md:py-8 shadow-md"
           style={{
             WebkitOverflowScrolling: "touch",
-            scrollbarGutter: "stable both-edges",
-            overscrollBehaviorX: "none",
-            touchAction: "pan-y",
           }}
         >
           {submitted && showSubmittedUI && (
