@@ -91,7 +91,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
         className={`${sidebarWidth} bg-white border-r border-gray-200 flex flex-col transition-all duration-200 relative`}
       >
         {/* Logo/Title */}
-        <div className="p-4 border-b flex items-center gap-2 border-gray-200">
+        <div className="relative p-4 border-b flex items-center gap-2 border-gray-200">
           <div className="flex items-center gap-2">
             <Image
               src={logo}
@@ -107,6 +107,14 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
               </h1>
             )}
           </div>
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className="absolute right-0 top-full translate-y-[-50%] translate-x-1/2 p-1.5 rounded-full border border-gray-200 bg-white transition-colors hover:bg-gray-50"
+            aria-label={isExpanded ? "Shrink sidebar" : "Expand sidebar"}
+          >
+            {toggleIcon}
+          </button>
         </div>
 
         {/* Navigation */}
@@ -116,16 +124,26 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
             const isActive =
               pathname === item.href || pathname?.startsWith(item.href + "/");
 
+            const hoverBg = `${intPsychTheme.secondary}1a`;
+            const activeStyle = isActive
+              ? {
+                  backgroundColor: `${intPsychTheme.secondary}33`,
+                  color: intPsychTheme.text,
+                  ["--portal-hover-bg" as any]: hoverBg,
+                }
+              : { ["--portal-hover-bg" as any]: hoverBg };
+
             return (
               <Link
                 key={item.key}
                 href={item.href}
+                style={activeStyle}
                 className={`flex items-center ${
                   isExpanded ? "gap-3 px-3" : "justify-center px-0"
                 } py-2.5 rounded-lg text-sm font-thin transition-colors ${
                   isActive
-                    ? "bg-[#E8F4EF] text-gray-900"
-                    : "text-gray-600 hover:bg-[#E8F4EF]/50 hover:text-gray-900"
+                    ? "text-gray-900"
+                    : "text-gray-600 hover:bg-[var(--portal-hover-bg)] hover:text-[#113e60]"
                 }`}
               >
                 <Icon className="w-5 h-5" />
@@ -134,15 +152,6 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
             );
           })}
         </nav>
-
-        <button
-          type="button"
-          onClick={toggleSidebar}
-          className="absolute top-1/20 right-0 -translate-y-1/2 translate-x-1/2 p-1.5 rounded-full border border-gray-200 bg-white transition-colors hover:bg-gray-50"
-          aria-label={isExpanded ? "Shrink sidebar" : "Expand sidebar"}
-        >
-          {toggleIcon}
-        </button>
 
         {/* User Profile */}
         <div className="p-4 border-t border-gray-200">
