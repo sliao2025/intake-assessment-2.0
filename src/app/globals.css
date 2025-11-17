@@ -16,18 +16,18 @@
 
 @media (min-width: 768px) {
   .scrollable-div::-webkit-scrollbar {
-    width: 10px;
+    width: 8px;
   }
   .scrollable-div::-webkit-scrollbar-track {
     background: transparent;
   }
   .scrollable-div::-webkit-scrollbar-track-piece:start {
     background: transparent;
-    margin-top: 16px;
+    margin-top: 25px;
   }
   .scrollable-div::-webkit-scrollbar-track-piece:end {
     background: transparent;
-    margin-bottom: 16px;
+    margin-bottom: 25px;
   }
   .scrollable-div::-webkit-scrollbar-thumb {
     background-color: #ffa440;
