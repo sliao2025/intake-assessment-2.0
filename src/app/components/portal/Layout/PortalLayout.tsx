@@ -53,6 +53,27 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
     <ChevronsRight className="w-4 h-4" />
   );
 
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = window.localStorage.getItem("portalSidebarExpanded");
+    if (saved !== null) {
+      setIsExpanded(saved === "true");
+    }
+  }, []);
+
+  const toggleSidebar = () => {
+    setIsExpanded((prev) => {
+      const next = !prev;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(
+          "portalSidebarExpanded",
+          next ? "true" : "false"
+        );
+      }
+      return next;
+    });
+  };
+
   const getInitials = (name?: string | null) => {
     if (!name) return "U";
     return name
@@ -116,7 +137,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
 
         <button
           type="button"
-          onClick={() => setIsExpanded((prev) => !prev)}
+          onClick={toggleSidebar}
           className="absolute top-1/20 right-0 -translate-y-1/2 translate-x-1/2 p-1.5 rounded-full border border-gray-200 bg-white transition-colors hover:bg-gray-50"
           aria-label={isExpanded ? "Shrink sidebar" : "Expand sidebar"}
         >
