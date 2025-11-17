@@ -26,7 +26,7 @@ export default function SignInPage() {
     const t = setTimeout(() => setErrorTip(null), 3500);
     return () => clearTimeout(t);
   }, [errorTip]);
-  const callbackUrl = "/intake";
+  const callbackUrl = "/";
 
   return (
     <div

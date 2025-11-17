@@ -98,12 +98,27 @@ export const authOptions: NextAuthOptions = {
         token.id = (user as any).id ?? token.id;
         token.role = (user as any).role ?? token.role ?? "user";
       }
+
+      if (token.id && (!token.intakeFinished || !token.clinicId)) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { intakeFinished: true, clinicId: true },
+        });
+        if (dbUser) {
+          token.intakeFinished = dbUser.intakeFinished;
+          token.clinicId = dbUser.clinicId;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
       if (session.user && token?.id) {
         session.user.id = token.id as string;
         session.user.role = (token.role as "guest" | "user") ?? "user";
+        session.user.intakeFinished =
+          (token.intakeFinished as boolean) ?? false;
+        session.user.clinicId = token.clinicId as string;
       }
       return session;
     },

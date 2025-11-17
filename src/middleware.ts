@@ -3,46 +3,62 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-const protectedPrefixes = ["/intake", "/sessions"];
+const guardSignIn = (req: NextRequest, callback: string) => {
+  const url = new URL("/auth/signin", req.url);
+  url.searchParams.set("callbackUrl", callback);
+  return NextResponse.redirect(url);
+};
 
-export async function middleware(req: NextRequest) {
-  const { pathname, search } = req.nextUrl;
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  const guest = req.cookies.get("guest")?.value === "1";
-
-  // Handle the root path explicitly
-  if (pathname === "/") {
-    const url = new URL(token || guest ? "/intake" : "/auth/signin", req.url);
-    if (!(token || guest)) url.searchParams.set("callbackUrl", "/intake");
-    const resp = NextResponse.redirect(url);
-    if (token && guest) {
-      resp.cookies.set("guest", "", { path: "/", maxAge: 0 });
-      resp.cookies.delete("guest");
-    }
-    return resp;
-  }
-
-  // Guard protected areas
-  const isProtected = protectedPrefixes.some((p) => pathname.startsWith(p));
-  if (isProtected && !token && !guest) {
-    const signInUrl = new URL("/auth/signin", req.url);
-    signInUrl.searchParams.set("callbackUrl", `${pathname}${search || ""}`);
-    const resp = NextResponse.redirect(signInUrl);
-    if (token && guest) {
-      resp.cookies.set("guest", "", { path: "/", maxAge: 0 });
-      resp.cookies.delete("guest");
-    }
-    return resp;
-  }
-
-  const resp = NextResponse.next();
-  if (guest) {
+const handleGuest = (req: NextRequest, resp: NextResponse) => {
+  if (req.cookies.get("guest")) {
     resp.cookies.set("guest", "", { path: "/", maxAge: 0 });
     resp.cookies.delete("guest");
   }
   return resp;
+};
+
+export async function middleware(req: NextRequest) {
+  const { pathname, search } = req.nextUrl;
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const guestMode = req.cookies.get("guest")?.value === "1";
+  const hasToken = Boolean(token);
+  const intakeFinished = token?.intakeFinished ?? false;
+  console.log("[Middleware] token", token);
+
+  if (pathname === "/") {
+    if (!hasToken && !guestMode) {
+      return guardSignIn(req, "/intake");
+    }
+    const target = intakeFinished ? "/dashboard" : "/intake";
+    const resp = NextResponse.redirect(new URL(target, req.url));
+    return handleGuest(req, resp);
+  }
+
+  if (pathname.startsWith("/intake")) {
+    if (!hasToken && !guestMode) {
+      return guardSignIn(req, `${pathname}${search || ""}`);
+    }
+    if (intakeFinished && hasToken) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+  }
+
+  if (pathname.startsWith("/dashboard")) {
+    if (!hasToken && !guestMode) {
+      return guardSignIn(req, `${pathname}${search || ""}`);
+    }
+    if (!intakeFinished && hasToken) {
+      return NextResponse.redirect(new URL("/intake", req.url));
+    }
+  }
+
+  if (pathname.startsWith("/sessions") && !hasToken) {
+    return guardSignIn(req, `${pathname}${search || ""}`);
+  }
+
+  return handleGuest(req, NextResponse.next());
 }
 
 export const config = {
-  matcher: ["/", "/intake/:path*", "/sessions/:path*"],
+  matcher: ["/", "/intake/:path*", "/dashboard/:path*", "/sessions/:path*"],
 };
