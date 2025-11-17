@@ -9,33 +9,26 @@
   --foreground: #171717;
 }
 
-.scrollable-div {
-  scrollbar-width: thin;
-  scrollbar-color: #ffa440 transparent;
+.scrollable-div::-webkit-scrollbar {
+  width: 8px;
 }
-
-@media (min-width: 768px) {
-  .scrollable-div::-webkit-scrollbar {
-    width: 8px;
-  }
-  .scrollable-div::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .scrollable-div::-webkit-scrollbar-track-piece:start {
-    background: transparent;
-    margin-top: 25px;
-  }
-  .scrollable-div::-webkit-scrollbar-track-piece:end {
-    background: transparent;
-    margin-bottom: 25px;
-  }
-  .scrollable-div::-webkit-scrollbar-thumb {
-    background-color: #ffa440;
-    border-radius: 9999px; /* fully rounded */
-  }
-  .scrollable-div::-webkit-scrollbar-thumb:hover {
-    background-color: #e18f38;
-  }
+.scrollable-div::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollable-div::-webkit-scrollbar-track-piece:start {
+  background: transparent;
+  margin-top: 25px;
+}
+.scrollable-div::-webkit-scrollbar-track-piece:end {
+  background: transparent;
+  margin-bottom: 25px;
+}
+.scrollable-div::-webkit-scrollbar-thumb {
+  background-color: #ffa440;
+  border-radius: 9999px; /* fully rounded */
+}
+.scrollable-div::-webkit-scrollbar-thumb:hover {
+  background-color: #e18f38;
 }
 
 @theme inline {
@@ -55,7 +48,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-roboto, "Roboto", sans-serif);
+  font-family: Arial, Helvetica, sans-serif;
 }
 :root {
   /* Fallback page background used by theme-color and overscroll areas */
