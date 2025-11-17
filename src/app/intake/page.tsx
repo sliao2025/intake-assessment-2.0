@@ -1133,9 +1133,10 @@ export default function Page() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -15, opacity: 0 }}
           transition={{ duration: 0.8, ease }}
-          className="w-full rounded-4xl border border-gray-200 bg-white/70 backdrop-blur-sm px-6 py-6 md:py-8 shadow-md"
+          className="w-full rounded-4xl border border-gray-200 bg-white/70 backdrop-blur-sm px-6 py-6 md:py-8 shadow-md md:max-h-[70vh] md:overflow-y-auto md:overflow-x-hidden md:overscroll-y-contain"
           style={{
             WebkitOverflowScrolling: "touch",
+            scrollbarGutter: "stable both-edges",
           }}
         >
           {submitted && showSubmittedUI && (
