@@ -73,7 +73,6 @@ export async function POST(request: NextRequest) {
     // Create assessment response
     const assessment = await prisma.assessmentResponse.create({
       data: {
-        id: crypto.randomUUID(),
         userId: session.user.id,
         clinicId: session.user.clinicId,
         assessmentType: assessmentType.toLowerCase(),
