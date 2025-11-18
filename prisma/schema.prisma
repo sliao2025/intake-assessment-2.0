@@ -41,6 +41,7 @@ model User {
   guest              Boolean?             @default(false)
   intakeFinished     Boolean              @default(false)
   clinicId           String
+  clinician          String               @default("")
   accounts           Account[]
   AssessmentResponse AssessmentResponse[]
   JournalEntry       JournalEntry[]

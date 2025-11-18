@@ -4,18 +4,39 @@ import {
   Mic,
   RotateCcw,
   FileAudio,
+  Check,
+  ChevronDown,
 } from "lucide-react";
 import type { Profile } from "../../lib/types/types";
 import type { StateSetter } from "../../lib/types/types";
 import { welcomeMessages } from "../messages";
 import StepTitle from "../StepTitle";
 import { Session } from "next-auth";
-import React from "react";
-import { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   makeDefaultAdultProfile,
   makeDefaultChildProfile,
 } from "../../intake/page";
+import {
+  Field,
+  Listbox,
+  ListboxButton,
+  ListboxOptions,
+  ListboxOption,
+} from "@headlessui/react";
+
+const CLINICIAN_NAMES = [
+  "Ryan Sultan",
+  "Zurama Rodriguez ",
+  "Ryan Mather",
+  "Alexandra Christodoulou",
+  "Omarr Savage",
+  "Luisa Tinapay",
+  "Shayna Feuer",
+  "Jordan Arbelaez",
+  "Jennifer Ray",
+];
 
 export default function WelcomeSection({
   title,
@@ -30,6 +51,44 @@ export default function WelcomeSection({
   session: Session;
   setProfile: StateSetter<Profile>;
 }) {
+  const [dropdownPosition, setDropdownPosition] = useState<{
+    top: number;
+    left: number;
+    width: number;
+  } | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [clinicianName, setClinicianName] = useState<string>("");
+
+  const updateDropdownPosition = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 8, // 8px = mt-2
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  };
+
+  const saveClinician = async (clinician: string) => {
+    try {
+      const response = await fetch("/api/profile/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "updateClinician",
+          clinician,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to save clinician");
+      }
+    } catch (error) {
+      console.error("Error saving clinician:", error);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <StepTitle
@@ -85,14 +144,112 @@ export default function WelcomeSection({
             >
               <div className="font-medium text-slate-900">Child (under 18)</div>
               <div className="text-sm text-slate-600">
-                I'm a parent/guardian completing a child intake.
+                I'm a parent/guardian or child completing an intake.
               </div>
             </button>
+          </div>
+          <div className="mt-4">
+            <h3 className="font-semibold text-slate-900">
+              Who's your clinician?
+            </h3>
+            <Field className="mt-3" title="Who's your clinician?">
+              <Listbox
+                value={clinicianName || ""}
+                onChange={(val: string) => {
+                  setClinicianName(val);
+                  setDropdownPosition(null);
+                  saveClinician(val);
+                }}
+              >
+                {({ open }) => {
+                  // Update position when dropdown opens
+                  React.useEffect(() => {
+                    if (open) {
+                      // Small delay to ensure button is rendered
+                      requestAnimationFrame(() => {
+                        updateDropdownPosition();
+                      });
+                    } else {
+                      setDropdownPosition(null);
+                    }
+                  }, [open]);
+
+                  return (
+                    <div className="relative">
+                      <ListboxButton
+                        ref={buttonRef}
+                        className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900"
+                      >
+                        {clinicianName ? (
+                          <span className="text-slate-900">
+                            {clinicianName}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400">
+                            Your assigned clinician…
+                          </span>
+                        )}
+                        <ChevronDown
+                          className="group pointer-events-none absolute top-3 right-2.5 size-4"
+                          aria-hidden="true"
+                        />
+                      </ListboxButton>
+
+                      {open && dropdownPosition && typeof window !== "undefined"
+                        ? createPortal(
+                            <ListboxOptions
+                              static
+                              className="fixed z-[9999] mt-2 max-h-60 overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none"
+                              style={{
+                                top: `${dropdownPosition.top}px`,
+                                left: `${dropdownPosition.left}px`,
+                                width: `${dropdownPosition.width}px`,
+                              }}
+                            >
+                              {CLINICIAN_NAMES.map((name) => (
+                                <ListboxOption
+                                  key={name}
+                                  value={name}
+                                  as={React.Fragment}
+                                >
+                                  {({ active, selected }) => (
+                                    <li
+                                      className={`${
+                                        active ? "bg-slate-100" : "bg-white"
+                                      } relative cursor-pointer select-none py-2 pl-4 pr-10`}
+                                    >
+                                      <span
+                                        className={`${
+                                          selected
+                                            ? "font-medium text-slate-900"
+                                            : "font-normal text-slate-700"
+                                        } block truncate`}
+                                      >
+                                        {name}
+                                      </span>
+                                      {selected && (
+                                        <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                                          <Check />
+                                        </span>
+                                      )}
+                                    </li>
+                                  )}
+                                </ListboxOption>
+                              ))}
+                            </ListboxOptions>,
+                            document.body
+                          )
+                        : null}
+                    </div>
+                  );
+                }}
+              </Listbox>
+            </Field>
           </div>
         </div>
       )}
 
-      {profile.isChild !== null && (
+      {profile.isChild !== null && clinicianName !== "" && (
         <>
           {/* At-a-glance cards */}
           <div className="grid sm:grid-cols-2 gap-4">

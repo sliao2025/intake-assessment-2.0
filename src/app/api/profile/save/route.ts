@@ -4,7 +4,7 @@ import { prisma } from "../../../lib/prisma";
 
 // Default clinic ID for Integrative Psych (can be overridden by env var)
 const DEFAULT_CLINIC_ID =
-  process.env.DEFAULT_CLINIC_ID || "uvfoatdxzh7c1s395kc61u7i";
+  process.env.DEFAULT_CLINIC_ID || "cmh9hy3kf000038epofp8cutx";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -86,6 +86,58 @@ export async function POST(req: Request) {
     }
 
     return Response.json({ ok: true, mode: "submitMeta" });
+  }
+
+  // Mode C: update clinician field on User table
+  if (body.action === "updateClinician") {
+    const { clinician } = body;
+
+    if (!clinician || typeof clinician !== "string") {
+      return Response.json(
+        { error: "clinician is required and must be a string" },
+        { status: 400 }
+      );
+    }
+
+    if (!userId) {
+      console.error("[updateClinician] No userId in session");
+      return Response.json(
+        { error: "User ID not found in session" },
+        { status: 401 }
+      );
+    }
+
+    try {
+      // Use upsert to handle both create and update cases
+      // If user doesn't exist, create it with required fields
+      await prisma.user.upsert({
+        where: { id: userId },
+        update: { clinician: clinician },
+        create: {
+          id: userId,
+          clinician: clinician,
+          clinicId: DEFAULT_CLINIC_ID,
+          intakeFinished: false,
+          // Optional fields from session if available
+          email: (session.user as any).email ?? null,
+          name: session.user?.name ?? null,
+          image: (session.user as any).image ?? null,
+        },
+      });
+
+      return Response.json({ ok: true, mode: "updateClinician" });
+    } catch (error: any) {
+      console.error("[updateClinician] Failed to update clinician:", {
+        userId,
+        error: error.message,
+        code: error.code,
+      });
+
+      return Response.json(
+        { error: "Failed to update clinician" },
+        { status: 500 }
+      );
+    }
   }
 
   return new Response("Unsupported action", { status: 400 });
