@@ -331,10 +331,7 @@ export default function JournalPage() {
                   }}
                   disabled={!newContent.trim() || selectedMood === null}
                   style={{
-                    backgroundColor:
-                      !newContent.trim() || selectedMood === null
-                        ? "#ffd9b3"
-                        : intPsychTheme.secondary,
+                    backgroundColor: intPsychTheme.secondary,
                     borderColor:
                       !newContent.trim() || selectedMood === null
                         ? "#ffc994"

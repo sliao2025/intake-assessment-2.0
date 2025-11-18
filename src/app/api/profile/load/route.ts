@@ -16,8 +16,17 @@ export async function GET() {
       updatedAt: true,
     },
   });
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      clinician: true,
+    },
+  });
+
   return Response.json({
     profile: row?.json ?? null,
     version: row?.version ?? null,
+    clinician: user?.clinician ?? null,
   });
 }

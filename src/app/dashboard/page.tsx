@@ -3,7 +3,18 @@
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import PortalLayout from "../components/portal/Layout/PortalLayout";
-import { Leaf, TrendingDown, TrendingUp, ArrowRight } from "lucide-react";
+import {
+  Leaf,
+  TrendingDown,
+  TrendingUp,
+  ArrowRight,
+  Sun,
+  Cloud,
+  CloudRain,
+  CloudLightning,
+  Snowflake,
+  CloudDrizzle,
+} from "lucide-react";
 import { intPsychTheme } from "../components/theme";
 import { DM_Serif_Text, Roboto } from "next/font/google";
 
@@ -42,6 +53,12 @@ export default function DashboardPage() {
     null
   );
   const [loading, setLoading] = useState(true);
+  const [clinician, setClinician] = useState<string | null>(null);
+  const [weather, setWeather] = useState<{
+    temp: number;
+    condition: string;
+    icon: string;
+  } | null>(null);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -58,7 +75,51 @@ export default function DashboardPage() {
       }
     };
 
+    const fetchClinician = async () => {
+      try {
+        const response = await fetch("/api/profile/load");
+        if (response.ok) {
+          const data = await response.json();
+          setClinician(data.clinician);
+        }
+      } catch (error) {
+        console.error("Failed to load clinician:", error);
+      }
+    };
+
+    const fetchWeather = async (lat: number, lon: number) => {
+      try {
+        const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
+        if (response.ok) {
+          const data = await response.json();
+          setWeather(data);
+        }
+      } catch (error) {
+        console.error("Failed to load weather:", error);
+      }
+    };
+
+    const getLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            fetchWeather(position.coords.latitude, position.coords.longitude);
+          },
+          (error) => {
+            console.error("Geolocation error:", error);
+            // Fallback to a default location (e.g., New York) if geolocation fails
+            fetchWeather(40.7128, -74.006);
+          }
+        );
+      } else {
+        // Fallback if geolocation is not supported
+        fetchWeather(40.7128, -74.006);
+      }
+    };
+
     fetchDashboardData();
+    fetchClinician();
+    getLocation();
   }, []);
 
   const firstName = session?.user?.name?.split(" ")[0] || "back";
@@ -75,18 +136,108 @@ export default function DashboardPage() {
     );
   }
 
+  const getWeatherIcon = (iconName: string) => {
+    const iconProps = { className: "w-5 h-5" };
+    switch (iconName) {
+      case "sun":
+        return <Sun {...iconProps} />;
+      case "cloud":
+        return <Cloud {...iconProps} />;
+      case "cloud-rain":
+        return <CloudRain {...iconProps} />;
+      case "cloud-lightning":
+        return <CloudLightning {...iconProps} />;
+      case "snowflake":
+        return <Snowflake {...iconProps} />;
+      case "cloud-drizzle":
+        return <CloudDrizzle {...iconProps} />;
+      default:
+        return <Cloud {...iconProps} />;
+    }
+  };
+
+  const getWeatherGreeting = (
+    weather: { condition: string; icon: string } | null
+  ): string => {
+    if (!weather) {
+      return "";
+    }
+
+    const condition = weather.condition.toLowerCase();
+    const icon = weather.icon;
+
+    // Custom weather messages - direct and actionable (4 words max)
+    if (icon === "sun" || condition === "clear") {
+      return ", enjoy the sunshine";
+    } else if (icon === "cloud-rain" || condition === "rain") {
+      return ", don't forget an umbrella";
+    } else if (icon === "snowflake" || condition === "snow") {
+      return ", bundle up today";
+    } else if (icon === "cloud-lightning" || condition === "thunderstorm") {
+      return ", looks like a stormy day";
+    } else if (
+      icon === "cloud-drizzle" ||
+      condition === "drizzle" ||
+      condition === "foggy"
+    ) {
+      return ", enjoy the misty day";
+    } else if (icon === "cloud" || condition === "cloudy") {
+      return ", stay cozy today";
+    }
+
+    // Fallback
+    return "";
+  };
+
+  const weatherGreeting = getWeatherGreeting(weather);
+
   return (
     <PortalLayout>
       <div className="min-h-screen bg-[#E8F5EE] p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header - Exact Figma */}
-          <div className="mb-6">
-            <h1
-              style={{ color: intPsychTheme.primary }}
-              className={`${dm_serif.className} text-3xl mb-2`}
-            >
-              Welcome, {firstName}
-            </h1>
+          <div className="mb-6 flex items-start justify-between">
+            <div>
+              <h1
+                style={{ color: intPsychTheme.primary }}
+                className={`${dm_serif.className} text-3xl mb-0`}
+              >
+                Welcome {firstName}
+                {weatherGreeting && `${weatherGreeting}.`}
+              </h1>
+              {clinician && (
+                <p
+                  style={{ color: intPsychTheme.textMuted }}
+                  className=" text-sm"
+                >
+                  Your clinician:{" "}
+                  <span className="font-medium">{clinician}</span>
+                </p>
+              )}
+            </div>
+            {/* Weather Widget - Upper Right */}
+            {weather && (
+              <div
+                style={{ color: intPsychTheme.primary }}
+                className="flex items-center gap-2  rounded-xl px-4 py-2 "
+              >
+                {getWeatherIcon(weather.icon)}
+                <div className="flex flex-col">
+                  <span
+                    style={{ color: intPsychTheme.primary }}
+                    className={`font-medium font-serif text-lg`}
+                  >
+                    {weather.temp}°F
+                  </span>
+                  <span
+                    style={{ color: intPsychTheme.primary }}
+                    className="text-xs capitalize"
+                  >
+                    {weather.condition.toLowerCase()}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Main Garden and Psychoeducation Section - Exact Figma layout */}
@@ -96,7 +247,7 @@ export default function DashboardPage() {
           >
             {/* Garden Illustration */}
             <div className="lg:col-span-2">
-              <div className="bg-[#E8F0E6] rounded-3xl p-6 h-full shadow-[0_1px_2px_rgba(15,23,42,0.08)]">
+              <div className="bg-white rounded-3xl p-6 h-full shadow-[0_1px_2px_rgba(15,23,42,0.08)]">
                 <div className="bg-[#D4E9E7] rounded-2xl overflow-hidden h-[400px] shadow-[inset_0_0_0_1px_rgba(43,78,107,0.1)]">
                   {/* <GardenIllustration /> */}
                 </div>
@@ -107,11 +258,19 @@ export default function DashboardPage() {
             <div className="lg:col-span-1">
               <div className="bg-white rounded-3xl p-6 h-full shadow-[0_1px_2px_rgba(15,23,42,0.08)] flex flex-col">
                 <div className="mb-4">
-                  <div className={`${roboto.className} text-gray-500 mb-2`}>
+                  <div
+                    className={`${roboto.className} mb-2`}
+                    style={{ color: intPsychTheme.textMuted }}
+                  >
                     PSYCHOEDUCATION
                   </div>
-                  <h2 className="text-gray-900 mb-4">Behavioral Activation</h2>
-                  <p className="text-gray-700 mb-6">
+                  <h2 className="mb-4" style={{ color: intPsychTheme.primary }}>
+                    Behavioral Activation
+                  </h2>
+                  <p
+                    className="mb-6"
+                    style={{ color: intPsychTheme.textMuted }}
+                  >
                     Behavioral activation—scheduling enjoyable, meaningful
                     activities—is a powerful tool against low mood. To start,
                     recall some past pleasant activities (such as hobbies or
@@ -135,8 +294,10 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             {/* Assessments Completed */}
             <div className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
-              <h3 className="text-gray-600 mb-2">Assessments Completed</h3>
-              <div className="text-gray-900 mb-2">
+              <h3 className="mb-2" style={{ color: intPsychTheme.primary }}>
+                Assessments Completed
+              </h3>
+              <div className="mb-2" style={{ color: intPsychTheme.textMuted }}>
                 {dashboardData?.assessments.completed || 0}/
                 {dashboardData?.assessments.total || 0}
               </div>
@@ -156,18 +317,22 @@ export default function DashboardPage() {
 
             {/* Current Mood */}
             <div className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
-              <h3 className="text-gray-600 mb-2">Current Mood</h3>
-              <div className="text-gray-900 mb-2">
+              <h3 className="mb-2" style={{ color: intPsychTheme.primary }}>
+                Current Mood
+              </h3>
+              <div className="mb-2" style={{ color: intPsychTheme.textMuted }}>
                 {dashboardData?.mood.current || "Not set"}
               </div>
-              <div className="text-gray-500">
+              <div style={{ color: intPsychTheme.textMuted }}>
                 Last updated: {dashboardData?.mood.lastUpdated || "Never"}
               </div>
             </div>
 
             {/* Symptom Severity */}
             <div className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
-              <h3 className="text-gray-600 mb-2">Symptom Severity</h3>
+              <h3 className="mb-2" style={{ color: intPsychTheme.primary }}>
+                Symptom Severity
+              </h3>
               <div className="relative w-32 h-32 mx-auto">
                 <svg className="transform -rotate-90" viewBox="0 0 120 120">
                   <circle
@@ -189,15 +354,18 @@ export default function DashboardPage() {
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <div className="text-gray-900">
+                  <div style={{ color: intPsychTheme.textMuted }}>
                     {dashboardData?.severity.percentage || 0}%
                   </div>
-                  <div className="text-gray-500">
+                  <div style={{ color: intPsychTheme.textMuted }}>
                     {dashboardData?.severity.level || "Minimal"}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center justify-between mt-4 text-gray-600">
+              <div
+                className="flex items-center justify-between mt-4"
+                style={{ color: intPsychTheme.textMuted }}
+              >
                 <span>Minimal</span>
                 <span>Severe</span>
               </div>
@@ -205,7 +373,9 @@ export default function DashboardPage() {
 
             {/* Trends */}
             <div className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
-              <h3 className="text-gray-600 mb-2">Trends</h3>
+              <h3 className="mb-2" style={{ color: intPsychTheme.primary }}>
+                Trends
+              </h3>
               <div className="space-y-2">
                 {dashboardData?.assessments.recent
                   ?.slice(0, 3)
@@ -214,7 +384,9 @@ export default function DashboardPage() {
                       key={idx}
                       className="flex items-center justify-between"
                     >
-                      <span className="text-gray-700">{assessment.name}</span>
+                      <span style={{ color: intPsychTheme.textMuted }}>
+                        {assessment.name}
+                      </span>
                       {assessment.change < 0 ? (
                         <TrendingDown className="w-4 h-4 text-[#7FB885]" />
                       ) : (
@@ -223,7 +395,10 @@ export default function DashboardPage() {
                     </div>
                   ))}
               </div>
-              <button className="w-full mt-4 text-gray-600 py-2">
+              <button
+                className="w-full mt-4 py-2"
+                style={{ color: intPsychTheme.textMuted }}
+              >
                 See Care Path Suggestions
               </button>
             </div>
@@ -231,7 +406,9 @@ export default function DashboardPage() {
 
           {/* Clinical Assessments - Updated to Figma styling */}
           <div className="mb-6">
-            <h2 className="text-gray-900 mb-4">Recent Assessments</h2>
+            <h2 className="mb-4" style={{ color: intPsychTheme.primary }}>
+              Recent Assessments
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {dashboardData?.assessments.recent
                 ?.slice(0, 3)
@@ -242,8 +419,10 @@ export default function DashboardPage() {
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <h3 className="text-gray-900">{assessment.name}</h3>
-                        <p className="text-gray-500">
+                        <h3 style={{ color: intPsychTheme.primary }}>
+                          {assessment.name}
+                        </h3>
+                        <p style={{ color: intPsychTheme.textMuted }}>
                           Depression/Anxiety Scale
                         </p>
                       </div>
@@ -259,7 +438,9 @@ export default function DashboardPage() {
                     </div>
                     <div className="space-y-4">
                       <div className="flex items-end justify-between">
-                        <div className="text-gray-900">{assessment.score}</div>
+                        <div style={{ color: intPsychTheme.textMuted }}>
+                          {assessment.score}
+                        </div>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
@@ -267,7 +448,10 @@ export default function DashboardPage() {
                           style={{ width: "60%" }}
                         />
                       </div>
-                      <div className="flex items-center gap-2 text-gray-600">
+                      <div
+                        className="flex items-center gap-2"
+                        style={{ color: intPsychTheme.textMuted }}
+                      >
                         {assessment.change < 0 ? (
                           <TrendingDown className="w-4 h-4 text-[#7FB885]" />
                         ) : (

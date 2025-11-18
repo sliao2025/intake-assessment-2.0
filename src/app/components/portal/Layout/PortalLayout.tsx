@@ -46,7 +46,7 @@ const navigationItems = [
   },
   {
     key: "psychoeducation",
-    label: "Psycho Education",
+    label: "Psychoeducation",
     icon: Brain,
     href: "/psychoeducation",
   },
@@ -67,9 +67,9 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
 
   const sidebarWidth = isExpanded ? "w-64" : "w-20";
   const toggleIcon = isExpanded ? (
-    <ChevronsLeft className="w-4 h-4" />
+    <ChevronsLeft className="text-white w-4 h-4" />
   ) : (
-    <ChevronsRight className="w-4 h-4" />
+    <ChevronsRight className="text-white w-4 h-4" />
   );
 
   const toggleSidebar = () => {
@@ -121,7 +121,8 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
           <button
             type="button"
             onClick={toggleSidebar}
-            className="absolute right-0 top-full translate-y-[-50%] translate-x-1/2 p-1.5 rounded-full border border-gray-200 bg-white transition-colors hover:bg-gray-50"
+            style={{ backgroundColor: intPsychTheme.primary }}
+            className="absolute right-0 top-full translate-y-[-50%] translate-x-1/2 p-1.5 rounded-full border border-gray-200 transition-colors hover:bg-gray-50"
             aria-label={isExpanded ? "Shrink sidebar" : "Expand sidebar"}
           >
             {toggleIcon}
@@ -129,37 +130,48 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-2 py-4 space-y-1">
+        <nav className="flex-1 px-3 py-3 space-y-1">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive =
               pathname === item.href || pathname?.startsWith(item.href + "/");
 
-            const hoverBg = `${intPsychTheme.secondary}1a`;
+            const hoverBg = `${intPsychTheme.secondaryLight}`;
             const activeStyle = isActive
               ? {
-                  backgroundColor: `${intPsychTheme.secondary}33`,
-                  color: intPsychTheme.text,
+                  backgroundColor: `${intPsychTheme.secondaryLight}`,
+                  color: intPsychTheme.secondaryDark,
                   ["--portal-hover-bg" as any]: hoverBg,
                 }
               : { ["--portal-hover-bg" as any]: hoverBg };
 
             return (
-              <Link
-                key={item.key}
-                href={item.href}
-                style={activeStyle}
-                className={`flex items-center ${
-                  isExpanded ? "gap-3 px-3" : "justify-center px-0"
-                } py-2.5 rounded-lg text-sm font-thin transition-colors ${
-                  isActive
-                    ? "text-gray-900"
-                    : "text-gray-600 hover:bg-[var(--portal-hover-bg)] hover:text-[#113e60]"
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                {isExpanded && item.label}
-              </Link>
+              <div key={item.key} className="relative group">
+                <Link
+                  href={item.href}
+                  style={activeStyle}
+                  className={`flex items-center ${
+                    isExpanded ? "gap-3 px-3" : "justify-center px-0"
+                  } py-2.5 rounded-lg text-md font-thin transition-colors ${
+                    isActive
+                      ? ""
+                      : `text-[${intPsychTheme.primary}] hover:bg-[var(--portal-hover-bg)] hover:text-[${intPsychTheme.primary}]`
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  {isExpanded && item.label}
+                </Link>
+                {/* Tooltip - show on hover, especially useful when sidebar is collapsed */}
+                <div
+                  style={{ backgroundColor: intPsychTheme.primary }}
+                  className={`absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-2  text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-250 delay-200 pointer-events-none whitespace-nowrap z-50 shadow-lg ${
+                    isExpanded ? "hidden" : ""
+                  }`}
+                >
+                  {item.label}
+                  <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></div>
+                </div>
+              </div>
             );
           })}
         </nav>
