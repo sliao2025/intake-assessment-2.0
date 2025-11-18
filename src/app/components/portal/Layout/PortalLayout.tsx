@@ -136,30 +136,51 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
             const isActive =
               pathname === item.href || pathname?.startsWith(item.href + "/");
 
-            const hoverBg = `${intPsychTheme.secondaryLight}`;
-            const activeStyle = isActive
+            // Use CSS custom properties for hover states
+            const linkStyle = isActive
               ? {
-                  backgroundColor: `${intPsychTheme.secondaryLight}`,
+                  backgroundColor: intPsychTheme.secondaryLight,
                   color: intPsychTheme.secondaryDark,
-                  ["--portal-hover-bg" as any]: hoverBg,
+                  ["--hover-bg" as any]: intPsychTheme.secondaryLight,
+                  ["--hover-text" as any]: intPsychTheme.secondaryDark,
                 }
-              : { ["--portal-hover-bg" as any]: hoverBg };
+              : {
+                  ["--hover-bg" as any]: intPsychTheme.secondaryLight,
+                  ["--hover-text" as any]: intPsychTheme.secondaryDark,
+                };
 
             return (
               <div key={item.key} className="relative group">
                 <Link
                   href={item.href}
-                  style={activeStyle}
+                  style={linkStyle}
                   className={`flex items-center ${
                     isExpanded ? "gap-3 px-3" : "justify-center px-0"
-                  } py-2.5 rounded-lg text-md font-thin transition-colors ${
-                    isActive
-                      ? ""
-                      : `text-[${intPsychTheme.primary}] hover:bg-[var(--portal-hover-bg)] hover:text-[${intPsychTheme.primary}]`
+                  } py-2.5 rounded-lg text-md transition-colors ${
+                    !isActive
+                      ? "hover:bg-[var(--hover-bg)] hover:text-[var(--hover-text)]"
+                      : ""
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
-                  {isExpanded && item.label}
+                  <Icon
+                    style={{
+                      color: isActive
+                        ? intPsychTheme.secondaryDark
+                        : intPsychTheme.primary,
+                    }}
+                    className="w-5 h-5"
+                  />
+                  {isExpanded && (
+                    <span
+                      style={{
+                        color: isActive
+                          ? intPsychTheme.secondaryDark
+                          : intPsychTheme.primary,
+                      }}
+                    >
+                      {item.label}
+                    </span>
+                  )}
                 </Link>
                 {/* Tooltip - show on hover, especially useful when sidebar is collapsed */}
                 <div
