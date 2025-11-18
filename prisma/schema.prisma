@@ -39,6 +39,7 @@ model User {
   emailVerified      DateTime?
   passwordHash       String?
   guest              Boolean?             @default(false)
+  clinician          String
   intakeFinished     Boolean              @default(false)
   clinicId           String
   accounts           Account[]
