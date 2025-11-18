@@ -79,16 +79,12 @@ export async function POST(request: NextRequest) {
     // Create journal entry
     const entry = await prisma.journalEntry.create({
       data: {
-        user: {
-          connect: { id: session.user.id },
-        },
-        clinic: {
-          connect: { id: session.user.clinicId },
-        },
+        userId: session.user.id,
+        clinicId: session.user.clinicId,
         content: content.trim(),
         mood,
-        // Sentiment analysis will be added asynchronously
-        sentimentResult: Prisma.DbNull,
+        sentimentResult: null,
+        updatedAt: new Date(),
       },
       select: {
         id: true,
@@ -110,6 +106,157 @@ export async function POST(request: NextRequest) {
     console.error("Journal POST error:", error);
     return NextResponse.json(
       { error: "Failed to create journal entry" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * PATCH /api/portal/journal?id={entryId}
+ *
+ * Updates a journal entry's content for the current user
+ * Only allows updates to entries owned by the user
+ */
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const entryId = searchParams.get("id");
+
+    if (!entryId || typeof entryId !== "string") {
+      return NextResponse.json(
+        { error: "Entry ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const body = await request.json();
+    const { content } = body;
+
+    // Validate content
+    if (
+      !content ||
+      typeof content !== "string" ||
+      content.trim().length === 0
+    ) {
+      return NextResponse.json(
+        { error: "Content is required" },
+        { status: 400 }
+      );
+    }
+
+    // Verify the entry exists and belongs to the user
+    const existingEntry = await prisma.journalEntry.findUnique({
+      where: { id: entryId },
+      select: { userId: true },
+    });
+
+    if (!existingEntry) {
+      return NextResponse.json(
+        { error: "Journal entry not found" },
+        { status: 404 }
+      );
+    }
+
+    if (existingEntry.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: "Unauthorized to update this entry" },
+        { status: 403 }
+      );
+    }
+
+    // Update the entry
+    const updatedEntry = await prisma.journalEntry.update({
+      where: { id: entryId },
+      data: {
+        content: content.trim(),
+        updatedAt: new Date(),
+      },
+      select: {
+        id: true,
+        content: true,
+        mood: true,
+        sentimentResult: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      entry: updatedEntry,
+    });
+  } catch (error) {
+    console.error("Journal PATCH error:", error);
+    return NextResponse.json(
+      { error: "Failed to update journal entry" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * DELETE /api/portal/journal?id={entryId}
+ *
+ * Deletes a journal entry for the current user
+ * Only allows deletion of entries owned by the user
+ */
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const entryId = searchParams.get("id");
+
+    if (!entryId || typeof entryId !== "string") {
+      return NextResponse.json(
+        { error: "Entry ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Verify the entry exists and belongs to the user
+    const entry = await prisma.journalEntry.findUnique({
+      where: { id: entryId },
+      select: { userId: true },
+    });
+
+    if (!entry) {
+      return NextResponse.json(
+        { error: "Journal entry not found" },
+        { status: 404 }
+      );
+    }
+
+    if (entry.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: "Unauthorized to delete this entry" },
+        { status: 403 }
+      );
+    }
+
+    // Delete the entry
+    await prisma.journalEntry.delete({
+      where: { id: entryId },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Journal entry deleted successfully",
+    });
+  } catch (error) {
+    console.error("Journal DELETE error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete journal entry" },
       { status: 500 }
     );
   }

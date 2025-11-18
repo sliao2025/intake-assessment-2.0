@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Fragment } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   FileText,
@@ -13,7 +13,15 @@ import {
   User,
   ChevronsLeft,
   ChevronsRight,
+  Brain,
 } from "lucide-react";
+import {
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+  Transition,
+} from "@headlessui/react";
 import { DM_Serif_Text } from "next/font/google";
 import { intPsychTheme } from "../../theme";
 import logo from "@/assets/IP_Logo.png";
@@ -36,7 +44,12 @@ const navigationItems = [
     icon: FileText,
     href: "/assessments",
   },
-  { key: "settings", label: "Settings", icon: Settings, href: "/settings" },
+  {
+    key: "psychoeducation",
+    label: "Psycho Education",
+    icon: Brain,
+    href: "/psychoeducation",
+  },
 ];
 
 const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
@@ -44,7 +57,13 @@ const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
 export default function PortalLayout({ children }: PortalLayoutProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const [isExpanded, setIsExpanded] = useState(true);
+
+  // Initialize state from localStorage synchronously to prevent flash
+  const [isExpanded, setIsExpanded] = useState(() => {
+    if (typeof window === "undefined") return true;
+    const saved = window.localStorage.getItem("portalSidebarExpanded");
+    return saved !== null ? saved === "true" : true;
+  });
 
   const sidebarWidth = isExpanded ? "w-64" : "w-20";
   const toggleIcon = isExpanded ? (
@@ -52,14 +71,6 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
   ) : (
     <ChevronsRight className="w-4 h-4" />
   );
-
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    const saved = window.localStorage.getItem("portalSidebarExpanded");
-    if (saved !== null) {
-      setIsExpanded(saved === "true");
-    }
-  }, []);
 
   const toggleSidebar = () => {
     setIsExpanded((prev) => {
@@ -154,24 +165,90 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
         </nav>
 
         {/* User Profile */}
-        <div className="p-4 border-t border-gray-200">
-          <div
-            className={`flex items-center gap-3 ${
-              isExpanded ? "" : "justify-center"
-            }`}
-          >
-            <div className="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white font-medium">
-              {getInitials(session?.user?.name)}
+        <div className="p-4  border-t border-gray-200">
+          <Menu as="div" className="relative">
+            <div
+              className={`flex items-center gap-3 ${
+                isExpanded ? "" : "justify-center"
+              }`}
+            >
+              <MenuButton
+                className={`${
+                  isExpanded ? "" : "w-full justify-center"
+                } cursor-pointer flex items-center gap-3 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300`}
+                title={session?.user?.name ?? "Your profile"}
+                aria-label="Open profile menu"
+              >
+                <div className="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white font-medium overflow-hidden border border-gray-200">
+                  {session?.user?.image ? (
+                    <img
+                      src={session.user.image}
+                      alt={session?.user?.name ?? "Profile"}
+                      className="h-full w-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <span className="text-sm font-semibold">
+                      {getInitials(session?.user?.name)}
+                    </span>
+                  )}
+                </div>
+              </MenuButton>
+              {isExpanded && (
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {session?.user?.name || "User"}
+                  </p>
+                  <p className="text-xs text-gray-500">Patient</p>
+                </div>
+              )}
             </div>
-            {isExpanded && (
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {session?.user?.name || "User"}
-                </p>
-                <p className="text-xs text-gray-500">Patient</p>
-              </div>
-            )}
-          </div>
+
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <MenuItems
+                className={`absolute ${
+                  isExpanded ? "left-0" : "left-full ml-2"
+                } bottom-full mb-2 w-48 origin-bottom-left rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-50`}
+              >
+                <div className="py-1">
+                  <div className="px-3 py-2 text-xs text-gray-500 border-b border-gray-100">
+                    <div className="truncate font-medium text-gray-700">
+                      {session?.user?.name ?? "Signed in"}
+                    </div>
+                    {session?.user?.email?.split("-")[0] === "guest" ? (
+                      <div className="truncate italic text-gray-400">
+                        (Guest user)
+                      </div>
+                    ) : (
+                      <div className="truncate">
+                        {session?.user?.email ?? ""}
+                      </div>
+                    )}
+                  </div>
+                  <MenuItem>
+                    {({ active }) => (
+                      <button
+                        onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+                        className={`w-full text-left px-3 py-2 text-sm ${
+                          active ? "bg-gray-100 text-gray-900" : "text-gray-700"
+                        }`}
+                      >
+                        Logout
+                      </button>
+                    )}
+                  </MenuItem>
+                </div>
+              </MenuItems>
+            </Transition>
+          </Menu>
         </div>
       </aside>
 

@@ -1,12 +1,22 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import PortalLayout from "../components/portal/Layout/PortalLayout";
-import { Calendar, Smile, Frown, Meh } from "lucide-react";
+import {
+  Calendar,
+  Smile,
+  Frown,
+  Meh,
+  Trash2,
+  Eye,
+  Pencil,
+  Check,
+  X,
+} from "lucide-react";
 import { DM_Serif_Text } from "next/font/google";
 import { intPsychTheme } from "../components/theme";
 import { useSession } from "next-auth/react";
+import Drawer from "../components/Drawer";
 interface JournalEntry {
   id: string;
   content: string;
@@ -24,11 +34,15 @@ interface JournalEntry {
 const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
 export default function JournalPage() {
   const { data: session } = useSession();
-  const router = useRouter();
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [newContent, setNewContent] = useState("");
   const [selectedMood, setSelectedMood] = useState<number | null>(null);
+  const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const fetchEntries = async () => {
@@ -63,6 +77,106 @@ export default function JournalPage() {
     }
   };
 
+  const deleteJournalEntry = async (
+    entryId: string,
+    event: React.MouseEvent
+  ) => {
+    event.stopPropagation(); // Prevent navigation to entry detail page
+    try {
+      const response = await fetch(`/api/portal/journal?id=${entryId}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        setEntries((prev) => prev.filter((entry) => entry.id !== entryId));
+        // Close drawer if the deleted entry was being viewed
+        if (selectedEntry?.id === entryId) {
+          setIsDrawerOpen(false);
+          setSelectedEntry(null);
+        }
+      } else {
+        const data = await response.json();
+        console.error("Failed to delete journal entry:", data.error);
+      }
+    } catch (error) {
+      console.error("Failed to delete journal entry:", error);
+    }
+  };
+
+  const openDrawer = (entry: JournalEntry, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    setSelectedEntry(entry);
+    setEditedContent(entry.content);
+    setIsEditing(false);
+    setIsDrawerOpen(true);
+  };
+
+  const closeDrawer = () => {
+    setIsDrawerOpen(false);
+    setSelectedEntry(null);
+    setIsEditing(false);
+    setEditedContent("");
+  };
+
+  const startEditing = () => {
+    if (selectedEntry) {
+      setEditedContent(selectedEntry.content);
+      setIsEditing(true);
+    }
+  };
+
+  const cancelEditing = () => {
+    if (selectedEntry) {
+      setEditedContent(selectedEntry.content);
+      setIsEditing(false);
+    }
+  };
+
+  const updateJournalEntry = async (entryId: string, content: string) => {
+    setIsSaving(true);
+    try {
+      const response = await fetch(`/api/portal/journal?id=${entryId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ content }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Update the entry in the list
+        setEntries((prev) =>
+          prev.map((entry) =>
+            entry.id === entryId ? { ...entry, ...data.entry } : entry
+          )
+        );
+        // Update the selected entry
+        if (selectedEntry?.id === entryId) {
+          setSelectedEntry({ ...selectedEntry, ...data.entry });
+        }
+        setIsEditing(false);
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to update journal entry:", errorData.error);
+        alert("Failed to update journal entry. Please try again.");
+      }
+    } catch (error) {
+      console.error("Failed to update journal entry:", error);
+      alert("Failed to update journal entry. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSave = () => {
+    if (!selectedEntry || !editedContent.trim()) {
+      return;
+    }
+    updateJournalEntry(selectedEntry.id, editedContent.trim());
+  };
+
   const getMoodIcon = (mood: number) => {
     if (mood <= 2) return <Frown className="w-5 h-5 text-red-600" />;
     if (mood <= 3) return <Meh className="w-5 h-5 text-yellow-600" />;
@@ -70,8 +184,8 @@ export default function JournalPage() {
   };
 
   const getMoodLabel = (mood: number) => {
-    if (mood <= 2) return "Difficult";
-    if (mood <= 3) return "Neutral";
+    if (mood <= 2) return "Down";
+    if (mood <= 3) return "Okay";
     return "Good";
   };
 
@@ -103,7 +217,7 @@ export default function JournalPage() {
       selectedText: "text-[#0F4F21]",
     },
     {
-      label: "Neutral",
+      label: "Okay",
       value: 3,
       icon: <Meh className="w-5 h-5" />,
       bg: "bg-yellow-50",
@@ -114,7 +228,7 @@ export default function JournalPage() {
       selectedText: "text-[#6B4B00]",
     },
     {
-      label: "Difficult",
+      label: "Down",
       value: 1,
       icon: <Frown className="w-5 h-5" />,
       bg: "bg-red-50",
@@ -237,7 +351,7 @@ export default function JournalPage() {
                         intPsychTheme.secondary;
                     }
                   }}
-                  className="cursor-pointer w-full text-white border rounded-xl py-3 px-4 transition-colors"
+                  className={`${!newContent.trim() || selectedMood === null ? "cursor-not-allowed" : "cursor-pointer"} w-full text-white border rounded-xl py-3 px-4 transition-colors`}
                 >
                   Save Entry
                 </button>
@@ -272,7 +386,7 @@ export default function JournalPage() {
                   return (
                     <div
                       key={entry.id}
-                      onClick={() => router.push(`/journal/${entry.id}`)}
+                      onClick={() => openDrawer(entry)}
                       className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6 cursor-pointer hover:shadow-md transition-shadow"
                     >
                       <div className="flex items-center justify-between mb-4">
@@ -281,15 +395,28 @@ export default function JournalPage() {
                           <span className="text-gray-900">
                             {formatDate(entry.createdAt)}
                           </span>
+                          <div
+                            className={`flex items-center gap-2 px-3 py-1 rounded-full ${moodColors.bg}`}
+                          >
+                            {getMoodIcon(entry.mood)}
+
+                            <span className={moodColors.text}>{moodLabel}</span>
+                          </div>
                         </div>
-                        <div
-                          className={`flex items-center gap-2 px-3 py-1 rounded-full ${moodColors.bg}`}
-                        >
-                          {getMoodIcon(entry.mood)}
-                          <span className={moodColors.text}>{moodLabel}</span>
+                        <div className="flex items-center gap-2">
+                          <Trash2
+                            onClick={(e) => deleteJournalEntry(entry.id, e)}
+                            className="hover:text-red-500 w-5 h-5 text-gray-500 cursor-pointer"
+                          />
+                          <Eye
+                            onClick={(e) => openDrawer(entry, e)}
+                            className="hover:text-blue-500 w-5 h-5 text-gray-500 cursor-pointer"
+                          />
                         </div>
                       </div>
-                      <p className="text-gray-700">{entry.content}</p>
+                      <p className="line-clamp-3 text-gray-700">
+                        {entry.content}
+                      </p>
                     </div>
                   );
                 })}
@@ -298,6 +425,147 @@ export default function JournalPage() {
           </section>
         </div>
       </div>
+
+      {/* Drawer for viewing full entry */}
+      <Drawer isOpen={isDrawerOpen} onClose={closeDrawer}>
+        {selectedEntry && (
+          <div className="space-y-6">
+            {/* Header with date and mood */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Calendar className="w-5 h-5 text-gray-500" />
+                <span className="text-gray-900">
+                  {formatDate(selectedEntry.createdAt)}
+                </span>
+              </div>
+              <div
+                className={`flex items-center gap-2 px-3 py-1 rounded-full ${
+                  getMoodColor(selectedEntry.mood).bg
+                }`}
+              >
+                {getMoodIcon(selectedEntry.mood)}
+                <span className={getMoodColor(selectedEntry.mood).text}>
+                  {getMoodLabel(selectedEntry.mood)}
+                </span>
+              </div>
+            </div>
+
+            {/* Entry content */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3
+                  className="text-lg font-semibold"
+                  style={{ color: intPsychTheme.primary }}
+                >
+                  Journal Entry
+                </h3>
+                {!isEditing && (
+                  <button
+                    onClick={startEditing}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#7FB885]"
+                    aria-label="Edit entry"
+                  >
+                    <Pencil className="w-4 h-4" />
+                    Edit
+                  </button>
+                )}
+              </div>
+              {isEditing ? (
+                <div className="space-y-4">
+                  <textarea
+                    value={editedContent}
+                    onChange={(e) => setEditedContent(e.target.value)}
+                    rows={10}
+                    className="w-full border border-[#2B4E6B] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#7FB885] text-gray-700 leading-relaxed resize-none"
+                    placeholder="Write about your day, how you're feeling, what's on your mind..."
+                  />
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleSave}
+                      disabled={isSaving || !editedContent.trim()}
+                      style={{
+                        backgroundColor:
+                          isSaving || !editedContent.trim()
+                            ? "#ffd9b3"
+                            : intPsychTheme.secondary,
+                        borderColor:
+                          isSaving || !editedContent.trim()
+                            ? "#ffc994"
+                            : "#e69333",
+                      }}
+                      className="cursor-pointer flex items-center gap-2 px-4 py-2 text-white border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#7FB885] disabled:cursor-not-allowed"
+                    >
+                      <Check className="w-4 h-4" />
+                      {isSaving ? "Saving..." : "Save"}
+                    </button>
+                    <button
+                      onClick={cancelEditing}
+                      disabled={isSaving}
+                      className="cursor-pointer flex items-center gap-2 px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <X className="w-4 h-4" />
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                  {selectedEntry.content}
+                </p>
+              )}
+            </div>
+
+            {/* Sentiment analysis if available */}
+            {selectedEntry.sentimentResult && (
+              <div className="border-t border-gray-200 pt-6">
+                <h3
+                  className="text-lg font-semibold mb-3"
+                  style={{ color: intPsychTheme.primary }}
+                >
+                  Sentiment Analysis
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Average Score:</span>
+                    <span className="font-semibold text-gray-900">
+                      {selectedEntry.sentimentResult.average_score.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="space-y-1 pt-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">Positive:</span>
+                      <span className="font-medium text-green-600">
+                        {(
+                          selectedEntry.sentimentResult.breakdown.positive * 100
+                        ).toFixed(1)}
+                        %
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">Neutral:</span>
+                      <span className="font-medium text-gray-600">
+                        {(
+                          selectedEntry.sentimentResult.breakdown.neutral * 100
+                        ).toFixed(1)}
+                        %
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">Negative:</span>
+                      <span className="font-medium text-red-600">
+                        {(
+                          selectedEntry.sentimentResult.breakdown.negative * 100
+                        ).toFixed(1)}
+                        %
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </Drawer>
     </PortalLayout>
   );
 }
