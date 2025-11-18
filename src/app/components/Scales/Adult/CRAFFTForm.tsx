@@ -1,6 +1,77 @@
+import React from "react";
 import { SetAActions } from "../../../lib/types/types";
 import Field from "../../primitives/Field";
 import Likert from "../../primitives/Likert";
+
+const DaysField = React.memo(function DaysField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const onChangeRef = React.useRef(onChange);
+  const initialValueRef = React.useRef(value || "");
+
+  // Keep onChange ref up to date
+  React.useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  // Only update input value if it changed externally and input is not focused
+  React.useEffect(() => {
+    if (inputRef.current && document.activeElement !== inputRef.current) {
+      if (value !== inputRef.current.value) {
+        inputRef.current.value = value || "";
+      }
+    }
+  }, [value]);
+
+  const handleChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const raw = e.target.value.replace(/[^\d]/g, "");
+      e.target.value = raw;
+      // Don't call onChange here - wait for blur
+    },
+    []
+  );
+
+  const handleBlur = React.useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      // Only update parent on blur to prevent re-renders while typing
+      const raw = e.target.value.replace(/[^\d]/g, "");
+      if (raw === "") {
+        onChangeRef.current("");
+      } else {
+        const n = Math.max(0, Math.min(365, parseInt(raw, 10)));
+        onChangeRef.current(String(n));
+      }
+    },
+    []
+  );
+
+  return (
+    <div className="flex items-center gap-2">
+      <label className="text-[15px] font-medium text-slate-800 w-56">
+        {label}
+      </label>
+      <input
+        ref={inputRef}
+        type="text"
+        inputMode="numeric"
+        className="w-24 rounded-lg border border-slate-300 px-2 py-1 text-[15px] text-slate-800"
+        defaultValue={initialValueRef.current}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        placeholder="0"
+      />
+      <span className="text-slate-500 text-sm">days</span>
+    </div>
+  );
+});
 
 export default function CRAFFTForm({ a, setA }: { a: any; setA: SetAActions }) {
   const pA = a.crafft.partA;
@@ -9,40 +80,6 @@ export default function CRAFFTForm({ a, setA }: { a: any; setA: SetAActions }) {
     Number(pA.daysAlcohol || "0") > 0 ||
     Number(pA.daysMarijuana || "0") > 0 ||
     Number(pA.daysOther || "0") > 0;
-
-  function DaysField({
-    label,
-    value,
-    onChange,
-  }: {
-    label: string;
-    value: string;
-    onChange: (v: string) => void;
-  }) {
-    return (
-      <div className="flex items-center gap-2">
-        <label className="text-[15px] font-medium text-slate-800 w-56">
-          {label}
-        </label>
-        <input
-          type="number"
-          inputMode="numeric"
-          min={0}
-          max={365}
-          className="w-24 rounded-lg border border-slate-300 px-2 py-1 text-[15px] text-slate-800"
-          value={value}
-          onChange={(e) => {
-            const raw = e.target.value.replace(/[^\d]/g, "");
-            if (raw === "") return onChange("");
-            const n = Math.max(0, Math.min(365, parseInt(raw, 10)));
-            onChange(String(n));
-          }}
-          placeholder="0"
-        />
-        <span className="text-slate-500 text-sm">days</span>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4">

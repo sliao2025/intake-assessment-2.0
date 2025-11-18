@@ -79,13 +79,17 @@ export async function POST(request: NextRequest) {
     // Create journal entry
     const entry = await prisma.journalEntry.create({
       data: {
-        userId: session.user.id,
-        clinicId: session.user.clinicId,
+        user: {
+          connect: { id: session.user.id },
+        },
+        clinic: {
+          connect: { id: session.user.clinicId },
+        },
         content: content.trim(),
         mood,
         // Sentiment analysis will be added asynchronously
         sentimentResult: Prisma.DbNull,
-      } as Prisma.JournalEntryUncheckedCreateInput,
+      },
       select: {
         id: true,
         content: true,

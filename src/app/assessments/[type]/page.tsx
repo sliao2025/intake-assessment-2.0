@@ -485,7 +485,7 @@ export default function AssessmentPage() {
           style={{
             backgroundColor: complete ? intPsychTheme.secondary : "#ccc",
           }}
-          className="flex-1 px-6 py-3 text-white rounded-xl hover:opacity-90 transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+          className="cursor-pointer flex-1 px-6 py-3 text-white rounded-xl hover:opacity-90 transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? "Submitting..." : "Submit Assessment"}
         </button>
