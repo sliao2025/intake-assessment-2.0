@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
         mood,
         // Sentiment analysis will be added asynchronously
         sentimentResult: Prisma.DbNull,
-      },
+      } as Prisma.JournalEntryUncheckedCreateInput,
       select: {
         id: true,
         content: true,

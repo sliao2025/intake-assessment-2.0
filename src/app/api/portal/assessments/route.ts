@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/app/lib/prisma";
 
 /**
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
         totalScore: totalScore || null,
         severity: severity || null,
         requestedBy: requestedBy || null,
-      },
+      } as Prisma.AssessmentResponseUncheckedCreateInput,
       select: {
         id: true,
         assessmentType: true,
