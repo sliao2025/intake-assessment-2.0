@@ -152,7 +152,7 @@ export default function JournalPage() {
             >
               New Entry
             </h2>
-            <div className="bg-[#FAF9F6] shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
+            <div className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
               <div className="space-y-4">
                 <div>
                   <label className="block text-gray-700 mb-2">
@@ -258,7 +258,7 @@ export default function JournalPage() {
                 Loading entries...
               </div>
             ) : entries.length === 0 ? (
-              <div className="bg-[#FAF9F6] rounded-3xl p-12 text-center shadow-[0_1px_2px_rgba(15,23,42,0.08)]">
+              <div className="bg-white rounded-3xl p-12 text-center shadow-[0_1px_2px_rgba(15,23,42,0.08)]">
                 <p className="text-gray-600 mb-4">
                   You haven't written any journal entries yet.
                 </p>
@@ -273,7 +273,7 @@ export default function JournalPage() {
                     <div
                       key={entry.id}
                       onClick={() => router.push(`/journal/${entry.id}`)}
-                      className="bg-[#FAF9F6] shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6 cursor-pointer hover:shadow-md transition-shadow"
+                      className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6 cursor-pointer hover:shadow-md transition-shadow"
                     >
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">

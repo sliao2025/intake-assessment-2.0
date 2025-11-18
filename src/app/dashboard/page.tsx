@@ -91,7 +91,10 @@ export default function DashboardPage() {
           </div>
 
           {/* Main Garden and Psychoeducation Section - Exact Figma layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div
+            className="grid grid-cols-1 lg:grid-cols-3 
+          gap-6 mb-6"
+          >
             {/* Garden Illustration */}
             <div className="lg:col-span-2">
               <div className="bg-[#E8F0E6] rounded-3xl p-6 h-full shadow-[0_1px_2px_rgba(15,23,42,0.08)]">
@@ -103,7 +106,7 @@ export default function DashboardPage() {
 
             {/* Psychoeducation Module - Exact Figma styling */}
             <div className="lg:col-span-1">
-              <div className="bg-[#FAF9F6] rounded-3xl p-6 h-full shadow-[0_1px_2px_rgba(15,23,42,0.08)] flex flex-col">
+              <div className="bg-white rounded-3xl p-6 h-full shadow-[0_1px_2px_rgba(15,23,42,0.08)] flex flex-col">
                 <div className="mb-4">
                   <div className={`${roboto.className} text-gray-500 mb-2`}>
                     PSYCHOEDUCATION
@@ -132,7 +135,7 @@ export default function DashboardPage() {
           {/* Stats Cards - Updated to Figma styling */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             {/* Assessments Completed */}
-            <div className="bg-[#FAF9F6] shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
+            <div className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
               <h3 className="text-gray-600 mb-2">Assessments Completed</h3>
               <div className="text-gray-900 mb-2">
                 {dashboardData?.assessments.completed || 0}/
@@ -153,7 +156,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Current Mood */}
-            <div className="bg-[#FAF9F6] shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
+            <div className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
               <h3 className="text-gray-600 mb-2">Current Mood</h3>
               <div className="text-gray-900 mb-2">
                 {dashboardData?.mood.current || "Not set"}
@@ -164,7 +167,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Symptom Severity */}
-            <div className="bg-[#FAF9F6] shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
+            <div className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
               <h3 className="text-gray-600 mb-2">Symptom Severity</h3>
               <div className="relative w-32 h-32 mx-auto">
                 <svg className="transform -rotate-90" viewBox="0 0 120 120">
@@ -202,7 +205,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Trends */}
-            <div className="bg-[#FAF9F6] shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
+            <div className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
               <h3 className="text-gray-600 mb-2">Trends</h3>
               <div className="space-y-2">
                 {dashboardData?.assessments.recent
@@ -236,7 +239,7 @@ export default function DashboardPage() {
                 .map((assessment, idx) => (
                   <div
                     key={idx}
-                    className="bg-[#FAF9F6] shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6"
+                    className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6"
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div>
