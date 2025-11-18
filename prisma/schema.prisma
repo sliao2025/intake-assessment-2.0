@@ -92,7 +92,7 @@ model VerificationToken {
 
 /// --- Your Profile persistence (JSON blob) ---
 model Profile {
-  userId            String    @id
+  userId            String    @id @default(cuid())
   json              Json
   version           Int       @default(1)
   updatedAt         DateTime  @updatedAt
@@ -117,7 +117,7 @@ model Profile {
 }
 
 model AssessmentResponse {
-  id             String   @id
+  id             String   @id @default(cuid())
   userId         String
   clinicId       String   @default("default-clinic")
   assessmentType String
@@ -136,7 +136,7 @@ model AssessmentResponse {
 }
 
 model JournalEntry {
-  id              String   @id
+  id              String   @id @default(cuid())
   userId          String
   clinicId        String   @default("default-clinic")
   content         String   @db.Text
@@ -153,7 +153,7 @@ model JournalEntry {
 }
 
 model ModuleProgress {
-  id             String         @id
+  id             String         @id @default(cuid())
   userId         String
   clinicId       String
   moduleId       String
@@ -173,7 +173,7 @@ model ModuleProgress {
 }
 
 model PsychoedModule {
-  id             String           @id
+  id             String           @id @default(cuid())
   title          String
   description    String           @db.Text
   category       String

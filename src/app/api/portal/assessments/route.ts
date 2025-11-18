@@ -4,7 +4,7 @@ import { prisma } from "@/app/lib/prisma";
 
 /**
  * GET /api/portal/assessments
- * 
+ *
  * Retrieves assessment history for the current user
  */
 export async function GET(request: NextRequest) {
@@ -12,10 +12,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession();
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const history = await prisma.assessmentResponse.findMany({
@@ -43,7 +40,7 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/portal/assessments
- * 
+ *
  * Submits a new assessment response
  */
 export async function POST(request: NextRequest) {
@@ -51,14 +48,12 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession();
 
     if (!session?.user?.id || !session?.user?.clinicId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
-    const { assessmentType, responses, totalScore, severity, requestedBy } = body;
+    const { assessmentType, responses, totalScore, severity, requestedBy } =
+      body;
 
     // Validate inputs
     if (!assessmentType || typeof assessmentType !== "string") {
@@ -78,6 +73,7 @@ export async function POST(request: NextRequest) {
     // Create assessment response
     const assessment = await prisma.assessmentResponse.create({
       data: {
+        id: crypto.randomUUID(),
         userId: session.user.id,
         clinicId: session.user.clinicId,
         assessmentType: assessmentType.toLowerCase(),
@@ -107,4 +103,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
