@@ -138,12 +138,12 @@ model AssessmentResponse {
 model JournalEntry {
   id              String   @id @default(cuid())
   userId          String
-  clinicId        String
+  clinicId        String   @default("default-clinic")
   content         String   @db.Text
   mood            Int
   sentimentResult Json?
   createdAt       DateTime @default(now())
-  updatedAt       DateTime @default(now()) @updatedAt
+  updatedAt       DateTime @updatedAt
   Clinic          Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
   User            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 

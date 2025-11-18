@@ -129,7 +129,7 @@ export default function JournalPage() {
   return (
     <PortalLayout>
       <div className="min-h-screen p-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="mb-8">
             <h1
               style={{ color: intPsychTheme.primary }}
@@ -216,7 +216,28 @@ export default function JournalPage() {
                     setSelectedMood(null);
                   }}
                   disabled={!newContent.trim() || selectedMood === null}
-                  className="cursor-pointer w-full bg-[#FF8C42] disabled:bg-[#F7C1A1] hover:bg-[#FF7A2E] text-white border border-[#E67A38] rounded-xl py-3 px-4 transition-colors"
+                  style={{
+                    backgroundColor:
+                      !newContent.trim() || selectedMood === null
+                        ? "#ffd9b3"
+                        : intPsychTheme.secondary,
+                    borderColor:
+                      !newContent.trim() || selectedMood === null
+                        ? "#ffc994"
+                        : "#e69333",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!(!newContent.trim() || selectedMood === null)) {
+                      e.currentTarget.style.backgroundColor = "#e69333";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!(!newContent.trim() || selectedMood === null)) {
+                      e.currentTarget.style.backgroundColor =
+                        intPsychTheme.secondary;
+                    }
+                  }}
+                  className="cursor-pointer w-full text-white border rounded-xl py-3 px-4 transition-colors"
                 >
                   Save Entry
                 </button>

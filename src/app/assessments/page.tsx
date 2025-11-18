@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import PortalLayout from "../components/portal/Layout/PortalLayout";
 import { Calendar, ChevronRight } from "lucide-react";
 import { intPsychTheme } from "../components/theme";
+import { DM_Serif_Text } from "next/font/google";
+const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
 
 interface Assessment {
   id: string;
@@ -96,7 +98,12 @@ export default function AssessmentsPage() {
         <div className="max-w-7xl mx-auto">
           {/* Header - Exact Figma */}
           <div className="mb-8">
-            <h1 className="text-gray-900 mb-2">Clinical Assessments</h1>
+            <h1
+              style={{ color: intPsychTheme.primary }}
+              className={`${dm_serif.className} text-3xl text-gray-900 mb-2`}
+            >
+              Clinical Assessments
+            </h1>
             <p className="text-gray-600">
               Track and complete your mental health assessments
             </p>
@@ -104,7 +111,12 @@ export default function AssessmentsPage() {
 
           {/* Available Assessments Section */}
           <section className="mb-8">
-            <h2 className="text-gray-900 mb-4">Available Assessments</h2>
+            <h2
+              style={{ color: intPsychTheme.primary }}
+              className="font-serif text-xl text-gray-900 mb-4"
+            >
+              Available Assessments
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {availableAssessments.map((assessment, index) => (
                 <div
@@ -157,19 +169,47 @@ export default function AssessmentsPage() {
 
           {/* Assessment History Section */}
           <section>
-            <h2 className="text-gray-900 mb-4">Assessment History</h2>
+            <h2
+              style={{ color: intPsychTheme.primary }}
+              className="font-serif text-xl text-gray-900 mb-4"
+            >
+              Assessment History
+            </h2>
             <div className="bg-[#FAF9F6] shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="border-b border-gray-200">
                     <tr>
-                      <th className="text-left p-4 text-gray-900">Date</th>
-                      <th className="text-left p-4 text-gray-900">
+                      <th
+                        style={{ color: intPsychTheme.text }}
+                        className="text-left p-4"
+                      >
+                        Date
+                      </th>
+                      <th
+                        style={{ color: intPsychTheme.text }}
+                        className="text-left p-4"
+                      >
                         Assessment
                       </th>
-                      <th className="text-left p-4 text-gray-900">Score</th>
-                      <th className="text-left p-4 text-gray-900">Severity</th>
-                      <th className="text-left p-4 text-gray-900">Action</th>
+                      <th
+                        style={{ color: intPsychTheme.text }}
+                        className="text-left p-4"
+                      >
+                        Score
+                      </th>
+                      <th
+                        style={{ color: intPsychTheme.text }}
+                        className="text-left p-4"
+                      >
+                        Severity
+                      </th>
+                      <th
+                        style={{ color: intPsychTheme.text }}
+                        className="text-left p-4"
+                      >
+                        Action
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
