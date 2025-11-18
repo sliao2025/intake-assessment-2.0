@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Calendar, ChevronRight } from "lucide-react";
 import { intPsychTheme } from "../components/theme";
 import { DM_Serif_Text } from "next/font/google";
+import { useWeather } from "../lib/hooks/useWeather";
+import WeatherWidget from "../components/WeatherWidget";
 const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
 
 interface Assessment {
@@ -19,6 +21,7 @@ export default function AssessmentsPage() {
   const router = useRouter();
   const [history, setHistory] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
+  const { weather } = useWeather();
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -46,6 +49,7 @@ export default function AssessmentsPage() {
       year: "numeric",
     });
   };
+
 
   // Available assessments - 7 adult assessments
   const availableAssessments = [
@@ -124,16 +128,20 @@ export default function AssessmentsPage() {
   return (
     <>
       {/* Header - Exact Figma */}
-      <div className="mb-8">
-        <h1
-          style={{ color: intPsychTheme.primary }}
-          className={`${dm_serif.className} text-3xl text-gray-900 mb-2`}
-        >
-          Clinical Assessments
-        </h1>
-        <p className="text-gray-600">
-          Track and complete your mental health assessments
-        </p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1
+            style={{ color: intPsychTheme.primary }}
+            className={`${dm_serif.className} text-3xl text-gray-900 mb-2`}
+          >
+            Clinical Assessments
+          </h1>
+          <p className="text-gray-600">
+            Track and complete your mental health assessments
+          </p>
+        </div>
+        {/* Weather Widget - Upper Right */}
+        <WeatherWidget weather={weather} />
       </div>
 
       {/* Available Assessments Section */}

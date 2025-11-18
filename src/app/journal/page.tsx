@@ -17,6 +17,8 @@ import { DM_Serif_Text } from "next/font/google";
 import { intPsychTheme } from "../components/theme";
 import { useSession } from "next-auth/react";
 import Drawer from "../components/Drawer";
+import { useWeather } from "../lib/hooks/useWeather";
+import WeatherWidget from "../components/WeatherWidget";
 interface JournalEntry {
   id: string;
   content: string;
@@ -43,6 +45,7 @@ export default function JournalPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const { weather } = useWeather();
 
   useEffect(() => {
     const fetchEntries = async () => {
@@ -244,18 +247,22 @@ export default function JournalPage() {
     <PortalLayout>
       <div className="min-h-screen p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1
-              style={{ color: intPsychTheme.primary }}
-              className={`${dm_serif.className} text-3xl text-gray-900 mb-2`}
-            >
-              {session?.user?.name
-                ? `${session?.user?.name?.split(" ")[0]}'s Journal`
-                : "Your Journal"}
-            </h1>
-            <p className="text-sm font-thin text-gray-600">
-              Track your thoughts, feelings, and daily experiences
-            </p>
+          <div className="mb-8 flex items-start justify-between">
+            <div>
+              <h1
+                style={{ color: intPsychTheme.primary }}
+                className={`${dm_serif.className} text-3xl text-gray-900 mb-2`}
+              >
+                {session?.user?.name
+                  ? `${session?.user?.name?.split(" ")[0]}'s Journal`
+                  : "Your Journal"}
+              </h1>
+              <p className="text-sm text-gray-600">
+                Track your thoughts, feelings, and daily experiences
+              </p>
+            </div>
+            {/* Weather Widget - Upper Right */}
+            <WeatherWidget weather={weather} />
           </div>
 
           {/* New Entry Section - Exact Figma */}

@@ -3,20 +3,11 @@
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import PortalLayout from "../components/portal/Layout/PortalLayout";
-import {
-  Leaf,
-  TrendingDown,
-  TrendingUp,
-  ArrowRight,
-  Sun,
-  Cloud,
-  CloudRain,
-  CloudLightning,
-  Snowflake,
-  CloudDrizzle,
-} from "lucide-react";
+import { Leaf, TrendingDown, TrendingUp, ArrowRight } from "lucide-react";
 import { intPsychTheme } from "../components/theme";
 import { DM_Serif_Text, Roboto } from "next/font/google";
+import { useWeather } from "../lib/hooks/useWeather";
+import WeatherWidget from "../components/WeatherWidget";
 
 interface DashboardData {
   assessments: {
@@ -54,11 +45,7 @@ export default function DashboardPage() {
   );
   const [loading, setLoading] = useState(true);
   const [clinician, setClinician] = useState<string | null>(null);
-  const [weather, setWeather] = useState<{
-    temp: number;
-    condition: string;
-    icon: string;
-  } | null>(null);
+  const { weather } = useWeather();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -87,39 +74,8 @@ export default function DashboardPage() {
       }
     };
 
-    const fetchWeather = async (lat: number, lon: number) => {
-      try {
-        const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
-        if (response.ok) {
-          const data = await response.json();
-          setWeather(data);
-        }
-      } catch (error) {
-        console.error("Failed to load weather:", error);
-      }
-    };
-
-    const getLocation = () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            fetchWeather(position.coords.latitude, position.coords.longitude);
-          },
-          (error) => {
-            console.error("Geolocation error:", error);
-            // Fallback to a default location (e.g., New York) if geolocation fails
-            fetchWeather(40.7128, -74.006);
-          }
-        );
-      } else {
-        // Fallback if geolocation is not supported
-        fetchWeather(40.7128, -74.006);
-      }
-    };
-
     fetchDashboardData();
     fetchClinician();
-    getLocation();
   }, []);
 
   const firstName = session?.user?.name?.split(" ")[0] || "back";
@@ -135,26 +91,6 @@ export default function DashboardPage() {
       </PortalLayout>
     );
   }
-
-  const getWeatherIcon = (iconName: string) => {
-    const iconProps = { className: "w-5 h-5" };
-    switch (iconName) {
-      case "sun":
-        return <Sun {...iconProps} />;
-      case "cloud":
-        return <Cloud {...iconProps} />;
-      case "cloud-rain":
-        return <CloudRain {...iconProps} />;
-      case "cloud-lightning":
-        return <CloudLightning {...iconProps} />;
-      case "snowflake":
-        return <Snowflake {...iconProps} />;
-      case "cloud-drizzle":
-        return <CloudDrizzle {...iconProps} />;
-      default:
-        return <Cloud {...iconProps} />;
-    }
-  };
 
   const getWeatherGreeting = (
     weather: { condition: string; icon: string } | null
@@ -193,7 +129,7 @@ export default function DashboardPage() {
 
   return (
     <PortalLayout>
-      <div className="min-h-screen bg-[#E8F5EE] p-8">
+      <div className="min-h-screen p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header - Exact Figma */}
           <div className="mb-6 flex items-start justify-between">
@@ -216,28 +152,7 @@ export default function DashboardPage() {
               )}
             </div>
             {/* Weather Widget - Upper Right */}
-            {weather && (
-              <div
-                style={{ color: intPsychTheme.primary }}
-                className="flex items-center gap-2  rounded-xl px-4 py-2 "
-              >
-                {getWeatherIcon(weather.icon)}
-                <div className="flex flex-col">
-                  <span
-                    style={{ color: intPsychTheme.primary }}
-                    className={`font-medium font-serif text-lg`}
-                  >
-                    {weather.temp}°F
-                  </span>
-                  <span
-                    style={{ color: intPsychTheme.primary }}
-                    className="text-xs capitalize"
-                  >
-                    {weather.condition.toLowerCase()}
-                  </span>
-                </div>
-              </div>
-            )}
+            <WeatherWidget weather={weather} />
           </div>
 
           {/* Main Garden and Psychoeducation Section - Exact Figma layout */}
@@ -248,9 +163,7 @@ export default function DashboardPage() {
             {/* Garden Illustration */}
             <div className="lg:col-span-2">
               <div className="bg-white rounded-3xl p-6 h-full shadow-[0_1px_2px_rgba(15,23,42,0.08)]">
-                <div className="bg-[#D4E9E7] rounded-2xl overflow-hidden h-[400px] shadow-[inset_0_0_0_1px_rgba(43,78,107,0.1)]">
-                  {/* <GardenIllustration /> */}
-                </div>
+                <div className="bg-emerald-50 rounded-2xl overflow-hidden h-[400px] shadow-[inset_0_0_0_1px_rgba(43,78,107,0.1)]"></div>
               </div>
             </div>
 

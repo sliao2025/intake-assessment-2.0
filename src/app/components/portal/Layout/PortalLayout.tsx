@@ -286,7 +286,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 bg-[#E8F5EE] overflow-y-auto">{children}</main>
+      <main className="flex-1 bg-[#ebf7fc] overflow-y-auto">{children}</main>
     </div>
   );
 }
