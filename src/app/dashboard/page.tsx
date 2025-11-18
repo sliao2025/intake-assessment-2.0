@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import PortalLayout from "../components/portal/Layout/PortalLayout";
 import { Leaf, TrendingDown, TrendingUp, ArrowRight } from "lucide-react";
-import { GardenIllustration } from "../components/GardenIllustration";
 import { intPsychTheme } from "../components/theme";
 import { DM_Serif_Text, Roboto } from "next/font/google";
 
