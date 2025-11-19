@@ -26,16 +26,16 @@ import {
   ListboxOption,
 } from "@headlessui/react";
 
-const CLINICIAN_NAMES = [
-  "Ryan Sultan",
-  "Zurama Rodriguez ",
-  "Ryan Mather",
-  "Alexandra Christodoulou",
-  "Omarr Savage",
-  "Luisa Tinapay",
-  "Shayna Feuer",
-  "Jordan Arbelaez",
-  "Jennifer Ray",
+const CLINICIANS = [
+  { name: "Ryan Sultan", email: "rsultan@psych-nyc.com" },
+  { name: "Zurama Rodriguez ", email: "zrodriguez@psych-nyc.com" },
+  { name: "Ryan Mather", email: "rmather@psych-nyc.com" },
+  { name: "Alexandra Christodoulou", email: "achristodoulou@psych-nyc.com" },
+  { name: "Omarr Savage", email: "osavage@psych-nyc.com" },
+  { name: "Luisa Tinapay", email: "ltinapay@psych-nyc.com" },
+  { name: "Shayna Feuer", email: "sfeuer@psych-nyc.com" },
+  { name: "Jordan Arbelaez", email: "jarbelaez@psych-nyc.com" },
+  { name: "Jennifer Ray", email: "jray@psych-nyc.com" },
 ];
 
 export default function WelcomeSection({
@@ -206,10 +206,10 @@ export default function WelcomeSection({
                                 width: `${dropdownPosition.width}px`,
                               }}
                             >
-                              {CLINICIAN_NAMES.map((name) => (
+                              {CLINICIANS.map((clinician) => (
                                 <ListboxOption
-                                  key={name}
-                                  value={name}
+                                  key={clinician.name}
+                                  value={clinician.name}
                                   as={React.Fragment}
                                 >
                                   {({ active, selected }) => (
@@ -225,7 +225,7 @@ export default function WelcomeSection({
                                             : "font-normal text-slate-700"
                                         } block truncate`}
                                       >
-                                        {name}
+                                        {clinician.name}
                                       </span>
                                       {selected && (
                                         <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">

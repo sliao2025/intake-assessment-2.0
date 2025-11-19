@@ -45,6 +45,7 @@ export default function JournalPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
   const { weather } = useWeather();
 
   useEffect(() => {
@@ -243,6 +244,113 @@ export default function JournalPage() {
     },
   ];
 
+  const emotions = [
+    {
+      label: "Happy",
+      emoji: "😊",
+      color: "bg-yellow-50",
+      border: "border-yellow-300",
+      text: "text-yellow-700",
+      selectedBg: "bg-yellow-100",
+    },
+    {
+      label: "Sad",
+      emoji: "😢",
+      color: "bg-blue-50",
+      border: "border-blue-300",
+      text: "text-blue-700",
+      selectedBg: "bg-blue-100",
+    },
+    {
+      label: "Anxious",
+      emoji: "😰",
+      color: "bg-orange-50",
+      border: "border-orange-300",
+      text: "text-orange-700",
+      selectedBg: "bg-orange-100",
+    },
+    {
+      label: "Calm",
+      emoji: "😌",
+      color: "bg-green-50",
+      border: "border-green-300",
+      text: "text-green-700",
+      selectedBg: "bg-green-100",
+    },
+    {
+      label: "Angry",
+      emoji: "😠",
+      color: "bg-red-50",
+      border: "border-red-300",
+      text: "text-red-700",
+      selectedBg: "bg-red-100",
+    },
+    {
+      label: "Excited",
+      emoji: "🤩",
+      color: "bg-pink-50",
+      border: "border-pink-300",
+      text: "text-pink-700",
+      selectedBg: "bg-pink-100",
+    },
+    {
+      label: "Tired",
+      emoji: "😴",
+      color: "bg-gray-50",
+      border: "border-gray-300",
+      text: "text-gray-700",
+      selectedBg: "bg-gray-100",
+    },
+    {
+      label: "Grateful",
+      emoji: "🙏",
+      color: "bg-purple-50",
+      border: "border-purple-300",
+      text: "text-purple-700",
+      selectedBg: "bg-purple-100",
+    },
+    {
+      label: "Frustrated",
+      emoji: "😤",
+      color: "bg-red-50",
+      border: "border-red-400",
+      text: "text-red-800",
+      selectedBg: "bg-red-100",
+    },
+    {
+      label: "Hopeful",
+      emoji: "✨",
+      color: "bg-indigo-50",
+      border: "border-indigo-300",
+      text: "text-indigo-700",
+      selectedBg: "bg-indigo-100",
+    },
+    {
+      label: "Lonely",
+      emoji: "😔",
+      color: "bg-slate-50",
+      border: "border-slate-300",
+      text: "text-slate-700",
+      selectedBg: "bg-slate-100",
+    },
+    {
+      label: "Content",
+      emoji: "😊",
+      color: "bg-emerald-50",
+      border: "border-emerald-300",
+      text: "text-emerald-700",
+      selectedBg: "bg-emerald-100",
+    },
+  ];
+
+  const toggleEmotion = (emotion: string) => {
+    setSelectedEmotions((prev) =>
+      prev.includes(emotion)
+        ? prev.filter((e) => e !== emotion)
+        : [...prev, emotion]
+    );
+  };
+
   return (
     <PortalLayout>
       <div className="min-h-screen p-8">
@@ -310,6 +418,36 @@ export default function JournalPage() {
                 </div>
 
                 <div>
+                  <label className="block text-gray-700 mb-2">
+                    What emotions are you experiencing?
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {emotions.map((emotion) => {
+                      const isSelected = selectedEmotions.includes(
+                        emotion.label
+                      );
+                      return (
+                        <button
+                          key={emotion.label}
+                          type="button"
+                          onClick={() => toggleEmotion(emotion.label)}
+                          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-[#7FB885] ${
+                            isSelected
+                              ? `${emotion.selectedBg} ${emotion.border} ${emotion.text} opacity-100 border-2`
+                              : `${emotion.color} ${emotion.border} ${emotion.text} opacity-70 hover:opacity-100 border`
+                          }`}
+                        >
+                          <span className="text-lg">{emotion.emoji}</span>
+                          <span className="text-sm font-medium">
+                            {emotion.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
                   <label
                     htmlFor="journal-entry"
                     className="block text-gray-700 mb-2"
@@ -335,6 +473,7 @@ export default function JournalPage() {
                     await createJournalEntry(newContent.trim(), selectedMood);
                     setNewContent("");
                     setSelectedMood(null);
+                    setSelectedEmotions([]);
                   }}
                   disabled={!newContent.trim() || selectedMood === null}
                   style={{
