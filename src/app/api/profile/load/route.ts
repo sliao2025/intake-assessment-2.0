@@ -7,17 +7,27 @@ export async function GET() {
   if (!session) return new Response("Unauthorized", { status: 401 });
   const userId = (session.user as any).id as string;
 
-  const row = await prisma.profile.findUnique({
-    where: { userId },
-    select: {
-      userId: true,
-      json: true,
-      version: true,
-      updatedAt: true,
-    },
-  });
+  const [profileRow, userRow] = await Promise.all([
+    prisma.profile.findUnique({
+      where: { userId },
+      select: {
+        userId: true,
+        json: true,
+        version: true,
+        updatedAt: true,
+      },
+    }),
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        clinician: true,
+      },
+    }),
+  ]);
+
   return Response.json({
-    profile: row?.json ?? null,
-    version: row?.version ?? null,
+    profile: profileRow?.json ?? null,
+    version: profileRow?.version ?? null,
+    clinician: userRow?.clinician ?? null,
   });
 }

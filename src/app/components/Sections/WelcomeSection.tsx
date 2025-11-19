@@ -59,6 +59,25 @@ export default function WelcomeSection({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [clinicianName, setClinicianName] = useState<string>("");
 
+  // Fetch clinician name from database on mount
+  useEffect(() => {
+    const fetchClinician = async () => {
+      try {
+        const response = await fetch("/api/profile/load");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.clinician) {
+            setClinicianName(data.clinician);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching clinician:", error);
+      }
+    };
+
+    fetchClinician();
+  }, []);
+
   const updateDropdownPosition = () => {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
