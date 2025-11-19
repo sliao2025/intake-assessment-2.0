@@ -158,16 +158,6 @@ export default function AssessmentsPage() {
       type: "crafft",
     },
     {
-      name: "ACE Resilience",
-      fullName: "Adverse Childhood Experiences Resilience Scale",
-      description: "Measures protective factors and resilience",
-      lastTaken: "Never",
-      nextDue: "Due now",
-      frequency: "As needed",
-      status: "Available",
-      type: "aceResilience",
-    },
-    {
       name: "ASRS-5",
       fullName: "Adult ADHD Self-Report Scale",
       description: "Screens for ADHD symptoms",

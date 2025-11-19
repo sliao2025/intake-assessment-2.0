@@ -30,7 +30,7 @@ export default function SignInPage() {
 
   return (
     <div
-      className="fixed inset-0 h-dvh flex items-center justify-center overflow-hidden"
+      className="bg-gray-50 fixed inset-0 h-dvh flex items-center justify-center overflow-hidden"
       style={{
         color: theme.text,
       }}
