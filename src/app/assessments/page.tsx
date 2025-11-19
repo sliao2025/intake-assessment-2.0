@@ -17,28 +17,40 @@ interface Assessment {
   completedAt: string;
 }
 
+interface AssignedAssessment {
+  id: string;
+  assessmentType: string;
+  requestedBy: string;
+  dueDate: string | null;
+  completedAt: string;
+}
+
 export default function AssessmentsPage() {
   const router = useRouter();
   const [history, setHistory] = useState<Assessment[]>([]);
+  const [assignedAssessments, setAssignedAssessments] = useState<
+    AssignedAssessment[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const { weather } = useWeather();
 
   useEffect(() => {
-    const fetchHistory = async () => {
+    const fetchData = async () => {
       try {
         const response = await fetch("/api/portal/assessments");
         if (response.ok) {
           const data = await response.json();
           setHistory(data.history || []);
+          setAssignedAssessments(data.assignedAssessments || []);
         }
       } catch (error) {
-        console.error("Failed to load assessment history:", error);
+        console.error("Failed to load assessments:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchHistory();
+    fetchData();
   }, []);
 
   const formatDate = (dateStr: string) => {
@@ -50,9 +62,51 @@ export default function AssessmentsPage() {
     });
   };
 
+  const formatDueDate = (dateStr: string | null) => {
+    if (!dateStr) return "No due date";
+    // Parse the date string - extract date part to avoid timezone issues
+    // Handle both ISO strings (2025-11-20T00:00:00.000Z) and date-only strings
+    const dateMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!dateMatch) {
+      // Fallback to regular date parsing
+      const date = new Date(dateStr);
+      const formattedDate = date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+      return `Due ${formattedDate}`;
+    }
 
-  // Available assessments - 7 adult assessments
-  const availableAssessments = [
+    // Extract year, month, day from the date string (UTC date, not local)
+    const year = parseInt(dateMatch[1], 10);
+    const month = parseInt(dateMatch[2], 10) - 1; // Month is 0-indexed
+    const day = parseInt(dateMatch[3], 10);
+
+    // Create date objects for comparison (in local timezone)
+    const dueDate = new Date(year, month, day);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    dueDate.setHours(0, 0, 0, 0);
+
+    // Format the date for display
+    const formattedDate = dueDate.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
+    if (dueDate < today) {
+      return `Overdue (${formattedDate})`;
+    } else if (dueDate.getTime() === today.getTime()) {
+      return "Due today";
+    } else {
+      return `Due ${formattedDate}`;
+    }
+  };
+
+  // All 7 adult assessments
+  const allAssessments = [
     {
       name: "PHQ-9",
       fullName: "Patient Health Questionnaire",
@@ -125,6 +179,53 @@ export default function AssessmentsPage() {
     },
   ];
 
+  // Create a map of completed assessment types
+  const completedTypes = new Set(
+    history.map((h) => h.assessmentType.toLowerCase())
+  );
+
+  // Create a map of assigned assessment types (only if not completed)
+  const assignedTypes = new Set(
+    assignedAssessments
+      .filter((a) => !completedTypes.has(a.assessmentType.toLowerCase()))
+      .map((a) => a.assessmentType.toLowerCase())
+  );
+
+  // Split into assigned and available
+  // Assigned: has assigned assessment AND not yet completed
+  const assignedAssessmentsList = allAssessments
+    .filter((assessment) => assignedTypes.has(assessment.type.toLowerCase()))
+    .map((assessment) => {
+      const assigned = assignedAssessments.find(
+        (a) => a.assessmentType.toLowerCase() === assessment.type.toLowerCase()
+      );
+      return {
+        ...assessment,
+        assignedData: assigned,
+        status: assigned?.dueDate
+          ? new Date(assigned.dueDate) < new Date()
+            ? "Overdue"
+            : "Assigned"
+          : "Assigned",
+      };
+    });
+
+  // Available: not assigned OR was assigned but has been completed
+  const availableAssessments = allAssessments.filter(
+    (assessment) => !assignedTypes.has(assessment.type.toLowerCase())
+  );
+
+  // Get last taken date for each assessment type from history
+  const getLastTaken = (type: string) => {
+    const lastCompleted = history
+      .filter((h) => h.assessmentType.toLowerCase() === type.toLowerCase())
+      .sort(
+        (a, b) =>
+          new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+      )[0];
+    return lastCompleted ? formatDate(lastCompleted.completedAt) : "Never";
+  };
+
   return (
     <>
       {/* Header - Exact Figma */}
@@ -144,6 +245,83 @@ export default function AssessmentsPage() {
         <WeatherWidget weather={weather} />
       </div>
 
+      {/* Assigned Assessments Section */}
+      {assignedAssessmentsList.length > 0 && (
+        <section className="mb-8">
+          <h2
+            style={{ color: intPsychTheme.primary }}
+            className="font-serif text-xl text-gray-900 mb-4"
+          >
+            Assigned Assessments
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
+            {assignedAssessmentsList.map((assessment) => (
+              <div
+                key={assessment.name}
+                className="flex flex-col justify-between bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6"
+              >
+                <>
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="text-xl text-gray-700">
+                        <b>{assessment.name}</b>
+                      </h3>
+                      <p className="text-gray-500">{assessment.fullName}</p>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm ${
+                        assessment.status === "Overdue"
+                          ? "bg-red-100 text-red-700 border border-red-400"
+                          : "bg-blue-100 text-blue-700 border border-blue-400"
+                      }`}
+                    >
+                      {assessment.status}
+                    </span>
+                  </div>
+                  <p className="text-gray-600 mb-4">{assessment.description}</p>
+                  <div className="space-y-2 mb-4 text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      <span>
+                        {assessment.assignedData?.dueDate
+                          ? formatDueDate(assessment.assignedData.dueDate)
+                          : "No due date"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      <span>Last taken: {getLastTaken(assessment.type)}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span>Frequency: {assessment.frequency}</span>
+                    </div>
+                  </div>
+                </>
+
+                <button
+                  onClick={() => router.push(`/assessments/${assessment.type}`)}
+                  style={{
+                    backgroundColor: intPsychTheme.secondary,
+                    transition: "background-color 0.2s",
+                  }}
+                  className="cursor-pointer w-full text-white rounded-xl py-3 px-4 flex items-center justify-center gap-2"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#ef8331";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor =
+                      intPsychTheme.secondary;
+                  }}
+                >
+                  Take Assessment
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Available Assessments Section */}
       <section className="mb-8">
         <h2
@@ -153,40 +331,28 @@ export default function AssessmentsPage() {
           Available Assessments
         </h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
-          {availableAssessments.map((assessment, index) => (
+          {availableAssessments.map((assessment) => (
             <div
               key={assessment.name}
-              className="flex flex-col justify-between  bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6"
+              className="flex flex-col justify-between bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6"
             >
               <>
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="text-xl text-gray-700">
-                      {<b>{assessment.name}</b>}
+                      <b>{assessment.name}</b>
                     </h3>
                     <p className="text-gray-500">{assessment.fullName}</p>
                   </div>
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm ${
-                      assessment.status === "Overdue"
-                        ? "bg-red-100 text-red-700 border border-red-400"
-                        : assessment.status === "Available"
-                          ? "bg-blue-100 text-blue-700 border border-blue-400"
-                          : "bg-[#A8D5BA] text-gray-900 border border-[#7FB885]"
-                    }`}
-                  >
-                    {assessment.status}
+                  <span className="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-700 border border-blue-400">
+                    Available
                   </span>
                 </div>
                 <p className="text-gray-600 mb-4">{assessment.description}</p>
                 <div className="space-y-2 mb-4 text-gray-600">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    <span>Last taken: {assessment.lastTaken}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    <span>Next due: {assessment.nextDue}</span>
+                    <span>Last taken: {getLastTaken(assessment.type)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span>Frequency: {assessment.frequency}</span>

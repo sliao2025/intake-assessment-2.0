@@ -354,6 +354,10 @@ export default function AssessmentPage() {
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [assignedAssessment, setAssignedAssessment] = useState<{
+    id: string;
+    requestedBy: string | null;
+  } | null>(null);
 
   const info = ASSESSMENT_INFO[type];
 
@@ -362,6 +366,30 @@ export default function AssessmentPage() {
       router.push("/assessments");
     }
   }, [type, info, router]);
+
+  // Fetch assigned assessment for this type
+  useEffect(() => {
+    const fetchAssigned = async () => {
+      try {
+        const response = await fetch("/api/portal/assessments");
+        if (response.ok) {
+          const data = await response.json();
+          const assigned = data.assignedAssessments?.find(
+            (a: any) => a.assessmentType.toLowerCase() === type.toLowerCase()
+          );
+          if (assigned) {
+            setAssignedAssessment({
+              id: assigned.id,
+              requestedBy: assigned.requestedBy,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch assigned assessment:", error);
+      }
+    };
+    fetchAssigned();
+  }, [type]);
 
   if (!info) {
     return null;
@@ -388,7 +416,7 @@ export default function AssessmentPage() {
     setError(null);
 
     try {
-      const { totalScore, severity } = calculateScore(type, a);
+      const { totalScore } = calculateScore(type, a);
 
       const response = await fetch("/api/portal/assessments", {
         method: "POST",
@@ -399,7 +427,7 @@ export default function AssessmentPage() {
           assessmentType: type,
           responses: a,
           totalScore,
-          severity,
+          assessmentId: assignedAssessment?.id || null, // Pass the ID to update the specific assessment
         }),
       });
 
