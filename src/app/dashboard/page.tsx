@@ -102,21 +102,48 @@ export default function DashboardPage() {
     const condition = weather.condition.toLowerCase();
     const icon = weather.icon;
 
+    // Get user's local hour in their timezone
+    // Since this is a client component, new Date() uses browser's local timezone
+    // But we'll be explicit to ensure timezone awareness
+    const now = new Date();
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: userTimezone,
+      hour: "numeric",
+      hour12: false,
+    });
+    const parts = formatter.formatToParts(now);
+    const hourPart = parts.find((part) => part.type === "hour");
+    const hour = hourPart ? parseInt(hourPart.value, 10) : now.getHours();
+    console.log(hour);
+    const isNight = hour >= 17 || hour < 6; // 6 PM to 6 AM is considered night
+    const isEvening = hour >= 17 && hour < 20; // 6 PM to 8 PM is evening
+    const timeContext = isEvening ? "evening" : isNight ? "night" : "day";
+    console.log(isEvening, isNight, timeContext);
     // Custom weather messages - direct and actionable (4 words max)
     if (icon === "sun" || condition === "clear") {
+      if (isNight) {
+        return isEvening
+          ? ", enjoy the clear evening"
+          : ", enjoy the clear night";
+      }
       return ", enjoy the sunshine";
     } else if (icon === "cloud-rain" || condition === "rain") {
       return ", don't forget an umbrella";
     } else if (icon === "snowflake" || condition === "snow") {
       return ", bundle up today";
     } else if (icon === "cloud-lightning" || condition === "thunderstorm") {
-      return ", looks like a stormy day";
+      return isNight
+        ? `, looks like a stormy ${timeContext}`
+        : ", looks like a stormy day";
     } else if (
       icon === "cloud-drizzle" ||
       condition === "drizzle" ||
       condition === "foggy"
     ) {
-      return ", enjoy the misty day";
+      return isNight
+        ? `, enjoy the misty ${timeContext}`
+        : ", enjoy the misty day";
     } else if (icon === "cloud" || condition === "cloudy") {
       return ", stay cozy today";
     }
