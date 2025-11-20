@@ -53,10 +53,10 @@ export async function GET(request: NextRequest) {
         // Has requestedBy and is not completed
         const responses = assessment.responses as Record<string, any> | null;
         const isEmpty = !responses || Object.keys(responses).length === 0;
-        return (
-          assessment.requestedBy !== null &&
-          (isEmpty || assessment.totalScore === null)
-        );
+        const isNotCompleted =
+          assessment.completedAt === null &&
+          (isEmpty || assessment.totalScore === null);
+        return assessment.requestedBy !== null && isNotCompleted;
       })
       .map(({ totalScore, responses, ...rest }) => rest);
 

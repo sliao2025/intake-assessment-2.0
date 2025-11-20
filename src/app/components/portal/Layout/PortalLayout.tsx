@@ -7,13 +7,12 @@ import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import {
   LayoutDashboard,
-  FileText,
   BookOpen,
-  Settings,
-  User,
   ChevronsLeft,
   ChevronsRight,
   Brain,
+  ClipboardList,
+  Sprout,
 } from "lucide-react";
 import {
   Menu,
@@ -41,7 +40,7 @@ const navigationItems = [
   {
     key: "assessments",
     label: "Assessments",
-    icon: FileText,
+    icon: ClipboardList,
     href: "/assessments",
   },
   {
@@ -49,6 +48,12 @@ const navigationItems = [
     label: "Psychoeducation",
     icon: Brain,
     href: "/psychoeducation",
+  },
+  {
+    key: "garden",
+    label: "Garden",
+    icon: Sprout,
+    href: "/garden",
   },
 ];
 
@@ -122,7 +127,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
             type="button"
             onClick={toggleSidebar}
             style={{ backgroundColor: intPsychTheme.primary }}
-            className="absolute right-0 top-full translate-y-[-50%] translate-x-1/2 p-1.5 rounded-full border border-gray-200 transition-colors hover:bg-gray-50"
+            className="absolute right-0 top-full translate-y-[-50%] translate-x-1/2 p-1.5 rounded-full border border-gray-200 transition-colors hover:bg-gray-50 z-[9999]"
             aria-label={isExpanded ? "Shrink sidebar" : "Expand sidebar"}
           >
             {toggleIcon}

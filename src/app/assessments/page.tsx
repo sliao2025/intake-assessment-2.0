@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Calendar, ChevronRight } from "lucide-react";
-import { intPsychTheme } from "../components/theme";
+import { intPsychTheme, theme } from "../components/theme";
 import { DM_Serif_Text } from "next/font/google";
 import { useWeather } from "../lib/hooks/useWeather";
 import WeatherWidget from "../components/WeatherWidget";
@@ -174,11 +174,10 @@ export default function AssessmentsPage() {
     history.map((h) => h.assessmentType.toLowerCase())
   );
 
-  // Create a map of assigned assessment types (only if not completed)
+  // Create a map of assigned assessment types
+  // Note: A user can have both a completed AND an assigned assessment of the same type
   const assignedTypes = new Set(
-    assignedAssessments
-      .filter((a) => !completedTypes.has(a.assessmentType.toLowerCase()))
-      .map((a) => a.assessmentType.toLowerCase())
+    assignedAssessments.map((a) => a.assessmentType.toLowerCase())
   );
 
   // Split into assigned and available
@@ -259,11 +258,21 @@ export default function AssessmentsPage() {
                       <p className="text-gray-500">{assessment.fullName}</p>
                     </div>
                     <span
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        assessment.status === "Overdue"
-                          ? "bg-red-100 text-red-700 border border-red-400"
-                          : "bg-blue-100 text-blue-700 border border-blue-400"
-                      }`}
+                      style={{
+                        borderColor:
+                          assessment.status === "Overdue"
+                            ? intPsychTheme.alternate
+                            : theme.primary,
+                        color:
+                          assessment.status === "Overdue"
+                            ? intPsychTheme.alternate
+                            : theme.primaryDark,
+                        backgroundColor:
+                          assessment.status === "Overdue"
+                            ? intPsychTheme.alternateLight
+                            : theme.primaryLight,
+                      }}
+                      className="px-3 py-1 rounded-full text-sm border"
                     >
                       {assessment.status}
                     </span>
@@ -334,7 +343,14 @@ export default function AssessmentsPage() {
                     </h3>
                     <p className="text-gray-500">{assessment.fullName}</p>
                   </div>
-                  <span className="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-700 border border-blue-400">
+                  <span
+                    style={{
+                      borderColor: intPsychTheme.accent,
+                      color: intPsychTheme.accentDark,
+                      backgroundColor: intPsychTheme.accentLight,
+                    }}
+                    className="px-3 py-1 rounded-full text-sm border"
+                  >
                     Available
                   </span>
                 </div>
