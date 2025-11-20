@@ -173,7 +173,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                   } py-4 rounded-xl text-base font-medium transition-all duration-200 relative overflow-hidden group ${
                     isActive
                       ? "bg-[#f0f9ff] text-[#113e60] shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] border-2 border-[#e7e5e4]"
-                      : "text-stone-500 hover:bg-[#ffa44033] hover:text-[#113e60] border border-transparent"
+                      : "text-stone-500 hover:bg-stone-100 hover:text-[#113e60] border border-transparent"
                   }`}
                 >
                   {/* Active Indicator Pill */}
@@ -185,7 +185,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                     className={`w-6 h-6 transition-transform duration-300 group-hover:scale-110 ${
                       isActive
                         ? item.color
-                        : "text-stone-400 group-hover:text-stone-600"
+                        : "text-stone group-hover:text-[#113e60]"
                     }`}
                     strokeWidth={2}
                   />

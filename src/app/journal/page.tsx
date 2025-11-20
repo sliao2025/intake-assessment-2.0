@@ -266,11 +266,12 @@ export default function JournalPage() {
   return (
     <PortalLayout>
       <div className={`min-h-screen p-6 md:p-8 ${dm_sans.className}`}>
-        <div className="max-w-5xl mx-auto space-y-8">
+        <div className="max-w-7xl mx-auto space-y-8">
           <div className="flex items-center justify-between">
             <div>
               <h1
-                className={`${dm_serif.className} text-4xl text-[#1c1917] mb-2`}
+                className={`${dm_serif.className} text-4xl mb-2`}
+                style={{ color: intPsychTheme.primary }}
               >
                 Your Journal
               </h1>

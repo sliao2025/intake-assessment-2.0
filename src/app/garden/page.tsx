@@ -553,11 +553,11 @@ export default function GardenBuilder() {
 
                   {/* Selection UI */}
                   {isSelected && (
-                    <div className="absolute -inset-4 border-2 border-[#15803d] border-dashed rounded-3xl pointer-events-none animate-fade-in bg-[#15803d]/10">
+                    <div className="absolute -inset-4 border-2 border-[#0072ce] border-dashed rounded-3xl pointer-events-none animate-fade-in bg-[#0072ce]/10">
                       {/* Rotate Handle */}
-                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 h-10 w-0.5 bg-[#15803d] flex flex-col justify-start items-center">
+                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 h-10 w-0.5 bg-[#0072ce] flex flex-col justify-start items-center">
                         <div
-                          className="w-10 h-10 -mt-5 bg-white rounded-full shadow-md border border-[#15803d]/30 flex items-center justify-center cursor-ew-resize pointer-events-auto hover:bg-[#f0fdf4] hover:text-[#15803d] hover:scale-110 transition-all"
+                          className="w-10 h-10 -mt-5 bg-white rounded-full shadow-md border border-[#0072ce]/30 flex items-center justify-center cursor-ew-resize pointer-events-auto hover:bg-[#f0fdf4] hover:text-[#0072ce] hover:scale-110 transition-all"
                           onMouseDown={(e) =>
                             handleMouseDown(e, flower.id, "rotate")
                           }
@@ -583,13 +583,13 @@ export default function GardenBuilder() {
 
                       {/* Scale Handle */}
                       <div
-                        className="absolute -bottom-3 -right-3 w-10 h-10 bg-white rounded-full shadow-md border border-[#15803d]/30 flex items-center justify-center cursor-nwse-resize pointer-events-auto hover:bg-[#f0fdf4] hover:scale-110 transition-all"
+                        className="absolute -bottom-3 -right-3 w-10 h-10 bg-white rounded-full shadow-md border border-[#0072ce]/30 flex items-center justify-center cursor-nwse-resize pointer-events-auto hover:bg-[#f0fdf4] hover:scale-110 transition-all"
                         onMouseDown={(e) =>
                           handleMouseDown(e, flower.id, "scale")
                         }
                         title="Scale"
                       >
-                        <Maximize size={18} className="text-[#15803d]" />
+                        <Maximize size={18} className="text-[#0072ce]" />
                       </div>
 
                       {/* Layer Menu Button */}
@@ -599,7 +599,7 @@ export default function GardenBuilder() {
                             e.stopPropagation();
                             setShowLayersMenu(!showLayersMenu);
                           }}
-                          className={`bg-white p-3 rounded-full shadow-md hover:scale-110 transition-all border ${showLayersMenu ? "text-[#15803d] border-[#15803d] bg-[#f0fdf4]" : "text-stone-500 border-[#e7e5e4]"}`}
+                          className={`bg-white p-3 rounded-full shadow-md hover:scale-110 transition-all border ${showLayersMenu ? "text-[#0072ce] border-[#0072ce] bg-[#f0fdf4]" : "text-stone-500 border-[#e7e5e4]"}`}
                           title="Layers"
                         >
                           <Layers size={20} />
@@ -651,7 +651,7 @@ export default function GardenBuilder() {
               onClick={() => setActiveTab("trees")}
               className={`flex-1 cursor-pointer rounded-xl py-3 text-xs font-bold uppercase tracking-wider transition-all ${
                 activeTab === "trees"
-                  ? "text-[#15803d] bg-white shadow-sm border-b-4 border-[#15803d] translate-y-[-1px]"
+                  ? "text-[#0072ce] bg-white shadow-sm border-b-4 border-[#0072ce] translate-y-[-1px]"
                   : "text-stone-400 hover:text-stone-600 hover:bg-white"
               }`}
             >
@@ -661,7 +661,7 @@ export default function GardenBuilder() {
               onClick={() => setActiveTab("bushes")}
               className={`flex-1 cursor-pointer rounded-xl py-3 text-xs font-bold uppercase tracking-wider transition-all ${
                 activeTab === "bushes"
-                  ? "text-[#4d7c0f] bg-white shadow-sm border-b-4 border-[#4d7c0f] translate-y-[-1px]"
+                  ? "text-[#0072ce] bg-white shadow-sm border-b-4 border-[#0072ce] translate-y-[-1px]"
                   : "text-stone-400 hover:text-stone-600 hover:bg-white"
               }`}
             >

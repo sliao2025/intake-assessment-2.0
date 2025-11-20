@@ -20,7 +20,7 @@ export default function AssessmentLayout({ children }: AssessmentLayoutProps) {
 
   return (
     <PortalLayout>
-      <div className="min-h-screen p-8">
+      <div className="min-h-screen isDynamicRoute ? 'p-8' : 'p-0'">
         <div className={`${maxWidth} mx-auto`}>
           {/* Back button - only on dynamic routes */}
           {isDynamicRoute && (

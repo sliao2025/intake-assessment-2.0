@@ -5,11 +5,10 @@ import { useRouter } from "next/navigation";
 import {
   Calendar,
   ChevronRight,
-  CheckCircle2,
   AlertCircle,
   Clock,
   Trophy,
-  Lock,
+  ClipboardClock,
 } from "lucide-react";
 import { intPsychTheme } from "../components/theme";
 import { DM_Serif_Text, DM_Sans } from "next/font/google";
@@ -241,7 +240,7 @@ export default function AssessmentsPage() {
               {assignedAssessmentsList.map((assessment) => (
                 <div
                   key={assessment.name}
-                  className="bg-white rounded-2xl border-b-4 border-[#e7e5e4] hover:border-[#ffa440]/30 p-6 transition-all group relative overflow-hidden shadow-sm"
+                  className="bg-white rounded-2xl flex flex-col justify-between  border-b-4 border-[#e7e5e4] hover:border-[#ffa440]/30 p-6 transition-all group relative overflow-hidden shadow-sm"
                 >
                   {assessment.status === "Overdue" && (
                     <div
@@ -367,7 +366,7 @@ export default function AssessmentsPage() {
         {/* History Log */}
         <section>
           <div className="flex items-center gap-3 mb-6">
-            <Lock className="w-6 h-6 text-stone-400" />
+            <ClipboardClock className="w-6 h-6 text-stone-400" />
             <h2
               className={`${dm_serif.className} text-2xl`}
               style={{ color: intPsychTheme.primary }}

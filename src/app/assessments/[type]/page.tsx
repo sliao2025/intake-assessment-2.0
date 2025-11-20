@@ -12,6 +12,7 @@ import CRAFFTForm from "../../components/Scales/Adult/CRAFFTForm";
 import ACEResilienceForm from "../../components/Scales/Adult/ACEResilienceForm";
 import ASRS5Form from "../../components/Scales/Adult/ASRS5Form";
 import { SetAActions } from "../../lib/types/types";
+import { ArrowLeft } from "lucide-react";
 
 const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
 
@@ -449,7 +450,6 @@ export default function AssessmentPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1
           style={{ color: intPsychTheme.primary }}

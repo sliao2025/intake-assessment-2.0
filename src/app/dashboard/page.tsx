@@ -97,9 +97,20 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <PortalLayout>
-        <div className="flex items-center justify-center h-full">
+        <div className="flex items-center justify-center h-full min-h-[60vh]">
           <div className="flex flex-col items-center gap-4">
-            <div className="w-16 h-16 border-4 border-[#15803d]/30 border-t-[#15803d] rounded-full animate-spin"></div>
+            <div className="relative w-16 h-16 flex items-center justify-center">
+              <span
+                style={{
+                  borderTopColor: "#0072ce",
+                  borderRightColor: intPsychTheme.accentLight,
+                  borderBottomColor: intPsychTheme.accentLight,
+                  borderLeftColor: intPsychTheme.accentLight,
+                }}
+                className="absolute inset-0 border-4 rounded-full animate-spin"
+              />
+              <span className="absolute inset-2 bg-[#0072ce] rounded-full opacity-0" />
+            </div>
             <div className="font-medium text-stone-500 animate-pulse">
               Gathering your data...
             </div>
@@ -129,8 +140,10 @@ export default function DashboardPage() {
 
   return (
     <PortalLayout>
-      <div className={`min-h-screen p-6 md:p-8 ${dm_sans.className}`}>
-        <div className="max-w-7xl mx-auto space-y-8">
+      <div
+        className={`min-h-screen max-w-8/10 mx-auto p-6 md:p-8 ${dm_sans.className}`}
+      >
+        <div className="w-full space-y-8">
           {/* Header Area */}
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
