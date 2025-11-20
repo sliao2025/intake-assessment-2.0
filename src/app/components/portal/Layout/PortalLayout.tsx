@@ -21,7 +21,7 @@ import {
   MenuItems,
   Transition,
 } from "@headlessui/react";
-import { DM_Serif_Text } from "next/font/google";
+import { DM_Serif_Text, DM_Sans } from "next/font/google";
 import { intPsychTheme } from "../../theme";
 import logo from "@/assets/IP_Logo.png";
 
@@ -29,35 +29,50 @@ interface PortalLayoutProps {
   children: React.ReactNode;
 }
 
+// Using IntPsych Theme Colors
 const navigationItems = [
   {
     key: "dashboard",
     label: "Dashboard",
     icon: LayoutDashboard,
     href: "/dashboard",
+    color: `text-[${intPsychTheme.primary}]`, // Navy
   },
-  { key: "journal", label: "Journal", icon: BookOpen, href: "/journal" },
+  {
+    key: "journal",
+    label: "Journal",
+    icon: BookOpen,
+    href: "/journal",
+    color: `text-[${intPsychTheme.secondary}]`, // Orange/Amber
+  },
   {
     key: "assessments",
     label: "Assessments",
     icon: ClipboardList,
     href: "/assessments",
+    color: `text-[${intPsychTheme.accent}]`, // Blue
   },
   {
     key: "psychoeducation",
-    label: "Psychoeducation",
+    label: "Learn",
     icon: Brain,
     href: "/psychoeducation",
+    color: "text-[#7e22ce]", // Deep purple (keeping distinct for learning)
   },
   {
     key: "garden",
     label: "Garden",
     icon: Sprout,
     href: "/garden",
+    color: "text-[#4d7c0f]", // Moss green (keeping distinct for nature)
   },
 ];
 
 const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
+const dm_sans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+});
 
 export default function PortalLayout({ children }: PortalLayoutProps) {
   const pathname = usePathname();
@@ -70,11 +85,11 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
     return saved !== null ? saved === "true" : true;
   });
 
-  const sidebarWidth = isExpanded ? "w-64" : "w-20";
+  const sidebarWidth = isExpanded ? "w-72" : "w-24";
   const toggleIcon = isExpanded ? (
-    <ChevronsLeft className="text-white w-4 h-4" />
+    <ChevronsLeft className="text-stone-500 w-5 h-5" />
   ) : (
-    <ChevronsRight className="text-white w-4 h-4" />
+    <ChevronsRight className="text-stone-500 w-5 h-5" />
   );
 
   const toggleSidebar = () => {
@@ -101,33 +116,39 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white">
+    <div
+      className={`flex h-screen overflow-hidden bg-slate-50 ${dm_sans.className}`}
+    >
       {/* Sidebar */}
       <aside
-        className={`${sidebarWidth} bg-white border-r border-gray-200 flex flex-col transition-all duration-200 relative`}
+        className={`${sidebarWidth} bg-white border-r-2 border-[#e7e5e4] flex flex-col transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] relative z-20 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]`}
       >
-        {/* Logo/Title */}
-        <div className="relative p-4 border-b flex items-center gap-2 border-gray-200">
-          <div className="flex items-center gap-2">
+        {/* Logo/Title - Header */}
+        <div className="relative p-6 flex items-center gap-3 justify-center border-b-2 border-[#e7e5e4]">
+          <div className="relative group cursor-pointer">
+            <div className="absolute inset-0 bg-[#e0f2fe] rounded-full transform scale-0 group-hover:scale-110 transition-transform duration-200" />
             <Image
               src={logo}
               alt="Integrative Psych logo"
-              className={`object-contain ${isExpanded ? "h-12 w-12" : "h-10 w-10"}`}
+              className={`relative object-contain transition-all duration-300 ${isExpanded ? "h-14 w-14" : "h-10 w-10"}`}
             />
-            {isExpanded && (
-              <h1
-                className={`${dm_serif.className} text-xl font-semibold text-gray-800`}
-                style={{ color: intPsychTheme.primary }}
-              >
-                Integrative Psych
-              </h1>
-            )}
           </div>
+
+          {isExpanded && (
+            <h1
+              className={`${dm_serif.className} text-2xl text-[#1c1917] tracking-tight leading-none`}
+              style={{ color: intPsychTheme.primary }}
+            >
+              Integrative <br /> Psych
+            </h1>
+          )}
+
+          {/* Toggle Button - Anchored to intersection of bottom border and right border */}
           <button
             type="button"
             onClick={toggleSidebar}
-            style={{ backgroundColor: intPsychTheme.primary }}
-            className="absolute right-0 top-full translate-y-[-50%] translate-x-1/2 p-1.5 rounded-full border border-gray-200 transition-colors hover:bg-gray-50 z-[9999]"
+            // right-[-2px] to align center with the 2px border
+            className="absolute right-[-2px] top-full translate-x-1/2 -translate-y-1/2 bg-white border-2 border-[#e7e5e4] p-1.5 rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all z-50 text-stone-400 hover:text-[#0072ce]"
             aria-label={isExpanded ? "Shrink sidebar" : "Expand sidebar"}
           >
             {toggleIcon}
@@ -135,89 +156,72 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-3 space-y-1">
+        <nav
+          className={`flex-1 px-4 py-6 space-y-2 scrollbar-hide ${isExpanded ? "overflow-y-auto" : "overflow-visible"}`}
+        >
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive =
               pathname === item.href || pathname?.startsWith(item.href + "/");
 
-            // Use CSS custom properties for hover states
-            const linkStyle = isActive
-              ? {
-                  backgroundColor: intPsychTheme.secondaryLight,
-                  color: intPsychTheme.secondaryDark,
-                  ["--hover-bg" as any]: intPsychTheme.secondaryLight,
-                  ["--hover-text" as any]: intPsychTheme.secondaryDark,
-                }
-              : {
-                  ["--hover-bg" as any]: intPsychTheme.secondaryLight,
-                  ["--hover-text" as any]: intPsychTheme.secondaryDark,
-                };
-
             return (
               <div key={item.key} className="relative group">
                 <Link
                   href={item.href}
-                  style={linkStyle}
                   className={`flex items-center ${
-                    isExpanded ? "gap-3 px-3" : "justify-center px-0"
-                  } py-2.5 rounded-lg text-md transition-colors ${
-                    !isActive
-                      ? "hover:bg-[var(--hover-bg)] hover:text-[var(--hover-text)]"
-                      : ""
+                    isExpanded ? "gap-4 px-4" : "justify-center px-0"
+                  } py-4 rounded-xl text-base font-medium transition-all duration-200 relative overflow-hidden group ${
+                    isActive
+                      ? "bg-[#f0f9ff] text-[#113e60] shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] border-2 border-[#e7e5e4]"
+                      : "text-stone-500 hover:bg-[#ffa44033] hover:text-[#113e60] border border-transparent"
                   }`}
                 >
+                  {/* Active Indicator Pill */}
+                  {isActive && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#113e60] rounded-r-full" />
+                  )}
+
                   <Icon
-                    style={{
-                      color: isActive
-                        ? intPsychTheme.secondaryDark
-                        : intPsychTheme.primary,
-                    }}
-                    className="w-5 h-5"
+                    className={`w-6 h-6 transition-transform duration-300 group-hover:scale-110 ${
+                      isActive
+                        ? item.color
+                        : "text-stone-400 group-hover:text-stone-600"
+                    }`}
+                    strokeWidth={2}
                   />
                   {isExpanded && (
-                    <span
-                      style={{
-                        color: isActive
-                          ? intPsychTheme.secondaryDark
-                          : intPsychTheme.primary,
-                      }}
-                    >
-                      {item.label}
-                    </span>
+                    <span className="tracking-wide">{item.label}</span>
                   )}
                 </Link>
-                {/* Tooltip - show on hover, especially useful when sidebar is collapsed */}
-                <div
-                  style={{ backgroundColor: intPsychTheme.primary }}
-                  className={`absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-2  text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-250 delay-200 pointer-events-none whitespace-nowrap z-50 shadow-lg ${
-                    isExpanded ? "hidden" : ""
-                  }`}
-                >
-                  {item.label}
-                  <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></div>
-                </div>
+
+                {/* Tooltip for collapsed state - High Z-Index */}
+                {!isExpanded && (
+                  <div
+                    style={{ backgroundColor: intPsychTheme.primary }}
+                    className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-4 py-2  text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-[9999] shadow-xl pointer-events-none"
+                  >
+                    {item.label}
+                    <div
+                      style={{ borderRightColor: intPsychTheme.primary }}
+                      className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-white"
+                    ></div>
+                  </div>
+                )}
               </div>
             );
           })}
         </nav>
 
         {/* User Profile */}
-        <div className="p-4  border-t border-gray-200">
+        <div className="p-3 border-t-2 border-[#e7e5e4]">
           <Menu as="div" className="relative">
-            <div
-              className={`flex items-center gap-3 ${
-                isExpanded ? "" : "justify-center"
-              }`}
+            <MenuButton
+              className={`w-full ${
+                isExpanded ? "px-3 py-3" : "justify-center py-2"
+              } flex items-center gap-3 rounded-xl hover:bg-[#f5f5f4] border border-transparent hover:border-[#e7e5e4] transition-all group outline-none`}
             >
-              <MenuButton
-                className={`${
-                  isExpanded ? "" : "w-full justify-center"
-                } cursor-pointer flex items-center gap-3 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300`}
-                title={session?.user?.name ?? "Your profile"}
-                aria-label="Open profile menu"
-              >
-                <div className="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white font-medium overflow-hidden border border-gray-200">
+              <div className="relative">
+                <div className="w-10 h-10 rounded-full bg-[#e0f2fe] border border-[#bae6fd] flex items-center justify-center text-[#0369a1] font-bold text-lg overflow-hidden">
                   {session?.user?.image ? (
                     <img
                       src={session.user.image}
@@ -226,64 +230,58 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <span className="text-sm font-semibold">
-                      {getInitials(session?.user?.name)}
-                    </span>
+                    getInitials(session?.user?.name)
                   )}
                 </div>
-              </MenuButton>
+              </div>
+
               {isExpanded && (
                 <div className="flex-1 min-w-0 text-left">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {session?.user?.name || "User"}
+                  <p className="text-sm font-bold text-[#1c1917] truncate">
+                    {session?.user?.name || "Adventurer"}
                   </p>
-                  <p className="text-xs text-gray-500">Patient</p>
+                  <p className="text-xs text-stone-500">Patient Portal</p>
                 </div>
               )}
-            </div>
+            </MenuButton>
 
             <Transition
               as={Fragment}
-              enter="transition ease-out duration-100"
-              enterFrom="transform opacity-0 scale-95"
-              enterTo="transform opacity-100 scale-100"
-              leave="transition ease-in duration-75"
-              leaveFrom="transform opacity-100 scale-100"
-              leaveTo="transform opacity-0 scale-95"
+              enter="transition ease-out duration-200"
+              enterFrom="transform opacity-0 scale-95 translate-y-2"
+              enterTo="transform opacity-100 scale-100 translate-y-0"
+              leave="transition ease-in duration-150"
+              leaveFrom="transform opacity-100 scale-100 translate-y-0"
+              leaveTo="transform opacity-0 scale-95 translate-y-2"
             >
               <MenuItems
                 className={`absolute ${
-                  isExpanded ? "left-0" : "left-full ml-2"
-                } bottom-full mb-2 w-48 origin-bottom-left rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-50`}
+                  isExpanded
+                    ? "left-0 bottom-full mb-4 w-full"
+                    : "left-full bottom-0 ml-4 w-56"
+                } rounded-xl border border-[#e7e5e4] bg-white shadow-xl focus:outline-none z-[9999] overflow-hidden p-1`}
               >
-                <div className="py-1">
-                  <div className="px-3 py-2 text-xs text-gray-500 border-b border-gray-100">
-                    <div className="truncate font-medium text-gray-700">
-                      {session?.user?.name ?? "Signed in"}
-                    </div>
-                    {session?.user?.email?.split("-")[0] === "guest" ? (
-                      <div className="truncate italic text-gray-400">
-                        (Guest user)
-                      </div>
-                    ) : (
-                      <div className="truncate">
-                        {session?.user?.email ?? ""}
-                      </div>
-                    )}
-                  </div>
-                  <MenuItem>
-                    {({ active }) => (
-                      <button
-                        onClick={() => signOut({ callbackUrl: "/auth/signin" })}
-                        className={`w-full text-left px-3 py-2 text-sm ${
-                          active ? "bg-gray-100 text-gray-900" : "text-gray-700"
-                        }`}
-                      >
-                        Logout
-                      </button>
-                    )}
-                  </MenuItem>
+                <div className="px-4 py-3 bg-[#fafaf9] border-b border-[#e7e5e4] mb-1">
+                  <p className="text-xs font-bold text-stone-400 uppercase">
+                    Signed in as
+                  </p>
+                  <p className="text-sm font-medium text-stone-700 truncate">
+                    {session?.user?.email}
+                  </p>
                 </div>
+
+                <MenuItem>
+                  {({ active }) => (
+                    <button
+                      onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+                      className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                        active ? "bg-red-50 text-red-700" : "text-stone-600"
+                      }`}
+                    >
+                      Log Out
+                    </button>
+                  )}
+                </MenuItem>
               </MenuItems>
             </Transition>
           </Menu>
@@ -292,8 +290,8 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
 
       {/* Main Content */}
       <main
-        className="flex-1 overflow-y-auto"
-        style={{ backgroundColor: intPsychTheme.background }}
+        className="flex-1 overflow-y-auto scroll-smooth"
+        style={{ backgroundColor: "#f8fafc" }} // Slate 50 - cooler
       >
         {children}
       </main>

@@ -3,11 +3,24 @@
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import PortalLayout from "../components/portal/Layout/PortalLayout";
-import { Leaf, TrendingDown, TrendingUp, ArrowRight } from "lucide-react";
+import {
+  Leaf,
+  TrendingDown,
+  TrendingUp,
+  ArrowRight,
+  Zap,
+  Moon,
+  Sun,
+  Target,
+  Trophy,
+  Star,
+  ClipboardList,
+} from "lucide-react";
 import { intPsychTheme } from "../components/theme";
-import { DM_Serif_Text, Roboto } from "next/font/google";
+import { DM_Serif_Text, DM_Sans } from "next/font/google";
 import { useWeather } from "../lib/hooks/useWeather";
 import WeatherWidget from "../components/WeatherWidget";
+import Link from "next/link";
 
 interface DashboardData {
   assessments: {
@@ -35,8 +48,9 @@ interface DashboardData {
     sleep?: { current: number; change: number; direction: string };
   };
 }
+
 const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
-const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"] });
+const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -78,14 +92,17 @@ export default function DashboardPage() {
     fetchClinician();
   }, []);
 
-  const firstName = session?.user?.name?.split(" ")[0] || "back";
+  const firstName = session?.user?.name?.split(" ")[0] || "Friend";
 
   if (loading) {
     return (
       <PortalLayout>
         <div className="flex items-center justify-center h-full">
-          <div className="animate-pulse text-gray-600">
-            Loading dashboard...
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-16 h-16 border-4 border-[#15803d]/30 border-t-[#15803d] rounded-full animate-spin"></div>
+            <div className="font-medium text-stone-500 animate-pulse">
+              Gathering your data...
+            </div>
           </div>
         </div>
       </PortalLayout>
@@ -95,60 +112,16 @@ export default function DashboardPage() {
   const getWeatherGreeting = (
     weather: { condition: string; icon: string } | null
   ): string => {
-    if (!weather) {
-      return "";
-    }
-
-    const condition = weather.condition.toLowerCase();
+    if (!weather) return "";
     const icon = weather.icon;
+    const hour = new Date().getHours();
+    const isNight = hour >= 17 || hour < 6;
 
-    // Get user's local hour in their timezone
-    // Since this is a client component, new Date() uses browser's local timezone
-    // But we'll be explicit to ensure timezone awareness
-    const now = new Date();
-    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const formatter = new Intl.DateTimeFormat("en-US", {
-      timeZone: userTimezone,
-      hour: "numeric",
-      hour12: false,
-    });
-    const parts = formatter.formatToParts(now);
-    const hourPart = parts.find((part) => part.type === "hour");
-    const hour = hourPart ? parseInt(hourPart.value, 10) : now.getHours();
-    console.log(hour);
-    const isNight = hour >= 17 || hour < 6; // 6 PM to 6 AM is considered night
-    const isEvening = hour >= 17 && hour < 20; // 6 PM to 8 PM is evening
-    const timeContext = isEvening ? "evening" : isNight ? "night" : "day";
-    console.log(isEvening, isNight, timeContext);
-    // Custom weather messages - direct and actionable (4 words max)
-    if (icon === "sun" || condition === "clear") {
-      if (isNight) {
-        return isEvening
-          ? ", enjoy the clear evening"
-          : ", enjoy the clear night";
-      }
-      return ", enjoy the sunshine";
-    } else if (icon === "cloud-rain" || condition === "rain") {
-      return ", don't forget an umbrella";
-    } else if (icon === "snowflake" || condition === "snow") {
-      return ", bundle up today";
-    } else if (icon === "cloud-lightning" || condition === "thunderstorm") {
-      return isNight
-        ? `, looks like a stormy ${timeContext}`
-        : ", looks like a stormy day";
-    } else if (
-      icon === "cloud-drizzle" ||
-      condition === "drizzle" ||
-      condition === "foggy"
-    ) {
-      return isNight
-        ? `, enjoy the misty ${timeContext}`
-        : ", enjoy the misty day";
-    } else if (icon === "cloud" || condition === "cloudy") {
-      return ", stay cozy today";
+    if (icon === "sun" || weather.condition.toLowerCase() === "clear") {
+      return isNight ? ", clear skies tonight" : ", nice and sunny";
+    } else if (icon === "cloud-rain") {
+      return ", bring an umbrella";
     }
-
-    // Fallback
     return "";
   };
 
@@ -156,254 +129,299 @@ export default function DashboardPage() {
 
   return (
     <PortalLayout>
-      <div className="min-h-screen p-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Header - Exact Figma */}
-          <div className="mb-6 flex items-start justify-between">
+      <div className={`min-h-screen p-6 md:p-8 ${dm_sans.className}`}>
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Header Area */}
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <h1
-                style={{ color: intPsychTheme.primary }}
-                className={`${dm_serif.className} text-3xl mb-0`}
+                className={`${dm_serif.className} text-4xl md:text-5xl mb-2 text-[#1c1917]`}
               >
-                Welcome {firstName}
-                {weatherGreeting && `${weatherGreeting}.`}
+                Hi,{" "}
+                <span style={{ color: intPsychTheme.accent }}>{firstName}</span>
+                !
               </h1>
-              {clinician && (
-                <p
-                  style={{ color: intPsychTheme.textMuted }}
-                  className=" text-sm"
-                >
-                  Your clinician:{" "}
-                  <span className="font-medium">{clinician}</span>
-                </p>
-              )}
+              <p className="text-stone-500 text-lg font-medium flex items-center gap-2">
+                {weatherGreeting
+                  ? `It's ${weatherGreeting.replace(", ", "").toLowerCase()} today.`
+                  : "Ready to continue your journey?"}
+              </p>
             </div>
-            {/* Weather Widget - Upper Right */}
             <WeatherWidget weather={weather} />
           </div>
 
-          {/* Main Garden and Psychoeducation Section - Exact Figma layout */}
-          <div
-            className="grid grid-cols-1 lg:grid-cols-3 
-          gap-6 mb-6"
-          >
-            {/* Garden Illustration */}
-            <div className="lg:col-span-2">
-              <div className="bg-white rounded-3xl p-6 h-full shadow-[0_1px_2px_rgba(15,23,42,0.08)]">
-                <div className="bg-emerald-50 rounded-2xl overflow-hidden h-[400px] shadow-[inset_0_0_0_1px_rgba(43,78,107,0.1)]"></div>
+          {/* Main Action Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Hero Card: Current Mission / Psychoeducation */}
+            <div
+              style={{ borderColor: intPsychTheme.accent }}
+              className="lg:col-span-2 bg-white rounded-2xl border-b-4 border-2 p-1 shadow-sm group hover:border-[#15803d]/40 transition-all duration-300"
+            >
+              <div
+                style={{ backgroundColor: intPsychTheme.accentLight }}
+                className="bg-gradient-to-br from-[#0072ce] to-[#004684] rounded-[12px] p-8 h-full text-white relative overflow-hidden"
+              >
+                {/* Background Pattern - Organic Shapes */}
+                <div
+                  style={{ backgroundColor: intPsychTheme.accent }}
+                  className="absolute top-0 right-0 w-64 h-64 bg-[#0072ce] opacity-10 rounded-full -mr-16 -mt-16 blur-3xl mix-blend-overlay"
+                ></div>
+                <div
+                  style={{ backgroundColor: intPsychTheme.accent }}
+                  className="absolute bottom-0 left-0 w-48 h-48 bg-[#0072ce] opacity-10 rounded-full -ml-10 -mb-10 blur-2xl mix-blend-overlay"
+                ></div>
+
+                <div className="relative z-10 flex flex-col h-full justify-between">
+                  <div>
+                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold mb-4 border border-white/10 text-[#dcfce7]">
+                      <Leaf className="w-4 h-4" />
+                      DAILY GROWTH
+                    </div>
+                    <h2 className={`${dm_serif.className} text-3xl mb-2`}>
+                      Behavioral Activation
+                    </h2>
+                    <p className="text-[#dcfce7] text-lg max-w-xl leading-relaxed font-normal">
+                      Schedule enjoyable, meaningful activities to boost your
+                      mood. Let's plant one simple activity for this week.
+                    </p>
+                  </div>
+
+                  <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="flex -space-x-2">
+                        <div
+                          style={{ backgroundColor: intPsychTheme.accent }}
+                          className="w-8 h-8 rounded-full border-2 border-white"
+                        ></div>
+                        <div
+                          style={{ backgroundColor: intPsychTheme.secondary }}
+                          className="w-8 h-8 rounded-full border-2 border-white"
+                        ></div>
+                        <div
+                          style={{ backgroundColor: intPsychTheme.accent }}
+                          className="w-8 h-8 rounded-full border-2 border-white"
+                        ></div>
+                      </div>
+                      <span className="text-sm font-medium text-[#dcfce7]">
+                        124 others started today
+                      </span>
+                    </div>
+                    <button
+                      className="px-6 py-3 bg-white rounded-xl font-bold border-b-4 border-blue-100 hover:bg-blue-50 active:border-b-0 active:translate-y-[4px] transition-all flex items-center gap-2 uppercase tracking-wide text-sm"
+                      style={{ color: intPsychTheme.accent }}
+                    >
+                      Begin
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Psychoeducation Module - Exact Figma styling */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-3xl p-6 h-full shadow-[0_1px_2px_rgba(15,23,42,0.08)] flex flex-col">
-                <div className="mb-4">
-                  <div
-                    className={`${roboto.className} mb-2`}
-                    style={{ color: intPsychTheme.textMuted }}
-                  >
-                    PSYCHOEDUCATION
-                  </div>
-                  <h2 className="mb-4" style={{ color: intPsychTheme.primary }}>
-                    Behavioral Activation
-                  </h2>
-                  <p
-                    className="mb-6"
-                    style={{ color: intPsychTheme.textMuted }}
-                  >
-                    Behavioral activation—scheduling enjoyable, meaningful
-                    activities—is a powerful tool against low mood. To start,
-                    recall some past pleasant activities (such as hobbies or
-                    socializing), then plan to try one in the next week.
-                  </p>
-                </div>
-                <div className="mt-auto">
-                  <button
-                    style={{ backgroundColor: intPsychTheme.secondary }}
-                    className="w-full hover:bg-[#FF7A2E] text-white rounded-xl py-3 px-4 flex items-center justify-center gap-2"
-                  >
-                    Try Now
-                    <ArrowRight className="w-4 h-4 ml-2" />
+            {/* Garden Mini-Card */}
+            <div className="lg:col-span-1 bg-white rounded-2xl border-b-4 border-[#84cc16]/30 p-6 shadow-sm flex flex-col items-center justify-center text-center gap-4 hover:border-[#84cc16]/50 transition-all cursor-pointer group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-b from-[#f7fee7]/50 to-transparent pointer-events-none" />
+
+              <div className="bg-[#ecfccb] p-4 rounded-full mb-2 group-hover:scale-110 transition-transform duration-300 shadow-inner">
+                <img
+                  src="/assets/garden/flower_orange.png"
+                  alt="Flower"
+                  className="w-16 h-16 object-contain drop-shadow-sm"
+                />
+              </div>
+
+              <div className="relative z-10">
+                <h3
+                  className={`${dm_serif.className} text-2xl text-[#3f6212] mb-1`}
+                >
+                  Your Garden
+                </h3>
+                <p className="text-[#65a30d] font-medium mb-4">
+                  Everything is blooming.
+                </p>
+                <Link href="/garden">
+                  <button className="w-full bg-[#84cc16] text-white px-6 py-2 rounded-xl font-bold border-b-4 border-[#65a30d] hover:bg-[#65a30d] active:border-b-0 active:translate-y-[4px] transition-all shadow-sm">
+                    Visit Garden
                   </button>
-                </div>
+                </Link>
               </div>
             </div>
           </div>
 
-          {/* Stats Cards - Updated to Figma styling */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            {/* Assessments Completed */}
-            <div className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
-              <h3 className="mb-2" style={{ color: intPsychTheme.primary }}>
-                Assessments Completed
-              </h3>
-              <div className="mb-2" style={{ color: intPsychTheme.textMuted }}>
-                {dashboardData?.assessments.completed || 0}/
-                {dashboardData?.assessments.total || 0}
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-gray-800 h-2 rounded-full transition-all"
-                  style={{
-                    width: `${
-                      ((dashboardData?.assessments.completed || 0) /
-                        (dashboardData?.assessments.total || 1)) *
-                      100
-                    }%`,
-                  }}
-                />
-              </div>
-            </div>
+          {/* Stats Grid */}
+          <div>
+            <h2
+              className={`${dm_serif.className} text-2xl text-[#1c1917] mb-6 flex items-center gap-3`}
+            >
+              <Leaf className="w-5 h-5 text-[#15803d]" />
+              Your Growth
+            </h2>
 
-            {/* Current Mood */}
-            <div className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
-              <h3 className="mb-2" style={{ color: intPsychTheme.primary }}>
-                Current Mood
-              </h3>
-              <div className="mb-2" style={{ color: intPsychTheme.textMuted }}>
-                {dashboardData?.mood.current || "Not set"}
-              </div>
-              <div style={{ color: intPsychTheme.textMuted }}>
-                Last updated: {dashboardData?.mood.lastUpdated || "Never"}
-              </div>
-            </div>
-
-            {/* Symptom Severity */}
-            <div className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
-              <h3 className="mb-2" style={{ color: intPsychTheme.primary }}>
-                Symptom Severity
-              </h3>
-              <div className="relative w-32 h-32 mx-auto">
-                <svg className="transform -rotate-90" viewBox="0 0 120 120">
-                  <circle
-                    cx="60"
-                    cy="60"
-                    r="50"
-                    fill="none"
-                    stroke="#E5E7EB"
-                    strokeWidth="12"
-                  />
-                  <circle
-                    cx="60"
-                    cy="60"
-                    r="50"
-                    fill="none"
-                    stroke="#7FB885"
-                    strokeWidth="12"
-                    strokeDasharray={`${2 * Math.PI * 50 * ((dashboardData?.severity.percentage || 0) / 100)} ${2 * Math.PI * 50}`}
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <div style={{ color: intPsychTheme.textMuted }}>
-                    {dashboardData?.severity.percentage || 0}%
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Assessments Progress */}
+              <div className="bg-white rounded-2xl border border-[#e7e5e4] border-b-4 p-6 hover:-translate-y-1 transition-transform duration-300 shadow-sm">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="bg-[#f3e8ff] p-2 rounded-lg">
+                    <Target className="w-5 h-5 text-[#7e22ce]" />
                   </div>
-                  <div style={{ color: intPsychTheme.textMuted }}>
-                    {dashboardData?.severity.level || "Minimal"}
-                  </div>
+                  <span className="text-xs font-bold bg-[#fafaf9] text-stone-500 px-2 py-1 rounded-md uppercase tracking-wide border border-[#e7e5e4]">
+                    Weekly
+                  </span>
+                </div>
+                <h3 className="text-stone-500 font-bold text-xs uppercase tracking-wider mb-1">
+                  Assessments
+                </h3>
+                <div className="flex items-baseline gap-1 mb-3">
+                  <span className="text-3xl font-bold text-[#1c1917]">
+                    {dashboardData?.assessments.completed || 0}
+                  </span>
+                  <span className="text-stone-400 font-medium">
+                    / {dashboardData?.assessments.total || 0}
+                  </span>
+                </div>
+                <div className="w-full bg-[#f3e8ff] rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-[#a855f7] h-full rounded-full transition-all duration-500 ease-out"
+                    style={{
+                      width: `${((dashboardData?.assessments.completed || 0) / (dashboardData?.assessments.total || 1)) * 100}%`,
+                    }}
+                  />
                 </div>
               </div>
-              <div
-                className="flex items-center justify-between mt-4"
-                style={{ color: intPsychTheme.textMuted }}
-              >
-                <span>Minimal</span>
-                <span>Severe</span>
+
+              {/* Current Mood */}
+              <div className="bg-white rounded-2xl border border-[#e7e5e4] border-b-4 p-6 hover:-translate-y-1 transition-transform duration-300 shadow-sm">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="bg-[#ffedd5] p-2 rounded-lg">
+                    <Sun className="w-5 h-5 text-[#ea580c]" />
+                  </div>
+                  <span className="text-xs font-bold bg-[#fafaf9] text-stone-500 px-2 py-1 rounded-md uppercase tracking-wide border border-[#e7e5e4]">
+                    Today
+                  </span>
+                </div>
+                <h3 className="text-stone-500 font-bold text-xs uppercase tracking-wider mb-1">
+                  Current Mood
+                </h3>
+                <div className="text-2xl font-bold text-[#1c1917] mb-1 truncate">
+                  {dashboardData?.mood.current || "Not set"}
+                </div>
+                <p className="text-xs font-medium text-stone-400">
+                  Last:{" "}
+                  {dashboardData?.mood.lastUpdated
+                    ? new Date(
+                        dashboardData.mood.lastUpdated
+                      ).toLocaleDateString()
+                    : "Never"}
+                </p>
+              </div>
+
+              {/* Symptom Severity */}
+              <div className="bg-white rounded-2xl border border-[#e7e5e4] border-b-4 p-6 hover:-translate-y-1 transition-transform duration-300 shadow-sm">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="bg-[#ffe4e6] p-2 rounded-lg">
+                    <TrendingDown className="w-5 h-5 text-[#e11d48]" />
+                  </div>
+                  <span className="text-xs font-bold bg-[#fafaf9] text-stone-500 px-2 py-1 rounded-md uppercase tracking-wide border border-[#e7e5e4]">
+                    Status
+                  </span>
+                </div>
+                <h3 className="text-stone-500 font-bold text-xs uppercase tracking-wider mb-1">
+                  Symptom Level
+                </h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl font-bold text-[#1c1917]">
+                    {dashboardData?.severity.level || "Unknown"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-[#e11d48]">
+                  {dashboardData?.severity.percentage || 0}% Severity
+                </div>
+              </div>
+
+              {/* Streak / Generic */}
+              <div className="bg-white rounded-2xl border border-[#e7e5e4] border-b-4 p-6 hover:-translate-y-1 transition-transform duration-300 shadow-sm">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="bg-[#fef9c3] p-2 rounded-lg">
+                    <Star className="w-5 h-5 text-[#ca8a04]" />
+                  </div>
+                </div>
+                <h3 className="text-stone-500 font-bold text-xs uppercase tracking-wider mb-1">
+                  Current Streak
+                </h3>
+                <div className="text-3xl font-bold text-[#1c1917] mb-1">
+                  3 Days
+                </div>
+                <p className="text-xs font-medium text-stone-400">
+                  Keep nurturing!
+                </p>
               </div>
             </div>
+          </div>
 
-            {/* Trends */}
-            <div className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
-              <h3 className="mb-2" style={{ color: intPsychTheme.primary }}>
-                Trends
-              </h3>
-              <div className="space-y-2">
-                {dashboardData?.assessments.recent
+          {/* Recent Activity Section - styled as "Journal Log" */}
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2
+                className={`${dm_serif.className} text-2xl text-[#1c1917] flex items-center gap-3`}
+              >
+                <Target className="w-5 h-5 text-[#0369a1]" />
+                Recent Milestones
+              </h2>
+              <Link
+                href="/assessments"
+                className="text-[#0369a1] font-bold uppercase text-xs hover:underline tracking-wide"
+              >
+                View All
+              </Link>
+            </div>
+
+            <div className="space-y-4">
+              {dashboardData?.assessments.recent?.length === 0 ? (
+                <div className="bg-white rounded-2xl p-8 text-center border-2 border-dashed border-[#e7e5e4]">
+                  <p className="text-stone-400 font-medium">
+                    No milestones recorded yet.
+                  </p>
+                </div>
+              ) : (
+                dashboardData?.assessments.recent
                   ?.slice(0, 3)
                   .map((assessment, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center justify-between"
+                      className="bg-white rounded-xl border border-[#e7e5e4] border-b-2 p-4 flex items-center justify-between hover:border-[#0369a1]/30 transition-colors group shadow-sm"
                     >
-                      <span style={{ color: intPsychTheme.textMuted }}>
-                        {assessment.name}
-                      </span>
-                      {assessment.change < 0 ? (
-                        <TrendingDown className="w-4 h-4 text-[#7FB885]" />
-                      ) : (
-                        <TrendingUp className="w-4 h-4 text-[#FF8C42]" />
-                      )}
-                    </div>
-                  ))}
-              </div>
-              <button
-                className="w-full mt-4 py-2"
-                style={{ color: intPsychTheme.textMuted }}
-              >
-                See Care Path Suggestions
-              </button>
-            </div>
-          </div>
-
-          {/* Clinical Assessments - Updated to Figma styling */}
-          <div className="mb-6">
-            <h2 className="mb-4" style={{ color: intPsychTheme.primary }}>
-              Recent Assessments
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {dashboardData?.assessments.recent
-                ?.slice(0, 3)
-                .map((assessment, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6"
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 style={{ color: intPsychTheme.primary }}>
-                          {assessment.name}
-                        </h3>
-                        <p style={{ color: intPsychTheme.textMuted }}>
-                          Depression/Anxiety Scale
-                        </p>
-                      </div>
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm ${
-                          assessment.severity === "Mild"
-                            ? "bg-[#A8D5BA] text-gray-900 border border-[#7FB885]"
-                            : "bg-[#FFD9A6] text-gray-900 border border-[#FF8C42]"
-                        }`}
-                      >
-                        {assessment.severity}
-                      </span>
-                    </div>
-                    <div className="space-y-4">
-                      <div className="flex items-end justify-between">
-                        <div style={{ color: intPsychTheme.textMuted }}>
-                          {assessment.score}
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-[#e0f2fe] flex items-center justify-center text-[#0369a1] group-hover:bg-[#bae6fd] transition-colors">
+                          <ClipboardList className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-[#1c1917]">
+                            {assessment.name}
+                          </h3>
+                          <p className="text-xs font-medium text-stone-500 uppercase tracking-wide">
+                            Score: {assessment.score} • {assessment.severity}
+                          </p>
                         </div>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+
+                      <div className="flex items-center gap-4">
                         <div
-                          className="bg-gray-800 h-2 rounded-full"
-                          style={{ width: "60%" }}
-                        />
-                      </div>
-                      <div
-                        className="flex items-center gap-2"
-                        style={{ color: intPsychTheme.textMuted }}
-                      >
-                        {assessment.change < 0 ? (
-                          <TrendingDown className="w-4 h-4 text-[#7FB885]" />
-                        ) : (
-                          <TrendingUp className="w-4 h-4 text-[#FF8C42]" />
-                        )}
-                        <span>
-                          {Math.abs(assessment.change)} from last week
-                        </span>
+                          className={`flex items-center gap-1 font-bold text-sm ${assessment.change < 0 ? "text-[#15803d]" : "text-[#ea580c]"}`}
+                        >
+                          {assessment.change < 0 ? (
+                            <TrendingDown className="w-4 h-4" />
+                          ) : (
+                            <TrendingUp className="w-4 h-4" />
+                          )}
+                          <span>{Math.abs(assessment.change)} pts</span>
+                        </div>
+                        <div className="w-8 h-8 rounded-full bg-[#fafaf9] flex items-center justify-center text-stone-300 group-hover:text-[#0369a1] transition-colors">
+                          <ArrowRight className="w-4 h-4" />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+              )}
             </div>
           </div>
         </div>

@@ -12,13 +12,18 @@ import {
   Pencil,
   Check,
   X,
+  Plus,
+  Heart,
+  BookOpen,
+  Feather,
 } from "lucide-react";
-import { DM_Serif_Text } from "next/font/google";
+import { DM_Serif_Text, DM_Sans } from "next/font/google";
 import { intPsychTheme } from "../components/theme";
 import { useSession } from "next-auth/react";
 import Drawer from "../components/Drawer";
 import { useWeather } from "../lib/hooks/useWeather";
 import WeatherWidget from "../components/WeatherWidget";
+
 interface JournalEntry {
   id: string;
   content: string;
@@ -33,7 +38,10 @@ interface JournalEntry {
     };
   };
 }
+
 const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
+const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
+
 export default function JournalPage() {
   const { data: session } = useSession();
   const [entries, setEntries] = useState<JournalEntry[]>([]);
@@ -85,14 +93,13 @@ export default function JournalPage() {
     entryId: string,
     event: React.MouseEvent
   ) => {
-    event.stopPropagation(); // Prevent navigation to entry detail page
+    event.stopPropagation();
     try {
       const response = await fetch(`/api/portal/journal?id=${entryId}`, {
         method: "DELETE",
       });
       if (response.ok) {
         setEntries((prev) => prev.filter((entry) => entry.id !== entryId));
-        // Close drawer if the deleted entry was being viewed
         if (selectedEntry?.id === entryId) {
           setIsDrawerOpen(false);
           setSelectedEntry(null);
@@ -150,13 +157,11 @@ export default function JournalPage() {
 
       if (response.ok) {
         const data = await response.json();
-        // Update the entry in the list
         setEntries((prev) =>
           prev.map((entry) =>
             entry.id === entryId ? { ...entry, ...data.entry } : entry
           )
         );
-        // Update the selected entry
         if (selectedEntry?.id === entryId) {
           setSelectedEntry({ ...selectedEntry, ...data.entry });
         }
@@ -182,27 +187,41 @@ export default function JournalPage() {
   };
 
   const getMoodIcon = (mood: number) => {
-    if (mood <= 2) return <Frown className="w-5 h-5 text-red-600" />;
-    if (mood <= 3) return <Meh className="w-5 h-5 text-yellow-600" />;
-    return <Smile className="w-5 h-5 text-[#7FB885]" />;
+    if (mood <= 2) return <Frown className="w-6 h-6 text-[#e11d48]" />;
+    if (mood <= 3) return <Meh className="w-6 h-6 text-[#ca8a04]" />;
+    return <Smile className="w-6 h-6 text-[#15803d]" />;
   };
 
   const getMoodLabel = (mood: number) => {
-    if (mood <= 2) return "Down";
+    if (mood <= 2) return "Low";
     if (mood <= 3) return "Okay";
     return "Good";
   };
 
   const getMoodColor = (mood: number) => {
-    if (mood <= 2) return { bg: "bg-red-50", text: "text-red-600" };
-    if (mood <= 3) return { bg: "bg-yellow-50", text: "text-yellow-600" };
-    return { bg: "bg-[#E8F0E6]", text: "text-[#7FB885]" };
+    if (mood <= 2)
+      return {
+        bg: "bg-[#ffe4e6]",
+        text: "text-[#e11d48]",
+        border: "border-[#fda4af]",
+      };
+    if (mood <= 3)
+      return {
+        bg: "bg-[#fef9c3]",
+        text: "text-[#ca8a04]",
+        border: "border-[#fde047]",
+      };
+    return {
+      bg: "bg-[#dcfce7]",
+      text: "text-[#15803d]",
+      border: "border-[#86efac]",
+    };
   };
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString("en-US", {
-      month: "short",
+      month: "long",
       day: "numeric",
       year: "numeric",
     });
@@ -212,316 +231,154 @@ export default function JournalPage() {
     {
       label: "Good",
       value: 5,
-      icon: <Smile className="w-5 h-5" />,
-      bg: "bg-[#E8F0E6]",
-      border: "border-[#7FB885]",
-      text: "text-[#1F6B3D]",
-      selectedBg: "bg-[#CFE8D5]",
-      selectedBorder: "border-[#5AA36E]",
-      selectedText: "text-[#0F4F21]",
+      icon: <Smile className="w-6 h-6" />,
+      bg: "bg-[#f0fdf4]",
+      border: "border-[#bbf7d0]",
+      text: "text-[#15803d]",
+      selectedBg: "bg-[#dcfce7]",
+      selectedBorder: "border-[#15803d]",
+      selectedText: "text-[#14532d]",
     },
     {
       label: "Okay",
       value: 3,
-      icon: <Meh className="w-5 h-5" />,
-      bg: "bg-yellow-50",
-      border: "border-yellow-400",
-      text: "text-[#8C6E00]",
-      selectedBg: "bg-[#FDE6C0]",
-      selectedBorder: "border-[#D98205]",
-      selectedText: "text-[#6B4B00]",
+      icon: <Meh className="w-6 h-6" />,
+      bg: "bg-[#fefce8]",
+      border: "border-[#fef08a]",
+      text: "text-[#854d0e]",
+      selectedBg: "bg-[#fef9c3]",
+      selectedBorder: "border-[#ca8a04]",
+      selectedText: "text-[#713f12]",
     },
     {
-      label: "Down",
+      label: "Low",
       value: 1,
-      icon: <Frown className="w-5 h-5" />,
-      bg: "bg-red-50",
-      border: "border-red-400",
-      text: "text-[#B1222B]",
-      selectedBg: "bg-[#F5C6C8]",
-      selectedBorder: "border-[#C62B38]",
-      selectedText: "text-[#81131E]",
+      icon: <Frown className="w-6 h-6" />,
+      bg: "bg-[#fff1f2]",
+      border: "border-[#fecdd3]",
+      text: "text-[#be123c]",
+      selectedBg: "bg-[#ffe4e6]",
+      selectedBorder: "border-[#e11d48]",
+      selectedText: "text-[#9f1239]",
     },
   ];
-
-  const emotions = [
-    {
-      label: "Happy",
-      emoji: "😊",
-      color: "bg-yellow-50",
-      border: "border-yellow-300",
-      text: "text-yellow-700",
-      selectedBg: "bg-yellow-100",
-    },
-    {
-      label: "Sad",
-      emoji: "😢",
-      color: "bg-blue-50",
-      border: "border-blue-300",
-      text: "text-blue-700",
-      selectedBg: "bg-blue-100",
-    },
-    {
-      label: "Anxious",
-      emoji: "😰",
-      color: "bg-orange-50",
-      border: "border-orange-300",
-      text: "text-orange-700",
-      selectedBg: "bg-orange-100",
-    },
-    {
-      label: "Calm",
-      emoji: "😌",
-      color: "bg-green-50",
-      border: "border-green-300",
-      text: "text-green-700",
-      selectedBg: "bg-green-100",
-    },
-    {
-      label: "Angry",
-      emoji: "😠",
-      color: "bg-red-50",
-      border: "border-red-300",
-      text: "text-red-700",
-      selectedBg: "bg-red-100",
-    },
-    {
-      label: "Excited",
-      emoji: "🤩",
-      color: "bg-pink-50",
-      border: "border-pink-300",
-      text: "text-pink-700",
-      selectedBg: "bg-pink-100",
-    },
-    {
-      label: "Tired",
-      emoji: "😴",
-      color: "bg-gray-50",
-      border: "border-gray-300",
-      text: "text-gray-700",
-      selectedBg: "bg-gray-100",
-    },
-    {
-      label: "Grateful",
-      emoji: "🙏",
-      color: "bg-purple-50",
-      border: "border-purple-300",
-      text: "text-purple-700",
-      selectedBg: "bg-purple-100",
-    },
-    {
-      label: "Frustrated",
-      emoji: "😤",
-      color: "bg-red-50",
-      border: "border-red-400",
-      text: "text-red-800",
-      selectedBg: "bg-red-100",
-    },
-    {
-      label: "Hopeful",
-      emoji: "✨",
-      color: "bg-indigo-50",
-      border: "border-indigo-300",
-      text: "text-indigo-700",
-      selectedBg: "bg-indigo-100",
-    },
-    {
-      label: "Lonely",
-      emoji: "😔",
-      color: "bg-slate-50",
-      border: "border-slate-300",
-      text: "text-slate-700",
-      selectedBg: "bg-slate-100",
-    },
-    {
-      label: "Content",
-      emoji: "😊",
-      color: "bg-emerald-50",
-      border: "border-emerald-300",
-      text: "text-emerald-700",
-      selectedBg: "bg-emerald-100",
-    },
-  ];
-
-  const toggleEmotion = (emotion: string) => {
-    setSelectedEmotions((prev) =>
-      prev.includes(emotion)
-        ? prev.filter((e) => e !== emotion)
-        : [...prev, emotion]
-    );
-  };
 
   return (
     <PortalLayout>
-      <div className="min-h-screen p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8 flex items-start justify-between">
+      <div className={`min-h-screen p-6 md:p-8 ${dm_sans.className}`}>
+        <div className="max-w-5xl mx-auto space-y-8">
+          <div className="flex items-center justify-between">
             <div>
               <h1
-                style={{ color: intPsychTheme.primary }}
-                className={`${dm_serif.className} text-3xl text-gray-900 mb-2`}
+                className={`${dm_serif.className} text-4xl text-[#1c1917] mb-2`}
               >
-                {session?.user?.name
-                  ? `${session?.user?.name?.split(" ")[0]}'s Journal`
-                  : "Your Journal"}
+                Your Journal
               </h1>
-              <p className="text-sm text-gray-600">
-                Track your thoughts, feelings, and daily experiences
+              <p className="text-stone-500 text-lg font-medium">
+                A quiet space for your thoughts and growth.
               </p>
             </div>
-            {/* Weather Widget - Upper Right */}
             <WeatherWidget weather={weather} />
           </div>
 
-          {/* New Entry Section - Exact Figma */}
-          <section className="mb-8">
-            <h2
-              style={{ color: intPsychTheme.primary }}
-              className={`font-serif text-xl text-gray-900 mb-2`}
-            >
-              New Entry
-            </h2>
-            <div className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-gray-700 mb-2">
-                    How are you feeling today?
-                  </label>
-                  <div className="flex gap-3">
-                    {moodOptions.map((option) => {
-                      const isSelected = selectedMood === option.value;
-                      return (
-                        <button
-                          key={option.label}
-                          type="button"
-                          onClick={() => setSelectedMood(option.value)}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors focus:outline-none ${
-                            isSelected
-                              ? `${option.selectedBg ?? option.bg} ${option.selectedBorder ?? option.border} ${option.selectedText ?? option.text} opacity-100`
-                              : `${option.bg} ${option.border} ${option.text} opacity-70 hover:opacity-100`
-                          }`}
-                        >
-                          {option.icon}
-                          <span
-                            className={
-                              isSelected
-                                ? (option.selectedText ?? option.text)
-                                : option.text
-                            }
-                          >
-                            {option.label}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 mb-2">
-                    What emotions are you experiencing?
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {emotions.map((emotion) => {
-                      const isSelected = selectedEmotions.includes(
-                        emotion.label
-                      );
-                      return (
-                        <button
-                          key={emotion.label}
-                          type="button"
-                          onClick={() => toggleEmotion(emotion.label)}
-                          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-[#7FB885] ${
-                            isSelected
-                              ? `${emotion.selectedBg} ${emotion.border} ${emotion.text} opacity-100 border-2`
-                              : `${emotion.color} ${emotion.border} ${emotion.text} opacity-70 hover:opacity-100 border`
-                          }`}
-                        >
-                          <span className="text-lg">{emotion.emoji}</span>
-                          <span className="text-sm font-medium">
-                            {emotion.label}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="journal-entry"
-                    className="block text-gray-700 mb-2"
-                  >
-                    Your thoughts
-                  </label>
-                  <textarea
-                    id="journal-entry"
-                    placeholder="Write about your day, how you're feeling, what's on your mind..."
-                    rows={6}
-                    value={newContent}
-                    onChange={(event) => setNewContent(event.target.value)}
-                    className="w-full border border-[#2B4E6B] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#7FB885]"
-                  />
-                </div>
-
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (!newContent.trim() || selectedMood === null) {
-                      return;
-                    }
-                    await createJournalEntry(newContent.trim(), selectedMood);
-                    setNewContent("");
-                    setSelectedMood(null);
-                    setSelectedEmotions([]);
-                  }}
-                  disabled={!newContent.trim() || selectedMood === null}
-                  style={{
-                    backgroundColor: intPsychTheme.secondary,
-                    borderColor:
-                      !newContent.trim() || selectedMood === null
-                        ? "#ffc994"
-                        : "#e69333",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!(!newContent.trim() || selectedMood === null)) {
-                      e.currentTarget.style.backgroundColor = "#e69333";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!(!newContent.trim() || selectedMood === null)) {
-                      e.currentTarget.style.backgroundColor =
-                        intPsychTheme.secondary;
-                    }
-                  }}
-                  className={`${!newContent.trim() || selectedMood === null ? "cursor-not-allowed" : "cursor-pointer"} w-full text-white border rounded-xl py-3 px-4 transition-colors`}
-                >
-                  Save Entry
-                </button>
+          {/* New Entry Section */}
+          <section className="bg-white rounded-2xl border-b-4 border-[#fde047]/50 p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="bg-[#fef9c3] p-2 rounded-lg">
+                <Feather className="w-6 h-6 text-[#ca8a04]" />
               </div>
+              <h2 className={`${dm_serif.className} text-2xl text-[#1c1917]`}>
+                New Entry
+              </h2>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-bold text-stone-400 uppercase tracking-wide mb-3">
+                  How are you feeling today?
+                </label>
+                <div className="flex gap-4">
+                  {moodOptions.map((option) => {
+                    const isSelected = selectedMood === option.value;
+                    return (
+                      <button
+                        key={option.label}
+                        type="button"
+                        onClick={() => setSelectedMood(option.value)}
+                        className={`flex-1 flex flex-col items-center justify-center gap-2 p-4 rounded-xl border transition-all ${
+                          isSelected
+                            ? `${option.selectedBg} ${option.selectedBorder} border-2 ${option.selectedText} shadow-inner scale-[0.98]`
+                            : `${option.bg} ${option.border} ${option.text} hover:scale-[1.02] hover:shadow-sm`
+                        }`}
+                      >
+                        {option.icon}
+                        <span className="font-bold">{option.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="journal-entry"
+                  className="block text-sm font-bold text-stone-400 uppercase tracking-wide mb-3"
+                >
+                  Reflection
+                </label>
+                <textarea
+                  id="journal-entry"
+                  placeholder="What's on your mind today?"
+                  rows={6}
+                  value={newContent}
+                  onChange={(event) => setNewContent(event.target.value)}
+                  className="w-full bg-[#fafaf9] border border-[#e7e5e4] rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-[#ca8a04]/20 focus:border-[#ca8a04] transition-all text-lg placeholder:text-stone-400 font-medium resize-none text-[#1c1917] leading-relaxed"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!newContent.trim() || selectedMood === null) return;
+                  await createJournalEntry(newContent.trim(), selectedMood);
+                  setNewContent("");
+                  setSelectedMood(null);
+                  setSelectedEmotions([]);
+                }}
+                disabled={!newContent.trim() || selectedMood === null}
+                className={`w-full py-3.5 rounded-xl font-bold uppercase tracking-wide transition-all flex items-center justify-center gap-2 shadow-[0_2px_0_0_rgba(0,0,0,0.05)] text-sm ${
+                  !newContent.trim() || selectedMood === null
+                    ? "bg-[#f5f5f4] text-stone-400 cursor-not-allowed shadow-none border border-[#e7e5e4]"
+                    : "bg-[#ffa440] text-white border-b-4 border-[#f58402] hover:bg-[#f58402] hover:translate-y-[-1px] active:translate-y-[1px] active:border-b-0 active:shadow-none"
+                }`}
+              >
+                <Check className="w-5 h-5" />
+                Save Entry
+              </button>
             </div>
           </section>
 
-          {/* Previous Entries Section - Exact Figma */}
+          {/* Previous Entries */}
           <section>
-            <h2
-              style={{ color: intPsychTheme.primary }}
-              className={`font-serif text-xl text-gray-900 mb-2`}
-            >
-              Previous Entries
-            </h2>
+            <div className="flex items-center gap-3 mb-6">
+              <BookOpen className="w-6 h-6 text-[#0ea5e9]" />
+              <h2 className={`${dm_serif.className} text-2xl text-[#1c1917]`}>
+                Your Journal
+              </h2>
+            </div>
+
             {loading ? (
-              <div className="text-center py-12 text-gray-600">
-                Loading entries...
+              <div className="text-center py-12 text-stone-400 font-bold">
+                Loading your entries...
               </div>
             ) : entries.length === 0 ? (
-              <div className="bg-white rounded-3xl p-12 text-center shadow-[0_1px_2px_rgba(15,23,42,0.08)]">
-                <p className="text-gray-600 mb-4">
-                  You haven't written any journal entries yet.
+              <div className="bg-[#f0f9ff] rounded-2xl p-12 text-center border border-[#bae6fd] border-dashed">
+                <p className="text-stone-500 font-medium text-lg">
+                  Your journal is waiting for its first story.
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {entries.map((entry) => {
                   const moodColors = getMoodColor(entry.mood);
                   const moodLabel = getMoodLabel(entry.mood);
@@ -530,36 +387,37 @@ export default function JournalPage() {
                     <div
                       key={entry.id}
                       onClick={() => openDrawer(entry)}
-                      className="bg-white shadow-[0_1px_2px_rgba(15,23,42,0.08)] rounded-3xl p-6 cursor-pointer hover:shadow-md transition-shadow"
+                      className="bg-white rounded-xl border border-[#e7e5e4] border-b-2 p-5 cursor-pointer hover:border-[#0ea5e9]/30 hover:bg-[#f0f9ff]/30 transition-all group shadow-sm"
                     >
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <Calendar className="w-5 h-5 text-gray-500" />
-                          <span className="text-gray-900">
-                            {formatDate(entry.createdAt)}
-                          </span>
-                          <div
-                            className={`flex items-center gap-2 px-3 py-1 rounded-full ${moodColors.bg}`}
-                          >
-                            {getMoodIcon(entry.mood)}
-
-                            <span className={moodColors.text}>{moodLabel}</span>
-                          </div>
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-2 bg-[#fafaf9] px-3 py-1.5 rounded-lg text-xs font-bold text-stone-500 uppercase tracking-wide border border-[#e7e5e4]">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(entry.createdAt).toLocaleDateString(
+                            "en-US",
+                            { month: "short", day: "numeric" }
+                          )}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Trash2
-                            onClick={(e) => deleteJournalEntry(entry.id, e)}
-                            className="hover:text-red-500 w-5 h-5 text-gray-500 cursor-pointer"
-                          />
-                          <Eye
-                            onClick={(e) => openDrawer(entry, e)}
-                            className="hover:text-blue-500 w-5 h-5 text-gray-500 cursor-pointer"
-                          />
+
+                        <div
+                          className={`flex items-center gap-1.5 px-3 py-1 rounded-full ${moodColors.bg} ${moodColors.text} text-xs font-bold uppercase border ${moodColors.border}`}
+                        >
+                          {getMoodIcon(entry.mood)}
+                          {moodLabel}
                         </div>
                       </div>
-                      <p className="line-clamp-3 text-gray-700">
+
+                      <p className="text-stone-600 font-medium line-clamp-3 mb-4 leading-relaxed text-base">
                         {entry.content}
                       </p>
+
+                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => deleteJournalEntry(entry.id, e)}
+                          className="p-2 text-stone-400 hover:text-[#e11d48] hover:bg-[#ffe4e6] rounded-lg transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -572,22 +430,26 @@ export default function JournalPage() {
       {/* Drawer for viewing full entry */}
       <Drawer isOpen={isDrawerOpen} onClose={closeDrawer}>
         {selectedEntry && (
-          <div className="space-y-6">
+          <div className={`space-y-6 ${dm_sans.className}`}>
             {/* Header with date and mood */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Calendar className="w-5 h-5 text-gray-500" />
-                <span className="text-gray-900">
+            <div className="flex items-center justify-between border-b border-[#e7e5e4] pb-6">
+              <div className="flex items-center gap-2">
+                <div className="bg-[#f5f5f4] p-2 rounded-lg">
+                  <Calendar className="w-5 h-5 text-stone-500" />
+                </div>
+                <span className="text-lg font-bold text-[#1c1917]">
                   {formatDate(selectedEntry.createdAt)}
                 </span>
               </div>
               <div
-                className={`flex items-center gap-2 px-3 py-1 rounded-full ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${
                   getMoodColor(selectedEntry.mood).bg
-                }`}
+                } ${getMoodColor(selectedEntry.mood).border}`}
               >
                 {getMoodIcon(selectedEntry.mood)}
-                <span className={getMoodColor(selectedEntry.mood).text}>
+                <span
+                  className={`font-bold uppercase tracking-wide text-sm ${getMoodColor(selectedEntry.mood).text}`}
+                >
                   {getMoodLabel(selectedEntry.mood)}
                 </span>
               </div>
@@ -595,117 +457,56 @@ export default function JournalPage() {
 
             {/* Entry content */}
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3
-                  className="text-lg font-semibold"
-                  style={{ color: intPsychTheme.primary }}
-                >
-                  Journal Entry
+              <div className="flex items-center justify-between mb-4">
+                <h3 className={`${dm_serif.className} text-2xl text-[#1c1917]`}>
+                  Entry Details
                 </h3>
                 {!isEditing && (
                   <button
                     onClick={startEditing}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#7FB885]"
-                    aria-label="Edit entry"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold text-stone-600 bg-[#f5f5f4] hover:bg-[#e7e5e4] transition-colors uppercase tracking-wide"
                   >
                     <Pencil className="w-4 h-4" />
                     Edit
                   </button>
                 )}
               </div>
+
               {isEditing ? (
                 <div className="space-y-4">
                   <textarea
                     value={editedContent}
                     onChange={(e) => setEditedContent(e.target.value)}
-                    rows={10}
-                    className="w-full border border-[#2B4E6B] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#7FB885] text-gray-700 leading-relaxed resize-none"
-                    placeholder="Write about your day, how you're feeling, what's on your mind..."
+                    rows={12}
+                    className="w-full bg-[#fafaf9] border border-[#e7e5e4] rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-[#ca8a04]/20 focus:border-[#ca8a04] transition-all text-lg text-[#1c1917] leading-relaxed resize-none font-medium"
+                    placeholder="Write about your day..."
                   />
                   <div className="flex items-center gap-3">
                     <button
                       onClick={handleSave}
                       disabled={isSaving || !editedContent.trim()}
-                      style={{
-                        backgroundColor:
-                          isSaving || !editedContent.trim()
-                            ? "#ffd9b3"
-                            : intPsychTheme.secondary,
-                        borderColor:
-                          isSaving || !editedContent.trim()
-                            ? "#ffc994"
-                            : "#e69333",
-                      }}
-                      className="cursor-pointer flex items-center gap-2 px-4 py-2 text-white border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#7FB885] disabled:cursor-not-allowed"
+                      className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#ca8a04] text-white rounded-xl font-bold border-b-4 border-[#a16207] hover:bg-[#b45309] hover:translate-y-[-1px] active:translate-y-[1px] active:border-b-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm uppercase tracking-wide"
                     >
-                      <Check className="w-4 h-4" />
-                      {isSaving ? "Saving..." : "Save"}
+                      <Check className="w-5 h-5" />
+                      {isSaving ? "Saving..." : "Save Changes"}
                     </button>
                     <button
                       onClick={cancelEditing}
                       disabled={isSaving}
-                      className="cursor-pointer flex items-center gap-2 px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="px-6 py-3 bg-[#f5f5f4] text-stone-600 rounded-xl font-bold border-b-4 border-[#d6d3d1] hover:bg-[#e7e5e4] hover:translate-y-[-1px] active:translate-y-[1px] active:border-b-0 transition-all text-sm uppercase tracking-wide"
                     >
-                      <X className="w-4 h-4" />
                       Cancel
                     </button>
                   </div>
                 </div>
               ) : (
-                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                  {selectedEntry.content}
-                </p>
+                <div className="bg-[#fafaf9] p-6 rounded-xl border border-[#e7e5e4]">
+                  <p className="text-[#1c1917] whitespace-pre-wrap leading-relaxed text-lg font-medium">
+                    {selectedEntry.content}
+                  </p>
+                </div>
               )}
             </div>
-
-            {/* Sentiment analysis if available */}
-            {selectedEntry.sentimentResult && (
-              <div className="border-t border-gray-200 pt-6">
-                <h3
-                  className="text-lg font-semibold mb-3"
-                  style={{ color: intPsychTheme.primary }}
-                >
-                  Sentiment Analysis
-                </h3>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Average Score:</span>
-                    <span className="font-semibold text-gray-900">
-                      {selectedEntry.sentimentResult.average_score.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="space-y-1 pt-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">Positive:</span>
-                      <span className="font-medium text-green-600">
-                        {(
-                          selectedEntry.sentimentResult.breakdown.positive * 100
-                        ).toFixed(1)}
-                        %
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">Neutral:</span>
-                      <span className="font-medium text-gray-600">
-                        {(
-                          selectedEntry.sentimentResult.breakdown.neutral * 100
-                        ).toFixed(1)}
-                        %
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">Negative:</span>
-                      <span className="font-medium text-red-600">
-                        {(
-                          selectedEntry.sentimentResult.breakdown.negative * 100
-                        ).toFixed(1)}
-                        %
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
       </Drawer>

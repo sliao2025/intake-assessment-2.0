@@ -14,6 +14,13 @@ import {
 } from "lucide-react";
 import PortalLayout from "../components/portal/Layout/PortalLayout";
 import { useSession } from "next-auth/react";
+import { DM_Sans } from "next/font/google";
+import { intPsychTheme } from "../components/theme";
+
+const dm_sans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+});
 
 /* --- ASSETS: Vector Components --- */
 
@@ -376,39 +383,39 @@ export default function GardenBuilder() {
 
     return (
       <div
-        className="absolute z-[99999] flex flex-col gap-1 bg-white rounded-lg shadow-xl border border-slate-100 p-1 w-40 animate-in fade-in zoom-in-95 duration-100"
+        className="absolute z-[99999] flex flex-col gap-1 bg-white rounded-xl shadow-[0_4px_0_0_rgba(0,0,0,0.1)] border-2 border-slate-100 p-2 w-44 animate-in fade-in zoom-in-95 duration-100"
         style={{
           left: flower.x - offsetX,
           top: flower.y,
           transform: "translate(-100%, -50%)",
         }}
       >
-        <div className="text-[10px] font-bold text-slate-400 px-3 py-1 uppercase tracking-wider">
-          Layer Order
+        <div className="text-[10px] font-bold text-stone-400 px-3 py-1 uppercase tracking-wider">
+          Arrangement
         </div>
         <button
           onClick={() => reorderFlower(flower.id, "front")}
-          className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-md transition-colors text-left"
+          className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-stone-600 hover:bg-[#f0fdf4] hover:text-[#15803d] rounded-lg transition-colors text-left uppercase tracking-wide"
         >
-          <BringToFront size={14} /> Bring to Front
+          <BringToFront size={14} /> To Front
         </button>
         <button
           onClick={() => reorderFlower(flower.id, "forward")}
-          className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-md transition-colors text-left"
+          className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-stone-600 hover:bg-[#f0fdf4] hover:text-[#15803d] rounded-lg transition-colors text-left uppercase tracking-wide"
         >
-          <ChevronUp size={14} /> Bring Forward
+          <ChevronUp size={14} /> Forward
         </button>
         <button
           onClick={() => reorderFlower(flower.id, "backward")}
-          className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-md transition-colors text-left"
+          className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-stone-600 hover:bg-[#f0fdf4] hover:text-[#15803d] rounded-lg transition-colors text-left uppercase tracking-wide"
         >
-          <ChevronDown size={14} /> Send Backward
+          <ChevronDown size={14} /> Backward
         </button>
         <button
           onClick={() => reorderFlower(flower.id, "back")}
-          className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-md transition-colors text-left"
+          className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-stone-600 hover:bg-[#f0fdf4] hover:text-[#15803d] rounded-lg transition-colors text-left uppercase tracking-wide"
         >
-          <SendToBack size={14} /> Send to Back
+          <SendToBack size={14} /> To Back
         </button>
       </div>
     );
@@ -416,19 +423,21 @@ export default function GardenBuilder() {
 
   return (
     <PortalLayout>
-      <div className="flex h-full w-full bg-slate-50 font-sans overflow-hidden text-slate-700 select-none">
+      <div
+        className={`flex h-full w-full bg-[#f8fafc] font-sans overflow-hidden text-[#1c1917] select-none ${dm_sans.className}`}
+      >
         <FontStyle />
 
-        {/* --- MAIN AREA: GARDEN CANVAS (Moved to Left) --- */}
-        <main className="flex-1 relative flex flex-col bg-sky-50 order-1">
+        {/* --- MAIN AREA: GARDEN CANVAS --- */}
+        <main className="flex-1 relative flex flex-col bg-[#e0f2fe] order-1 m-4 rounded-[2rem] overflow-hidden shadow-[inset_0_0_20px_rgba(0,0,0,0.05)] border-4 border-white/50">
           <header className="absolute top-6 left-6 right-6 flex justify-between items-center pointer-events-none z-30">
-            <div className="bg-white/80 backdrop-blur px-6 py-2 rounded-full border border-white/50 shadow-sm">
-              <span className="font-serif-display text-xl text-slate-700">
+            <div className="bg-white/90 backdrop-blur px-6 py-3 rounded-2xl border border-[#e7e5e4] shadow-sm">
+              <span className="font-serif-display text-2xl text-[#1c1917]">
                 {session?.user?.name?.split(" ")[0]}'s Garden
               </span>
             </div>
-            <div className="bg-white/80 backdrop-blur px-4 py-2 rounded-full border border-white/50 shadow-sm text-xs font-bold text-slate-400 tracking-widest">
-              {flowers.length} PLANTS
+            <div className="bg-white/90 backdrop-blur px-4 py-3 rounded-2xl border border-[#e7e5e4] shadow-sm text-xs font-bold text-stone-400 tracking-widest uppercase">
+              {flowers.length} Plants
             </div>
           </header>
 
@@ -444,9 +453,9 @@ export default function GardenBuilder() {
 
             {/* --- BACKGROUND ART --- */}
             <div className="absolute inset-0 pointer-events-none z-0 garden-background-elements">
-              <div className="absolute inset-0 bg-gradient-to-b from-indigo-50 via-sky-100 to-blue-50" />
+              <div className="absolute inset-0 bg-gradient-to-b from-[#e0f2fe] via-[#f0f9ff] to-[#fdfbf7]" />
               <div
-                className="absolute inset-0 opacity-30 mix-blend-multiply"
+                className="absolute inset-0 opacity-20 mix-blend-multiply"
                 style={{
                   backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E")`,
                 }}
@@ -465,8 +474,8 @@ export default function GardenBuilder() {
                       x2="0%"
                       y2="100%"
                     >
-                      <stop offset="0%" stopColor="#8B4513" />
-                      <stop offset="100%" stopColor="#693B1F" />
+                      <stop offset="0%" stopColor="#78350F" />
+                      <stop offset="100%" stopColor="#451a03" />
                     </linearGradient>
                     <linearGradient
                       id="dirtMid"
@@ -475,8 +484,8 @@ export default function GardenBuilder() {
                       x2="0%"
                       y2="100%"
                     >
-                      <stop offset="0%" stopColor="#A0522D" />
-                      <stop offset="100%" stopColor="#8B4513" />
+                      <stop offset="0%" stopColor="#92400e" />
+                      <stop offset="100%" stopColor="#78350F" />
                     </linearGradient>
                     <linearGradient
                       id="dirtFront"
@@ -485,46 +494,9 @@ export default function GardenBuilder() {
                       x2="0%"
                       y2="100%"
                     >
-                      <stop offset="0%" stopColor="#B87333" />
-                      <stop offset="100%" stopColor="#A0522D" />
+                      <stop offset="0%" stopColor="#b45309" />
+                      <stop offset="100%" stopColor="#92400e" />
                     </linearGradient>
-                    <pattern
-                      id="dirtTexture"
-                      x="0"
-                      y="0"
-                      width="30"
-                      height="30"
-                      patternUnits="userSpaceOnUse"
-                    >
-                      <circle
-                        cx="5"
-                        cy="10"
-                        r="1.5"
-                        fill="#5A2E1C"
-                        opacity="0.15"
-                      />
-                      <circle
-                        cx="20"
-                        cy="25"
-                        r="2"
-                        fill="#5A2E1C"
-                        opacity="0.1"
-                      />
-                      <circle
-                        cx="15"
-                        cy="5"
-                        r="1"
-                        fill="#5A2E1C"
-                        opacity="0.2"
-                      />
-                      <circle
-                        cx="25"
-                        cy="18"
-                        r="1.8"
-                        fill="#5A2E1C"
-                        opacity="0.12"
-                      />
-                    </pattern>
                   </defs>
                   <path
                     d="M0,180 Q300,120 600,200 T1200,150 L1200,450 L0,450 Z"
@@ -537,10 +509,6 @@ export default function GardenBuilder() {
                   <path
                     d="M0,330 Q500,230 1200,350 L1200,450 L0,450 Z"
                     fill="url(#dirtFront)"
-                  />
-                  <path
-                    d="M0,330 Q500,230 1200,350 L1200,450 L0,450 Z"
-                    fill="url(#dirtTexture)"
                   />
                 </svg>
               </div>
@@ -585,17 +553,17 @@ export default function GardenBuilder() {
 
                   {/* Selection UI */}
                   {isSelected && (
-                    <div className="absolute -inset-4 border-2 border-indigo-500 border-dashed rounded-xl pointer-events-none animate-fade-in">
+                    <div className="absolute -inset-4 border-2 border-[#15803d] border-dashed rounded-3xl pointer-events-none animate-fade-in bg-[#15803d]/10">
                       {/* Rotate Handle */}
-                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 h-10 w-0.5 bg-indigo-500 flex flex-col justify-start items-center">
+                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 h-10 w-0.5 bg-[#15803d] flex flex-col justify-start items-center">
                         <div
-                          className="w-8 h-8 -mt-4 bg-white rounded-full shadow-md border border-indigo-100 flex items-center justify-center cursor-ew-resize pointer-events-auto hover:bg-indigo-50 hover:text-indigo-600 hover:scale-110 transition-all"
+                          className="w-10 h-10 -mt-5 bg-white rounded-full shadow-md border border-[#15803d]/30 flex items-center justify-center cursor-ew-resize pointer-events-auto hover:bg-[#f0fdf4] hover:text-[#15803d] hover:scale-110 transition-all"
                           onMouseDown={(e) =>
                             handleMouseDown(e, flower.id, "rotate")
                           }
                           title="Rotate"
                         >
-                          <RotateCw size={16} className="text-slate-600" />
+                          <RotateCw size={20} className="text-stone-600" />
                         </div>
                       </div>
 
@@ -606,22 +574,22 @@ export default function GardenBuilder() {
                             e.stopPropagation();
                             deleteFlower(flower.id);
                           }}
-                          className="bg-white p-2 rounded-full shadow-md text-red-500 hover:bg-red-50 hover:scale-110 transition-all border border-red-100"
+                          className="bg-white p-3 rounded-full shadow-md text-red-500 hover:bg-red-50 hover:scale-110 transition-all border border-red-200"
                           title="Remove"
                         >
-                          <Trash2 size={18} />
+                          <Trash2 size={20} />
                         </button>
                       </div>
 
                       {/* Scale Handle */}
                       <div
-                        className="absolute -bottom-3 -right-3 w-8 h-8 bg-white rounded-full shadow-md border border-indigo-100 flex items-center justify-center cursor-nwse-resize pointer-events-auto hover:bg-indigo-50 hover:scale-110 transition-all"
+                        className="absolute -bottom-3 -right-3 w-10 h-10 bg-white rounded-full shadow-md border border-[#15803d]/30 flex items-center justify-center cursor-nwse-resize pointer-events-auto hover:bg-[#f0fdf4] hover:scale-110 transition-all"
                         onMouseDown={(e) =>
                           handleMouseDown(e, flower.id, "scale")
                         }
                         title="Scale"
                       >
-                        <Maximize size={14} className="text-indigo-600" />
+                        <Maximize size={18} className="text-[#15803d]" />
                       </div>
 
                       {/* Layer Menu Button */}
@@ -631,10 +599,10 @@ export default function GardenBuilder() {
                             e.stopPropagation();
                             setShowLayersMenu(!showLayersMenu);
                           }}
-                          className={`bg-white p-2 rounded-full shadow-md hover:scale-110 transition-all border ${showLayersMenu ? "text-indigo-600 border-indigo-300 bg-indigo-50" : "text-slate-500 border-slate-200"}`}
+                          className={`bg-white p-3 rounded-full shadow-md hover:scale-110 transition-all border ${showLayersMenu ? "text-[#15803d] border-[#15803d] bg-[#f0fdf4]" : "text-stone-500 border-[#e7e5e4]"}`}
                           title="Layers"
                         >
-                          <Layers size={18} />
+                          <Layers size={20} />
                         </button>
                       </div>
                     </div>
@@ -645,13 +613,13 @@ export default function GardenBuilder() {
 
             {flowers.length === 0 && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40 z-10">
-                <div className="text-center bg-white/50 backdrop-blur-sm p-8 rounded-3xl shadow-sm border border-white/60">
-                  <Sprout size={64} className="mx-auto mb-4 text-slate-400" />
-                  <p className="text-xl font-serif-display text-slate-600">
+                <div className="text-center bg-white/50 backdrop-blur-sm p-8 rounded-[2rem] shadow-sm border border-white/60">
+                  <Sprout size={64} className="mx-auto mb-4 text-stone-400" />
+                  <p className="text-xl font-serif-display text-stone-600">
                     Your sanctuary awaits
                   </p>
-                  <p className="text-sm text-slate-500 mt-2">
-                    Select a category on the right to begin
+                  <p className="text-sm font-bold text-stone-400 mt-2 uppercase tracking-wider">
+                    Drag plants here
                   </p>
                 </div>
               </div>
@@ -659,63 +627,80 @@ export default function GardenBuilder() {
           </div>
         </main>
 
-        {/* --- RIGHT SIDEBAR: PALETTE (Moved to Right) --- */}
-        <aside className="w-72 bg-white border-l border-slate-200 flex flex-col shadow-md z-20 order-2">
-          {/* <div className="p-6 border-b border-slate-100 bg-slate-50/50">
-            <h1 className="text-3xl font-serif-display text-slate-800">
-              Botany Kit
-            </h1>
-            <p className="text-xs text-slate-400 mt-1 tracking-wide">
-              DESIGN YOUR SANCTUARY
-            </p>
-          </div> */}
-
+        {/* --- RIGHT SIDEBAR: PALETTE --- */}
+        <aside className="w-72 flex flex-col z-20 order-2 mr-4 my-4 bg-white rounded-[2rem] border border-[#e7e5e4] overflow-hidden shadow-sm">
           {/* Tabs */}
-          <div className="flex p-3 gap-2 border-b border-slate-200">
+          <div className="flex p-3 gap-2 border-b border-[#e7e5e4] bg-[#f8fafc]">
             <button
               onClick={() => setActiveTab("flowers")}
-              className={`flex-1 cursor-pointer rounded-lg py-4 text-xs font-bold uppercase tracking-wider transition-colors ${activeTab === "flowers" ? "text-indigo-600   bg-indigo-50/80" : "text-slate-400 hover:text-slate-600"}`}
+              style={{
+                color:
+                  activeTab === "flowers" ? intPsychTheme.accent : undefined,
+                borderColor:
+                  activeTab === "flowers" ? intPsychTheme.accent : undefined,
+              }}
+              className={`flex-1 cursor-pointer rounded-xl py-3 text-xs font-bold uppercase tracking-wider transition-all ${
+                activeTab === "flowers"
+                  ? "bg-white shadow-sm border-b-4 translate-y-[-1px]"
+                  : "text-stone-400 hover:text-stone-600 hover:bg-white"
+              }`}
             >
               Flowers
             </button>
             <button
               onClick={() => setActiveTab("trees")}
-              className={`flex-1 cursor-pointer rounded-lg py-4 text-xs font-bold uppercase tracking-wider transition-colors ${activeTab === "trees" ? "text-emerald-600   bg-emerald-50/80" : "text-slate-400 hover:text-slate-600"}`}
+              className={`flex-1 cursor-pointer rounded-xl py-3 text-xs font-bold uppercase tracking-wider transition-all ${
+                activeTab === "trees"
+                  ? "text-[#15803d] bg-white shadow-sm border-b-4 border-[#15803d] translate-y-[-1px]"
+                  : "text-stone-400 hover:text-stone-600 hover:bg-white"
+              }`}
             >
               Trees
             </button>
             <button
               onClick={() => setActiveTab("bushes")}
-              className={`flex-1 cursor-pointer rounded-lg py-4 text-xs font-bold uppercase tracking-wider transition-colors ${activeTab === "bushes" ? "text-lime-600   bg-lime-50/80" : "text-slate-400 hover:text-slate-600"}`}
+              className={`flex-1 cursor-pointer rounded-xl py-3 text-xs font-bold uppercase tracking-wider transition-all ${
+                activeTab === "bushes"
+                  ? "text-[#4d7c0f] bg-white shadow-sm border-b-4 border-[#4d7c0f] translate-y-[-1px]"
+                  : "text-stone-400 hover:text-stone-600 hover:bg-white"
+              }`}
             >
               Bushes
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-12 space-y-8">
+          <div className="flex-1 overflow-y-auto p-8 space-y-6 scrollbar-thin bg-[#f8fafc]">
             {ITEMS.filter((i) => i.category === activeTab).map((item) => {
               return (
                 <div
                   key={item.id}
                   draggable
                   onDragStart={() => handleDragStart(item.id)}
-                  className="group flex flex-col items-center cursor-grab active:cursor-grabbing transition-transform duration-200 hover:scale-105"
+                  className="group flex flex-col items-center cursor-grab active:cursor-grabbing"
                 >
-                  <div className="w-full aspect-square max-w-[140px] relative flex items-center justify-center bg-slate-50 rounded-2xl border border-slate-100 shadow-sm group-hover:shadow-md group-hover:border-indigo-100 transition-all p-4">
+                  <div
+                    className="w-full aspect-square relative flex items-center justify-center bg-white rounded-2xl border border-[#e7e5e4] group-hover:scale-105 group-hover:shadow-md transition-all duration-300 p-6"
+                    style={{
+                      borderColor: undefined, // handled by hover
+                    }}
+                  >
                     {item.type === "image" && item.src ? (
                       <img
                         src={item.src}
                         alt={item.label}
-                        className="w-full h-full object-contain drop-shadow-md"
+                        className="w-full h-full object-contain drop-shadow-md transition-transform duration-300 group-hover:rotate-3 group-hover:scale-110"
                         draggable={false}
                       />
                     ) : (
                       item.Component && (
-                        <item.Component className="w-full h-full drop-shadow-md" />
+                        <item.Component className="w-full h-full drop-shadow-md transition-transform duration-300 group-hover:rotate-3 group-hover:scale-110" />
                       )
                     )}
                   </div>
-                  <span className="mt-3 text-sm font-medium text-slate-500 group-hover:text-indigo-600 transition-colors">
+                  <span
+                    style={{ color: undefined }}
+                    className="mt-3 text-sm font-medium text-stone-500 group-hover:text-[#0072ce] transition-colors"
+                  >
                     {item.label}
                   </span>
                 </div>

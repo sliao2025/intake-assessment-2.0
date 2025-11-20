@@ -24,7 +24,7 @@ export const intPsychTheme = {
   text: "#0f172a",
   textMuted: "#475569",
   textMutedLight: "#47556933",
-  background: "#fafcff",
+  background: "#f8fafc",
 };
 
 export const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
