@@ -87,9 +87,9 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
 
   const sidebarWidth = isExpanded ? "w-72" : "w-24";
   const toggleIcon = isExpanded ? (
-    <ChevronsLeft className="text-stone-500 w-5 h-5" />
+    <ChevronsLeft className="text-white w-5 h-5" />
   ) : (
-    <ChevronsRight className="text-stone-500 w-5 h-5" />
+    <ChevronsRight className="text-white w-5 h-5" />
   );
 
   const toggleSidebar = () => {
@@ -148,7 +148,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
             type="button"
             onClick={toggleSidebar}
             // right-[-2px] to align center with the 2px border
-            className="absolute right-[-2px] top-full translate-x-1/2 -translate-y-1/2 bg-white border-2 border-[#e7e5e4] p-1.5 rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all z-50 text-stone-400 hover:text-[#0072ce]"
+            className="absolute right-[-2px] top-full translate-x-1/2 -translate-y-1/2 bg-[#ffa440] border-2 border-[#e7e5e4] p-1.5 rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all z-50 text-white hover:text-white"
             aria-label={isExpanded ? "Shrink sidebar" : "Expand sidebar"}
           >
             {toggleIcon}
