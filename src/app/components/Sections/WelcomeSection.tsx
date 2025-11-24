@@ -59,6 +59,25 @@ export default function WelcomeSection({
     }
   };
 
+  // Fetch clinician name from database on mount
+  useEffect(() => {
+    const fetchClinician = async () => {
+      try {
+        const response = await fetch("/api/profile/load");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.clinician) {
+            setClinicianName(data.clinician);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching clinician:", error);
+      }
+    };
+
+    fetchClinician();
+  }, []);
+
   const saveClinician = async (clinician: string) => {
     try {
       const response = await fetch("/api/profile/save", {
