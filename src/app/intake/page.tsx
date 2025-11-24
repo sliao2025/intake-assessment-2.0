@@ -912,6 +912,154 @@ export default function Page() {
     }
   }
 
+  async function alertSuicideRisk(p: Profile) {
+    try {
+      const assessments = p.assessments;
+      const isNewSchema =
+        assessments?.kind === "adult" || assessments?.kind === "child";
+      const isChild = p.isChild || assessments?.kind === "child";
+
+      let hasWarning = false;
+      const concernQuestions: string[] = [];
+
+      if (isChild) {
+        // Child CSSRS logic
+        const cssrs = isNewSchema
+          ? (assessments as any)?.data?.cssrs
+          : (assessments as any)?.cssrs;
+
+        if (cssrs) {
+          if (cssrs.wishDead === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "Have you wished you were dead or wished you could go to sleep and not wake up?"
+            );
+          }
+          if (cssrs.thoughts === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "In the past month have you had any actual thoughts of killing yourself?"
+            );
+          }
+          if (cssrs.methodHow === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "Have you been thinking about how you might do this?"
+            );
+          }
+          if (cssrs.intention === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "Have you had these thoughts and had some intention of acting on them?"
+            );
+          }
+          if (cssrs.plan === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "Have you started to work out or worked out the details of how to kill yourself? Do you intend to carry out this plan?"
+            );
+          }
+          if (cssrs.behavior === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "Have you ever done anything, started to do anything, or prepared to do anything to end your life?"
+            );
+          }
+          if (cssrs.behavior3mo === "yes") {
+            hasWarning = true;
+            concernQuestions.push("Was this within the past three months?");
+          }
+        }
+      } else {
+        // Adult suicide logic
+        const s = isNewSchema
+          ? (assessments as any)?.data?.suicide
+          : (assessments as any)?.suicide;
+        const selfHarm = isNewSchema
+          ? (assessments as any)?.data?.selfHarm
+          : (assessments as any)?.selfHarm;
+
+        if (s) {
+          if (s.wishDead === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "In the past month, have you wished you were dead, or wished you could go to sleep and not wake up?"
+            );
+          }
+          if (s.thoughts === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "In the past month, have you had any actual thoughts about killing yourself?"
+            );
+          }
+          if (s.methodHow === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "In the past month, have you been thinking about how you might end your life?"
+            );
+          }
+          if (s.intention === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "In the past month, have you had these suicidal thoughts and some intention of acting on them?"
+            );
+          }
+          if (s.plan === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "In the past month, have you started to work out the details of how to kill yourself? Do you intend to carry out this plan?"
+            );
+          }
+          if (s.behavior === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "Have you done anything, started to do anything, or prepared to do anything, to end your life? Such as: collected pills, obtained a gun, wrote a will or suicide note"
+            );
+          }
+          if (s.behavior3mo === "yes") {
+            hasWarning = true;
+            concernQuestions.push("Was this within the past 3 months?");
+          }
+        }
+
+        if (selfHarm) {
+          if (selfHarm.pastMonth === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "In the past month, have you intentionally hurt yourself (e.g., cut, burned, scratched) without wanting to die?"
+            );
+          }
+          if (selfHarm.lifetime === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "Have you ever intentionally hurt yourself without wanting to die?"
+            );
+          }
+        }
+      }
+
+      if (hasWarning) {
+        console.log("[AlertSuicideRisk] Risk detected, sending notification");
+        await fetch("/api/notify/suicide-risk", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            firstName: p.firstName || "",
+            lastName: p.lastName || "",
+            email: p.email || "",
+            isChild: p.isChild ?? null,
+            concernQuestions,
+            submittedAtEpoch: Date.now(),
+            submittedAtISO: new Date().toISOString(),
+          }),
+        });
+      }
+    } catch (e) {
+      console.error("Suicide risk notification failed", e);
+      // Do not block the UX if email fails
+    }
+  }
+
   async function runInsights() {
     try {
       const response = await fetch("/api/insights", {
@@ -1016,13 +1164,16 @@ export default function Page() {
       const finalized: Profile = { ...profile, maxVisited: steps.length - 1 };
       await saveProgress(finalized);
 
-      // 2) Fire-and-forget notification email
+      // 2) Check for suicide risk and notify if detected (before other notifications)
+      await alertSuicideRisk(finalized);
+
+      // 3) Fire-and-forget notification email
       await notifyAssessmentComplete(finalized);
 
-      // 3) Run insights generation (sentiment + summarization) in background
+      // 4) Run insights generation (sentiment + summarization) in background
       runInsights();
 
-      // 4) Persist denormalized scalars to Profile (firstName, etc.) and stamp firstSubmittedAt once
+      // 5) Persist denormalized scalars to Profile (firstName, etc.) and stamp firstSubmittedAt once
       try {
         console.log("[Finalize Submit]", finalized.isChild);
         const metaPayload = {

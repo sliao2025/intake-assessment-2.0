@@ -1,3 +1,8 @@
+export type Clinician = {
+  name: string;
+  email: string;
+};
+
 export type EngineNextRequest = {
   scaleCode?: string;
   theta?: number | null;
