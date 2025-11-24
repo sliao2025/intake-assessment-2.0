@@ -148,7 +148,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
             type="button"
             onClick={toggleSidebar}
             // right-[-2px] to align center with the 2px border
-            className="absolute right-[-2px] top-full translate-x-1/2 -translate-y-1/2 bg-[#ffa440] border-2 border-[#e7e5e4] p-1.5 rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all z-50 text-white hover:text-white"
+            className="absolute right-[-2px] top-full translate-x-1/2 -translate-y-1/2 bg-[#ffa440] border-[#e7e5e4] p-1.5 rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all z-50 text-white hover:text-white"
             aria-label={isExpanded ? "Shrink sidebar" : "Expand sidebar"}
           >
             {toggleIcon}

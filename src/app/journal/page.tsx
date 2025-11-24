@@ -486,7 +486,7 @@ export default function JournalPage() {
                     <button
                       onClick={handleSave}
                       disabled={isSaving || !editedContent.trim()}
-                      className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#ca8a04] text-white rounded-xl font-bold border-b-4 border-[#a16207] hover:bg-[#b45309] hover:translate-y-[-1px] active:translate-y-[1px] active:border-b-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm uppercase tracking-wide"
+                      className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#ffa440] text-white rounded-xl font-bold border-b-4 border-[#f58402] hover:bg-[#f58402] hover:translate-y-[-1px] active:translate-y-[1px] active:border-b-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm uppercase tracking-wide"
                     >
                       <Check className="w-5 h-5" />
                       {isSaving ? "Saving..." : "Save Changes"}
