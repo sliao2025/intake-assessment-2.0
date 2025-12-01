@@ -666,7 +666,7 @@ const VoiceRecorder = forwardRef<
                 handleStart();
               }}
               disabled={uploading || deleting || !!audioURL}
-              className="inline-flex items-center gap-2 hover:bg-red-600 cursor-pointer bg-red-500 text-white rounded-full px-3 py-2 text-sm font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 hover:bg-red-600 cursor-pointer bg-red-500 text-white rounded-full px-3 py-2 text-sm font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed border-b-4 border-black/20"
               title={
                 audioURL
                   ? "Delete the existing recording first"
@@ -682,7 +682,7 @@ const VoiceRecorder = forwardRef<
                 e.preventDefault();
                 handleStop();
               }}
-              className="inline-flex items-center gap-2 hover:bg-red-600 cursor-pointer rounded-full px-3 py-2 text-sm font-semibold bg-red-500 text-white shadow-sm"
+              className="inline-flex items-center gap-2 hover:bg-red-600 cursor-pointer rounded-full px-3 py-2 text-sm font-semibold bg-red-500 text-white shadow-sm border-b-4 border-black/20"
             >
               <Square className="h-4 w-4" /> Stop
             </button>
@@ -745,7 +745,7 @@ const VoiceRecorder = forwardRef<
                   audioRef.current?.play();
                 }}
                 disabled={uploading}
-                className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-300 text-slate-800 hover:bg-slate-100 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-300 border-b-4 text-slate-800 hover:bg-slate-100 transition-colors disabled:opacity-50"
               >
                 <Play className="h-4 w-4" /> Play
               </button>
@@ -757,7 +757,7 @@ const VoiceRecorder = forwardRef<
                   audioRef.current?.pause();
                   setPlaying(false);
                 }}
-                className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-300 text-slate-800 hover:bg-slate-100 transition-colors"
+                className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-300 border-b-4 text-slate-800 hover:bg-slate-100 transition-colors"
               >
                 <Pause className="h-4 w-4" /> Pause
               </button>
@@ -771,7 +771,7 @@ const VoiceRecorder = forwardRef<
                 await handleDelete();
               }}
               disabled={deleting || uploading}
-              className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-300 text-slate-800 hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-300 border-b-4 text-slate-800 hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {deleting ? (
                 <>

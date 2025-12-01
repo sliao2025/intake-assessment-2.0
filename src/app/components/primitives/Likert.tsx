@@ -23,9 +23,9 @@ const Likert: React.FC<Props> = ({ id, label, value, onChange, options }) => {
             <button
               key={o.key}
               onClick={() => onChange(o.key)}
-              className={`rounded-xl border px-3 py-2 text-sm transition ${
+              className={`rounded-xl border border-b-4 px-3 py-2 text-sm transition ${
                 value === o.key
-                  ? "border-transparent text-white"
+                  ? "border-transparent border-b-black/20 text-white"
                   : "border-slate-300 text-slate-700 hover:border-slate-400"
               }`}
               style={

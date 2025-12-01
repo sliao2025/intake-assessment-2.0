@@ -31,8 +31,8 @@ export default function MultiSelectGroup({
             key={opt.key}
             type="button"
             onClick={() => toggle(opt.key, opt.none)}
-            className={`w-full text-left rounded-xl border px-3 py-2 ${
-              active ? "border-slate-900 bg-white" : "border-slate-300 bg-white"
+            className={`w-full text-left rounded-xl border border-b-4 px-3 py-2 ${
+              active ? "border-[#113e60] bg-white" : "border-slate-300 bg-white"
             }`}
           >
             <div className="flex items-center gap-3">

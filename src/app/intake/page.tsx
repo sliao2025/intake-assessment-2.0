@@ -1286,7 +1286,7 @@ export default function Page() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -15, opacity: 0 }}
           transition={{ duration: 0.8, ease }}
-          className="w-full rounded-4xl border border-gray-200 bg-white/70 backdrop-blur-sm px-6 py-6 md:py-8 shadow-md md:max-h-[70vh] md:overflow-y-auto md:overflow-x-hidden md:overscroll-y-contain scrollable-div box-border"
+          className="w-full rounded-4xl border border-[#e7e5e4] border-b-4 bg-white/70 backdrop-blur-sm px-6 py-6 md:py-8 shadow-sm md:max-h-[70vh] md:overflow-y-auto md:overflow-x-hidden md:overscroll-y-contain scrollable-div box-border"
           style={{
             WebkitOverflowScrolling: "touch",
             scrollbarGutter: "stable both-edges",
@@ -1434,7 +1434,7 @@ export default function Page() {
             <div className="mt-8 flex items-center justify-between gap-3">
               <button
                 onClick={goBack}
-                className="inline-flex cursor-pointer disabled:cursor-not-allowed bg-white items-center gap-2 rounded-xl px-3 py-2 font-medium border border-gray-300 text-gray-700 disabled:opacity-40 transition duration-150 hover:brightness-95 active:scale-95"
+                className="inline-flex cursor-pointer disabled:cursor-not-allowed bg-white items-center gap-2 rounded-xl px-3 py-2 font-medium border border-gray-300 border-b-4 text-gray-700 disabled:opacity-40 transition duration-150 hover:brightness-95 active:scale-95"
               >
                 <ChevronLeft className="h-4 w-4" /> Back
               </button>
@@ -1447,7 +1447,7 @@ export default function Page() {
                         : setStep(Math.min(profile.maxVisited, lastIndex))
                     }
                     disabled={profile.maxVisited === 0 && !canNext}
-                    className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed border-b-4 border-black/20"
                     style={{ background: intPsychTheme.secondary }}
                   >
                     {profile.maxVisited === 0 ? "Start" : "Resume"}
@@ -1463,7 +1463,7 @@ export default function Page() {
                           setStep(0);
                           window.scrollTo({ top: 0, behavior: "smooth" });
                         }}
-                        className="inline-flex cursor-pointer mr-2 items-center gap-2 rounded-xl px-4 py-2 font-normal text-white transition duration-150 hover:brightness-90 active:scale-95"
+                        className="inline-flex cursor-pointer mr-2 items-center gap-2 rounded-xl px-4 py-2 font-normal text-white transition duration-150 hover:brightness-90 active:scale-95 border-b-4 border-black/20"
                         style={{ background: intPsychTheme.primary }}
                       >
                         Back to Beginning
@@ -1475,7 +1475,7 @@ export default function Page() {
                         href={"https://forms.gle/FNvs8LzwZfT2hWb27"}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex cursor-pointer font-semibold mr-2 items-center gap-2 rounded-xl px-4 py-2 font-normal text-white transition duration-150 hover:brightness-90 active:scale-95"
+                        className="inline-flex cursor-pointer font-semibold mr-2 items-center gap-2 rounded-xl px-4 py-2 font-normal text-white transition duration-150 hover:brightness-90 active:scale-95 border-b-4 border-black/20"
                         style={{ background: intPsychTheme.primary }}
                         aria-label="Open feedback form (opens in a new tab)"
                       >
@@ -1493,7 +1493,7 @@ export default function Page() {
                             ? isSubmitting || submitted
                             : !canNext
                         }
-                        className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95 ${
+                        className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95 border-b-4 border-black/20 ${
                           steps[step].key === "review"
                             ? "bg-gradient-to-r from-lime-400 to-green-600 shadow-md shadow-lime-300/50"
                             : ""
@@ -1517,7 +1517,7 @@ export default function Page() {
                     )}
                     {submitted && steps[step].key === "review" && (
                       <button
-                        className={`inline-flex ml-2 items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95`}
+                        className={`inline-flex ml-2 items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95 border-b-4 border-black/20`}
                         style={{ background: intPsychTheme.secondary }}
                         onClick={goNext}
                       >

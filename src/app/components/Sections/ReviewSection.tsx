@@ -5,6 +5,9 @@ import StepTitle from "../StepTitle";
 import { CheckCircle2, Shield, RotateCcw, ClipboardCheck } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { intPsychTheme } from "../theme";
+import { DM_Sans } from "next/font/google";
+
+const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 export default function ReviewSection({
   title,
@@ -35,7 +38,7 @@ export default function ReviewSection({
   );
 
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4 ${dm_sans.className}`}>
       <StepTitle n={step + 1} title={title ?? "You're all set"} />
 
       {submitted ? (
@@ -55,7 +58,7 @@ export default function ReviewSection({
           </div>
 
           {/* Security / next steps */}
-          <div className="rounded-xl border border-gray-200 bg-white/80 p-4">
+          <div className="rounded-xl border border-[#e7e5e4] bg-white p-4">
             <div className="mb-3 flex items-center gap-2">
               <h3 className="text-md font-semibold tracking-wide text-gray-900">
                 Security & Next Steps
@@ -82,7 +85,7 @@ export default function ReviewSection({
         </>
       ) : (
         <>
-          <div className="rounded-xl border border-gray-200 bg-white/90 p-4">
+          <div className="rounded-xl border border-[#e7e5e4] bg-white p-4">
             <p className="text-gray-900 font-medium">
               Thank you for completing the Integrative Psych pre-clinical
               assessment!
@@ -93,7 +96,7 @@ export default function ReviewSection({
             </p>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white/80 p-4">
+          <div className="rounded-xl border border-[#e7e5e4] bg-white p-4">
             <div className="mb-3 flex items-center gap-2">
               <h3 className="text-md font-semibold tracking-wide text-gray-900">
                 Security & Next Steps
@@ -125,7 +128,7 @@ export default function ReviewSection({
             </p>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white/60 p-4">
+          <div className="rounded-xl border border-[#e7e5e4] bg-white p-4">
             <div className="flex items-center gap-2">
               <RotateCcw className="mt-0.5 h-4 w-4 text-gray-500" />
               <p className="text-sm text-gray-700">

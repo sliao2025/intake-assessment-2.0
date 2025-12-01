@@ -8,6 +8,9 @@ import { intPsychTheme } from "../theme";
 import Likert from "../primitives/Likert";
 import RemoveButton from "../primitives/Removebutton";
 import { Pencil } from "lucide-react";
+import { DM_Sans } from "next/font/google";
+
+const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 const strengthOptions: {
   label: string;
@@ -173,7 +176,7 @@ export default function RelationshipSection({
   }, [relationships]);
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${dm_sans.className}`}>
       <StepTitle n={step + 1} title={title} />
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -460,7 +463,7 @@ export default function RelationshipSection({
             <button
               type="button"
               onClick={addRelationship}
-              className="inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white cursor-pointer border-b-4 border-black/20"
               style={{ background: intPsychTheme.secondary }}
             >
               {editingId ? "Update" : "Add"}

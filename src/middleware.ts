@@ -29,7 +29,8 @@ export async function middleware(req: NextRequest) {
     if (!hasToken && !guestMode) {
       return guardSignIn(req, "/intake");
     }
-    const target = intakeFinished ? "/dashboard" : "/intake";
+    // const target = intakeFinished ? "/dashboard" : "/intake";
+    const target = "/intake";
     const resp = NextResponse.redirect(new URL(target, req.url));
     return handleGuest(req, resp);
   }

@@ -20,6 +20,9 @@ import PTSDForm from "../Scales/Adult/PTSDForm";
 import SelfHarmForm from "../Scales/Adult/SelfHarmForm";
 import ACEResilienceForm from "../Scales/Adult/ACEResilienceForm";
 import PSS4Form from "../Scales/Adult/PSS4Form";
+import { DM_Sans } from "next/font/google";
+
+const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 /** Scales (Likert options) */
 const yesNo = [
@@ -377,7 +380,7 @@ export default function AssessmentsSection({
                 type="button"
                 disabled={!selected || loading}
                 onClick={() => selected && answer(Number(selected))}
-                className="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold cursor-pointer text-white disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold cursor-pointer text-white disabled:opacity-50 border-b-4 border-black/20"
                 style={{
                   background: selected ? intPsychTheme.accent : "#94a3b8",
                 }}
@@ -406,7 +409,7 @@ export default function AssessmentsSection({
             </div>
             <button
               onClick={start}
-              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white"
+              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white border-b-4 border-black/20"
               style={{ background: "#0ea5e9" }}
             >
               Restart PHQ-9
@@ -680,7 +683,7 @@ export default function AssessmentsSection({
   }, [profile.isChild, scaredSelfDone]);
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${dm_sans.className}`}>
       <StepTitle n={step + 1} title={title} />
 
       {/* 2) First depression block: PHQ-9 for adults or DISC for children */}
@@ -754,7 +757,7 @@ export default function AssessmentsSection({
                       setSnapCollateralDone(true);
                       setTimeout(() => setCopiedLink(false), 2000);
                     }}
-                    className="px-4 py-2 cursor-pointer text-white rounded-xl transition hover:brightness-90 flex items-center gap-2 text-sm font-medium"
+                    className="px-4 py-2 cursor-pointer text-white rounded-xl transition hover:brightness-90 flex items-center gap-2 text-sm font-medium border-b-4 border-black/20"
                     style={{ background: intPsychTheme.secondary }}
                   >
                     {copiedLink ? (
@@ -780,7 +783,7 @@ export default function AssessmentsSection({
                     setOpenSnapCollateral(false);
                     setOpenScaredSelf(true);
                   }}
-                  className="px-6 py-2 bg-gray-100 text-gray-700 cursor-pointer rounded-xl hover:bg-gray-200 transition font-medium"
+                  className="px-6 py-2 bg-gray-100 text-gray-700 cursor-pointer rounded-xl hover:bg-gray-200 transition font-medium border-b-4 border-gray-300"
                 >
                   Skip this step
                 </button>
