@@ -720,6 +720,7 @@ export default function IntakeTypePage() {
 
       if (hasWarning) {
         console.log("[AlertSuicideRisk] Risk detected, sending notification");
+        console.log("[AlertSuicideRisk] clinicianEmail:", clinicianEmail);
         await fetch("/api/notify/suicide-risk", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -731,6 +732,7 @@ export default function IntakeTypePage() {
             concernQuestions,
             submittedAtEpoch: Date.now(),
             submittedAtISO: new Date().toISOString(),
+            clinician: clinicianEmail || "",
           }),
         });
       }
@@ -1164,7 +1166,7 @@ export default function IntakeTypePage() {
                           setStep(0);
                           window.scrollTo({ top: 0, behavior: "smooth" });
                         }}
-                        className="inline-flex cursor-pointer mr-2 items-center gap-2 rounded-xl px-4 py-2 font-normal text-white transition duration-150 hover:brightness-90 active:scale-95 border-b-4 border-black/20"
+                        className="inline-flex cursor-pointer mr-2 items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95 border-b-4 border-black/20"
                         style={{ background: intPsychTheme.primary }}
                       >
                         Back to Beginning
@@ -1176,7 +1178,7 @@ export default function IntakeTypePage() {
                         href={"https://forms.gle/FNvs8LzwZfT2hWb27"}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex cursor-pointer font-semibold mr-2 items-center gap-2 rounded-xl px-4 py-2 font-normal text-white transition duration-150 hover:brightness-90 active:scale-95 border-b-4 border-black/20"
+                        className="inline-flex cursor-pointer mr-2 items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95 border-b-4 border-black/20"
                         style={{ background: intPsychTheme.primary }}
                         aria-label="Open feedback form (opens in a new tab)"
                       >
