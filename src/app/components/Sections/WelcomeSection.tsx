@@ -15,10 +15,6 @@ import { Session } from "next-auth";
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
-  makeDefaultAdultProfile,
-  makeDefaultChildProfile,
-} from "../../intake/page";
-import {
   Field,
   Listbox,
   ListboxButton,
@@ -36,12 +32,16 @@ export default function WelcomeSection({
   profile,
   session,
   setProfile,
+  assessmentType,
+  onClinicianChange,
 }: {
   title?: string;
   step: number;
   profile: Profile;
   session: Session;
   setProfile: StateSetter<Profile>;
+  assessmentType?: "adult" | "child";
+  onClinicianChange?: (clinicianName: string) => void;
 }) {
   const [dropdownPosition, setDropdownPosition] = useState<{
     top: number;
@@ -71,6 +71,7 @@ export default function WelcomeSection({
           const data = await response.json();
           if (data.clinician) {
             setClinicianName(data.clinician);
+            onClinicianChange?.(data.clinician);
           }
         }
       } catch (error) {
@@ -79,7 +80,7 @@ export default function WelcomeSection({
     };
 
     fetchClinician();
-  }, []);
+  }, [onClinicianChange]);
 
   const saveClinician = async (clinician: string) => {
     try {
@@ -100,6 +101,12 @@ export default function WelcomeSection({
     }
   };
 
+  // Determine the assessment type label for display
+  const assessmentTypeLabel =
+    assessmentType === "child" ? "Child (Under 18)" : "Adult (18+)";
+
+  const hasSelectedClinician = clinicianName !== "";
+
   return (
     <div className={`space-y-4 ${dm_sans.className}`}>
       <StepTitle
@@ -115,65 +122,45 @@ export default function WelcomeSection({
         })()} ${session?.user?.name?.split(" ")[0] ?? ""}!`}
       />
 
-      {/* Adult vs Child selector (only if unanswered) */}
-      {profile.maxVisited === 0 && (
+      {/* Assessment Type Indicator (when using URL-based type) */}
+      {assessmentType && (
         <div className="rounded-2xl border border-[#e7e5e4] bg-white p-4 md:p-5">
-          <h3 className="font-semibold text-slate-900">
-            Who is this assessment for?
-          </h3>
-          <p className="mt-1 text-sm text-slate-600">
-            Please select who will be receiving treatment.
-          </p>
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() =>
-                setProfile({ ...makeDefaultAdultProfile(), isChild: false })
-              }
-              className={`w-full text-left rounded-xl border border-b-4 p-4 transition hover:brightness-95 active:scale-95 ${
-                profile.isChild === false
-                  ? "border-emerald-500 bg-emerald-50/80"
-                  : "border-slate-200 bg-white/70"
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-slate-900">Assessment Type</h3>
+              <p className="mt-1 text-sm text-slate-600">
+                {assessmentType === "child"
+                  ? "Parent/guardian completing for a child under 18"
+                  : "Completing for yourself (adult 18+)"}
+              </p>
+            </div>
+            <div
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                assessmentType === "child"
+                  ? "bg-sky-100 text-sky-700"
+                  : "bg-emerald-100 text-emerald-700"
               }`}
             >
-              <div className="font-medium text-slate-900">
-                Myself (Adult 18+)
-              </div>
-              <div className="text-sm text-slate-600">
-                I am completing this for my own treatment.
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setProfile({ ...makeDefaultChildProfile(), isChild: true });
-              }}
-              className={`w-full text-left rounded-xl border border-b-4 p-4 transition hover:brightness-95 active:scale-95 ${
-                profile.isChild === true
-                  ? "border-emerald-500 bg-emerald-50/80"
-                  : "border-slate-200 bg-white/70"
-              }`}
-            >
-              <div className="font-medium text-slate-900">
-                My Child (Under 18)
-              </div>
-              <div className="text-sm text-slate-600">
-                I am a parent or guardian filling this out for my child.
-              </div>
-            </button>
+              {assessmentTypeLabel}
+            </div>
           </div>
-          <div className="mt-4">
-            <h3 className="font-semibold text-slate-900">
-              Who's your clinician?
-            </h3>
-            <Field className="mt-3" title="Who's your clinician?">
+
+          {/* Clinician selector */}
+          <div className="mt-4 pt-4 border-t border-slate-100">
+            <h4 className="font-medium text-slate-900 mb-1">
+              Who's your clinician? <span className="text-red-500">*</span>
+            </h4>
+            <p className="text-sm text-slate-500 mb-2">
+              Please select your assigned clinician to continue.
+            </p>
+            <Field title="Who's your clinician?">
               <Listbox
                 value={clinicianName || ""}
                 onChange={(val: string) => {
                   setClinicianName(val);
                   setDropdownPosition(null);
                   saveClinician(val);
+                  onClinicianChange?.(val);
                 }}
               >
                 {({ open }) => {
@@ -193,7 +180,11 @@ export default function WelcomeSection({
                     <div className="relative">
                       <ListboxButton
                         ref={buttonRef}
-                        className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900"
+                        className={`w-full relative block rounded-xl bg-white border px-3 py-2 text-left text-slate-900 ${
+                          hasSelectedClinician
+                            ? "border-emerald-300 ring-1 ring-emerald-200"
+                            : "border-slate-300"
+                        }`}
                       >
                         {clinicianName ? (
                           <span className="text-slate-900">
@@ -201,7 +192,7 @@ export default function WelcomeSection({
                           </span>
                         ) : (
                           <span className="text-slate-400">
-                            Your assigned clinician…
+                            Select your clinician…
                           </span>
                         )}
                         <ChevronDown
@@ -264,7 +255,8 @@ export default function WelcomeSection({
         </div>
       )}
 
-      {profile.isChild !== null && clinicianName !== "" && (
+      {/* Only show instructions after clinician is selected */}
+      {hasSelectedClinician && (
         <>
           {/* At-a-glance cards */}
           <div className="grid sm:grid-cols-2 gap-4">
@@ -302,7 +294,7 @@ export default function WelcomeSection({
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 flex-none text-emerald-600" />
                 <span className="text-slate-700">
-                  Progress is shown above. You’ll unlock later sections as you
+                  Progress is shown above. You'll unlock later sections as you
                   complete earlier ones.
                 </span>
               </li>
@@ -352,8 +344,8 @@ export default function WelcomeSection({
             </h3>
             {session?.user?.role === "guest" ? (
               <p className="mt-2 text-slate-700">
-                You’re using a <b>guest session</b>. If you close this tab, your
-                progress won’t save. To save and return later, please create an
+                You're using a <b>guest session</b>. If you close this tab, your
+                progress won't save. To save and return later, please create an
                 account or sign in with Google.
               </p>
             ) : (
