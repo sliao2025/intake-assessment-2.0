@@ -75,6 +75,7 @@ export async function POST(req: NextRequest) {
       isChild = "",
       submittedAtEpoch,
       submittedAtISO,
+      clinician = "",
       notifyTo,
       notifyCc,
       notifyBcc,
@@ -87,7 +88,8 @@ export async function POST(req: NextRequest) {
           : new Date();
     const submittedIso = submitted.toISOString();
     const submittedEt = formatET(submitted);
-    console.log(body);
+    console.log("[notify] Full body received:", JSON.stringify(body, null, 2));
+    console.log("[notify] Clinician email from body:", clinician);
     console.log("[notify] submitted raw:", {
       fromBody: { submittedAtEpoch, submittedAtISO },
       parsedIso: submittedIso,
@@ -132,7 +134,11 @@ export async function POST(req: NextRequest) {
     const REFRESH_TOKEN = process.env.GMAIL_REFRESH_TOKEN2;
     const SENDER = process.env.GMAIL_SENDER; // e.g., noreply@your-domain.com (must match authorized Gmail account)
     // Accept comma/semicolon/newline-separated lists in env; allow override from request body
-    const NOTIFY_TO = splitList(process.env.NOTIFY_TO || SENDER);
+    let NOTIFY_TO = splitList(process.env.NOTIFY_TO || SENDER);
+    if (clinician) {
+      NOTIFY_TO = [...NOTIFY_TO, ...splitList(clinician)];
+    }
+
     const NOTIFY_CC = splitList(process.env.NOTIFY_CC || "");
     const NOTIFY_BCC = splitList(process.env.NOTIFY_BCC || "");
 
@@ -167,6 +173,8 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
+    console.log("[notify] NOTIFY_TO:", NOTIFY_TO);
+    console.log("[notify] toList:", toList);
 
     const oAuth2Client = new google.auth.OAuth2({
       clientId: CLIENT_ID,

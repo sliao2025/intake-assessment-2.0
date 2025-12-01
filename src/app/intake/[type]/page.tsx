@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
-import type { Profile } from "../../lib/types/types";
+import type { Clinician, Profile } from "../../lib/types/types";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, User } from "lucide-react";
 import ProgressHeader from "../../components/ProgressHeader";
@@ -25,6 +25,7 @@ import WelcomeSection from "../../components/Sections/WelcomeSection";
 import ReportSection from "../../components/Sections/ReportSection";
 import { useParams, useRouter } from "next/navigation";
 import { makeDefaultAdultProfile, makeDefaultChildProfile } from "../page";
+import { CLINICIANS } from "@/app/lib/text";
 
 type Step = {
   key: string;
@@ -114,6 +115,7 @@ export default function IntakeTypePage() {
       : makeDefaultAdultProfile();
     return { ...baseProfile, isChild };
   });
+  const [clinicianEmail, setClinicianEmail] = useState<string>("");
 
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -149,6 +151,39 @@ export default function IntakeTypePage() {
     }
   }, [isValidType, router]);
 
+  // Helper to look up clinician email by name
+  const getClinicianEmail = (clinicianName: string): string => {
+    return CLINICIANS.find((c) => c.name === clinicianName)?.email ?? "";
+  };
+
+  //setting default clinician from saved profile
+  useEffect(() => {
+    if (status === "loading" || hasBootstrapped.current || !isValidType) return;
+    const fetchClinician = async () => {
+      try {
+        const resp = await fetch("/api/profile/load", { method: "GET" });
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data?.clinician) {
+            const email = getClinicianEmail(data.clinician);
+            setClinicianEmail(email);
+            setClinicianSelected(data.clinician !== "");
+            console.log(
+              "[Clinician] Loaded from DB:",
+              data.clinician,
+              "Email:",
+              email
+            );
+          }
+        }
+      } catch (err) {
+        console.error("[Clinician] Failed to load:", err);
+      }
+    };
+    fetchClinician();
+  }, [status, isValidType]);
+
+  //setting default profile
   useEffect(() => {
     if (status === "loading" || hasBootstrapped.current || !isValidType) return;
     const fetchProfile = async () => {
@@ -159,37 +194,32 @@ export default function IntakeTypePage() {
         const incoming = data?.profile ?? null;
 
         if (incoming) {
-          // Check if saved profile matches URL type
-          const savedIsChild = incoming.isChild === true;
+          // Check if saved profile has isChild set (user has already started an assessment)
+          const savedIsChild = incoming.isChild;
+          const hasSavedType = typeof savedIsChild === "boolean";
 
-          if (savedIsChild !== isChild) {
-            // Saved profile doesn't match URL type - start fresh with URL type
+          if (hasSavedType && savedIsChild !== isChild) {
+            // User has existing profile with different type - redirect to their correct type
+            // This prevents accidentally overwriting their data with the wrong assessment
             console.log(
-              `Saved profile was for ${savedIsChild ? "child" : "adult"}, but URL is for ${isChild ? "child" : "adult"}. Starting fresh.`
+              `User has existing ${savedIsChild ? "child" : "adult"} profile, but URL is for ${isChild ? "child" : "adult"}. Redirecting to correct type.`
             );
-            const freshProfile = isChild
-              ? makeDefaultChildProfile()
-              : makeDefaultAdultProfile();
-            setProfile({
-              ...freshProfile,
-              isChild,
-              firstName: session?.user?.name?.split(" ")[0] ?? "",
-              lastName:
-                session?.user?.name?.split(" ").slice(1).join(" ") ?? "",
-              email:
-                session?.user?.role !== "guest" ? session?.user?.email : "",
-            });
-          } else {
-            // Use saved profile merged with defaults
-            const baseDefaults = isChild
-              ? makeDefaultChildProfile()
-              : makeDefaultAdultProfile();
-            const merged = mergeWithDefaults(baseDefaults, incoming);
-            // Ensure isChild matches URL
-            merged.isChild = isChild;
-            setProfile(merged);
-            console.log("Loaded profile (merged)", merged);
+            const correctPath = savedIsChild
+              ? "/intake/child"
+              : "/intake/adult";
+            router.replace(correctPath);
+            return; // Don't continue loading - we're redirecting
           }
+
+          // Use saved profile merged with defaults (type matches or not set yet)
+          const baseDefaults = isChild
+            ? makeDefaultChildProfile()
+            : makeDefaultAdultProfile();
+          const merged = mergeWithDefaults(baseDefaults, incoming);
+          // Set isChild from URL (either matches saved or saved was null)
+          merged.isChild = isChild;
+          setProfile(merged);
+          console.log("Loaded profile (merged)", merged);
         } else {
           // No saved profile - use URL-based default and fill in session info
           const freshProfile = isChild
@@ -533,18 +563,28 @@ export default function IntakeTypePage() {
 
   async function notifyAssessmentComplete(p: Profile) {
     try {
-      console.log("[NotifyAssessmentComplete]", p.isChild);
+      console.log("[NotifyAssessmentComplete] isChild:", p.isChild);
+      console.log("[NotifyAssessmentComplete] clinicianEmail:", clinicianEmail);
+
+      const payload = {
+        firstName: p.firstName || "",
+        lastName: p.lastName || "",
+        email: p.email || "",
+        isChild: p.isChild ?? null,
+        submittedAtEpoch: Date.now(),
+        submittedAtISO: new Date().toISOString(),
+        clinician: clinicianEmail || "",
+      };
+
+      console.log(
+        "[NotifyAssessmentComplete] Full payload:",
+        JSON.stringify(payload, null, 2)
+      );
+
       await fetch("/api/notify/assessment-complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          firstName: p.firstName || "",
-          lastName: p.lastName || "",
-          email: p.email || "",
-          isChild: p.isChild ?? null,
-          submittedAtEpoch: Date.now(),
-          submittedAtISO: new Date().toISOString(),
-        }),
+        body: JSON.stringify(payload),
       });
     } catch (e) {
       console.error("Notification failed", e);
@@ -972,9 +1012,12 @@ export default function IntakeTypePage() {
                   session={session}
                   setProfile={setProfile}
                   assessmentType={assessmentType as "adult" | "child"}
-                  onClinicianChange={(name) =>
-                    setClinicianSelected(name !== "")
-                  }
+                  onClinicianChange={(name) => {
+                    setClinicianSelected(name !== "");
+                    const email = getClinicianEmail(name);
+                    setClinicianEmail(email);
+                    console.log("[Clinician] Selected:", name, "Email:", email);
+                  }}
                 />
               );
             }
