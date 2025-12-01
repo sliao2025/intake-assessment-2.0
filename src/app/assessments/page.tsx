@@ -289,7 +289,7 @@ export default function AssessmentsPage() {
                         router.push(`/assessments/${assessment.type}`)
                       }
                       style={{ backgroundColor: intPsychTheme.secondary }}
-                      className="w-full text-white py-3.5 rounded-xl font-bold shadow-[0_2px_0_0_#c27b00] hover:bg-[#ffb366] hover:translate-y-[-1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
+                      className="w-full text-white py-3.5 rounded-xl font-bold shadow-[0_4px_0_0_#c27b00] hover:bg-[#ffb366] hover:translate-y-[-1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
                     >
                       Start Assessment
                       <ChevronRight className="w-4 h-4" />
