@@ -37,7 +37,6 @@ export async function GET(request: NextRequest) {
       select: {
         assessmentType: true,
         totalScore: true,
-        severity: true,
         completedAt: true,
       },
     });
@@ -46,7 +45,6 @@ export async function GET(request: NextRequest) {
     const formattedRecent = recentAssessments.map((assessment) => ({
       name: formatAssessmentName(assessment.assessmentType),
       score: `${assessment.totalScore || 0}/27`,
-      severity: assessment.severity || "Minimal",
       change: -3, // TODO: Calculate actual change from previous assessment
       date: assessment.completedAt.toISOString().split("T")[0],
     }));
