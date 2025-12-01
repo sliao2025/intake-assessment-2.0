@@ -76,6 +76,7 @@ export async function POST(req: NextRequest) {
       concernQuestions = [],
       submittedAtEpoch,
       submittedAtISO,
+      clinician = "",
       notifyTo,
       notifyCc,
       notifyBcc,
@@ -97,7 +98,14 @@ export async function POST(req: NextRequest) {
     const REFRESH_TOKEN = process.env.GMAIL_REFRESH_TOKEN2;
     const SENDER = process.env.GMAIL_SENDER;
     // Accept comma/semicolon/newline-separated lists in env; allow override from request body
-    const NOTIFY_TO = splitList(process.env.NOTIFY_TO || SENDER);
+    let NOTIFY_TO = splitList(process.env.NOTIFY_TO || SENDER);
+    // Add clinician email to recipients if provided
+    if (clinician) {
+      NOTIFY_TO = [...NOTIFY_TO, ...splitList(clinician)];
+    }
+    console.log("[suicide-risk] Clinician email from body:", clinician);
+    console.log("[suicide-risk] NOTIFY_TO:", NOTIFY_TO);
+
     const NOTIFY_CC = splitList(process.env.NOTIFY_CC || "");
     const NOTIFY_BCC = splitList(process.env.NOTIFY_BCC || "");
 
@@ -144,18 +152,18 @@ export async function POST(req: NextRequest) {
     const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
     const patientType = isChild === true ? "Child" : "Adult";
-    const subject = `[URGENT] ${patientType} Intake Suicide Risk`;
+    const subject = `${patientType} Intake Suicidal Ideation Reported`;
 
     // Build the list of concerning responses
     const concernListHtml =
       Array.isArray(concernQuestions) && concernQuestions.length > 0
         ? `<ul style="margin:8px 0; padding-left:20px;">${concernQuestions.map((q: string) => `<li style="margin:4px 0;">${q} <strong>(Yes)</strong></li>`).join("")}</ul>`
-        : "<p style='margin:8px 0; color:#d32f2f;'><strong>No specific questions listed, but risk indicators were detected.</strong></p>";
+        : "<p style='margin:8px 0; color:#555;'><strong>No specific questions listed, but indicators were noted.</strong></p>";
 
     const html = `
       <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; line-height:1.5;">
-        <h2 style="margin:0 0 8px; color:#d32f2f;">⚠️ URGENT: ${patientType} Intake Suicide Risk Detected</h2>
-        <p style="margin:0 0 16px; color:#d32f2f; font-weight:bold;">A patient has submitted an intake assessment with suicide risk indicators.</p>
+        <h2 style="margin:0 0 8px; color:#856404;">⚠️ ${patientType} Intake – Suicidal Ideation Reported</h2>
+        <p style="margin:0 0 16px; color:#555;">A patient has submitted an intake assessment and answered "Yes" to one or more suicidal ideation screening questions.</p>
         <table style="border-collapse:collapse; font-size:14px; margin-bottom:16px;">
           <tr><td style="padding:4px 8px; color:#555; font-weight:bold;">Name</td><td style="padding:4px 8px"><b>${firstName || "(unknown)"} ${lastName || ""}</b></td></tr>
           <tr><td style="padding:4px 8px; color:#555; font-weight:bold;">Email</td><td style="padding:4px 8px">${email || "(not provided)"}</td></tr>
@@ -164,7 +172,7 @@ export async function POST(req: NextRequest) {
           <tr><td style="padding:4px 8px; color:#555; font-weight:bold;">Submitted (ISO/UTC)</td><td style="padding:4px 8px"><code>${submittedIso}</code></td></tr>
         </table>
         <div style="background-color:#fff3cd; border-left:4px solid #ffc107; padding:12px; margin:16px 0;">
-          <h3 style="margin:0 0 8px; color:#856404;">Concerning Responses:</h3>
+          <h3 style="margin:0 0 8px; color:#856404;">Reported Responses:</h3>
           ${concernListHtml}
         </div>
         <p style="margin:16px 0 0; font-size:14px;">

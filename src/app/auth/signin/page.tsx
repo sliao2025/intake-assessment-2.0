@@ -1,8 +1,8 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import logo from "../../../assets/IP_Logo.png";
@@ -13,7 +13,7 @@ import { DM_Sans, DM_Serif_Text } from "next/font/google";
 const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
 
-export default function SignInPage() {
+function SignInContent() {
   const [mode, setMode] = useState<"signin" | "signup" | "guest">("signin");
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -21,12 +21,16 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [errorTip, setErrorTip] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Get callbackUrl from query params, default to /intake
+  const callbackUrl = searchParams.get("callbackUrl") || "/intake";
+
   useEffect(() => {
     if (!errorTip) return;
     const t = setTimeout(() => setErrorTip(null), 3500);
     return () => clearTimeout(t);
   }, [errorTip]);
-  const callbackUrl = "/";
 
   return (
     <div
@@ -346,5 +350,28 @@ export default function SignInPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense
+      fallback={
+        <div
+          className="fixed inset-0 h-dvh flex items-center justify-center"
+          style={{ background: "#f9fafb", color: theme.text }}
+        >
+          <div className="animate-pulse text-center">
+            <div
+              style={{ borderTopColor: intPsychTheme.secondary }}
+              className="rounded-full h-12 w-12 mx-auto mb-4 border-4 border-gray-300 border-t-4 border-t-transparent animate-spin"
+            />
+            <p className="text-gray-700">Loading…</p>
+          </div>
+        </div>
+      }
+    >
+      <SignInContent />
+    </Suspense>
   );
 }
