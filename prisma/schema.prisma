@@ -39,9 +39,9 @@ model User {
   emailVerified      DateTime?
   passwordHash       String?
   guest              Boolean?             @default(false)
-  clinician          String
   intakeFinished     Boolean              @default(false)
   clinicId           String
+  clinician          String               @default("")
   accounts           Account[]
   AssessmentResponse AssessmentResponse[]
   JournalEntry       JournalEntry[]
@@ -124,9 +124,10 @@ model AssessmentResponse {
   assessmentType String
   responses      Json
   totalScore     Int?
-  severity       String?
-  completedAt    DateTime @default(now())
+  assignedAt     DateTime?
+  completedAt    DateTime?
   requestedBy    String?
+  dueDate        DateTime?
   Clinic         Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
   User           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 

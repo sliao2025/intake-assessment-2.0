@@ -912,6 +912,154 @@ export default function Page() {
     }
   }
 
+  async function alertSuicideRisk(p: Profile) {
+    try {
+      const assessments = p.assessments;
+      const isNewSchema =
+        assessments?.kind === "adult" || assessments?.kind === "child";
+      const isChild = p.isChild || assessments?.kind === "child";
+
+      let hasWarning = false;
+      const concernQuestions: string[] = [];
+
+      if (isChild) {
+        // Child CSSRS logic
+        const cssrs = isNewSchema
+          ? (assessments as any)?.data?.cssrs
+          : (assessments as any)?.cssrs;
+
+        if (cssrs) {
+          if (cssrs.wishDead === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "Have you wished you were dead or wished you could go to sleep and not wake up?"
+            );
+          }
+          if (cssrs.thoughts === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "In the past month have you had any actual thoughts of killing yourself?"
+            );
+          }
+          if (cssrs.methodHow === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "Have you been thinking about how you might do this?"
+            );
+          }
+          if (cssrs.intention === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "Have you had these thoughts and had some intention of acting on them?"
+            );
+          }
+          if (cssrs.plan === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "Have you started to work out or worked out the details of how to kill yourself? Do you intend to carry out this plan?"
+            );
+          }
+          if (cssrs.behavior === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "Have you ever done anything, started to do anything, or prepared to do anything to end your life?"
+            );
+          }
+          if (cssrs.behavior3mo === "yes") {
+            hasWarning = true;
+            concernQuestions.push("Was this within the past three months?");
+          }
+        }
+      } else {
+        // Adult suicide logic
+        const s = isNewSchema
+          ? (assessments as any)?.data?.suicide
+          : (assessments as any)?.suicide;
+        const selfHarm = isNewSchema
+          ? (assessments as any)?.data?.selfHarm
+          : (assessments as any)?.selfHarm;
+
+        if (s) {
+          if (s.wishDead === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "In the past month, have you wished you were dead, or wished you could go to sleep and not wake up?"
+            );
+          }
+          if (s.thoughts === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "In the past month, have you had any actual thoughts about killing yourself?"
+            );
+          }
+          if (s.methodHow === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "In the past month, have you been thinking about how you might end your life?"
+            );
+          }
+          if (s.intention === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "In the past month, have you had these suicidal thoughts and some intention of acting on them?"
+            );
+          }
+          if (s.plan === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "In the past month, have you started to work out the details of how to kill yourself? Do you intend to carry out this plan?"
+            );
+          }
+          if (s.behavior === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "Have you done anything, started to do anything, or prepared to do anything, to end your life? Such as: collected pills, obtained a gun, wrote a will or suicide note"
+            );
+          }
+          if (s.behavior3mo === "yes") {
+            hasWarning = true;
+            concernQuestions.push("Was this within the past 3 months?");
+          }
+        }
+
+        if (selfHarm) {
+          if (selfHarm.pastMonth === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "In the past month, have you intentionally hurt yourself (e.g., cut, burned, scratched) without wanting to die?"
+            );
+          }
+          if (selfHarm.lifetime === "yes") {
+            hasWarning = true;
+            concernQuestions.push(
+              "Have you ever intentionally hurt yourself without wanting to die?"
+            );
+          }
+        }
+      }
+
+      if (hasWarning) {
+        console.log("[AlertSuicideRisk] Risk detected, sending notification");
+        await fetch("/api/notify/suicide-risk", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            firstName: p.firstName || "",
+            lastName: p.lastName || "",
+            email: p.email || "",
+            isChild: p.isChild ?? null,
+            concernQuestions,
+            submittedAtEpoch: Date.now(),
+            submittedAtISO: new Date().toISOString(),
+          }),
+        });
+      }
+    } catch (e) {
+      console.error("Suicide risk notification failed", e);
+      // Do not block the UX if email fails
+    }
+  }
+
   async function runInsights() {
     try {
       const response = await fetch("/api/insights", {
@@ -1016,13 +1164,16 @@ export default function Page() {
       const finalized: Profile = { ...profile, maxVisited: steps.length - 1 };
       await saveProgress(finalized);
 
-      // 2) Fire-and-forget notification email
+      // 2) Check for suicide risk and notify if detected (before other notifications)
+      await alertSuicideRisk(finalized);
+
+      // 3) Fire-and-forget notification email
       await notifyAssessmentComplete(finalized);
 
-      // 3) Run insights generation (sentiment + summarization) in background
+      // 4) Run insights generation (sentiment + summarization) in background
       runInsights();
 
-      // 4) Persist denormalized scalars to Profile (firstName, etc.) and stamp firstSubmittedAt once
+      // 5) Persist denormalized scalars to Profile (firstName, etc.) and stamp firstSubmittedAt once
       try {
         console.log("[Finalize Submit]", finalized.isChild);
         const metaPayload = {
@@ -1135,7 +1286,7 @@ export default function Page() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -15, opacity: 0 }}
           transition={{ duration: 0.8, ease }}
-          className="w-full rounded-4xl border border-gray-200 bg-white/70 backdrop-blur-sm px-6 py-6 md:py-8 shadow-md md:max-h-[70vh] md:overflow-y-auto md:overflow-x-hidden md:overscroll-y-contain scrollable-div box-border"
+          className="w-full rounded-4xl border border-[#e7e5e4] border-b-4 bg-white/70 backdrop-blur-sm px-6 py-6 md:py-8 shadow-sm md:max-h-[70vh] md:overflow-y-auto md:overflow-x-hidden md:overscroll-y-contain scrollable-div box-border"
           style={{
             WebkitOverflowScrolling: "touch",
             scrollbarGutter: "stable both-edges",
@@ -1283,7 +1434,7 @@ export default function Page() {
             <div className="mt-8 flex items-center justify-between gap-3">
               <button
                 onClick={goBack}
-                className="inline-flex cursor-pointer disabled:cursor-not-allowed bg-white items-center gap-2 rounded-xl px-3 py-2 font-medium border border-gray-300 text-gray-700 disabled:opacity-40 transition duration-150 hover:brightness-95 active:scale-95"
+                className="inline-flex cursor-pointer disabled:cursor-not-allowed bg-white items-center gap-2 rounded-xl px-3 py-2 font-medium border border-gray-300 border-b-4 text-gray-700 disabled:opacity-40 transition duration-150 hover:brightness-95 active:scale-95"
               >
                 <ChevronLeft className="h-4 w-4" /> Back
               </button>
@@ -1296,7 +1447,7 @@ export default function Page() {
                         : setStep(Math.min(profile.maxVisited, lastIndex))
                     }
                     disabled={profile.maxVisited === 0 && !canNext}
-                    className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed border-b-4 border-black/20"
                     style={{ background: intPsychTheme.secondary }}
                   >
                     {profile.maxVisited === 0 ? "Start" : "Resume"}
@@ -1312,7 +1463,7 @@ export default function Page() {
                           setStep(0);
                           window.scrollTo({ top: 0, behavior: "smooth" });
                         }}
-                        className="inline-flex cursor-pointer mr-2 items-center gap-2 rounded-xl px-4 py-2 font-normal text-white transition duration-150 hover:brightness-90 active:scale-95"
+                        className="inline-flex cursor-pointer mr-2 items-center gap-2 rounded-xl px-4 py-2 font-normal text-white transition duration-150 hover:brightness-90 active:scale-95 border-b-4 border-black/20"
                         style={{ background: intPsychTheme.primary }}
                       >
                         Back to Beginning
@@ -1324,7 +1475,7 @@ export default function Page() {
                         href={"https://forms.gle/FNvs8LzwZfT2hWb27"}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex cursor-pointer font-semibold mr-2 items-center gap-2 rounded-xl px-4 py-2 font-normal text-white transition duration-150 hover:brightness-90 active:scale-95"
+                        className="inline-flex cursor-pointer font-semibold mr-2 items-center gap-2 rounded-xl px-4 py-2 font-normal text-white transition duration-150 hover:brightness-90 active:scale-95 border-b-4 border-black/20"
                         style={{ background: intPsychTheme.primary }}
                         aria-label="Open feedback form (opens in a new tab)"
                       >
@@ -1342,7 +1493,7 @@ export default function Page() {
                             ? isSubmitting || submitted
                             : !canNext
                         }
-                        className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95 ${
+                        className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95 border-b-4 border-black/20 ${
                           steps[step].key === "review"
                             ? "bg-gradient-to-r from-lime-400 to-green-600 shadow-md shadow-lime-300/50"
                             : ""
@@ -1366,7 +1517,7 @@ export default function Page() {
                     )}
                     {submitted && steps[step].key === "review" && (
                       <button
-                        className={`inline-flex ml-2 items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95`}
+                        className={`inline-flex ml-2 items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95 border-b-4 border-black/20`}
                         style={{ background: intPsychTheme.secondary }}
                         onClick={goNext}
                       >

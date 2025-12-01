@@ -1,6 +1,9 @@
 import { ShieldUser, CheckCircle2, ChevronRight } from "lucide-react";
 import StepTitle from "../StepTitle";
 import { intPsychTheme } from "../theme";
+import { DM_Sans } from "next/font/google";
+
+const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 export default function HIPAASection({
   title,
@@ -10,7 +13,7 @@ export default function HIPAASection({
   step: number;
 }) {
   return (
-    <div className="space-y-5">
+    <div className={`space-y-5 ${dm_sans.className}`}>
       <StepTitle n={step + 1} title={title} />
 
       {/* Compact privacy callout */}
@@ -28,7 +31,7 @@ export default function HIPAASection({
       </div>
 
       {/* Details card */}
-      <div className="rounded-2xl border border-gray-200 bg-white/80 p-5">
+      <div className="rounded-2xl border border-[#e7e5e4] bg-white p-5">
         <p className="text-gray-800">
           Before we start, here’s a quick overview of how your information is
           handled:

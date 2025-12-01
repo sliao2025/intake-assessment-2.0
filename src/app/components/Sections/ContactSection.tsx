@@ -13,6 +13,9 @@ import {
   ListboxOptions,
 } from "@headlessui/react";
 import { ChevronDown, Check } from "lucide-react";
+import { DM_Sans } from "next/font/google";
+
+const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 export default function ContactSection({
   title,
@@ -71,7 +74,7 @@ export default function ContactSection({
     degreeOptions.find((o) => o.value === v)?.label ?? "Choose…";
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${dm_sans.className}`}>
       <StepTitle n={step + 1} title={title} />
 
       {/* Patient contact info */}

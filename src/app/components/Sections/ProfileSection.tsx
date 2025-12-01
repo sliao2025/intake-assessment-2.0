@@ -16,6 +16,9 @@ import { Option } from "../../lib/types/types";
 import Separator from "../primitives/Separator";
 import Likert from "../primitives/Likert";
 import TextAreaWithEncouragement from "../primitives/TextAreawithEncouragement";
+import { DM_Sans } from "next/font/google";
+
+const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 const sexualOrientations: Option[] = [
   { label: "Asexual", value: "asexual" },
@@ -150,7 +153,7 @@ export default function ProfileSection({
   step: number;
 }) {
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${dm_sans.className}`}>
       <StepTitle n={step + 1} title={title} />
       <div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

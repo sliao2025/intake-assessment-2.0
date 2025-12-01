@@ -25,18 +25,10 @@ import {
   ListboxOptions,
   ListboxOption,
 } from "@headlessui/react";
+import { CLINICIANS } from "../../lib/text";
+import { DM_Sans } from "next/font/google";
 
-const CLINICIAN_NAMES = [
-  "Ryan Sultan",
-  "Zurama Rodriguez ",
-  "Ryan Mather",
-  "Alexandra Christodoulou",
-  "Omarr Savage",
-  "Luisa Tinapay",
-  "Shayna Feuer",
-  "Jordan Arbelaez",
-  "Jennifer Ray",
-];
+const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 export default function WelcomeSection({
   title,
@@ -59,6 +51,17 @@ export default function WelcomeSection({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [clinicianName, setClinicianName] = useState<string>("");
 
+  const updateDropdownPosition = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 8, // 8px = mt-2
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  };
+
   // Fetch clinician name from database on mount
   useEffect(() => {
     const fetchClinician = async () => {
@@ -77,17 +80,6 @@ export default function WelcomeSection({
 
     fetchClinician();
   }, []);
-
-  const updateDropdownPosition = () => {
-    if (buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY + 8, // 8px = mt-2
-        left: rect.left + window.scrollX,
-        width: rect.width,
-      });
-    }
-  };
 
   const saveClinician = async (clinician: string) => {
     try {
@@ -109,7 +101,7 @@ export default function WelcomeSection({
   };
 
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4 ${dm_sans.className}`}>
       <StepTitle
         n={step + 1}
         title={`${(() => {
@@ -125,12 +117,12 @@ export default function WelcomeSection({
 
       {/* Adult vs Child selector (only if unanswered) */}
       {profile.maxVisited === 0 && (
-        <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 md:p-5">
+        <div className="rounded-2xl border border-[#e7e5e4] bg-white p-4 md:p-5">
           <h3 className="font-semibold text-slate-900">
-            Who is completing this intake?
+            Who is this assessment for?
           </h3>
           <p className="mt-1 text-sm text-slate-600">
-            Please select one to proceed to the overview.
+            Please select who will be receiving treatment.
           </p>
           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
@@ -138,15 +130,17 @@ export default function WelcomeSection({
               onClick={() =>
                 setProfile({ ...makeDefaultAdultProfile(), isChild: false })
               }
-              className={`w-full text-left rounded-xl border p-4 transition hover:brightness-95 active:scale-95 ${
+              className={`w-full text-left rounded-xl border border-b-4 p-4 transition hover:brightness-95 active:scale-95 ${
                 profile.isChild === false
                   ? "border-emerald-500 bg-emerald-50/80"
                   : "border-slate-200 bg-white/70"
               }`}
             >
-              <div className="font-medium text-slate-900">Adult (18+)</div>
+              <div className="font-medium text-slate-900">
+                Myself (Adult 18+)
+              </div>
               <div className="text-sm text-slate-600">
-                I'm completing my own intake.
+                I am completing this for my own treatment.
               </div>
             </button>
 
@@ -155,15 +149,17 @@ export default function WelcomeSection({
               onClick={() => {
                 setProfile({ ...makeDefaultChildProfile(), isChild: true });
               }}
-              className={`w-full text-left rounded-xl border p-4 transition hover:brightness-95 active:scale-95 ${
+              className={`w-full text-left rounded-xl border border-b-4 p-4 transition hover:brightness-95 active:scale-95 ${
                 profile.isChild === true
                   ? "border-emerald-500 bg-emerald-50/80"
                   : "border-slate-200 bg-white/70"
               }`}
             >
-              <div className="font-medium text-slate-900">Child (under 18)</div>
+              <div className="font-medium text-slate-900">
+                My Child (Under 18)
+              </div>
               <div className="text-sm text-slate-600">
-                I'm a parent/guardian or child completing an intake.
+                I am a parent or guardian filling this out for my child.
               </div>
             </button>
           </div>
@@ -225,10 +221,10 @@ export default function WelcomeSection({
                                 width: `${dropdownPosition.width}px`,
                               }}
                             >
-                              {CLINICIAN_NAMES.map((name) => (
+                              {CLINICIANS.map((clinician) => (
                                 <ListboxOption
-                                  key={name}
-                                  value={name}
+                                  key={clinician.name}
+                                  value={clinician.name}
                                   as={React.Fragment}
                                 >
                                   {({ active, selected }) => (
@@ -244,7 +240,7 @@ export default function WelcomeSection({
                                             : "font-normal text-slate-700"
                                         } block truncate`}
                                       >
-                                        {name}
+                                        {clinician.name}
                                       </span>
                                       {selected && (
                                         <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
@@ -272,7 +268,7 @@ export default function WelcomeSection({
         <>
           {/* At-a-glance cards */}
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="rounded-2xl border border-slate-200 bg-white/80 p-4">
+            <div className="rounded-2xl border border-[#e7e5e4] bg-white p-4">
               <div className="text-sm text-slate-500">Estimated time</div>
               <div className="text-lg items-start flex font-semibold text-slate-900">
                 <p>30–60 minutes</p>
@@ -281,7 +277,7 @@ export default function WelcomeSection({
                 You can move between sections and come back to edit answers.
               </div>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-white/80 p-4">
+            <div className="rounded-2xl border border-[#e7e5e4] bg-white p-4">
               <div className="text-sm text-slate-500">Format</div>
               <div className="text-lg font-semibold text-slate-900">
                 Multiple‑choice + Free‑response
@@ -293,7 +289,7 @@ export default function WelcomeSection({
           </div>
 
           {/* What to expect */}
-          <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 md:p-5">
+          <div className="rounded-2xl border border-[#e7e5e4] bg-white p-4 md:p-5">
             <h3 className="font-semibold text-slate-900">What to expect</h3>
             <ul className="mt-3 space-y-2">
               <li className="flex items-start gap-2">
@@ -321,7 +317,7 @@ export default function WelcomeSection({
           </div>
 
           {/* Voice Recordings */}
-          <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 md:p-5">
+          <div className="rounded-2xl border border-[#e7e5e4] bg-white p-4 md:p-5">
             <h3 className="font-semibold text-slate-900">Voice Recordings</h3>
             <ul className="mt-3 space-y-2">
               <li className="flex items-start gap-2">
@@ -350,7 +346,7 @@ export default function WelcomeSection({
           </div>
 
           {/* Saving behavior */}
-          <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 md:p-5">
+          <div className="rounded-2xl border border-[#e7e5e4] bg-white p-4 md:p-5">
             <h3 className="font-semibold text-slate-900">
               Saving &amp; returning
             </h3>

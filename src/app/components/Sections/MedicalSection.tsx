@@ -25,6 +25,9 @@ import type {
 } from "../../lib/types/types";
 import StepTitle from "../StepTitle";
 import { Check, ChevronDown } from "lucide-react";
+import { DM_Sans } from "next/font/google";
+
+const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 // ---- Hoisted UI atoms to maintain stable component identity across renders ----
 const Card: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -51,7 +54,7 @@ const AddButton: React.FC<{ onClick: () => void; label: string }> = ({
 }) => (
   <button
     onClick={onClick}
-    className="inline-flex cursor-pointer items-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+    className="inline-flex cursor-pointer items-center rounded-xl border border-slate-300 border-b-4 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
     style={{ outlineColor: intPsychTheme.secondary }}
   >
     + {label}
@@ -286,7 +289,7 @@ export default function MedicalSection({
 
   // ------- render -------
   return (
-    <div className="space-y-8">
+    <div className={`space-y-8 ${dm_sans.className}`}>
       <StepTitle n={step + 1} title={title} />
       {profile.isChild === true && (
         <>

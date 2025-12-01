@@ -8,9 +8,9 @@ import { motion } from "framer-motion";
 import logo from "../../../assets/IP_Logo.png";
 import GardenFrame from "../../components/Garden/Garden";
 import { intPsychTheme, theme, ease } from "../../components/theme";
-import { Roboto, DM_Serif_Text } from "next/font/google";
+import { DM_Sans, DM_Serif_Text } from "next/font/google";
 
-const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"] });
+const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
 
 export default function SignInPage() {
@@ -26,11 +26,11 @@ export default function SignInPage() {
     const t = setTimeout(() => setErrorTip(null), 3500);
     return () => clearTimeout(t);
   }, [errorTip]);
-  const callbackUrl = "/intake";
+  const callbackUrl = "/";
 
   return (
     <div
-      className="bg-gray-50 fixed inset-0 h-dvh flex items-center justify-center overflow-hidden"
+      className={`bg-gray-50 fixed inset-0 h-dvh flex items-center justify-center overflow-hidden ${dm_sans.className}`}
       style={{
         color: theme.text,
       }}
@@ -44,7 +44,7 @@ export default function SignInPage() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -15, opacity: 0 }}
           transition={{ duration: 0.8, ease }}
-          className="w-full rounded-4xl border border-gray-200 bg-white/80 backdrop-blur-sm px-4 py-6 md:px-6 md:py-8 shadow-md max-h-[80vh] scrollable-div overflow-y-auto overflow-x-hidden box-border overscroll-y-contain"
+          className="w-full rounded-4xl border border-[#e7e5e4] border-b-4 bg-white/80 backdrop-blur-sm px-4 py-6 md:px-6 md:py-8 shadow-sm max-h-[80vh] scrollable-div overflow-y-auto overflow-x-hidden box-border overscroll-y-contain"
           style={{
             WebkitOverflowScrolling: "touch",
             scrollbarGutter: "stable both-edges",
@@ -91,7 +91,7 @@ export default function SignInPage() {
                     className={`${dm_serif.className}  `}
                     style={{ color: intPsychTheme.primary }}
                   >
-                    Integrative Psych Pre-clinical Assessment
+                    Integrative Psych Patient Portal
                   </span>
                 ) : (
                   <span
@@ -104,7 +104,7 @@ export default function SignInPage() {
               </h1>
             </div>
             {mode === "signin" && (
-              <p className="text-gray-700 font-sans">
+              <p className="text-gray-700">
                 {/* Sign in to begin your treatment or pick up right where you left
                 off. */}
               </p>
@@ -116,7 +116,7 @@ export default function SignInPage() {
                 {mode === "signin" && (
                   <>
                     <button
-                      className={`${roboto.className} w-full cursor-pointer inline-flex items-center justify-center gap-3 rounded-full px-5 py-3 font-medium text-white transition-all`}
+                      className={`${dm_sans.className} w-full cursor-pointer inline-flex items-center justify-center gap-3 rounded-full px-5 py-3 font-medium text-white transition-all border-b-4 border-black/20`}
                       onClick={async () => {
                         const res = await signIn("google", {
                           callbackUrl,
@@ -249,7 +249,7 @@ export default function SignInPage() {
                   </div>
 
                   <button
-                    className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 font-medium text-white bg-black/75 bg-[color:var(--accent)] hover:bg-black/85 transition-colors duration-200 ease-in-out"
+                    className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 font-medium text-white bg-black/75 bg-[color:var(--accent)] hover:bg-black/85 transition-colors duration-200 ease-in-out border-b-4 border-black/20"
                     type="submit"
                   >
                     {mode === "signin" ? "Sign in" : "Create account"}
@@ -260,7 +260,7 @@ export default function SignInPage() {
                   {mode === "signin" ? (
                     <div className="flex gap-3 mt-4">
                       <button
-                        className="flex-1 cursor-pointer rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors"
+                        className="flex-1 cursor-pointer rounded-full border border-gray-300 border-b-4 px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors"
                         onClick={() => setMode("signup")}
                       >
                         Create an account
@@ -268,7 +268,7 @@ export default function SignInPage() {
                       <button
                         type="button"
                         onClick={() => setMode("guest")}
-                        className="flex-1 cursor-pointer rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="flex-1 cursor-pointer rounded-full border border-gray-300 border-b-4 px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
                         aria-label="Continue as a guest (limited)"
                         title="Continue as a guest (limited)"
                       >
@@ -293,7 +293,7 @@ export default function SignInPage() {
           {mode === "guest" && (
             <form className="space-y-4 mt-4">
               <input
-                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                className="w-full rounded-full bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
                 type="text"
                 placeholder="First Name"
                 value={firstName}
@@ -301,7 +301,7 @@ export default function SignInPage() {
                 required
               />
               <input
-                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                className="w-full rounded-full bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
                 type="text"
                 placeholder="Last Name"
                 value={lastName}
@@ -311,12 +311,12 @@ export default function SignInPage() {
               <div className="flex justify-between gap-4">
                 <button
                   onClick={() => setMode("signin")}
-                  className="px-4 py-2 cursor-pointer rounded-full border border-slate-300 bg-gray-100 "
+                  className="px-4 py-2 cursor-pointer rounded-full border border-slate-300 border-b-4 bg-gray-100 "
                 >
                   Back
                 </button>
                 <button
-                  className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 font-semibold text-white bg-[color:var(--accent)] hover:bg-[color:var(--accent-hover)] transition-colors duration-200 ease-in-out"
+                  className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 font-semibold text-white bg-[color:var(--accent)] hover:bg-[color:var(--accent-hover)] transition-colors duration-200 ease-in-out border-b-4 border-black/20"
                   style={{
                     ["--accent" as any]: intPsychTheme.accent,
                     ["--accent-hover" as any]: "#0f5caeff",

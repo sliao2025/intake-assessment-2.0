@@ -9,6 +9,9 @@ import Likert from "../primitives/Likert";
 import { useRouter } from "next/navigation";
 import Separator from "../primitives/Separator";
 import CSSRSForm from "../Scales/Child/C-SSRSForm";
+import { DM_Sans } from "next/font/google";
+
+const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 /** Scales reused from AssessmentsSection (yes/no) */
 const yesNo = [
@@ -52,7 +55,7 @@ export default function CheckInSection({
   }, [highRisk, router]);
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${dm_sans.className}`}>
       <StepTitle n={step + 1} title={title} />
       {!profile.isChild ? (
         <p className="text-slate-700">

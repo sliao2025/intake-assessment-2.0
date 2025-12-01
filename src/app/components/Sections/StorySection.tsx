@@ -10,6 +10,9 @@ import MultiSelectGroup from "../primitives/MultiSelectGroup";
 import type { Profile } from "../../lib/types/types";
 import TextAreaWithEncouragement from "../primitives/TextAreawithEncouragement";
 import { Info } from "lucide-react";
+import { DM_Sans } from "next/font/google";
+
+const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 type Props = {
   title: string;
@@ -48,7 +51,7 @@ export default function StorySection({
   };
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${dm_sans.className}`}>
       <StepTitle n={step + 1} title={title} />
       <Field
         title={

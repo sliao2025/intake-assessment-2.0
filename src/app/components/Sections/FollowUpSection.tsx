@@ -9,6 +9,9 @@ import TextAreaWithEncouragement from "../primitives/TextAreawithEncouragement";
 import VoiceRecorder, { VoiceRecorderHandle } from "../VoiceRecorder";
 import { intPsychTheme } from "../theme";
 import { Info } from "lucide-react";
+import { DM_Sans } from "next/font/google";
+
+const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 type Props = {
   title: string;
@@ -156,7 +159,7 @@ export default function FollowUpSection({
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className={`space-y-6 ${dm_sans.className}`}>
         <StepTitle n={step + 1} title={title} />
         <div className="flex flex-col items-center justify-center py-20 space-y-4">
           {/* Spinning loader */}
@@ -180,7 +183,7 @@ export default function FollowUpSection({
 
   if (!questionsGenerated || !profile.followupQuestions) {
     return (
-      <div className="space-y-6">
+      <div className={`space-y-6 ${dm_sans.className}`}>
         <StepTitle n={step + 1} title={title} />
         <div className="text-center py-8">
           <p className="text-lg text-gray-600">Loading questions...</p>
@@ -194,7 +197,7 @@ export default function FollowUpSection({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="space-y-6"
+      className={`space-y-6 ${dm_sans.className}`}
     >
       <StepTitle n={step + 1} title={title} />
 
