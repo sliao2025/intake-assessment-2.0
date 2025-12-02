@@ -9,6 +9,7 @@ import VoiceRecorder, { VoiceRecorderHandle } from "../VoiceRecorder";
 import MultiSelectGroup from "../primitives/MultiSelectGroup";
 import type { Profile } from "../../lib/types/types";
 import TextAreaWithEncouragement from "../primitives/TextAreawithEncouragement";
+import VoicePreferredField from "../primitives/VoicePreferredField";
 import { Info } from "lucide-react";
 import { DM_Sans } from "next/font/google";
 
@@ -87,102 +88,99 @@ export default function StorySection({
         }
         required
       >
-        <div className="space-y-3">
-          <div className="flex items-start gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-xl">
-            <Info className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-orange-900 font-medium">
-              You can record your answer, type it below, or both – whatever you
-              prefer
-            </p>
-          </div>
-          <VoiceRecorder
-            ref={(el) => {
-              if (voiceRecorderRefs) {
-                voiceRecorderRefs.current.storyNarrative = el;
-              }
-            }}
-            fieldName="storyNarrative"
-            label="Record your answer"
-            audioState={profile.storyNarrative?.audio?.url || null}
-            fileName={profile.storyNarrative?.audio?.fileName || null}
-            onAttach={async (data) => {
-              console.log(
-                "[StorySection] storyNarrative onAttach called with data:",
-                data
-              );
+        <VoicePreferredField
+          hasTextValue={!!profile.storyNarrative?.text}
+          voiceRecorder={
+            <VoiceRecorder
+              ref={(el) => {
+                if (voiceRecorderRefs) {
+                  voiceRecorderRefs.current.storyNarrative = el;
+                }
+              }}
+              fieldName="storyNarrative"
+              label="Record your answer"
+              audioState={profile.storyNarrative?.audio?.url || null}
+              fileName={profile.storyNarrative?.audio?.fileName || null}
+              onAttach={async (data) => {
+                console.log(
+                  "[StorySection] storyNarrative onAttach called with data:",
+                  data
+                );
 
-              // ✅ Update local state immediately for UI responsiveness
-              setProfile((p) => ({
-                ...p,
-                storyNarrative: {
-                  text: p.storyNarrative?.text || "",
-                  ...(data && {
-                    audio: {
-                      url: data.url,
-                      fileName: data.fileName,
-                      uploadedAt: data.uploadedAt,
-                      // Preserve existing transcription fields if they exist
-                      ...(p.storyNarrative?.audio?.transcription && {
-                        transcription: p.storyNarrative.audio.transcription,
-                        chunks: p.storyNarrative.audio.chunks,
-                        transcribedAt: p.storyNarrative.audio.transcribedAt,
-                      }),
-                    },
-                  }),
-                },
-              }));
+                // ✅ Update local state immediately for UI responsiveness
+                setProfile((p) => ({
+                  ...p,
+                  storyNarrative: {
+                    text: p.storyNarrative?.text || "",
+                    ...(data && {
+                      audio: {
+                        url: data.url,
+                        fileName: data.fileName,
+                        uploadedAt: data.uploadedAt,
+                        // Preserve existing transcription fields if they exist
+                        ...(p.storyNarrative?.audio?.transcription && {
+                          transcription: p.storyNarrative.audio.transcription,
+                          chunks: p.storyNarrative.audio.chunks,
+                          transcribedAt: p.storyNarrative.audio.transcribedAt,
+                        }),
+                      },
+                    }),
+                  },
+                }));
 
-              // ✅ Save ONLY this field to DB using field-level update (prevents race conditions)
-              try {
-                const response = await fetch("/api/profile/update-field", {
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    fieldName: "storyNarrative",
-                    fieldValue: {
-                      text: profile.storyNarrative?.text || "",
-                      ...(data && {
-                        audio: {
-                          url: data.url,
-                          fileName: data.fileName,
-                          uploadedAt: data.uploadedAt,
-                        },
-                      }),
-                    },
-                  }),
-                });
+                // ✅ Save ONLY this field to DB using field-level update (prevents race conditions)
+                try {
+                  const response = await fetch("/api/profile/update-field", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      fieldName: "storyNarrative",
+                      fieldValue: {
+                        text: profile.storyNarrative?.text || "",
+                        ...(data && {
+                          audio: {
+                            url: data.url,
+                            fileName: data.fileName,
+                            uploadedAt: data.uploadedAt,
+                          },
+                        }),
+                      },
+                    }),
+                  });
 
-                if (!response.ok) {
+                  if (!response.ok) {
+                    console.error(
+                      "[StorySection] Failed to save storyNarrative to DB"
+                    );
+                  } else {
+                    console.log(
+                      "[StorySection] Successfully saved storyNarrative to DB"
+                    );
+                  }
+                } catch (err) {
                   console.error(
-                    "[StorySection] Failed to save storyNarrative to DB"
-                  );
-                } else {
-                  console.log(
-                    "[StorySection] Successfully saved storyNarrative to DB"
+                    "[StorySection] Error saving storyNarrative to DB:",
+                    err
                   );
                 }
-              } catch (err) {
-                console.error(
-                  "[StorySection] Error saving storyNarrative to DB:",
-                  err
-                );
+              }}
+            />
+          }
+          textArea={
+            <TextAreaWithEncouragement
+              rows={6}
+              placeholder="Or type here in your own words…"
+              value={profile.storyNarrative?.text || ""}
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  storyNarrative: { ...p.storyNarrative, text: next },
+                }))
               }
-            }}
-          />
-
-          <TextAreaWithEncouragement
-            rows={6}
-            placeholder="Or type here in your own words…"
-            value={profile.storyNarrative?.text || ""}
-            onChangeText={(next) =>
-              setProfile((p) => ({
-                ...p,
-                storyNarrative: { ...p.storyNarrative, text: next },
-              }))
-            }
-            recommendedWords={75}
-          />
-        </div>
+              recommendedWords={75}
+            />
+          }
+        />
       </Field>
 
       <Separator label="Your Goals" />
@@ -223,94 +221,96 @@ export default function StorySection({
         }
         required
       >
-        <div className="space-y-3">
-          <div className="flex items-start gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-xl">
-            <Info className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-orange-900 font-medium">
-              You can record your answer, type it below, or both – whatever you
-              prefer
-            </p>
-          </div>
-          <VoiceRecorder
-            ref={(el) => {
-              if (voiceRecorderRefs) {
-                voiceRecorderRefs.current.goals = el;
-              }
-            }}
-            fieldName="goals"
-            label="Record your answer"
-            audioState={profile.goals?.audio?.url || null}
-            fileName={profile.goals?.audio?.fileName || null}
-            onAttach={async (data) => {
-              console.log(
-                "[StorySection] goals onAttach called with data:",
-                data
-              );
-
-              // ✅ Update local state immediately
-              setProfile((p) => ({
-                ...p,
-                goals: {
-                  text: p.goals?.text || "",
-                  ...(data && {
-                    audio: {
-                      url: data.url,
-                      fileName: data.fileName,
-                      uploadedAt: data.uploadedAt,
-                      ...(p.goals?.audio?.transcription && {
-                        transcription: p.goals.audio.transcription,
-                        chunks: p.goals.audio.chunks,
-                        transcribedAt: p.goals.audio.transcribedAt,
-                      }),
-                    },
-                  }),
-                },
-              }));
-
-              // ✅ Save ONLY this field to DB
-              try {
-                const response = await fetch("/api/profile/update-field", {
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    fieldName: "goals",
-                    fieldValue: {
-                      text: profile.goals?.text || "",
-                      ...(data && {
-                        audio: {
-                          url: data.url,
-                          fileName: data.fileName,
-                          uploadedAt: data.uploadedAt,
-                        },
-                      }),
-                    },
-                  }),
-                });
-
-                if (!response.ok) {
-                  console.error("[StorySection] Failed to save goals to DB");
-                } else {
-                  console.log("[StorySection] Successfully saved goals to DB");
+        <VoicePreferredField
+          hasTextValue={!!profile.goals?.text}
+          voiceRecorder={
+            <VoiceRecorder
+              ref={(el) => {
+                if (voiceRecorderRefs) {
+                  voiceRecorderRefs.current.goals = el;
                 }
-              } catch (err) {
-                console.error("[StorySection] Error saving goals to DB:", err);
-              }
-            }}
-          />
+              }}
+              fieldName="goals"
+              label="Record your answer"
+              audioState={profile.goals?.audio?.url || null}
+              fileName={profile.goals?.audio?.fileName || null}
+              onAttach={async (data) => {
+                console.log(
+                  "[StorySection] goals onAttach called with data:",
+                  data
+                );
 
-          <TextAreaWithEncouragement
-            rows={6}
-            placeholder="Or type here in your own words…"
-            value={profile.goals?.text || ""}
-            onChangeText={(next) =>
-              setProfile((p) => ({
-                ...p,
-                goals: { ...p.goals, text: next },
-              }))
-            }
-            recommendedWords={40}
-          />
-        </div>
+                // ✅ Update local state immediately
+                setProfile((p) => ({
+                  ...p,
+                  goals: {
+                    text: p.goals?.text || "",
+                    ...(data && {
+                      audio: {
+                        url: data.url,
+                        fileName: data.fileName,
+                        uploadedAt: data.uploadedAt,
+                        ...(p.goals?.audio?.transcription && {
+                          transcription: p.goals.audio.transcription,
+                          chunks: p.goals.audio.chunks,
+                          transcribedAt: p.goals.audio.transcribedAt,
+                        }),
+                      },
+                    }),
+                  },
+                }));
+
+                // ✅ Save ONLY this field to DB
+                try {
+                  const response = await fetch("/api/profile/update-field", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      fieldName: "goals",
+                      fieldValue: {
+                        text: profile.goals?.text || "",
+                        ...(data && {
+                          audio: {
+                            url: data.url,
+                            fileName: data.fileName,
+                            uploadedAt: data.uploadedAt,
+                          },
+                        }),
+                      },
+                    }),
+                  });
+
+                  if (!response.ok) {
+                    console.error("[StorySection] Failed to save goals to DB");
+                  } else {
+                    console.log(
+                      "[StorySection] Successfully saved goals to DB"
+                    );
+                  }
+                } catch (err) {
+                  console.error(
+                    "[StorySection] Error saving goals to DB:",
+                    err
+                  );
+                }
+              }}
+            />
+          }
+          textArea={
+            <TextAreaWithEncouragement
+              rows={6}
+              placeholder="Or type here in your own words…"
+              value={profile.goals?.text || ""}
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  goals: { ...p.goals, text: next },
+                }))
+              }
+              recommendedWords={40}
+            />
+          }
+        />
       </Field>
 
       <Separator label="Living Situation" />
@@ -339,100 +339,97 @@ export default function StorySection({
         }
         required
       >
-        <div className="space-y-3">
-          <div className="flex items-start gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-xl">
-            <Info className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-orange-900 font-medium">
-              You can record your answer, type it below, or both – whatever you
-              prefer
-            </p>
-          </div>
-          <VoiceRecorder
-            ref={(el) => {
-              if (voiceRecorderRefs) {
-                voiceRecorderRefs.current.livingSituation = el;
-              }
-            }}
-            fieldName="livingSituation"
-            label="Record your answer"
-            audioState={profile.livingSituation?.audio?.url || null}
-            fileName={profile.livingSituation?.audio?.fileName || null}
-            onAttach={async (data) => {
-              console.log(
-                "[StorySection] livingSituation onAttach called with data:",
-                data
-              );
+        <VoicePreferredField
+          hasTextValue={!!profile.livingSituation?.text}
+          voiceRecorder={
+            <VoiceRecorder
+              ref={(el) => {
+                if (voiceRecorderRefs) {
+                  voiceRecorderRefs.current.livingSituation = el;
+                }
+              }}
+              fieldName="livingSituation"
+              label="Record your answer"
+              audioState={profile.livingSituation?.audio?.url || null}
+              fileName={profile.livingSituation?.audio?.fileName || null}
+              onAttach={async (data) => {
+                console.log(
+                  "[StorySection] livingSituation onAttach called with data:",
+                  data
+                );
 
-              // ✅ Update local state immediately
-              setProfile((p) => ({
-                ...p,
-                livingSituation: {
-                  text: p.livingSituation?.text || "",
-                  ...(data && {
-                    audio: {
-                      url: data.url,
-                      fileName: data.fileName,
-                      uploadedAt: data.uploadedAt,
-                      ...(p.livingSituation?.audio?.transcription && {
-                        transcription: p.livingSituation.audio.transcription,
-                        chunks: p.livingSituation.audio.chunks,
-                        transcribedAt: p.livingSituation.audio.transcribedAt,
-                      }),
-                    },
-                  }),
-                },
-              }));
+                // ✅ Update local state immediately
+                setProfile((p) => ({
+                  ...p,
+                  livingSituation: {
+                    text: p.livingSituation?.text || "",
+                    ...(data && {
+                      audio: {
+                        url: data.url,
+                        fileName: data.fileName,
+                        uploadedAt: data.uploadedAt,
+                        ...(p.livingSituation?.audio?.transcription && {
+                          transcription: p.livingSituation.audio.transcription,
+                          chunks: p.livingSituation.audio.chunks,
+                          transcribedAt: p.livingSituation.audio.transcribedAt,
+                        }),
+                      },
+                    }),
+                  },
+                }));
 
-              // ✅ Save ONLY this field to DB
-              try {
-                const response = await fetch("/api/profile/update-field", {
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    fieldName: "livingSituation",
-                    fieldValue: {
-                      text: profile.livingSituation?.text || "",
-                      ...(data && {
-                        audio: {
-                          url: data.url,
-                          fileName: data.fileName,
-                          uploadedAt: data.uploadedAt,
-                        },
-                      }),
-                    },
-                  }),
-                });
+                // ✅ Save ONLY this field to DB
+                try {
+                  const response = await fetch("/api/profile/update-field", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      fieldName: "livingSituation",
+                      fieldValue: {
+                        text: profile.livingSituation?.text || "",
+                        ...(data && {
+                          audio: {
+                            url: data.url,
+                            fileName: data.fileName,
+                            uploadedAt: data.uploadedAt,
+                          },
+                        }),
+                      },
+                    }),
+                  });
 
-                if (!response.ok) {
+                  if (!response.ok) {
+                    console.error(
+                      "[StorySection] Failed to save livingSituation to DB"
+                    );
+                  } else {
+                    console.log(
+                      "[StorySection] Successfully saved livingSituation to DB"
+                    );
+                  }
+                } catch (err) {
                   console.error(
-                    "[StorySection] Failed to save livingSituation to DB"
-                  );
-                } else {
-                  console.log(
-                    "[StorySection] Successfully saved livingSituation to DB"
+                    "[StorySection] Error saving livingSituation to DB:",
+                    err
                   );
                 }
-              } catch (err) {
-                console.error(
-                  "[StorySection] Error saving livingSituation to DB:",
-                  err
-                );
+              }}
+            />
+          }
+          textArea={
+            <TextAreaWithEncouragement
+              rows={6}
+              placeholder="Or type here in your own words…"
+              value={profile.livingSituation?.text || ""}
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  livingSituation: { ...p.livingSituation, text: next },
+                }))
               }
-            }}
-          />
-
-          <TextAreaWithEncouragement
-            rows={6}
-            placeholder="Or type here in your own words…"
-            value={profile.livingSituation?.text || ""}
-            onChangeText={(next) =>
-              setProfile((p) => ({
-                ...p,
-                livingSituation: { ...p.livingSituation, text: next },
-              }))
-            }
-          />
-        </div>
+            />
+          }
+        />
       </Field>
 
       <Separator label="Culture & Context" />
@@ -452,101 +449,98 @@ export default function StorySection({
         }
         required
       >
-        <div className="space-y-3">
-          <div className="flex items-start gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-xl">
-            <Info className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-orange-900 font-medium">
-              You can record your answer, type it below, or both – whatever you
-              prefer
-            </p>
-          </div>
-          <VoiceRecorder
-            ref={(el) => {
-              if (voiceRecorderRefs) {
-                voiceRecorderRefs.current.cultureContext = el;
-              }
-            }}
-            fieldName="cultureContext"
-            label="Record your answer"
-            audioState={profile.cultureContext?.audio?.url || null}
-            fileName={profile.cultureContext?.audio?.fileName || null}
-            onAttach={async (data) => {
-              console.log(
-                "[StorySection] cultureContext onAttach called with data:",
-                data
-              );
+        <VoicePreferredField
+          hasTextValue={!!profile.cultureContext?.text}
+          voiceRecorder={
+            <VoiceRecorder
+              ref={(el) => {
+                if (voiceRecorderRefs) {
+                  voiceRecorderRefs.current.cultureContext = el;
+                }
+              }}
+              fieldName="cultureContext"
+              label="Record your answer"
+              audioState={profile.cultureContext?.audio?.url || null}
+              fileName={profile.cultureContext?.audio?.fileName || null}
+              onAttach={async (data) => {
+                console.log(
+                  "[StorySection] cultureContext onAttach called with data:",
+                  data
+                );
 
-              // ✅ Update local state immediately
-              setProfile((p) => ({
-                ...p,
-                cultureContext: {
-                  text: p.cultureContext?.text || "",
-                  ...(data && {
-                    audio: {
-                      url: data.url,
-                      fileName: data.fileName,
-                      uploadedAt: data.uploadedAt,
-                      ...(p.cultureContext?.audio?.transcription && {
-                        transcription: p.cultureContext.audio.transcription,
-                        chunks: p.cultureContext.audio.chunks,
-                        transcribedAt: p.cultureContext.audio.transcribedAt,
-                      }),
-                    },
-                  }),
-                },
-              }));
+                // ✅ Update local state immediately
+                setProfile((p) => ({
+                  ...p,
+                  cultureContext: {
+                    text: p.cultureContext?.text || "",
+                    ...(data && {
+                      audio: {
+                        url: data.url,
+                        fileName: data.fileName,
+                        uploadedAt: data.uploadedAt,
+                        ...(p.cultureContext?.audio?.transcription && {
+                          transcription: p.cultureContext.audio.transcription,
+                          chunks: p.cultureContext.audio.chunks,
+                          transcribedAt: p.cultureContext.audio.transcribedAt,
+                        }),
+                      },
+                    }),
+                  },
+                }));
 
-              // ✅ Save ONLY this field to DB
-              try {
-                const response = await fetch("/api/profile/update-field", {
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    fieldName: "cultureContext",
-                    fieldValue: {
-                      text: profile.cultureContext?.text || "",
-                      ...(data && {
-                        audio: {
-                          url: data.url,
-                          fileName: data.fileName,
-                          uploadedAt: data.uploadedAt,
-                        },
-                      }),
-                    },
-                  }),
-                });
+                // ✅ Save ONLY this field to DB
+                try {
+                  const response = await fetch("/api/profile/update-field", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      fieldName: "cultureContext",
+                      fieldValue: {
+                        text: profile.cultureContext?.text || "",
+                        ...(data && {
+                          audio: {
+                            url: data.url,
+                            fileName: data.fileName,
+                            uploadedAt: data.uploadedAt,
+                          },
+                        }),
+                      },
+                    }),
+                  });
 
-                if (!response.ok) {
+                  if (!response.ok) {
+                    console.error(
+                      "[StorySection] Failed to save cultureContext to DB"
+                    );
+                  } else {
+                    console.log(
+                      "[StorySection] Successfully saved cultureContext to DB"
+                    );
+                  }
+                } catch (err) {
                   console.error(
-                    "[StorySection] Failed to save cultureContext to DB"
-                  );
-                } else {
-                  console.log(
-                    "[StorySection] Successfully saved cultureContext to DB"
+                    "[StorySection] Error saving cultureContext to DB:",
+                    err
                   );
                 }
-              } catch (err) {
-                console.error(
-                  "[StorySection] Error saving cultureContext to DB:",
-                  err
-                );
+              }}
+            />
+          }
+          textArea={
+            <TextAreaWithEncouragement
+              rows={6}
+              placeholder="Or type here in your own words…"
+              value={profile.cultureContext?.text || ""}
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  cultureContext: { ...p.cultureContext, text: next },
+                }))
               }
-            }}
-          />
-
-          <TextAreaWithEncouragement
-            rows={6}
-            placeholder="Or type here in your own words…"
-            value={profile.cultureContext?.text || ""}
-            onChangeText={(next) =>
-              setProfile((p) => ({
-                ...p,
-                cultureContext: { ...p.cultureContext, text: next },
-              }))
-            }
-            recommendedWords={40}
-          />
-        </div>
+              recommendedWords={40}
+            />
+          }
+        />
       </Field>
 
       {!profile.isChild && (

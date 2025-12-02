@@ -8,6 +8,7 @@ import StepTitle from "../StepTitle";
 import TextAreaWithEncouragement from "../primitives/TextAreawithEncouragement";
 import VoiceRecorder, { VoiceRecorderHandle } from "../VoiceRecorder";
 import { intPsychTheme } from "../theme";
+import VoicePreferredField from "../primitives/VoicePreferredField";
 import { Info } from "lucide-react";
 import { DM_Sans } from "next/font/google";
 
@@ -209,390 +210,387 @@ export default function FollowUpSection({
 
       {/* Question 1 */}
       <Field title={profile.followupQuestions.question1.question} required>
-        <div className="space-y-3">
-          <div className="flex items-start gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-xl">
-            <Info className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-orange-900 font-medium">
-              You can record your answer, type it below, or both – whatever you
-              prefer
-            </p>
-          </div>
-          <VoiceRecorder
-            ref={(el) => {
-              if (voiceRecorderRefs) {
-                voiceRecorderRefs.current["followupQuestion1"] = el;
+        <VoicePreferredField
+          hasTextValue={!!profile.followupQuestions.question1.answer.text}
+          voiceRecorder={
+            <VoiceRecorder
+              ref={(el) => {
+                if (voiceRecorderRefs) {
+                  voiceRecorderRefs.current["followupQuestion1"] = el;
+                }
+              }}
+              fieldName="followupQuestions.question1.answer"
+              label="Record your answer"
+              audioState={
+                profile.followupQuestions.question1.answer.audio?.url || null
               }
-            }}
-            fieldName="followupQuestions.question1.answer"
-            label="Record your answer"
-            audioState={
-              profile.followupQuestions.question1.answer.audio?.url || null
-            }
-            fileName={
-              profile.followupQuestions.question1.answer.audio?.fileName || null
-            }
-            onAttach={async (data) => {
-              console.log(
-                "[FollowUpSection] question1 onAttach called with data:",
-                data
-              );
+              fileName={
+                profile.followupQuestions.question1.answer.audio?.fileName ||
+                null
+              }
+              onAttach={async (data) => {
+                console.log(
+                  "[FollowUpSection] question1 onAttach called with data:",
+                  data
+                );
 
-              // ✅ Update local state immediately
-              setProfile((p) => {
-                const updatedProfile = {
-                  ...p,
-                  followupQuestions: {
-                    ...p.followupQuestions!,
-                    question1: {
-                      ...p.followupQuestions!.question1,
-                      answer: {
+                // ✅ Update local state immediately
+                setProfile((p) => {
+                  const updatedProfile = {
+                    ...p,
+                    followupQuestions: {
+                      ...p.followupQuestions!,
+                      question1: {
+                        ...p.followupQuestions!.question1,
+                        answer: {
+                          text:
+                            p.followupQuestions!.question1.answer.text || "",
+                          ...(data && {
+                            audio: {
+                              url: data.url,
+                              fileName: data.fileName,
+                              uploadedAt: data.uploadedAt,
+                              ...(p.followupQuestions!.question1.answer.audio
+                                ?.transcription && {
+                                transcription:
+                                  p.followupQuestions!.question1.answer.audio
+                                    .transcription,
+                                chunks:
+                                  p.followupQuestions!.question1.answer.audio
+                                    .chunks,
+                                transcribedAt:
+                                  p.followupQuestions!.question1.answer.audio
+                                    .transcribedAt,
+                              }),
+                            },
+                          }),
+                        },
+                      },
+                    },
+                  };
+
+                  // ✅ Save ONLY this field to DB using field-level update
+                  // Use the UPDATED profile data, not the stale closure
+                  fetch("/api/profile/update-field", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      fieldName: "followupQuestions.question1.answer",
+                      fieldValue: {
                         text: p.followupQuestions!.question1.answer.text || "",
                         ...(data && {
                           audio: {
                             url: data.url,
                             fileName: data.fileName,
                             uploadedAt: data.uploadedAt,
-                            ...(p.followupQuestions!.question1.answer.audio
-                              ?.transcription && {
-                              transcription:
-                                p.followupQuestions!.question1.answer.audio
-                                  .transcription,
-                              chunks:
-                                p.followupQuestions!.question1.answer.audio
-                                  .chunks,
-                              transcribedAt:
-                                p.followupQuestions!.question1.answer.audio
-                                  .transcribedAt,
-                            }),
                           },
                         }),
                       },
-                    },
-                  },
-                };
-
-                // ✅ Save ONLY this field to DB using field-level update
-                // Use the UPDATED profile data, not the stale closure
-                fetch("/api/profile/update-field", {
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    fieldName: "followupQuestions.question1.answer",
-                    fieldValue: {
-                      text: p.followupQuestions!.question1.answer.text || "",
-                      ...(data && {
-                        audio: {
-                          url: data.url,
-                          fileName: data.fileName,
-                          uploadedAt: data.uploadedAt,
-                        },
-                      }),
-                    },
-                  }),
-                })
-                  .then((response) => {
-                    if (!response.ok) {
-                      console.error(
-                        "[FollowUpSection] Failed to save question1 to DB"
-                      );
-                    } else {
-                      console.log(
-                        "[FollowUpSection] Successfully saved question1 to DB"
-                      );
-                    }
+                    }),
                   })
-                  .catch((err) => {
-                    console.error(
-                      "[FollowUpSection] Error saving question1 to DB:",
-                      err
-                    );
-                  });
+                    .then((response) => {
+                      if (!response.ok) {
+                        console.error(
+                          "[FollowUpSection] Failed to save question1 to DB"
+                        );
+                      } else {
+                        console.log(
+                          "[FollowUpSection] Successfully saved question1 to DB"
+                        );
+                      }
+                    })
+                    .catch((err) => {
+                      console.error(
+                        "[FollowUpSection] Error saving question1 to DB:",
+                        err
+                      );
+                    });
 
-                return updatedProfile;
-              });
-            }}
-          />
-
-          <TextAreaWithEncouragement
-            rows={4}
-            placeholder="Or type here in your own words…"
-            value={profile.followupQuestions.question1.answer.text || ""}
-            onChangeText={(next) =>
-              setProfile((p) => ({
-                ...p,
-                followupQuestions: {
-                  ...p.followupQuestions!,
-                  question1: {
-                    ...p.followupQuestions!.question1,
-                    answer: {
-                      ...p.followupQuestions!.question1.answer,
-                      text: next,
+                  return updatedProfile;
+                });
+              }}
+            />
+          }
+          textArea={
+            <TextAreaWithEncouragement
+              rows={4}
+              placeholder="Or type here in your own words…"
+              value={profile.followupQuestions.question1.answer.text || ""}
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  followupQuestions: {
+                    ...p.followupQuestions!,
+                    question1: {
+                      ...p.followupQuestions!.question1,
+                      answer: {
+                        ...p.followupQuestions!.question1.answer,
+                        text: next,
+                      },
                     },
                   },
-                },
-              }))
-            }
-            recommendedWords={50}
-          />
-        </div>
+                }))
+              }
+              recommendedWords={50}
+            />
+          }
+        />
       </Field>
 
       {/* Question 2 */}
       <Field title={profile.followupQuestions.question2.question} required>
-        <div className="space-y-3">
-          <div className="flex items-start gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-xl">
-            <Info className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-orange-900 font-medium">
-              You can record your answer, type it below, or both – whatever you
-              prefer
-            </p>
-          </div>
-          <VoiceRecorder
-            ref={(el) => {
-              if (voiceRecorderRefs) {
-                voiceRecorderRefs.current["followupQuestion2"] = el;
+        <VoicePreferredField
+          hasTextValue={!!profile.followupQuestions.question2.answer.text}
+          voiceRecorder={
+            <VoiceRecorder
+              ref={(el) => {
+                if (voiceRecorderRefs) {
+                  voiceRecorderRefs.current["followupQuestion2"] = el;
+                }
+              }}
+              fieldName="followupQuestions.question2.answer"
+              label="Record your answer"
+              audioState={
+                profile.followupQuestions.question2.answer.audio?.url || null
               }
-            }}
-            fieldName="followupQuestions.question2.answer"
-            label="Record your answer"
-            audioState={
-              profile.followupQuestions.question2.answer.audio?.url || null
-            }
-            fileName={
-              profile.followupQuestions.question2.answer.audio?.fileName || null
-            }
-            onAttach={async (data) => {
-              console.log(
-                "[FollowUpSection] question2 onAttach called with data:",
-                data
-              );
+              fileName={
+                profile.followupQuestions.question2.answer.audio?.fileName ||
+                null
+              }
+              onAttach={async (data) => {
+                console.log(
+                  "[FollowUpSection] question2 onAttach called with data:",
+                  data
+                );
 
-              // ✅ Update local state immediately
-              setProfile((p) => {
-                const updatedProfile = {
-                  ...p,
-                  followupQuestions: {
-                    ...p.followupQuestions!,
-                    question2: {
-                      ...p.followupQuestions!.question2,
-                      answer: {
+                // ✅ Update local state immediately
+                setProfile((p) => {
+                  const updatedProfile = {
+                    ...p,
+                    followupQuestions: {
+                      ...p.followupQuestions!,
+                      question2: {
+                        ...p.followupQuestions!.question2,
+                        answer: {
+                          text:
+                            p.followupQuestions!.question2.answer.text || "",
+                          ...(data && {
+                            audio: {
+                              url: data.url,
+                              fileName: data.fileName,
+                              uploadedAt: data.uploadedAt,
+                              ...(p.followupQuestions!.question2.answer.audio
+                                ?.transcription && {
+                                transcription:
+                                  p.followupQuestions!.question2.answer.audio
+                                    .transcription,
+                                chunks:
+                                  p.followupQuestions!.question2.answer.audio
+                                    .chunks,
+                                transcribedAt:
+                                  p.followupQuestions!.question2.answer.audio
+                                    .transcribedAt,
+                              }),
+                            },
+                          }),
+                        },
+                      },
+                    },
+                  };
+
+                  // ✅ Save ONLY this field to DB
+                  fetch("/api/profile/update-field", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      fieldName: "followupQuestions.question2.answer",
+                      fieldValue: {
                         text: p.followupQuestions!.question2.answer.text || "",
                         ...(data && {
                           audio: {
                             url: data.url,
                             fileName: data.fileName,
                             uploadedAt: data.uploadedAt,
-                            ...(p.followupQuestions!.question2.answer.audio
-                              ?.transcription && {
-                              transcription:
-                                p.followupQuestions!.question2.answer.audio
-                                  .transcription,
-                              chunks:
-                                p.followupQuestions!.question2.answer.audio
-                                  .chunks,
-                              transcribedAt:
-                                p.followupQuestions!.question2.answer.audio
-                                  .transcribedAt,
-                            }),
                           },
                         }),
                       },
-                    },
-                  },
-                };
-
-                // ✅ Save ONLY this field to DB
-                fetch("/api/profile/update-field", {
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    fieldName: "followupQuestions.question2.answer",
-                    fieldValue: {
-                      text: p.followupQuestions!.question2.answer.text || "",
-                      ...(data && {
-                        audio: {
-                          url: data.url,
-                          fileName: data.fileName,
-                          uploadedAt: data.uploadedAt,
-                        },
-                      }),
-                    },
-                  }),
-                })
-                  .then((response) => {
-                    if (!response.ok) {
-                      console.error(
-                        "[FollowUpSection] Failed to save question2 to DB"
-                      );
-                    } else {
-                      console.log(
-                        "[FollowUpSection] Successfully saved question2 to DB"
-                      );
-                    }
+                    }),
                   })
-                  .catch((err) => {
-                    console.error(
-                      "[FollowUpSection] Error saving question2 to DB:",
-                      err
-                    );
-                  });
+                    .then((response) => {
+                      if (!response.ok) {
+                        console.error(
+                          "[FollowUpSection] Failed to save question2 to DB"
+                        );
+                      } else {
+                        console.log(
+                          "[FollowUpSection] Successfully saved question2 to DB"
+                        );
+                      }
+                    })
+                    .catch((err) => {
+                      console.error(
+                        "[FollowUpSection] Error saving question2 to DB:",
+                        err
+                      );
+                    });
 
-                return updatedProfile;
-              });
-            }}
-          />
-
-          <TextAreaWithEncouragement
-            rows={4}
-            placeholder="Or type here in your own words…"
-            value={profile.followupQuestions.question2.answer.text || ""}
-            onChangeText={(next) =>
-              setProfile((p) => ({
-                ...p,
-                followupQuestions: {
-                  ...p.followupQuestions!,
-                  question2: {
-                    ...p.followupQuestions!.question2,
-                    answer: {
-                      ...p.followupQuestions!.question2.answer,
-                      text: next,
+                  return updatedProfile;
+                });
+              }}
+            />
+          }
+          textArea={
+            <TextAreaWithEncouragement
+              rows={4}
+              placeholder="Or type here in your own words…"
+              value={profile.followupQuestions.question2.answer.text || ""}
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  followupQuestions: {
+                    ...p.followupQuestions!,
+                    question2: {
+                      ...p.followupQuestions!.question2,
+                      answer: {
+                        ...p.followupQuestions!.question2.answer,
+                        text: next,
+                      },
                     },
                   },
-                },
-              }))
-            }
-            recommendedWords={50}
-          />
-        </div>
+                }))
+              }
+              recommendedWords={50}
+            />
+          }
+        />
       </Field>
 
       {/* Question 3 */}
       <Field title={profile.followupQuestions.question3.question} required>
-        <div className="space-y-3">
-          <div className="flex items-start gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-xl">
-            <Info className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-orange-900 font-medium">
-              You can record your answer, type it below, or both – whatever you
-              prefer
-            </p>
-          </div>
-          <VoiceRecorder
-            ref={(el) => {
-              if (voiceRecorderRefs) {
-                voiceRecorderRefs.current["followupQuestion3"] = el;
+        <VoicePreferredField
+          hasTextValue={!!profile.followupQuestions.question3.answer.text}
+          voiceRecorder={
+            <VoiceRecorder
+              ref={(el) => {
+                if (voiceRecorderRefs) {
+                  voiceRecorderRefs.current["followupQuestion3"] = el;
+                }
+              }}
+              fieldName="followupQuestions.question3.answer"
+              label="Record your answer"
+              audioState={
+                profile.followupQuestions.question3.answer.audio?.url || null
               }
-            }}
-            fieldName="followupQuestions.question3.answer"
-            label="Record your answer"
-            audioState={
-              profile.followupQuestions.question3.answer.audio?.url || null
-            }
-            fileName={
-              profile.followupQuestions.question3.answer.audio?.fileName || null
-            }
-            onAttach={async (data) => {
-              console.log(
-                "[FollowUpSection] question3 onAttach called with data:",
-                data
-              );
+              fileName={
+                profile.followupQuestions.question3.answer.audio?.fileName ||
+                null
+              }
+              onAttach={async (data) => {
+                console.log(
+                  "[FollowUpSection] question3 onAttach called with data:",
+                  data
+                );
 
-              // ✅ Update local state immediately
-              setProfile((p) => {
-                const updatedProfile = {
-                  ...p,
-                  followupQuestions: {
-                    ...p.followupQuestions!,
-                    question3: {
-                      ...p.followupQuestions!.question3,
-                      answer: {
+                // ✅ Update local state immediately
+                setProfile((p) => {
+                  const updatedProfile = {
+                    ...p,
+                    followupQuestions: {
+                      ...p.followupQuestions!,
+                      question3: {
+                        ...p.followupQuestions!.question3,
+                        answer: {
+                          text:
+                            p.followupQuestions!.question3.answer.text || "",
+                          ...(data && {
+                            audio: {
+                              url: data.url,
+                              fileName: data.fileName,
+                              uploadedAt: data.uploadedAt,
+                              ...(p.followupQuestions!.question3.answer.audio
+                                ?.transcription && {
+                                transcription:
+                                  p.followupQuestions!.question3.answer.audio
+                                    .transcription,
+                                chunks:
+                                  p.followupQuestions!.question3.answer.audio
+                                    .chunks,
+                                transcribedAt:
+                                  p.followupQuestions!.question3.answer.audio
+                                    .transcribedAt,
+                              }),
+                            },
+                          }),
+                        },
+                      },
+                    },
+                  };
+
+                  // ✅ Save ONLY this field to DB
+                  fetch("/api/profile/update-field", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      fieldName: "followupQuestions.question3.answer",
+                      fieldValue: {
                         text: p.followupQuestions!.question3.answer.text || "",
                         ...(data && {
                           audio: {
                             url: data.url,
                             fileName: data.fileName,
                             uploadedAt: data.uploadedAt,
-                            ...(p.followupQuestions!.question3.answer.audio
-                              ?.transcription && {
-                              transcription:
-                                p.followupQuestions!.question3.answer.audio
-                                  .transcription,
-                              chunks:
-                                p.followupQuestions!.question3.answer.audio
-                                  .chunks,
-                              transcribedAt:
-                                p.followupQuestions!.question3.answer.audio
-                                  .transcribedAt,
-                            }),
                           },
                         }),
                       },
-                    },
-                  },
-                };
-
-                // ✅ Save ONLY this field to DB
-                fetch("/api/profile/update-field", {
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    fieldName: "followupQuestions.question3.answer",
-                    fieldValue: {
-                      text: p.followupQuestions!.question3.answer.text || "",
-                      ...(data && {
-                        audio: {
-                          url: data.url,
-                          fileName: data.fileName,
-                          uploadedAt: data.uploadedAt,
-                        },
-                      }),
-                    },
-                  }),
-                })
-                  .then((response) => {
-                    if (!response.ok) {
-                      console.error(
-                        "[FollowUpSection] Failed to save question3 to DB"
-                      );
-                    } else {
-                      console.log(
-                        "[FollowUpSection] Successfully saved question3 to DB"
-                      );
-                    }
+                    }),
                   })
-                  .catch((err) => {
-                    console.error(
-                      "[FollowUpSection] Error saving question3 to DB:",
-                      err
-                    );
-                  });
+                    .then((response) => {
+                      if (!response.ok) {
+                        console.error(
+                          "[FollowUpSection] Failed to save question3 to DB"
+                        );
+                      } else {
+                        console.log(
+                          "[FollowUpSection] Successfully saved question3 to DB"
+                        );
+                      }
+                    })
+                    .catch((err) => {
+                      console.error(
+                        "[FollowUpSection] Error saving question3 to DB:",
+                        err
+                      );
+                    });
 
-                return updatedProfile;
-              });
-            }}
-          />
-
-          <TextAreaWithEncouragement
-            rows={4}
-            placeholder="Or type here in your own words…"
-            value={profile.followupQuestions.question3.answer.text || ""}
-            onChangeText={(next) =>
-              setProfile((p) => ({
-                ...p,
-                followupQuestions: {
-                  ...p.followupQuestions!,
-                  question3: {
-                    ...p.followupQuestions!.question3,
-                    answer: {
-                      ...p.followupQuestions!.question3.answer,
-                      text: next,
+                  return updatedProfile;
+                });
+              }}
+            />
+          }
+          textArea={
+            <TextAreaWithEncouragement
+              rows={4}
+              placeholder="Or type here in your own words…"
+              value={profile.followupQuestions.question3.answer.text || ""}
+              onChangeText={(next) =>
+                setProfile((p) => ({
+                  ...p,
+                  followupQuestions: {
+                    ...p.followupQuestions!,
+                    question3: {
+                      ...p.followupQuestions!.question3,
+                      answer: {
+                        ...p.followupQuestions!.question3.answer,
+                        text: next,
+                      },
                     },
                   },
-                },
-              }))
-            }
-            recommendedWords={50}
-          />
-        </div>
+                }))
+              }
+              recommendedWords={50}
+            />
+          }
+        />
       </Field>
     </motion.div>
   );
