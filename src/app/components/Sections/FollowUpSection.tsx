@@ -210,7 +210,8 @@ export default function FollowUpSection({
 
       {/* Question 1 */}
       <Field title={profile.followupQuestions.question1.question} required>
-        <VoicePreferredField
+        {/* VoiceRecorder temporarily disabled */}
+        {/* <VoicePreferredField
           hasTextValue={!!profile.followupQuestions.question1.answer.text}
           voiceRecorder={
             <VoiceRecorder
@@ -311,35 +312,35 @@ export default function FollowUpSection({
               }}
             />
           }
-          textArea={
-            <TextAreaWithEncouragement
-              rows={4}
-              placeholder="Or type here in your own words…"
-              value={profile.followupQuestions.question1.answer.text || ""}
-              onChangeText={(next) =>
-                setProfile((p) => ({
-                  ...p,
-                  followupQuestions: {
-                    ...p.followupQuestions!,
-                    question1: {
-                      ...p.followupQuestions!.question1,
-                      answer: {
-                        ...p.followupQuestions!.question1.answer,
-                        text: next,
-                      },
-                    },
+          textArea={ */}
+        <TextAreaWithEncouragement
+          rows={4}
+          placeholder="Or type here in your own words…"
+          value={profile.followupQuestions.question1.answer.text || ""}
+          onChangeText={(next) =>
+            setProfile((p) => ({
+              ...p,
+              followupQuestions: {
+                ...p.followupQuestions!,
+                question1: {
+                  ...p.followupQuestions!.question1,
+                  answer: {
+                    ...p.followupQuestions!.question1.answer,
+                    text: next,
                   },
-                }))
-              }
-              recommendedWords={50}
-            />
+                },
+              },
+            }))
           }
+          recommendedWords={50}
         />
+        {/* </VoicePreferredField> */}
       </Field>
 
       {/* Question 2 */}
       <Field title={profile.followupQuestions.question2.question} required>
-        <VoicePreferredField
+        {/* VoiceRecorder temporarily disabled */}
+        {/* <VoicePreferredField
           hasTextValue={!!profile.followupQuestions.question2.answer.text}
           voiceRecorder={
             <VoiceRecorder
@@ -439,35 +440,35 @@ export default function FollowUpSection({
               }}
             />
           }
-          textArea={
-            <TextAreaWithEncouragement
-              rows={4}
-              placeholder="Or type here in your own words…"
-              value={profile.followupQuestions.question2.answer.text || ""}
-              onChangeText={(next) =>
-                setProfile((p) => ({
-                  ...p,
-                  followupQuestions: {
-                    ...p.followupQuestions!,
-                    question2: {
-                      ...p.followupQuestions!.question2,
-                      answer: {
-                        ...p.followupQuestions!.question2.answer,
-                        text: next,
-                      },
-                    },
+          textArea={ */}
+        <TextAreaWithEncouragement
+          rows={4}
+          placeholder="Or type here in your own words…"
+          value={profile.followupQuestions.question2.answer.text || ""}
+          onChangeText={(next) =>
+            setProfile((p) => ({
+              ...p,
+              followupQuestions: {
+                ...p.followupQuestions!,
+                question2: {
+                  ...p.followupQuestions!.question2,
+                  answer: {
+                    ...p.followupQuestions!.question2.answer,
+                    text: next,
                   },
-                }))
-              }
-              recommendedWords={50}
-            />
+                },
+              },
+            }))
           }
+          recommendedWords={50}
         />
+        {/* </VoicePreferredField> */}
       </Field>
 
       {/* Question 3 */}
       <Field title={profile.followupQuestions.question3.question} required>
-        <VoicePreferredField
+        {/* VoiceRecorder temporarily disabled */}
+        {/* <VoicePreferredField
           hasTextValue={!!profile.followupQuestions.question3.answer.text}
           voiceRecorder={
             <VoiceRecorder
@@ -567,30 +568,29 @@ export default function FollowUpSection({
               }}
             />
           }
-          textArea={
-            <TextAreaWithEncouragement
-              rows={4}
-              placeholder="Or type here in your own words…"
-              value={profile.followupQuestions.question3.answer.text || ""}
-              onChangeText={(next) =>
-                setProfile((p) => ({
-                  ...p,
-                  followupQuestions: {
-                    ...p.followupQuestions!,
-                    question3: {
-                      ...p.followupQuestions!.question3,
-                      answer: {
-                        ...p.followupQuestions!.question3.answer,
-                        text: next,
-                      },
-                    },
+          textArea={ */}
+        <TextAreaWithEncouragement
+          rows={4}
+          placeholder="Or type here in your own words…"
+          value={profile.followupQuestions.question3.answer.text || ""}
+          onChangeText={(next) =>
+            setProfile((p) => ({
+              ...p,
+              followupQuestions: {
+                ...p.followupQuestions!,
+                question3: {
+                  ...p.followupQuestions!.question3,
+                  answer: {
+                    ...p.followupQuestions!.question3.answer,
+                    text: next,
                   },
-                }))
-              }
-              recommendedWords={50}
-            />
+                },
+              },
+            }))
           }
+          recommendedWords={50}
         />
+        {/* </VoicePreferredField> */}
       </Field>
     </motion.div>
   );

@@ -190,7 +190,7 @@ export default function ContactSection({
                 }
               />
             </Field>
-            <Field title="Parent/Guardian 2 First Name" required>
+            <Field title="Parent/Guardian 2 First Name">
               <input
                 className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
                 placeholder="e.g., John"
@@ -204,7 +204,7 @@ export default function ContactSection({
               />
             </Field>
 
-            <Field title="Parent/Guardian 2 Last Name" required>
+            <Field title="Parent/Guardian 2 Last Name">
               <input
                 className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
                 placeholder="e.g., Doe"

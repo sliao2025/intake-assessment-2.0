@@ -5,6 +5,7 @@ import { authOptions } from "./api/auth/[...nextauth]/route";
 import Providers from "./providers";
 import type { Metadata } from "next";
 import IPLogo from "../assets/IP_Logo.png";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
   title: "Integrative Psych Intake",
@@ -39,7 +40,10 @@ export default async function RootLayout({
         className="min-h-[100dvh] h-full antialiased"
       >
         <div className="pb-[env(safe-area-inset-bottom)]">
-          <Providers session={session}>{children}</Providers>
+          <Providers session={session}>
+            {children}
+            <Analytics />
+          </Providers>
         </div>
       </body>
     </html>

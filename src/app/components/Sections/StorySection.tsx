@@ -88,7 +88,8 @@ export default function StorySection({
         }
         required
       >
-        <VoicePreferredField
+        {/* VoiceRecorder temporarily disabled */}
+        {/* <VoicePreferredField
           hasTextValue={!!profile.storyNarrative?.text}
           voiceRecorder={
             <VoiceRecorder
@@ -166,21 +167,20 @@ export default function StorySection({
               }}
             />
           }
-          textArea={
-            <TextAreaWithEncouragement
-              rows={6}
-              placeholder="Or type here in your own words…"
-              value={profile.storyNarrative?.text || ""}
-              onChangeText={(next) =>
-                setProfile((p) => ({
-                  ...p,
-                  storyNarrative: { ...p.storyNarrative, text: next },
-                }))
-              }
-              recommendedWords={75}
-            />
+          textArea={ */}
+        <TextAreaWithEncouragement
+          rows={6}
+          placeholder="Or type here in your own words…"
+          value={profile.storyNarrative?.text || ""}
+          onChangeText={(next) =>
+            setProfile((p) => ({
+              ...p,
+              storyNarrative: { ...p.storyNarrative, text: next },
+            }))
           }
+          recommendedWords={75}
         />
+        {/* </VoicePreferredField> */}
       </Field>
 
       <Separator label="Your Goals" />
@@ -221,7 +221,8 @@ export default function StorySection({
         }
         required
       >
-        <VoicePreferredField
+        {/* VoiceRecorder temporarily disabled */}
+        {/* <VoicePreferredField
           hasTextValue={!!profile.goals?.text}
           voiceRecorder={
             <VoiceRecorder
@@ -296,21 +297,20 @@ export default function StorySection({
               }}
             />
           }
-          textArea={
-            <TextAreaWithEncouragement
-              rows={6}
-              placeholder="Or type here in your own words…"
-              value={profile.goals?.text || ""}
-              onChangeText={(next) =>
-                setProfile((p) => ({
-                  ...p,
-                  goals: { ...p.goals, text: next },
-                }))
-              }
-              recommendedWords={40}
-            />
+          textArea={ */}
+        <TextAreaWithEncouragement
+          rows={6}
+          placeholder="Or type here in your own words…"
+          value={profile.goals?.text || ""}
+          onChangeText={(next) =>
+            setProfile((p) => ({
+              ...p,
+              goals: { ...p.goals, text: next },
+            }))
           }
+          recommendedWords={40}
         />
+        {/* </VoicePreferredField> */}
       </Field>
 
       <Separator label="Living Situation" />
@@ -339,7 +339,8 @@ export default function StorySection({
         }
         required
       >
-        <VoicePreferredField
+        {/* VoiceRecorder temporarily disabled */}
+        {/* <VoicePreferredField
           hasTextValue={!!profile.livingSituation?.text}
           voiceRecorder={
             <VoiceRecorder
@@ -416,20 +417,19 @@ export default function StorySection({
               }}
             />
           }
-          textArea={
-            <TextAreaWithEncouragement
-              rows={6}
-              placeholder="Or type here in your own words…"
-              value={profile.livingSituation?.text || ""}
-              onChangeText={(next) =>
-                setProfile((p) => ({
-                  ...p,
-                  livingSituation: { ...p.livingSituation, text: next },
-                }))
-              }
-            />
+          textArea={ */}
+        <TextAreaWithEncouragement
+          rows={6}
+          placeholder="Or type here in your own words…"
+          value={profile.livingSituation?.text || ""}
+          onChangeText={(next) =>
+            setProfile((p) => ({
+              ...p,
+              livingSituation: { ...p.livingSituation, text: next },
+            }))
           }
         />
+        {/* </VoicePreferredField> */}
       </Field>
 
       <Separator label="Culture & Context" />
@@ -438,18 +438,19 @@ export default function StorySection({
           !profile.isChild ? (
             <>
               What role does culture (religion, ethnicity, nationality,
-              spirituality) play in your life? <i>(optional)</i>
+              spirituality) play in your life?
             </>
           ) : (
             <>
               What role does culture (religion, ethnicity, nationality,
-              spirituality) play in your child's life? <i>(optional)</i>
+              spirituality) play in your child's life?
             </>
           )
         }
         required
       >
-        <VoicePreferredField
+        {/* VoiceRecorder temporarily disabled */}
+        {/* <VoicePreferredField
           hasTextValue={!!profile.cultureContext?.text}
           voiceRecorder={
             <VoiceRecorder
@@ -526,21 +527,20 @@ export default function StorySection({
               }}
             />
           }
-          textArea={
-            <TextAreaWithEncouragement
-              rows={6}
-              placeholder="Or type here in your own words…"
-              value={profile.cultureContext?.text || ""}
-              onChangeText={(next) =>
-                setProfile((p) => ({
-                  ...p,
-                  cultureContext: { ...p.cultureContext, text: next },
-                }))
-              }
-              recommendedWords={40}
-            />
+          textArea={ */}
+        <TextAreaWithEncouragement
+          rows={6}
+          placeholder="Or type here in your own words…"
+          value={profile.cultureContext?.text || ""}
+          onChangeText={(next) =>
+            setProfile((p) => ({
+              ...p,
+              cultureContext: { ...p.cultureContext, text: next },
+            }))
           }
+          recommendedWords={40}
         />
+        {/* </VoicePreferredField> */}
       </Field>
 
       {!profile.isChild && (
@@ -684,6 +684,11 @@ export default function StorySection({
               label:
                 "Autism / Asperger's Disorder / Pervasive Developmental Disorder",
             },
+            {
+              key: "borderline_personality_disorder",
+              label: "Borderline Personality Disorder",
+            },
+
             { key: "none", label: "🚫 None of the above", none: true },
           ]}
           values={profile.familyHistory ? profile.familyHistory : []}

@@ -29,21 +29,67 @@ export async function POST(request: NextRequest) {
       "[Insights] Triggering sentiment analysis and summarization in parallel"
     );
 
+    // Get intake analysis service URL from environment
+    const intakeAnalysisUrl = process.env.INTAKE_ANALYSIS_URL;
+
+    if (!intakeAnalysisUrl) {
+      console.error("[Insights] INTAKE_ANALYSIS_URL not configured");
+      return NextResponse.json(
+        {
+          success: false,
+          error: "INTAKE_ANALYSIS_URL not configured",
+          sentiment: { success: false, error: "Service URL not configured" },
+          summary: { success: false, error: "Service URL not configured" },
+        },
+        { status: 500 }
+      );
+    }
+
+    // Build API endpoints
+    const sentimentUrl = intakeAnalysisUrl.includes("/api/sentiment")
+      ? intakeAnalysisUrl
+      : `${intakeAnalysisUrl}/api/sentiment`;
+    const summarizeUrl = intakeAnalysisUrl.includes("/api/summarize")
+      ? intakeAnalysisUrl
+      : `${intakeAnalysisUrl}/api/summarize`;
+
+    // Get API key from environment
+    const apiKey = process.env.INTAKE_ANALYSIS_API_KEY?.trim() || "";
+
+    if (!apiKey) {
+      console.error("[Insights] INTAKE_ANALYSIS_API_KEY not configured");
+      return NextResponse.json(
+        {
+          success: false,
+          error: "INTAKE_ANALYSIS_API_KEY not configured",
+          sentiment: { success: false, error: "API key not configured" },
+          summary: { success: false, error: "API key not configured" },
+        },
+        { status: 500 }
+      );
+    }
+
+    console.log(
+      `[Insights] Calling sentiment: ${sentimentUrl}, summarize: ${summarizeUrl}`
+    );
+
     const [sentimentResponse, summaryResponse] = await Promise.allSettled([
       // Sentiment Analysis
-      fetch("https://sentiment-analysis-b5ikba4x4q-uk.a.run.app/analyze", {
+      fetch(sentimentUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-API-Key": apiKey,
         },
         body: JSON.stringify({ userId }),
       }),
 
       // Summarization
-      fetch("https://summarization-b5ikba4x4q-uk.a.run.app/summarize", {
+      fetch(summarizeUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-API-Key": apiKey,
         },
         body: JSON.stringify({ userId }),
       }),

@@ -309,7 +309,7 @@ export default function WelcomeSection({
           </div>
 
           {/* Voice Recordings */}
-          <div className="rounded-2xl border border-[#e7e5e4] bg-white p-4 md:p-5">
+          {/*<div className="rounded-2xl border border-[#e7e5e4] bg-white p-4 md:p-5">
             <h3 className="font-semibold text-slate-900">Voice Recordings</h3>
             <ul className="mt-3 space-y-2">
               <li className="flex items-start gap-2">
@@ -335,7 +335,7 @@ export default function WelcomeSection({
                 </span>
               </li>
             </ul>
-          </div>
+          </div>*/}
 
           {/* Saving behavior */}
           <div className="rounded-2xl border border-[#e7e5e4] bg-white p-4 md:p-5">
