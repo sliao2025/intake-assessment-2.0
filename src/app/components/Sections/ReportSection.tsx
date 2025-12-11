@@ -11,30 +11,30 @@ type Props = {
   setProfile?: (updater: (prev: Profile) => Profile) => void;
 };
 
+import { Download } from "lucide-react";
+
 export default function ReportSection({
   profile,
   title,
   step,
   setProfile,
 }: Props) {
-  // Conditionally render child or adult component based on profile type
-  if (profile.isChild === true) {
-    return (
+  const content =
+    profile.isChild === true ? (
       <ReportSectionChild
         profile={profile}
         title={title}
         step={step}
         setProfile={setProfile}
       />
+    ) : (
+      <ReportSectionAdult
+        profile={profile}
+        title={title}
+        step={step}
+        setProfile={setProfile}
+      />
     );
-  }
 
-  return (
-    <ReportSectionAdult
-      profile={profile}
-      title={title}
-      step={step}
-      setProfile={setProfile}
-    />
-  );
+  return <div className="space-y-8">{content}</div>;
 }

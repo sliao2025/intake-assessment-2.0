@@ -14,8 +14,13 @@ const formatET = (d: Date) =>
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
-import { prisma } from "../../../lib/prisma";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { prisma } from "@/app/lib/prisma";
+import React from "react";
+import { renderToBuffer } from "@react-pdf/renderer";
+import { AssessmentReportPDFAdult } from "@/app/components/AssessmentReportPDFAdult";
+import { AssessmentReportPDFChild } from "@/app/components/AssessmentReportPDFChild";
+import { Profile } from "@/app/lib/types/types";
 
 // Utility to split recipient lists (comma/semicolon/newline)
 const splitList = (s?: string) =>
@@ -24,7 +29,7 @@ const splitList = (s?: string) =>
     .map((x) => x.trim())
     .filter((x) => x.length > 0);
 
-// Helper to build base64url MIME message (supports arrays and cc/bcc)
+// Helper to build base64url MIME message (supports arrays, cc/bcc, and attachments)
 function buildRawEmail({
   from,
   to,
@@ -32,6 +37,7 @@ function buildRawEmail({
   bcc,
   subject,
   html,
+  attachments = [],
 }: {
   from: string;
   to: string[] | string;
@@ -39,24 +45,70 @@ function buildRawEmail({
   bcc?: string[] | string;
   subject: string;
   html: string;
+  attachments?: {
+    filename: string;
+    content: Buffer | string;
+    contentType: string;
+  }[];
 }) {
   const toHeader = Array.isArray(to) ? to.join(", ") : to;
   const ccHeader = cc ? (Array.isArray(cc) ? cc.join(", ") : cc) : "";
   const bccHeader = bcc ? (Array.isArray(bcc) ? bcc.join(", ") : bcc) : "";
 
-  const lines = [
+  const boundary =
+    "----=_Part_" + Date.now() + "_" + Math.random().toString(36).substring(2);
+  const messageId = `<${Date.now()}.${Math.random().toString(36).substring(2)}@psych-nyc.com>`;
+  const dateHeader = new Date().toUTCString();
+
+  // Build headers with anti-spam best practices
+  const headers = [
     `From: ${from}`,
     `To: ${toHeader}`,
     ccHeader ? `Cc: ${ccHeader}` : "",
     bccHeader ? `Bcc: ${bccHeader}` : "",
     `Subject: ${subject}`,
+    `Date: ${dateHeader}`,
+    `Message-ID: ${messageId}`,
     "MIME-Version: 1.0",
+    `Content-Type: multipart/mixed; boundary="${boundary}"`,
+    "X-Priority: 3",
+    "X-Mailer: Integrative Psych Portal",
+  ]
+    .filter(Boolean)
+    .join("\r\n");
+
+  // HTML body part with proper Content-Transfer-Encoding
+  const body = [
+    `--${boundary}`,
     "Content-Type: text/html; charset=UTF-8",
+    "Content-Transfer-Encoding: 7bit",
     "",
     html,
-  ].filter(Boolean) as string[];
+  ].join("\r\n");
 
-  const message = lines.join("\r\n");
+  // Attachment parts
+  const attachmentParts = attachments
+    .map((att) => {
+      const contentBase64 = Buffer.isBuffer(att.content)
+        ? att.content.toString("base64")
+        : Buffer.from(att.content).toString("base64");
+      // Split base64 into 76-character lines (RFC 2045 compliance)
+      const chunkedBase64 =
+        contentBase64.match(/.{1,76}/g)?.join("\r\n") || contentBase64;
+      return [
+        `--${boundary}`,
+        `Content-Type: ${att.contentType}; name="${att.filename}"`,
+        `Content-Disposition: attachment; filename="${att.filename}"`,
+        "Content-Transfer-Encoding: base64",
+        "",
+        chunkedBase64,
+      ].join("\r\n");
+    })
+    .join("\r\n");
+
+  const end = `\r\n--${boundary}--`;
+
+  const message = [headers, "", body, attachmentParts, end].join("\r\n");
 
   return Buffer.from(message)
     .toString("base64")
@@ -128,6 +180,41 @@ export async function POST(req: NextRequest) {
     } catch (e) {
       console.error("[notify] Failed to set intakeFinished on user:", e);
       // Do not fail the notification on this.
+    }
+
+    // Fetch full profile for PDF generation
+    let pdfBuffer: Buffer | null = null;
+    let profileData: Profile | null = null;
+    try {
+      if (authedUserId) {
+        const profileRecord = await prisma.profile.findUnique({
+          where: { userId: authedUserId },
+          select: { json: true },
+        });
+        if (profileRecord && profileRecord.json) {
+          profileData = profileRecord.json as unknown as Profile;
+        }
+      }
+
+      if (profileData) {
+        console.log("[notify] Generating PDF report...");
+        const PdfComponent = profileData.isChild
+          ? AssessmentReportPDFChild
+          : AssessmentReportPDFAdult;
+        pdfBuffer = await renderToBuffer(
+          React.createElement(PdfComponent, {
+            profile: profileData,
+          }) as any
+        );
+        console.log(
+          "[notify] PDF generated successfully, size:",
+          pdfBuffer.length
+        );
+      } else {
+        console.warn("[notify] No profile data found for PDF generation.");
+      }
+    } catch (err: any) {
+      console.error("[notify] Failed to generate PDF:", err);
     }
     const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
     const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -214,6 +301,18 @@ export async function POST(req: NextRequest) {
       bcc: bccList.length ? bccList : undefined,
       subject,
       html,
+      attachments: pdfBuffer
+        ? [
+            {
+              filename: `Intake_Report_${firstName}_${lastName}.pdf`.replace(
+                /\s+/g,
+                "_"
+              ),
+              content: pdfBuffer,
+              contentType: "application/pdf",
+            },
+          ]
+        : [],
     });
 
     await gmail.users.messages.send({

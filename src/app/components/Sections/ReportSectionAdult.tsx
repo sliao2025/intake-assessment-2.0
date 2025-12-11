@@ -679,7 +679,7 @@ export default function ReportSectionAdult({
         <button
           type="button"
           onClick={downloadReactPdf}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-medium text-white transition duration-150 hover:brightness-95 active:scale-95 shrink-0"
+          className="inline-flex cursor-pointer border-b-4 border-[#004684] items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-medium text-white transition duration-150 hover:brightness-95 active:scale-95 shrink-0"
           style={{ background: intPsychTheme.accent }}
           aria-label="Download PDF of this report"
         >
