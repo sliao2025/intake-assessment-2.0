@@ -381,8 +381,49 @@ const VoiceRecorder = forwardRef<
         }
       };
 
-      const handleError = (e: Event) => {
+      const handleError = async (e: Event) => {
         console.error(`[VoiceRecorder ${fieldName}] Audio load error:`, e);
+
+        // Check if this is an orphaned reference (file missing from GCS)
+        // The audio element will fail to load if the stream endpoint returns 404
+        if (audioURL && currentFileName) {
+          console.log(
+            `[VoiceRecorder ${fieldName}] Checking if this is an orphaned reference...`
+          );
+
+          try {
+            // Try to fetch the audio URL to see if it's a 404 with cleanup flag
+            const response = await fetch(audioURL);
+            if (!response.ok && response.status === 404) {
+              const data = await response.json();
+              if (data.cleaned) {
+                console.log(
+                  `[VoiceRecorder ${fieldName}] Orphaned reference detected and cleaned up by server. Resetting local state...`
+                );
+
+                // Clear local state
+                reset();
+                setIsUploaded(false);
+                setActualDuration(0);
+                setCurrentFileName(null);
+
+                // Notify parent to refresh from database (which should now be clean)
+                if (onAttach) {
+                  await onAttach(null);
+                }
+
+                console.log(
+                  `[VoiceRecorder ${fieldName}] Local state reset after orphaned reference cleanup`
+                );
+              }
+            }
+          } catch (err) {
+            console.error(
+              `[VoiceRecorder ${fieldName}] Error checking orphaned reference:`,
+              err
+            );
+          }
+        }
       };
 
       audio.addEventListener("loadedmetadata", handleLoadedMetadata);
@@ -399,7 +440,7 @@ const VoiceRecorder = forwardRef<
         audio.removeEventListener("error", handleError);
       };
     }
-  }, [audioURL, audioBlob, fieldName]);
+  }, [audioURL, audioBlob, fieldName, currentFileName, onAttach, reset]);
 
   // Update actualDuration when duration changes from recording
   useEffect(() => {
