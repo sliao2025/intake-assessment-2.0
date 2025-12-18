@@ -39,7 +39,6 @@ export default function FollowUpSection({
   const loadingPhrases = [
     "Creating your personalized questions...",
     "Analyzing your responses...",
-    "Tailoring follow-up questions...",
     "Preparing your next steps...",
   ];
 
