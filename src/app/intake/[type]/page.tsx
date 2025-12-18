@@ -796,26 +796,78 @@ export default function IntakeTypePage() {
   const bloom = Math.max(0.05, progressPct / 100);
 
   async function saveProgress(override?: Profile) {
-    try {
-      console.log("[saveProgress] Saving profile (audio already uploaded)");
+    let currentPayload = override ?? profile;
+    const MAX_RETRIES = 3;
 
-      // Audio is uploaded immediately after recording and SQL is updated in onAttach
-      // This is just a final checkpoint save
-      const payload = override ?? profile;
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        if (attempt > 0) {
+          console.log(`[saveProgress] Retry attempt ${attempt + 1}...`);
+        }
 
-      const r = await fetch("/api/profile/create", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!r.ok) {
-        const msg = await r.text();
-        throw new Error(`${r.status} ${msg}`);
+        const r = await fetch("/api/profile/create", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(currentPayload),
+        });
+
+        if (!r.ok) {
+          // Handle 409 Conflict (Optimistic Locking)
+          if (r.status === 409) {
+            console.warn(
+              "[saveProgress] Optimistic concurrency conflict detected."
+            );
+
+            // Fetch latest profile from DB
+            const loadRes = await fetch("/api/profile/load");
+            if (loadRes.ok) {
+              const loadData = await loadRes.json();
+              const serverProfile = loadData.profile;
+
+              if (serverProfile) {
+                console.log(
+                  "[saveProgress] Merging server changes into local state..."
+                );
+                // Merge server (as base) with local (as overrides).
+                // mergeWithDefaults will preserve server fields if local fields are undefined/null/missing.
+                // This ensures we pick up background updates (like transcriptions) while keeping user edits.
+                const merged = mergeWithDefaults(serverProfile, currentPayload);
+
+                // Update metadata to match server, so next save uses correct version/timestamp
+                merged.updatedAt = serverProfile.updatedAt;
+                merged.version = serverProfile.version;
+
+                // Update payload and retry
+                currentPayload = merged;
+
+                // Update React state so validation/UI reflects merged state
+                setProfile(merged);
+
+                await new Promise((resolve) => setTimeout(resolve, 500)); // Brief backoff
+                continue; // Retry loop with merged payload
+              }
+            }
+          }
+
+          const msg = await r.text();
+          throw new Error(`${r.status} ${msg}`);
+        }
+
+        const saved = await r.json();
+        console.log("[saveProgress] Profile saved successfully");
+
+        // Update local updatedAt from successful save response
+        if (saved.updatedAt) {
+          setProfile((prev) => ({ ...prev, updatedAt: saved.updatedAt }));
+        }
+        return; // Success
+      } catch (error) {
+        console.error("Failed to store profile", error);
+        if (attempt === MAX_RETRIES - 1) {
+          // On final failure, maybe show a toast?
+          // For now, just log and keep console error
+        }
       }
-      const saved = await r.json();
-      console.log("[saveProgress] Profile saved successfully:", saved);
-    } catch (error) {
-      console.error("Failed to store profile", error);
     }
   }
 

@@ -24,8 +24,13 @@ export async function GET() {
     },
   });
 
+  const profileJson = (row?.json as any) ?? null;
+  if (profileJson && row?.updatedAt) {
+    profileJson.updatedAt = row.updatedAt;
+  }
+
   return Response.json({
-    profile: row?.json ?? null,
+    profile: profileJson,
     version: row?.version ?? null,
     clinician: user?.clinician ?? null,
   });

@@ -489,6 +489,7 @@ export type ChildDevelopmentalMilestones = {
 
 export type Profile = {
   maxVisited: number;
+  updatedAt?: string; // ISO string from DB for Optimistic Locking
   isChild: boolean | null;
 
   // Contact Section

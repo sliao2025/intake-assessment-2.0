@@ -153,6 +153,13 @@ export default function StorySection({
                       "[StorySection] Failed to save storyNarrative to DB"
                     );
                   } else {
+                    const resData = await response.json();
+                    if (resData.profile?.updatedAt) {
+                      setProfile((curr) => ({
+                        ...curr,
+                        updatedAt: resData.profile.updatedAt,
+                      }));
+                    }
                     console.log(
                       "[StorySection] Successfully saved storyNarrative to DB"
                     );
@@ -283,6 +290,13 @@ export default function StorySection({
                   if (!response.ok) {
                     console.error("[StorySection] Failed to save goals to DB");
                   } else {
+                    const resData = await response.json();
+                    if (resData.profile?.updatedAt) {
+                      setProfile((curr) => ({
+                        ...curr,
+                        updatedAt: resData.profile.updatedAt,
+                      }));
+                    }
                     console.log(
                       "[StorySection] Successfully saved goals to DB"
                     );
@@ -403,6 +417,13 @@ export default function StorySection({
                       "[StorySection] Failed to save livingSituation to DB"
                     );
                   } else {
+                    const resData = await response.json();
+                    if (resData.profile?.updatedAt) {
+                      setProfile((curr) => ({
+                        ...curr,
+                        updatedAt: resData.profile.updatedAt,
+                      }));
+                    }
                     console.log(
                       "[StorySection] Successfully saved livingSituation to DB"
                     );
@@ -513,6 +534,13 @@ export default function StorySection({
                       "[StorySection] Failed to save cultureContext to DB"
                     );
                   } else {
+                    const resData = await response.json();
+                    if (resData.profile?.updatedAt) {
+                      setProfile((curr) => ({
+                        ...curr,
+                        updatedAt: resData.profile.updatedAt,
+                      }));
+                    }
                     console.log(
                       "[StorySection] Successfully saved cultureContext to DB"
                     );
