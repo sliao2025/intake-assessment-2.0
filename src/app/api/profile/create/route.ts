@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   return Response.json({ ok: true });
 }
 
-const ProfileSchema = z.object({}).loose(); // permissive while iterating; replaces deprecated .passthrough()
+const ProfileSchema = z.object({}).loose();
 
 export async function PUT(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -34,10 +34,76 @@ export async function PUT(req: NextRequest) {
     return new Response("Validation failed", { status: 422 });
   }
 
-  const profile = parsed.data;
-  const jsonProfile = JSON.parse(JSON.stringify(profile)) as any;
+  const profile = parsed.data as any;
+  const jsonProfile = JSON.parse(JSON.stringify(profile));
 
-  // Your Prisma model stores JSON in Profile.json with userId as the PK
+  // Extract updatedAt for optimistic locking
+  // It might be in the root if typed, or passed separately
+  const clientUpdatedAt = profile.updatedAt ?? (body as any).updatedAt;
+  const userId = session.user.id;
+
+  if (clientUpdatedAt) {
+    // Attempt Atomic Update with Optimistic Locking
+    const result = await prisma.profile.updateMany({
+      where: {
+        userId,
+        updatedAt: new Date(clientUpdatedAt), // Must match exactly
+      },
+      data: {
+        json: jsonProfile,
+        version: { increment: 1 },
+        updatedAt: new Date(), // updateMany doesn't trigger @updatedAt automatically
+      },
+    });
+
+    if (result.count === 0) {
+      // Update failed: either user not found OR stale data (race condition)
+      const existing = await prisma.profile.findUnique({
+        where: { userId },
+        select: { updatedAt: true },
+      });
+
+      if (existing) {
+        // Record exists but timestamp didn't match -> Conflict
+        console.warn(
+          `[Profile] Optimistic locking conflict for user ${userId}`
+        );
+        return new Response(
+          JSON.stringify({
+            error: "Profile has been updated elsewhere. Please refresh.",
+            type: "CONCURRENCY_ERROR",
+            serverUpdatedAt: existing.updatedAt,
+          }),
+          { status: 409, headers: { "Content-Type": "application/json" } }
+        );
+      } else {
+        // Record completely missing -> Create it
+        const saved = await prisma.profile.create({
+          data: {
+            userId,
+            json: jsonProfile,
+            clinicId: DEFAULT_CLINIC_ID,
+            version: 1,
+            // updatedAt auto-set on create
+          },
+          select: { userId: true, updatedAt: true, version: true },
+        });
+        return Response.json(saved);
+      }
+    }
+
+    // Success -> Fetch and return the updated record
+    const saved = await prisma.profile.findUnique({
+      where: { userId },
+      select: { userId: true, updatedAt: true, version: true },
+    });
+    return Response.json(saved);
+  }
+
+  // Fallback: Blind Overwrite (Legacy behavior)
+  // Ensure we still strip updatedAt from jsonProfile if it shouldn't be in the blob?
+  // But we kept it in the check above.
+
   const saved = await prisma.profile.upsert({
     where: { userId: session.user.id },
     update: {
@@ -48,8 +114,7 @@ export async function PUT(req: NextRequest) {
       userId: session.user.id,
       json: jsonProfile,
       clinicId: DEFAULT_CLINIC_ID,
-      // Do NOT set firstSubmittedAt here - it should only be set when intake is finished
-      // via /api/profile/save with action: "submitMeta"
+      // Do NOT set firstSubmittedAt here
     },
     select: { userId: true, updatedAt: true, version: true },
   });

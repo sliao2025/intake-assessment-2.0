@@ -287,12 +287,19 @@ export default function FollowUpSection({
                       },
                     }),
                   })
-                    .then((response) => {
+                    .then(async (response) => {
                       if (!response.ok) {
                         console.error(
                           "[FollowUpSection] Failed to save question1 to DB"
                         );
                       } else {
+                        const resData = await response.json();
+                        if (resData.profile?.updatedAt) {
+                          setProfile((curr) => ({
+                            ...curr,
+                            updatedAt: resData.profile.updatedAt,
+                          }));
+                        }
                         console.log(
                           "[FollowUpSection] Successfully saved question1 to DB"
                         );
@@ -415,12 +422,19 @@ export default function FollowUpSection({
                       },
                     }),
                   })
-                    .then((response) => {
+                    .then(async (response) => {
                       if (!response.ok) {
                         console.error(
                           "[FollowUpSection] Failed to save question2 to DB"
                         );
                       } else {
+                        const resData = await response.json();
+                        if (resData.profile?.updatedAt) {
+                          setProfile((curr) => ({
+                            ...curr,
+                            updatedAt: resData.profile.updatedAt,
+                          }));
+                        }
                         console.log(
                           "[FollowUpSection] Successfully saved question2 to DB"
                         );
@@ -543,12 +557,19 @@ export default function FollowUpSection({
                       },
                     }),
                   })
-                    .then((response) => {
+                    .then(async (response) => {
                       if (!response.ok) {
                         console.error(
                           "[FollowUpSection] Failed to save question3 to DB"
                         );
                       } else {
+                        const resData = await response.json();
+                        if (resData.profile?.updatedAt) {
+                          setProfile((curr) => ({
+                            ...curr,
+                            updatedAt: resData.profile.updatedAt,
+                          }));
+                        }
                         console.log(
                           "[FollowUpSection] Successfully saved question3 to DB"
                         );
