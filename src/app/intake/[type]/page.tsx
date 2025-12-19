@@ -298,7 +298,7 @@ export default function IntakeTypePage() {
           profile.height.feet !== null &&
           profile.height.inches !== null &&
           profile.weightLbs !== null &&
-          profile.dailyScreenTime !== null
+          profile.dailyMobileScreenTime !== null
       );
 
       // ---- CHILD PATH ----
