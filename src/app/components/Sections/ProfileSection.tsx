@@ -261,7 +261,7 @@ export default function ProfileSection({
               }
             >
               <div className="relative">
-                <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
                   {profile.genderIdentity ? (
                     <span className="text-slate-900">
                       {genderLabel(profile.genderIdentity)}
@@ -327,7 +327,7 @@ export default function ProfileSection({
               multiple
             >
               <div className="relative">
-                <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
                   {profile.sexualOrientation.length === 0 ? (
                     <span className="text-slate-400">Select one or more…</span>
                   ) : (
@@ -400,7 +400,7 @@ export default function ProfileSection({
               multiple
             >
               <div className="relative">
-                <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
                   {profile.ethnicity.length === 0 ? (
                     <span className="text-slate-400">
                       Select all that apply…
@@ -475,7 +475,7 @@ export default function ProfileSection({
               multiple
             >
               <div className="relative">
-                <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
                   {profile.religion.length === 0 ? (
                     <span className="text-slate-400">
                       Select all that apply…
@@ -550,7 +550,7 @@ export default function ProfileSection({
               multiple
             >
               <div className="relative">
-                <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
                   {profile.pronouns.length === 0 ? (
                     <span className="text-slate-400">
                       Select all that apply…
@@ -608,6 +608,29 @@ export default function ProfileSection({
               </div>
             </Listbox>
           </Field>
+          <Field required title="Daily Screen Time">
+            <div className="relative">
+              <input
+                type="number"
+                min={0}
+                max={8}
+                step={1}
+                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 pr-16 text-slate-900 placeholder:text-slate-400"
+                placeholder="e.g., 5"
+                value={profile.dailyScreenTime ?? ""}
+                onChange={(e) =>
+                  setProfile((p) => ({
+                    ...p,
+                    dailyScreenTime:
+                      e.target.value === "" ? null : Number(e.target.value),
+                  }))
+                }
+              />
+              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
+                hours
+              </div>
+            </div>
+          </Field>
           {!profile.isChild && (
             <>
               <Field title="Highest Degree" required>
@@ -618,7 +641,7 @@ export default function ProfileSection({
                   }
                 >
                   <div className="relative">
-                    <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                    <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
                       {profile.highestDegree ? (
                         <span className="text-slate-900">
                           {degreeLabel(profile.highestDegree)}
@@ -728,7 +751,7 @@ export default function ProfileSection({
                   }
                 >
                   <div className="relative">
-                    <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                    <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
                       {profile.alcoholFrequency ? (
                         <span className="text-slate-900">
                           {alcoholFrequencyLabel(profile.alcoholFrequency)}
@@ -789,7 +812,7 @@ export default function ProfileSection({
                     }
                   >
                     <div className="relative">
-                      <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                      <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
                         {profile.drinksPerOccasion ? (
                           <span className="text-slate-900">
                             {drinksPerOccasionLabel(profile.drinksPerOccasion)}
@@ -852,7 +875,7 @@ export default function ProfileSection({
                   multiple
                 >
                   <div className="relative">
-                    <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                    <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
                       {profile.substancesUsed.length === 0 ? (
                         <span className="text-slate-400">
                           Select all that apply…
@@ -920,7 +943,7 @@ export default function ProfileSection({
                   multiple
                 >
                   <div className="relative">
-                    <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                    <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
                       {profile.dietType.length === 0 ? (
                         <span className="text-slate-400">
                           Select all that apply…
@@ -1098,6 +1121,22 @@ export default function ProfileSection({
                 />
               </Field>
             )}
+            <Field required title="Access to a firearm" className="mt-6">
+              <Likert
+                label="Do you have access to a firearm?"
+                value={profile.hasFirearm.toString()}
+                onChange={(v) =>
+                  setProfile((p) => ({
+                    ...p,
+                    hasFirearm: v === "true",
+                  }))
+                }
+                options={[
+                  { key: "true", label: "Yes" },
+                  { key: "false", label: "No" },
+                ]}
+              />
+            </Field>
           </>
         )}
 

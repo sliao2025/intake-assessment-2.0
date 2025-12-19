@@ -297,7 +297,8 @@ export default function IntakeTypePage() {
           profile.religion.length > 0 &&
           profile.height.feet !== null &&
           profile.height.inches !== null &&
-          profile.weightLbs !== null
+          profile.weightLbs !== null &&
+          profile.dailyScreenTime !== null
       );
 
       // ---- CHILD PATH ----
@@ -379,7 +380,8 @@ export default function IntakeTypePage() {
           profile.isMarried !== null &&
           profile.isSexuallyActive !== null &&
           profile.isEmployed !== null &&
-          profile.jobDetails
+          profile.jobDetails &&
+          profile.hasFirearm !== null
       );
 
       return Boolean(baseCommonOk && adultExtrasOk);
