@@ -531,6 +531,8 @@ export type Profile = {
   isEmployed?: boolean;
   jobDetails?: string;
   hobbies?: string;
+  hasFirearm?: boolean;
+  dailyScreenTime?: number;
 
   // Child Profile Section
   schoolInfo?: {
