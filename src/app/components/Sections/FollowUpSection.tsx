@@ -9,7 +9,6 @@ import TextAreaWithEncouragement from "../primitives/TextAreawithEncouragement";
 import VoiceRecorder, { VoiceRecorderHandle } from "../VoiceRecorder";
 import { intPsychTheme } from "../theme";
 import VoicePreferredField from "../primitives/VoicePreferredField";
-import { Info } from "lucide-react";
 import { DM_Sans } from "next/font/google";
 
 const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
@@ -98,14 +97,14 @@ export default function FollowUpSection({
     const generateQuestions = async () => {
       // FOR TESTING: Always generate new questions on mount
       // Comment out the check below to force API call every time
-      // if (
-      //   profile.followupQuestions?.question1?.question &&
-      //   profile.followupQuestions?.question2?.question &&
-      //   profile.followupQuestions?.question3?.question
-      // ) {
-      //   setQuestionsGenerated(true);
-      //   return;
-      // }
+      if (
+        profile.followupQuestions?.question1?.question &&
+        profile.followupQuestions?.question2?.question &&
+        profile.followupQuestions?.question3?.question
+      ) {
+        setQuestionsGenerated(true);
+        return;
+      }
 
       setLoading(true);
       try {
