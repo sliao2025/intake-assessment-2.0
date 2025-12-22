@@ -111,6 +111,13 @@ export async function PATCH(request: NextRequest) {
                 )
               );
             }
+          } else if (fieldName === "followupQuestions") {
+            // Special case: Replace entire followupQuestions object
+            // This is used when setting initial generated questions
+            console.log(
+              `[update-field] Replacing entire followupQuestions object`
+            );
+            profileData.followupQuestions = fieldValue;
           } else {
             // Standard top-level field update
             if (!profileData[fieldName]) {
