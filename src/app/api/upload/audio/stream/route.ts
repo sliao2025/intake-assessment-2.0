@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Storage } from "@google-cloud/storage";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../auth/[...nextauth]/route";
 import { prisma } from "@/app/lib/prisma";
-
-const storage = new Storage({
-  projectId: process.env.GCP_PROJECT_ID,
-});
-
-const bucketName =
-  process.env.GCS_BUCKET_NAME || "intake-assessment-audio-files";
+import {
+  fileExistsInStorage,
+  getFileStreamFromStorage,
+} from "@/lib/file-storage";
+import { Readable } from "stream";
 
 /**
  * Extract field name from GCS fileName
@@ -108,12 +105,23 @@ async function cleanupOrphanedReference(
   }
 }
 
+// Helper to convert Node.js Readable to Web ReadableStream
+function nodeStreamToReadableStream(nodeStream: Readable): ReadableStream {
+  return new ReadableStream({
+    start(controller) {
+      nodeStream.on("data", (chunk) => controller.enqueue(chunk));
+      nodeStream.on("end", () => controller.close());
+      nodeStream.on("error", (err) => controller.error(err));
+    },
+  });
+}
+
 /**
- * Stream audio files from GCS with ownership verification.
+ * Stream audio files from storage (GCS/S3) with ownership verification.
  * This proxies the file through our API, ensuring only the owner can access it.
  * No signed URLs needed - we verify userId matches the file path.
  *
- * If a file is not found in GCS but is referenced in the database,
+ * If a file is not found in storage but is referenced in the database,
  * automatically clean up the orphaned reference.
  */
 export async function GET(req: NextRequest) {
@@ -160,17 +168,13 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Stream the file from GCS
-    const bucket = storage.bucket(bucketName);
-    const file = bucket.file(fileName);
-
-    // Check if file exists
-    const [exists] = await file.exists();
+    // Check if file exists using abstraction verification
+    const exists = await fileExistsInStorage(fileName);
 
     console.log("[audio/stream] File exists:", exists);
 
     if (!exists) {
-      console.error(`[audio/stream] File not found in GCS: ${fileName}`);
+      console.error(`[audio/stream] File not found in storage: ${fileName}`);
 
       // Extract field name and clean up orphaned reference
       const fieldName = extractFieldNameFromFileName(fileName);
@@ -195,28 +199,28 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
-    // Get file metadata
-    const [metadata] = await file.getMetadata();
+    // Get file stream from storage abstraction
+    const { stream, contentType, contentLength } =
+      await getFileStreamFromStorage(fileName);
 
     console.log("[audio/stream] File metadata:", {
-      contentType: metadata.contentType,
-      size: metadata.size,
-      timeCreated: metadata.timeCreated,
+      contentType,
+      size: contentLength,
     });
 
-    // Download file content
-    const [content] = await file.download();
+    // Convert Node stream to Web ReadableStream for NextResponse
+    const webStream = nodeStreamToReadableStream(stream);
 
     console.log(
-      `[audio/stream] Successfully streaming ${fileName} (${content.length} bytes) for user ${userId}`
+      `[audio/stream] Successfully streaming ${fileName} for user ${userId}`
     );
 
     // Return the audio file with proper headers
-    return new NextResponse(content as unknown as BodyInit, {
+    return new NextResponse(webStream as any, {
       status: 200,
       headers: {
-        "Content-Type": metadata.contentType || "audio/webm",
-        "Content-Length": String(content.length),
+        "Content-Type": contentType || "audio/webm",
+        "Content-Length": contentLength ? String(contentLength) : "",
         "Cache-Control": "private, max-age=3600", // Cache for 1 hour
         "Content-Disposition": `inline; filename="${fileName.split("/").pop()}"`,
         // Security headers
@@ -228,9 +232,9 @@ export async function GET(req: NextRequest) {
     });
   } catch (error: any) {
     console.error("[audio/stream] Error:", error);
-    console.error("[audio/stream] Error stack:", error.stack);
+    console.error("[audio/stream] Error stack:", error?.stack);
     return NextResponse.json(
-      { error: error.message || "Failed to stream audio" },
+      { error: error?.message || "Failed to stream audio" },
       { status: 500 }
     );
   }

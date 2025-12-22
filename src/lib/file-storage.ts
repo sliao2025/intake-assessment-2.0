@@ -71,6 +71,7 @@ const GCS_BUCKET =
 function getActiveBackend(): "gcs" | "s3" {
   // Force backup mode overrides everything
   if (FORCE_BACKUP) {
+    console.log("[Storage] Force backup mode enabled, using s3");
     return "s3";
   }
 
@@ -85,6 +86,8 @@ function getActiveBackend(): "gcs" | "s3" {
       return "gcs";
     }
   }
+
+  console.log("[Storage] Using primary backend: " + PRIMARY_BACKEND);
 
   return PRIMARY_BACKEND as "gcs" | "s3";
 }
@@ -304,6 +307,7 @@ export async function getFileStreamFromStorage(
 
   try {
     if (backend === "gcs") {
+      console.log(`[Storage] Streaming from GCS: ${fileName}`);
       const storage = await getGCSStorage();
       const bucket = storage.bucket(GCS_BUCKET);
       const file = bucket.file(fileName);
@@ -317,6 +321,7 @@ export async function getFileStreamFromStorage(
         contentLength: parseInt(metadata.size as string, 10),
       };
     } else {
+      console.log(`[Storage] Streaming from S3: ${fileName}`);
       const s3 = await getS3Module();
       return await s3.getFileStream(fileName);
     }
@@ -426,9 +431,11 @@ export async function fileExistsInStorage(fileName: string): Promise<boolean> {
       const storage = await getGCSStorage();
       const bucket = storage.bucket(GCS_BUCKET);
       const [exists] = await bucket.file(fileName).exists();
+      console.log("[Storage] File exists in GCS");
       return exists;
     } else {
       const s3 = await getS3Module();
+      console.log("[Storage] File exists in S3");
       return await s3.fileExists(fileName);
     }
   } catch (error: any) {

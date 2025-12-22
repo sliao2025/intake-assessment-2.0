@@ -782,6 +782,10 @@ const VoiceRecorder = forwardRef<
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
+                  console.log(
+                    `[VoiceRecorder] Playing audio from URL:`,
+                    audioRef.current?.src
+                  );
                   setPlaying(true);
                   audioRef.current?.play();
                 }}

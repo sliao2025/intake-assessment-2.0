@@ -1,17 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Storage } from "@google-cloud/storage";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 
-// Initialize Google Cloud Storage client
-const storage = new Storage({
-  projectId: process.env.GCP_PROJECT_ID,
-  // In production on Cloud Run, uses Application Default Credentials
-  // In development, set GOOGLE_APPLICATION_CREDENTIALS env var
-});
-
-const bucketName =
-  process.env.GCS_BUCKET_NAME || "intake-assessment-audio-files";
+// Use our file storage abstraction for dual-write support
+import { uploadFileToStorage, deleteFileFromStorage } from "@/lib/file-storage";
 
 export async function POST(req: NextRequest) {
   try {
@@ -46,8 +38,6 @@ export async function POST(req: NextRequest) {
     }
 
     // Normalize field name for use in filename
-    // Convert "followupQuestions.question1.answer" -> "followupQuestion1"
-    // Keep other fields unchanged (storyNarrative, goals, etc.)
     let normalizedFieldName = fieldName;
     if (fieldName.startsWith("followupQuestions.question")) {
       const match = fieldName.match(/followupQuestions\.question(\d)\.answer/);
@@ -73,28 +63,14 @@ export async function POST(req: NextRequest) {
       `[upload/audio] Uploading file: ${fileName}, size: ${fileSizeBytes} bytes`
     );
 
-    // Upload to Google Cloud Storage (will overwrite if exists)
-    const bucket = storage.bucket(bucketName);
-    const file = bucket.file(fileName);
-
-    await file.save(buffer, {
-      metadata: {
-        contentType: "audio/webm",
-        metadata: {
-          userId,
-          fieldName,
-          uploadedAt: new Date().toISOString(),
-          sizeBytes: String(fileSizeBytes),
-        },
-      },
-    });
+    // Call storage abstraction to handle DUAL-WRITE
+    const result = await uploadFileToStorage(fileName, buffer, "audio/webm");
 
     console.log(
-      `[upload/audio] File uploaded successfully to gs://${bucketName}/${fileName}`
+      `[upload/audio] File uploaded successfully to ${result.backend} (dual-write: ${result.dualWriteSuccess})`
     );
 
     // Return proxy URL that will be served through our API with auth check
-    // The fileName contains the userId, so we can verify ownership on access
     const proxyUrl = `/api/upload/audio/stream?fileName=${encodeURIComponent(fileName)}`;
     const uploadedAt = new Date().toISOString();
 
@@ -140,8 +116,7 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    const bucket = storage.bucket(bucketName);
-    await bucket.file(fileName).delete();
+    await deleteFileFromStorage(fileName);
 
     console.log(`[upload/audio] File deleted: ${fileName}`);
 
