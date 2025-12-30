@@ -43,7 +43,6 @@ const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
 const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 export default function JournalPage() {
-  const { data: session } = useSession();
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [newContent, setNewContent] = useState("");
