@@ -17,7 +17,7 @@
 
 ## Overview
 
-**Intake Assessment v2** is a modern, mobile-first web application that enables patients to complete comprehensive mental health intake assessments before their first clinical appointment. The platform supports both **adult** and **child** assessment pathways, featuring voice recording capabilities, standardized psychological scales, and AI-generated follow-up questions.
+**Intake Assessment v2** is a modern, mobile-first web application that enables patients to complete comprehensive mental health intake assessments before their first clinical appointment and complete longitudinal activities. The intake portion supports both **adult** and **child** assessment pathways, featuring voice recording capabilities, standardized psychological scales, and AI-generated follow-up questions. The longitudinal portion supports mood journaling, session management, and scheduled assessments.
 
 This application is part of the Integrative Psych Assessment Platform and works in conjunction with:
 
