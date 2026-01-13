@@ -23,11 +23,18 @@ import {
   FaRegFaceTired,
 } from "react-icons/fa6";
 
+interface EmotionTag {
+  emotion: string;
+  class: string;
+  field?: string;
+}
+
 interface JournalEntry {
   id: string;
   content: string;
   mood: number;
   createdAt: string;
+  emotions?: EmotionTag[];
   sentimentResult?: {
     average_score: number;
     breakdown: {
@@ -52,6 +59,9 @@ export default function JournalPage() {
   const [editedContent, setEditedContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
+  const [pendingExtractions, setPendingExtractions] = useState<Set<string>>(
+    new Set()
+  );
   const { weather } = useWeather();
 
   useEffect(() => {
@@ -74,15 +84,23 @@ export default function JournalPage() {
 
   const createJournalEntry = async (content: string, mood: number) => {
     try {
+      console.log("Creating journal entry...");
       const response = await fetch("/api/portal/journal", {
         method: "POST",
         body: JSON.stringify({ content, mood }),
       });
       if (response.ok) {
         const data = await response.json();
-        setEntries((prev) => [data.entry, ...prev]);
+        const newEntryId = data.entry.id;
 
-        // Trigger emotion extraction
+        // Add entry to list and mark as pending extraction
+        setEntries((prev) => [data.entry, ...prev]);
+        setPendingExtractions((prev) => new Set(prev).add(newEntryId));
+        setNewContent("");
+        setSelectedMood(null);
+        setSelectedEmotions([]);
+
+        // Trigger emotion extraction in background
         try {
           const extractionResponse = await fetch(
             "/api/portal/journal/emotion-extraction",
@@ -91,13 +109,31 @@ export default function JournalPage() {
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({ journalId: data.entry.id }),
+              body: JSON.stringify({ journalId: newEntryId }),
             }
           );
           const extractionData = await extractionResponse.json();
           console.log("Emotion Extraction Response:", extractionData);
+
+          // Update entry with extracted emotions
+          if (extractionData.success && extractionData.data?.all_emotions) {
+            setEntries((prev) =>
+              prev.map((entry) =>
+                entry.id === newEntryId
+                  ? { ...entry, emotions: extractionData.data.all_emotions }
+                  : entry
+              )
+            );
+          }
         } catch (err) {
           console.error("Failed to trigger emotion extraction:", err);
+        } finally {
+          // Remove from pending regardless of success/failure
+          setPendingExtractions((prev) => {
+            const next = new Set(prev);
+            next.delete(newEntryId);
+            return next;
+          });
         }
       }
     } catch (error) {
@@ -173,15 +209,66 @@ export default function JournalPage() {
 
       if (response.ok) {
         const data = await response.json();
+
+        // Mark as pending extraction
+        setPendingExtractions((prev) => new Set(prev).add(entryId));
+
         setEntries((prev) =>
           prev.map((entry) =>
-            entry.id === entryId ? { ...entry, ...data.entry } : entry
+            entry.id === entryId
+              ? { ...entry, ...data.entry, emotions: undefined }
+              : entry
           )
         );
         if (selectedEntry?.id === entryId) {
-          setSelectedEntry({ ...selectedEntry, ...data.entry });
+          setSelectedEntry({
+            ...selectedEntry,
+            ...data.entry,
+            emotions: undefined,
+          });
         }
         setIsEditing(false);
+
+        // Re-trigger emotion extraction for updated content
+        try {
+          const extractionResponse = await fetch(
+            "/api/portal/journal/emotion-extraction",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ journalId: entryId }),
+            }
+          );
+          const extractionData = await extractionResponse.json();
+          console.log("Emotion Extraction Response (update):", extractionData);
+
+          // Update entry with new extracted emotions
+          if (extractionData.success && extractionData.data?.all_emotions) {
+            const newEmotions = extractionData.data.all_emotions;
+            setEntries((prev) =>
+              prev.map((entry) =>
+                entry.id === entryId
+                  ? { ...entry, emotions: newEmotions }
+                  : entry
+              )
+            );
+            if (selectedEntry?.id === entryId) {
+              setSelectedEntry((prev) =>
+                prev ? { ...prev, emotions: newEmotions } : null
+              );
+            }
+          }
+        } catch (err) {
+          console.error("Failed to trigger emotion extraction:", err);
+        } finally {
+          setPendingExtractions((prev) => {
+            const next = new Set(prev);
+            next.delete(entryId);
+            return next;
+          });
+        }
       } else {
         const errorData = await response.json();
         console.error("Failed to update journal entry:", errorData.error);
@@ -423,9 +510,6 @@ export default function JournalPage() {
                 onClick={async () => {
                   if (!newContent.trim() || selectedMood === null) return;
                   await createJournalEntry(newContent.trim(), selectedMood);
-                  setNewContent("");
-                  setSelectedMood(null);
-                  setSelectedEmotions([]);
                 }}
                 disabled={!newContent.trim() || selectedMood === null}
                 className={`w-full py-3.5 rounded-xl font-bold uppercase tracking-wide transition-all flex items-center justify-center gap-2 shadow-[0_2px_0_0_rgba(0,0,0,0.05)] text-sm ${
@@ -491,6 +575,31 @@ export default function JournalPage() {
                       <p className="text-stone-600 font-medium line-clamp-3 mb-4 leading-relaxed text-base">
                         {entry.content}
                       </p>
+
+                      {/* Emotion Tags */}
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {pendingExtractions.has(entry.id) ? (
+                          <span className="text-xs text-stone-400 italic animate-pulse">
+                            Creating emotion tags...
+                          </span>
+                        ) : entry.emotions && entry.emotions.length > 0 ? (
+                          <>
+                            {entry.emotions.slice(0, 3).map((emotion, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2.5 py-1 bg-[#f0f9ff] text-[#0072ce] text-xs font-medium rounded-full border border-[#bae6fd]"
+                              >
+                                {emotion.emotion}
+                              </span>
+                            ))}
+                            {entry.emotions.length > 3 && (
+                              <span className="px-2.5 py-1 bg-[#fafaf9] text-stone-500 text-xs font-medium rounded-full border border-[#e7e5e4]">
+                                +{entry.emotions.length - 3} more
+                              </span>
+                            )}
+                          </>
+                        ) : null}
+                      </div>
 
                       <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
@@ -588,6 +697,36 @@ export default function JournalPage() {
                   </p>
                 </div>
               )}
+            </div>
+
+            {/* Emotions Section */}
+            <div>
+              <h3
+                className={`${dm_serif.className} text-xl text-[#1c1917] mb-4`}
+              >
+                Emotions
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {pendingExtractions.has(selectedEntry.id) ? (
+                  <span className="text-sm text-stone-400 italic animate-pulse">
+                    Creating emotion tags...
+                  </span>
+                ) : selectedEntry.emotions &&
+                  selectedEntry.emotions.length > 0 ? (
+                  selectedEntry.emotions.map((emotion, idx) => (
+                    <span
+                      key={idx}
+                      className="px-3 py-1.5 bg-[#f0f9ff] text-[#0072ce] text-sm font-medium rounded-full border border-[#bae6fd]"
+                    >
+                      {emotion.emotion}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-sm text-stone-400 italic">
+                    No emotions detected
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         )}
