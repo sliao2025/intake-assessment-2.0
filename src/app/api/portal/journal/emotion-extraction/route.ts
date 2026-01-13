@@ -32,11 +32,17 @@ export async function POST(request: NextRequest) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ journalId }),
+      body: JSON.stringify({ journalEntryId: journalId }),
     });
 
     if (!response.ok) {
-      throw new Error("Failed to extract emotions");
+      const errorText = await response.text();
+      console.error(
+        `Emotion Extraction Service failed with status ${response.status}: ${errorText}`
+      );
+      throw new Error(
+        `Failed to extract emotions: ${response.status} ${errorText}`
+      );
     }
 
     const data = await response.json();
