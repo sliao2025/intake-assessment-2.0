@@ -4,25 +4,24 @@ import React, { useEffect, useState } from "react";
 import PortalLayout from "../components/portal/Layout/PortalLayout";
 import {
   Calendar,
-  Smile,
-  Frown,
-  Meh,
   Trash2,
-  Eye,
   Pencil,
   Check,
-  X,
-  Plus,
-  Heart,
   BookOpen,
   Feather,
 } from "lucide-react";
 import { DM_Serif_Text, DM_Sans } from "next/font/google";
 import { intPsychTheme } from "../components/theme";
-import { useSession } from "next-auth/react";
 import Drawer from "../components/Drawer";
 import { useWeather } from "../lib/hooks/useWeather";
 import WeatherWidget from "../components/WeatherWidget";
+import {
+  FaRegFaceGrinStars,
+  FaRegFaceSmileBeam,
+  FaRegFaceMeh,
+  FaRegFaceFrownOpen,
+  FaRegFaceTired,
+} from "react-icons/fa6";
 
 interface JournalEntry {
   id: string;
@@ -82,6 +81,24 @@ export default function JournalPage() {
       if (response.ok) {
         const data = await response.json();
         setEntries((prev) => [data.entry, ...prev]);
+
+        // Trigger emotion extraction
+        try {
+          const extractionResponse = await fetch(
+            "/api/portal/journal/emotion-extraction",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ journalId: data.entry.id }),
+            }
+          );
+          const extractionData = await extractionResponse.json();
+          console.log("Emotion Extraction Response:", extractionData);
+        } catch (err) {
+          console.error("Failed to trigger emotion extraction:", err);
+        }
       }
     } catch (error) {
       console.error("Failed to create journal entry:", error);
@@ -186,35 +203,78 @@ export default function JournalPage() {
   };
 
   const getMoodIcon = (mood: number) => {
-    if (mood <= 2) return <Frown className="w-6 h-6 text-[#e11d48]" />;
-    if (mood <= 3) return <Meh className="w-6 h-6 text-[#ca8a04]" />;
-    return <Smile className="w-6 h-6 text-[#15803d]" />;
+    switch (mood) {
+      case 5:
+        return <FaRegFaceGrinStars className="w-6 h-6 text-[#16a34a]" />;
+      case 4:
+        return <FaRegFaceSmileBeam className="w-6 h-6 text-[#84cc16]" />;
+      case 3:
+        return <FaRegFaceMeh className="w-6 h-6 text-[#0072ce]" />;
+      case 2:
+        return <FaRegFaceFrownOpen className="w-6 h-6 text-[#ffa440]" />;
+      case 1:
+        return <FaRegFaceTired className="w-6 h-6 text-[#f43f5e]" />;
+      default:
+        return <FaRegFaceSmileBeam className="w-6 h-6 text-[#84cc16]" />;
+    }
   };
 
   const getMoodLabel = (mood: number) => {
-    if (mood <= 2) return "Low";
-    if (mood <= 3) return "Okay";
-    return "Good";
+    switch (mood) {
+      case 5:
+        return "Amazing";
+      case 4:
+        return "Good";
+      case 3:
+        return "Meh";
+      case 2:
+        return "Bad";
+      case 1:
+        return "Terrible";
+      default:
+        return "Good";
+    }
   };
 
   const getMoodColor = (mood: number) => {
-    if (mood <= 2)
-      return {
-        bg: "bg-[#ffe4e6]",
-        text: "text-[#e11d48]",
-        border: "border-[#fda4af]",
-      };
-    if (mood <= 3)
-      return {
-        bg: "bg-[#fef9c3]",
-        text: "text-[#ca8a04]",
-        border: "border-[#fde047]",
-      };
-    return {
-      bg: "bg-[#dcfce7]",
-      text: "text-[#15803d]",
-      border: "border-[#86efac]",
-    };
+    switch (mood) {
+      case 5:
+        return {
+          bg: "bg-[#f0fdf4]",
+          text: "text-[#16a34a]",
+          border: "border-[#bbf7d0]",
+        };
+      case 4:
+        return {
+          bg: "bg-[#f7fee7]",
+          text: "text-[#84cc16]",
+          border: "border-[#d9f99d]",
+        };
+      case 3:
+        return {
+          bg: "bg-[#eff6ff]",
+          text: "text-[#0072ce]",
+          border: "border-[#bfdbfe]",
+        };
+      case 2:
+        return {
+          bg: "bg-[#fff7ed]",
+          text: "text-[#ffa440]",
+          border: "border-[#fed7aa]",
+        };
+      case 1:
+        return {
+          bg: "bg-[#fff1f2]",
+          text: "text-[#f43f5e]",
+          border: "border-[#fecdd3]",
+        };
+      default:
+        return {
+          bg: "bg-[#f0fdf4]",
+          text: "text-[#16a34a]",
+          border: "border-[#bbf7d0]",
+        };
+    }
   };
 
   const formatDate = (dateStr: string) => {
@@ -228,37 +288,59 @@ export default function JournalPage() {
 
   const moodOptions = [
     {
-      label: "Good",
+      label: "Amazing",
       value: 5,
-      icon: <Smile className="w-6 h-6" />,
+      icon: <FaRegFaceGrinStars className="w-6 h-6" />,
       bg: "bg-[#f0fdf4]",
       border: "border-[#bbf7d0]",
-      text: "text-[#15803d]",
+      text: "text-[#16a34a]",
       selectedBg: "bg-[#dcfce7]",
       selectedBorder: "border-[#15803d]",
       selectedText: "text-[#14532d]",
     },
     {
-      label: "Okay",
-      value: 3,
-      icon: <Meh className="w-6 h-6" />,
-      bg: "bg-[#fefce8]",
-      border: "border-[#fef08a]",
-      text: "text-[#854d0e]",
-      selectedBg: "bg-[#fef9c3]",
-      selectedBorder: "border-[#ca8a04]",
-      selectedText: "text-[#713f12]",
+      label: "Good",
+      value: 4,
+      icon: <FaRegFaceSmileBeam className="w-6 h-6" />,
+      bg: "bg-[#f7fee7]",
+      border: "border-[#d9f99d]",
+      text: "text-[#84cc16]",
+      selectedBg: "bg-[#ecfccb]",
+      selectedBorder: "border-[#4d7c0f]",
+      selectedText: "text-[#365314]",
     },
     {
-      label: "Low",
+      label: "Meh",
+      value: 3,
+      icon: <FaRegFaceMeh className="w-6 h-6" />,
+      bg: "bg-[#eff6ff]",
+      border: "border-[#bfdbfe]",
+      text: "text-[#0072ce]",
+      selectedBg: "bg-[#dbeafe]",
+      selectedBorder: "border-[#1d4ed8]",
+      selectedText: "text-[#1e3a8a]",
+    },
+    {
+      label: "Bad",
+      value: 2,
+      icon: <FaRegFaceFrownOpen className="w-6 h-6" />,
+      bg: "bg-[#fff7ed]",
+      border: "border-[#fed7aa]",
+      text: "text-[#ffa440]",
+      selectedBg: "bg-[#ffedd5]",
+      selectedBorder: "border-[#c2410c]",
+      selectedText: "text-[#7c2d12]",
+    },
+    {
+      label: "Terrible",
       value: 1,
-      icon: <Frown className="w-6 h-6" />,
+      icon: <FaRegFaceTired className="w-6 h-6" />,
       bg: "bg-[#fff1f2]",
       border: "border-[#fecdd3]",
-      text: "text-[#be123c]",
+      text: "text-[#f43f5e]",
       selectedBg: "bg-[#ffe4e6]",
-      selectedBorder: "border-[#e11d48]",
-      selectedText: "text-[#9f1239]",
+      selectedBorder: "border-[#be123c]",
+      selectedText: "text-[#881337]",
     },
   ];
 
