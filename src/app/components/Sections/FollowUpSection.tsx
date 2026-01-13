@@ -9,7 +9,6 @@ import TextAreaWithEncouragement from "../primitives/TextAreawithEncouragement";
 import VoiceRecorder, { VoiceRecorderHandle } from "../VoiceRecorder";
 import { intPsychTheme } from "../theme";
 import VoicePreferredField from "../primitives/VoicePreferredField";
-import { Info } from "lucide-react";
 import { DM_Sans } from "next/font/google";
 
 const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
@@ -57,21 +56,37 @@ export default function FollowUpSection({
     return () => clearInterval(interval);
   }, [loading]);
 
-  // Function to save a specific profile state to SQL
-  const saveProfileToSQL = async (profileToSave: typeof profile) => {
+  // Function to save follow-up questions to SQL using field-level update
+  // This avoids optimistic locking conflicts that can occur with full-profile updates
+  const saveFollowupQuestionsToSQL = async (
+    followupQuestions: Profile["followupQuestions"]
+  ) => {
     try {
-      console.log("[FollowUpSection] Saving profile to SQL...");
-      const response = await fetch("/api/profile/create", {
-        method: "PUT",
+      console.log("[FollowUpSection] Saving follow-up questions to SQL...");
+      const response = await fetch("/api/profile/update-field", {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profileToSave),
+        body: JSON.stringify({
+          fieldName: "followupQuestions",
+          fieldValue: followupQuestions,
+        }),
       });
       if (!response.ok) {
-        throw new Error(`Failed to save: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          `Failed to save: ${response.statusText} - ${JSON.stringify(errorData)}`
+        );
       }
-      console.log("[FollowUpSection] Profile saved to SQL successfully");
+      const resData = await response.json();
+      console.log(
+        "[FollowUpSection] Follow-up questions saved to SQL successfully"
+      );
+      return resData;
     } catch (err) {
-      console.error("[FollowUpSection] Failed to save profile to SQL:", err);
+      console.error(
+        "[FollowUpSection] Failed to save follow-up questions to SQL:",
+        err
+      );
       throw err;
     }
   };
@@ -92,6 +107,7 @@ export default function FollowUpSection({
 
       setLoading(true);
       try {
+        console.log("profile [FollowUpSection]", profile);
         const response = await fetch("/api/followup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -105,27 +121,33 @@ export default function FollowUpSection({
         const data = await response.json();
 
         if (data.ok && data.questions) {
-          // Update profile with generated questions
-          const updatedProfile = {
-            ...profile,
-            followupQuestions: {
-              question1: {
-                question: data.questions.question1,
-                answer: { text: "" },
-              },
-              question2: {
-                question: data.questions.question2,
-                answer: { text: "" },
-              },
-              question3: {
-                question: data.questions.question3,
-                answer: { text: "" },
-              },
+          // Create the follow-up questions structure
+          const followupQuestions = {
+            question1: {
+              question: data.questions.question1,
+              answer: { text: "" },
+            },
+            question2: {
+              question: data.questions.question2,
+              answer: { text: "" },
+            },
+            question3: {
+              question: data.questions.question3,
+              answer: { text: "" },
             },
           };
 
-          setProfile(updatedProfile);
-          await saveProfileToSQL(updatedProfile);
+          // Save to SQL first using field-level update (avoids optimistic locking conflicts)
+          const resData = await saveFollowupQuestionsToSQL(followupQuestions);
+
+          // Update local state with the new questions AND the updated timestamp
+          setProfile((p) => ({
+            ...p,
+            followupQuestions,
+            ...(resData?.profile?.updatedAt && {
+              updatedAt: resData.profile.updatedAt,
+            }),
+          }));
           setQuestionsGenerated(true);
         }
       } catch (err) {

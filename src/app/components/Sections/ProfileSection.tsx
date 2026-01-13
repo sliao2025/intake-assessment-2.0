@@ -608,7 +608,7 @@ export default function ProfileSection({
               </div>
             </Listbox>
           </Field>
-          <Field required title="Daily Screen Time">
+          <Field required title="Daily Mobile Screen Time">
             <div className="relative">
               <input
                 type="number"
@@ -617,11 +617,11 @@ export default function ProfileSection({
                 step={1}
                 className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 pr-16 text-slate-900 placeholder:text-slate-400"
                 placeholder="e.g., 5"
-                value={profile.dailyScreenTime ?? ""}
+                value={profile.dailyMobileScreenTime ?? ""}
                 onChange={(e) =>
                   setProfile((p) => ({
                     ...p,
-                    dailyScreenTime:
+                    dailyMobileScreenTime:
                       e.target.value === "" ? null : Number(e.target.value),
                   }))
                 }

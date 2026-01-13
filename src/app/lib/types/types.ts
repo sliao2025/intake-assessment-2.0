@@ -532,7 +532,7 @@ export type Profile = {
   jobDetails?: string;
   hobbies?: string;
   hasFirearm?: boolean;
-  dailyScreenTime?: number;
+  dailyMobileScreenTime?: number;
 
   // Child Profile Section
   schoolInfo?: {
