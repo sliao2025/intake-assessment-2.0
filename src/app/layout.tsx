@@ -4,15 +4,15 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import Providers from "./providers";
 import type { Metadata } from "next";
-import IPLogo from "../assets/IP_Logo.png";
+import sigmund_logo from "public/Sigmund Window.png";
 
 export const metadata: Metadata = {
-  title: "Integrative Psych Intake",
-  description: "Patient intake assessment platform",
+  title: "Sigmund",
+  description: "Mental Health Platform",
   icons: {
-    icon: [{ url: IPLogo.src, type: "image/png" }],
-    shortcut: [{ url: IPLogo.src, type: "image/png" }],
-    apple: [{ url: IPLogo.src }],
+    icon: [{ url: sigmund_logo.src, type: "image/png" }],
+    shortcut: [{ url: sigmund_logo.src, type: "image/png" }],
+    apple: [{ url: sigmund_logo.src }],
   },
 };
 

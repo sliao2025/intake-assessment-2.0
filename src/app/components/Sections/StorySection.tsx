@@ -459,12 +459,12 @@ export default function StorySection({
           !profile.isChild ? (
             <>
               What role does culture (religion, ethnicity, nationality,
-              spirituality) play in your life? <i>(optional)</i>
+              spirituality) play in your life?
             </>
           ) : (
             <>
               What role does culture (religion, ethnicity, nationality,
-              spirituality) play in your child's life? <i>(optional)</i>
+              spirituality) play in your child's life?
             </>
           )
         }

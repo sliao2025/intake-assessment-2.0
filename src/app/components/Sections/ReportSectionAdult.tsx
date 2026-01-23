@@ -34,7 +34,7 @@ import type {
   SummaryPair,
   AdultAssessments,
 } from "../../lib/types/types";
-import { intPsychTheme } from "../theme";
+import { intPsychTheme, sigmundTheme } from "../theme";
 import logo from "../../../assets/IP_Logo.png";
 import { useSession } from "next-auth/react";
 
@@ -73,16 +73,16 @@ const pdfStyles = StyleSheet.create({
   sectionHeader: {
     fontSize: 13,
     fontWeight: 700,
-    color: "#113e60",
+    color: intPsychTheme.primary,
     marginBottom: 6,
   },
   card: {
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: sigmundTheme.border,
     borderRadius: 12,
     padding: 12,
     marginBottom: 12,
-    backgroundColor: "#ffffff",
+    backgroundColor: intPsychTheme.card,
   },
   gridRow: { flexDirection: "row", flexWrap: "wrap" },
   gridItem: { width: "50%", paddingRight: 12, marginBottom: 6 },
@@ -96,7 +96,7 @@ const pdfStyles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 6,
     borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
+    borderTopColor: sigmundTheme.border,
   },
   gaugeWrap: { marginTop: 6, marginBottom: 10 },
   gaugeLabel: { fontSize: 12, fontWeight: 700, color: "#334155" },
@@ -223,7 +223,7 @@ const PdfGauge = ({
             style={{
               fontSize: 28,
               fontWeight: 700,
-              color: "#05539C",
+              color: intPsychTheme.accentDark,
               lineHeight: 1.0,
             }}
           >
@@ -240,9 +240,9 @@ const PdfGauge = ({
         <View
           style={{
             borderWidth: 1,
-            borderColor: "#e2e8f0",
+            borderColor: sigmundTheme.border,
             borderRadius: 8,
-            backgroundColor: "#f8fafc",
+            backgroundColor: intPsychTheme.background,
             padding: 8,
             marginTop: 6,
           }}
@@ -503,7 +503,12 @@ export default function ReportSectionAdult({
           </View>
           <View style={pdfStyles.card}>
             <View style={pdfStyles.badgeRow}>
-              <View style={[pdfStyles.badge, { backgroundColor: "#0072ce" }]} />
+              <View
+                style={[
+                  pdfStyles.badge,
+                  { backgroundColor: intPsychTheme.accent },
+                ]}
+              />
               <Text style={pdfStyles.sectionHeader}>Patient Info</Text>
             </View>
             <View style={pdfStyles.gridRow}>
@@ -533,15 +538,20 @@ export default function ReportSectionAdult({
           </View>
           <View style={pdfStyles.card}>
             <View style={pdfStyles.badgeRow}>
-              <View style={[pdfStyles.badge, { backgroundColor: "#ffa440" }]} />
+              <View
+                style={[
+                  pdfStyles.badge,
+                  { backgroundColor: intPsychTheme.secondary },
+                ]}
+              />
               <Text style={pdfStyles.sectionHeader}>Reason for Evaluation</Text>
             </View>
             <View
               style={{
                 borderWidth: 1,
-                borderColor: "#e2e8f0",
+                borderColor: sigmundTheme.border,
                 borderRadius: 8,
-                backgroundColor: "#f8fafc",
+                backgroundColor: intPsychTheme.background,
                 padding: 8,
                 marginTop: 4,
               }}
@@ -553,15 +563,20 @@ export default function ReportSectionAdult({
           </View>
           <View style={pdfStyles.card}>
             <View style={pdfStyles.badgeRow}>
-              <View style={[pdfStyles.badge, { backgroundColor: "#113e60" }]} />
+              <View
+                style={[
+                  pdfStyles.badge,
+                  { backgroundColor: intPsychTheme.primary },
+                ]}
+              />
               <Text style={pdfStyles.sectionHeader}>Background</Text>
             </View>
             <View
               style={{
                 borderWidth: 1,
-                borderColor: "#e2e8f0",
+                borderColor: sigmundTheme.border,
                 borderRadius: 8,
-                backgroundColor: "#f8fafc",
+                backgroundColor: intPsychTheme.background,
                 padding: 8,
                 marginTop: 4,
               }}
@@ -573,7 +588,12 @@ export default function ReportSectionAdult({
           </View>
           <View style={pdfStyles.card}>
             <View style={pdfStyles.badgeRow}>
-              <View style={[pdfStyles.badge, { backgroundColor: "#0072ce" }]} />
+              <View
+                style={[
+                  pdfStyles.badge,
+                  { backgroundColor: intPsychTheme.accent },
+                ]}
+              />
               <Text style={pdfStyles.sectionHeader}>Screening Scores</Text>
             </View>
             <PdfGauge
@@ -679,7 +699,7 @@ export default function ReportSectionAdult({
         <button
           type="button"
           onClick={downloadReactPdf}
-          className="inline-flex cursor-pointer border-b-4 border-[#004684] items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-medium text-white transition duration-150 hover:brightness-95 active:scale-95 shrink-0"
+          className={`inline-flex cursor-pointer border-b-4 border-[${intPsychTheme.accentDark}] items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-medium text-white transition duration-150 hover:brightness-95 active:scale-95 shrink-0`}
           style={{ background: intPsychTheme.accent }}
           aria-label="Download PDF of this report"
         >
@@ -903,7 +923,7 @@ export default function ReportSectionAdult({
                           name="% of max"
                           dataKey="pct"
                           isAnimationActive={false}
-                          className="text-[#0072ce]"
+                          className="text-[#426459]"
                           stroke="currentColor"
                           strokeWidth={2}
                           fill="currentColor"

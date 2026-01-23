@@ -27,4 +27,16 @@ export const intPsychTheme = {
   background: "#f8fafc",
 };
 
+export const sigmundTheme = {
+  primary: "#b2bfa2",
+  primaryLight: "#b2bfa233",
+  secondary: "#91654f",
+  secondaryDark: "#463f3bff",
+  accent: "#426459",
+  accentDark: "#2d463e",
+  background: "#fafaf9", // stone-50
+  border: "#e7e5e4", // stone-200
+  hover: "#e4e9dd", // light primary/sage
+};
+
 export const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];

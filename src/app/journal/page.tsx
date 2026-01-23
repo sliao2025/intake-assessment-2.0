@@ -11,10 +11,14 @@ import {
   Feather,
 } from "lucide-react";
 import { DM_Serif_Text, DM_Sans } from "next/font/google";
-import { intPsychTheme } from "../components/theme";
+import { intPsychTheme, sigmundTheme } from "../components/theme";
 import Drawer from "../components/Drawer";
 import { useWeather } from "../lib/hooks/useWeather";
 import WeatherWidget from "../components/WeatherWidget";
+import LinearGauge from "../components/primitives/LinearGauge";
+import CircularGauge from "../components/primitives/CircularGauge";
+import { RiInformation2Line } from "react-icons/ri";
+
 import {
   FaRegFaceGrinStars,
   FaRegFaceSmileBeam,
@@ -48,6 +52,15 @@ interface JournalEntry {
 const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
 const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
+/**
+ * Normalizes a score from -1 to 1 range to 0-100 range
+ * -1 -> 0, 0 -> 50, 1 -> 100
+ */
+const normalizeScore = (score: number | undefined | null): number => {
+  if (score === undefined || score === null) return 50;
+  return Math.round(((score + 1) / 2) * 100);
+};
+
 export default function JournalPage() {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,6 +73,9 @@ export default function JournalPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
   const [pendingExtractions, setPendingExtractions] = useState<Set<string>>(
+    new Set()
+  );
+  const [pendingSentiment, setPendingSentiment] = useState<Set<string>>(
     new Set()
   );
   const { weather } = useWeather();
@@ -82,6 +98,16 @@ export default function JournalPage() {
     fetchEntries();
   }, []);
 
+  // Sync selectedEntry with entries updates (e.g. when background analysis completes)
+  useEffect(() => {
+    if (selectedEntry) {
+      const updatedEntry = entries.find((e) => e.id === selectedEntry.id);
+      if (updatedEntry && updatedEntry !== selectedEntry) {
+        setSelectedEntry(updatedEntry);
+      }
+    }
+  }, [entries, selectedEntry]);
+
   const createJournalEntry = async (content: string, mood: number) => {
     try {
       console.log("Creating journal entry...");
@@ -100,36 +126,50 @@ export default function JournalPage() {
         setSelectedMood(null);
         setSelectedEmotions([]);
 
-        // Trigger emotion extraction in background
-        try {
-          const extractionResponse = await fetch(
-            "/api/portal/journal/emotion-extraction",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ journalId: newEntryId }),
-            }
-          );
-          const extractionData = await extractionResponse.json();
-          console.log("Emotion Extraction Response:", extractionData);
+        // Trigger emotion extraction and sentiment analysis in parallel
+        setPendingSentiment((prev) => new Set(prev).add(newEntryId));
 
-          // Update entry with extracted emotions
-          if (extractionData.success && extractionData.data?.all_emotions) {
-            setEntries((prev) =>
-              prev.map((entry) =>
-                entry.id === newEntryId
-                  ? { ...entry, emotions: extractionData.data.all_emotions }
-                  : entry
-              )
-            );
+        try {
+          const [extractionResponse, sentimentResponse] =
+            await Promise.allSettled([
+              fetch("/api/portal/journal/emotion-extraction", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ journalId: newEntryId }),
+              }),
+              fetch("/api/insights/sentiment-analysis", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ journalId: newEntryId }),
+              }),
+            ]);
+
+          if (extractionResponse.status === "fulfilled") {
+            const extractionData = await extractionResponse.value.json();
+            console.log("Emotion Extraction Response:", extractionData);
+          }
+
+          if (sentimentResponse.status === "fulfilled") {
+            const sentimentData = await sentimentResponse.value.json();
+            console.log("Sentiment Analysis Response:", sentimentData);
+          }
+
+          // Refetch entries from database to get saved data
+          const refreshResponse = await fetch("/api/portal/journal");
+          if (refreshResponse.ok) {
+            const refreshData = await refreshResponse.json();
+            setEntries(refreshData.entries || []);
           }
         } catch (err) {
-          console.error("Failed to trigger emotion extraction:", err);
+          console.error("Failed to trigger analysis:", err);
         } finally {
           // Remove from pending regardless of success/failure
           setPendingExtractions((prev) => {
+            const next = new Set(prev);
+            next.delete(newEntryId);
+            return next;
+          });
+          setPendingSentiment((prev) => {
             const next = new Set(prev);
             next.delete(newEntryId);
             return next;
@@ -173,6 +213,11 @@ export default function JournalPage() {
     setEditedContent(entry.content);
     setIsEditing(false);
     setIsDrawerOpen(true);
+    console.log("Selected Entry:", entry);
+    console.log(
+      "Normalized Entry:",
+      normalizeScore(entry.sentimentResult?.average_score)
+    );
   };
 
   const closeDrawer = () => {
@@ -229,41 +274,59 @@ export default function JournalPage() {
         }
         setIsEditing(false);
 
-        // Re-trigger emotion extraction for updated content
-        try {
-          const extractionResponse = await fetch(
-            "/api/portal/journal/emotion-extraction",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ journalId: entryId }),
-            }
-          );
-          const extractionData = await extractionResponse.json();
-          console.log("Emotion Extraction Response (update):", extractionData);
+        // Re-trigger emotion extraction and sentiment analysis for updated content
+        setPendingSentiment((prev) => new Set(prev).add(entryId));
 
-          // Update entry with new extracted emotions
-          if (extractionData.success && extractionData.data?.all_emotions) {
-            const newEmotions = extractionData.data.all_emotions;
-            setEntries((prev) =>
-              prev.map((entry) =>
-                entry.id === entryId
-                  ? { ...entry, emotions: newEmotions }
-                  : entry
-              )
+        try {
+          const [extractionResponse, sentimentResponse] =
+            await Promise.allSettled([
+              fetch("/api/portal/journal/emotion-extraction", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ journalId: entryId }),
+              }),
+              fetch("/api/insights/sentiment-analysis", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ journalId: entryId }),
+              }),
+            ]);
+
+          if (extractionResponse.status === "fulfilled") {
+            const extractionData = await extractionResponse.value.json();
+            console.log(
+              "Emotion Extraction Response (update):",
+              extractionData
             );
-            if (selectedEntry?.id === entryId) {
-              setSelectedEntry((prev) =>
-                prev ? { ...prev, emotions: newEmotions } : null
-              );
+          }
+
+          if (sentimentResponse.status === "fulfilled") {
+            const sentimentData = await sentimentResponse.value.json();
+            console.log("Sentiment Analysis Response (update):", sentimentData);
+          }
+
+          // Refetch entries from database to get saved data
+          const refreshResponse = await fetch("/api/portal/journal");
+          if (refreshResponse.ok) {
+            const refreshData = await refreshResponse.json();
+            setEntries(refreshData.entries || []);
+            // Update selectedEntry from refreshed data
+            const updatedEntry = refreshData.entries?.find(
+              (e: JournalEntry) => e.id === entryId
+            );
+            if (updatedEntry) {
+              setSelectedEntry(updatedEntry);
             }
           }
         } catch (err) {
-          console.error("Failed to trigger emotion extraction:", err);
+          console.error("Failed to trigger analysis:", err);
         } finally {
           setPendingExtractions((prev) => {
+            const next = new Set(prev);
+            next.delete(entryId);
+            return next;
+          });
+          setPendingSentiment((prev) => {
             const next = new Set(prev);
             next.delete(entryId);
             return next;
@@ -296,7 +359,7 @@ export default function JournalPage() {
       case 4:
         return <FaRegFaceSmileBeam className="w-6 h-6 text-[#84cc16]" />;
       case 3:
-        return <FaRegFaceMeh className="w-6 h-6 text-[#0072ce]" />;
+        return <FaRegFaceMeh className="w-6 h-6 text-[#ca8a04]" />;
       case 2:
         return <FaRegFaceFrownOpen className="w-6 h-6 text-[#ffa440]" />;
       case 1:
@@ -339,9 +402,9 @@ export default function JournalPage() {
         };
       case 3:
         return {
-          bg: "bg-[#eff6ff]",
-          text: "text-[#0072ce]",
-          border: "border-[#bfdbfe]",
+          bg: "bg-[#fef9c3]",
+          text: "text-[#ca8a04]",
+          border: "border-[#fde047]",
         };
       case 2:
         return {
@@ -400,12 +463,12 @@ export default function JournalPage() {
       label: "Meh",
       value: 3,
       icon: <FaRegFaceMeh className="w-6 h-6" />,
-      bg: "bg-[#eff6ff]",
-      border: "border-[#bfdbfe]",
-      text: "text-[#0072ce]",
-      selectedBg: "bg-[#dbeafe]",
-      selectedBorder: "border-[#1d4ed8]",
-      selectedText: "text-[#1e3a8a]",
+      bg: "bg-[#fef9c3]",
+      border: "border-[#fde047]",
+      text: "text-[#ca8a04]",
+      selectedBg: "bg-[#fde047]",
+      selectedBorder: "border-[#ca8a04]",
+      selectedText: "text-[#854d0e]",
     },
     {
       label: "Bad",
@@ -439,7 +502,7 @@ export default function JournalPage() {
             <div>
               <h1
                 className={`${dm_serif.className} text-4xl mb-2`}
-                style={{ color: intPsychTheme.primary }}
+                style={{ color: sigmundTheme.accent }}
               >
                 Your Journal
               </h1>
@@ -501,7 +564,7 @@ export default function JournalPage() {
                   rows={6}
                   value={newContent}
                   onChange={(event) => setNewContent(event.target.value)}
-                  className="w-full bg-[#fafaf9] border border-[#e7e5e4] rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-[#ca8a04]/20 focus:border-[#ca8a04] transition-all text-lg placeholder:text-stone-400 font-medium resize-none text-[#1c1917] leading-relaxed"
+                  className={`w-full bg-[${sigmundTheme.background}] border border-[${sigmundTheme.border}] rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-[#ca8a04]/20 focus:border-[#ca8a04] transition-all text-lg placeholder:text-stone-400 font-medium resize-none text-[#1c1917] leading-relaxed`}
                 />
               </div>
 
@@ -514,7 +577,7 @@ export default function JournalPage() {
                 disabled={!newContent.trim() || selectedMood === null}
                 className={`w-full py-3.5 rounded-xl font-bold uppercase tracking-wide transition-all flex items-center justify-center gap-2 shadow-[0_2px_0_0_rgba(0,0,0,0.05)] text-sm ${
                   !newContent.trim() || selectedMood === null
-                    ? "bg-[#f5f5f4] text-stone-400 cursor-not-allowed shadow-none border border-[#e7e5e4]"
+                    ? `bg-[#f5f5f4] text-stone-400 cursor-not-allowed shadow-none border border-[${sigmundTheme.border}]`
                     : "bg-[#ffa440] text-white border-b-4 border-[#f58402] hover:bg-[#f58402] hover:translate-y-[-1px] active:translate-y-[1px] active:border-b-0 active:shadow-none"
                 }`}
               >
@@ -529,7 +592,7 @@ export default function JournalPage() {
             <div className="flex items-center gap-3 mb-6">
               <BookOpen className="w-6 h-6 text-[#0ea5e9]" />
               <h2 className={`${dm_serif.className} text-2xl text-[#1c1917]`}>
-                Your Journal
+                Your entries
               </h2>
             </div>
 
@@ -553,10 +616,12 @@ export default function JournalPage() {
                     <div
                       key={entry.id}
                       onClick={() => openDrawer(entry)}
-                      className="bg-white rounded-xl border border-[#e7e5e4] border-b-2 p-5 cursor-pointer hover:border-[#0ea5e9]/30 hover:bg-[#f0f9ff]/30 transition-all group shadow-sm"
+                      className="bg-white rounded-xl border border-[#e7e5e4] border-b-4 p-5 cursor-pointer hover:scale-[1.01] hover:shadow-xs transition-all group"
                     >
                       <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-2 bg-[#fafaf9] px-3 py-1.5 rounded-lg text-xs font-bold text-stone-500 uppercase tracking-wide border border-[#e7e5e4]">
+                        <div
+                          className={`flex items-center gap-2 bg-[${sigmundTheme.background}] px-3 py-1.5 rounded-lg text-xs font-bold text-stone-500 uppercase tracking-wide border border-[${sigmundTheme.border}]`}
+                        >
                           <Calendar className="w-3 h-3" />
                           {new Date(entry.createdAt).toLocaleDateString(
                             "en-US",
@@ -564,11 +629,32 @@ export default function JournalPage() {
                           )}
                         </div>
 
-                        <div
-                          className={`flex items-center gap-1.5 px-3 py-1 rounded-full ${moodColors.bg} ${moodColors.text} text-xs font-bold uppercase border ${moodColors.border}`}
-                        >
-                          {getMoodIcon(entry.mood)}
-                          {moodLabel}
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => deleteJournalEntry(entry.id, e)}
+                            className="p-1.5 text-stone-400 hover:text-[#e11d48] hover:bg-[#ffe4e6] rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                          {(entry.sentimentResult?.average_score !==
+                            undefined ||
+                            pendingSentiment.has(entry.id)) && (
+                            <CircularGauge
+                              score={normalizeScore(
+                                entry.sentimentResult?.average_score
+                              )}
+                              size={32}
+                              showLabel={false}
+                              animate={false}
+                              isLoading={pendingSentiment.has(entry.id)}
+                            />
+                          )}
+                          <div
+                            className={`flex items-center gap-1.5 px-3 py-1 rounded-full ${moodColors.bg} ${moodColors.text} text-xs font-bold uppercase border ${moodColors.border}`}
+                          >
+                            {getMoodIcon(entry.mood)}
+                            {moodLabel}
+                          </div>
                         </div>
                       </div>
 
@@ -577,38 +663,42 @@ export default function JournalPage() {
                       </p>
 
                       {/* Emotion Tags */}
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {pendingExtractions.has(entry.id) ? (
-                          <span className="text-xs text-stone-400 italic animate-pulse">
-                            Creating emotion tags...
+                      {(pendingExtractions.has(entry.id) ||
+                        (entry.emotions && entry.emotions.length > 0)) && (
+                        <div className="mb-4">
+                          <span className="text-xs font-bold text-stone-400 uppercase tracking-wide mb-2 block">
+                            Feelings and Emotions
                           </span>
-                        ) : entry.emotions && entry.emotions.length > 0 ? (
-                          <>
-                            {entry.emotions.slice(0, 3).map((emotion, idx) => (
-                              <span
-                                key={idx}
-                                className="px-2.5 py-1 bg-[#f0f9ff] text-[#0072ce] text-xs font-medium rounded-full border border-[#bae6fd]"
-                              >
-                                {emotion.emotion}
+                          <div className="flex flex-wrap gap-2">
+                            {pendingExtractions.has(entry.id) ? (
+                              <span className="text-xs text-stone-400 italic animate-pulse">
+                                Creating emotion tags...
                               </span>
-                            ))}
-                            {entry.emotions.length > 3 && (
-                              <span className="px-2.5 py-1 bg-[#fafaf9] text-stone-500 text-xs font-medium rounded-full border border-[#e7e5e4]">
-                                +{entry.emotions.length - 3} more
-                              </span>
+                            ) : (
+                              <>
+                                {entry.emotions
+                                  ?.slice(0, 3)
+                                  .map((emotion, idx) => (
+                                    <span
+                                      key={idx}
+                                      className="px-2.5 py-1 bg-[#b2bfa233] text-[#426459] text-xs font-medium rounded-full border border-[#b2bfa2]"
+                                    >
+                                      {emotion.emotion}
+                                    </span>
+                                  ))}
+                                {entry.emotions &&
+                                  entry.emotions.length > 3 && (
+                                    <span
+                                      className={`px-2.5 py-1 bg-[${sigmundTheme.background}] text-stone-500 text-xs font-medium rounded-full border border-[${sigmundTheme.border}]`}
+                                    >
+                                      +{entry.emotions.length - 3} more
+                                    </span>
+                                  )}
+                              </>
                             )}
-                          </>
-                        ) : null}
-                      </div>
-
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={(e) => deleteJournalEntry(entry.id, e)}
-                          className="p-2 text-stone-400 hover:text-[#e11d48] hover:bg-[#ffe4e6] rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -623,7 +713,9 @@ export default function JournalPage() {
         {selectedEntry && (
           <div className={`space-y-6 ${dm_sans.className}`}>
             {/* Header with date and mood */}
-            <div className="flex items-center justify-between border-b border-[#e7e5e4] pb-6">
+            <div
+              className={`flex items-center justify-between border-b border-[${sigmundTheme.border}] pb-6`}
+            >
               <div className="flex items-center gap-2">
                 <div className="bg-[#f5f5f4] p-2 rounded-lg">
                   <Calendar className="w-5 h-5 text-stone-500" />
@@ -632,17 +724,19 @@ export default function JournalPage() {
                   {formatDate(selectedEntry.createdAt)}
                 </span>
               </div>
-              <div
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${
-                  getMoodColor(selectedEntry.mood).bg
-                } ${getMoodColor(selectedEntry.mood).border}`}
-              >
-                {getMoodIcon(selectedEntry.mood)}
-                <span
-                  className={`font-bold uppercase tracking-wide text-sm ${getMoodColor(selectedEntry.mood).text}`}
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${
+                    getMoodColor(selectedEntry.mood).bg
+                  } ${getMoodColor(selectedEntry.mood).border}`}
                 >
-                  {getMoodLabel(selectedEntry.mood)}
-                </span>
+                  {getMoodIcon(selectedEntry.mood)}
+                  <span
+                    className={`font-bold uppercase tracking-wide text-sm ${getMoodColor(selectedEntry.mood).text}`}
+                  >
+                    {getMoodLabel(selectedEntry.mood)}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -655,7 +749,7 @@ export default function JournalPage() {
                 {!isEditing && (
                   <button
                     onClick={startEditing}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold text-stone-600 bg-[#f5f5f4] hover:bg-[#e7e5e4] transition-colors uppercase tracking-wide"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold text-stone-600 bg-[#f5f5f4] hover:bg-stone-200 transition-colors uppercase tracking-wide"
                   >
                     <Pencil className="w-4 h-4" />
                     Edit
@@ -669,7 +763,7 @@ export default function JournalPage() {
                     value={editedContent}
                     onChange={(e) => setEditedContent(e.target.value)}
                     rows={12}
-                    className="w-full bg-[#fafaf9] border border-[#e7e5e4] rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-[#ca8a04]/20 focus:border-[#ca8a04] transition-all text-lg text-[#1c1917] leading-relaxed resize-none font-medium"
+                    className={`w-full bg-[${sigmundTheme.background}] border border-[${sigmundTheme.border}] rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-[#ca8a04]/20 focus:border-[#ca8a04] transition-all text-lg text-[#1c1917] leading-relaxed resize-none font-medium`}
                     placeholder="Write about your day..."
                   />
                   <div className="flex items-center gap-3">
@@ -691,7 +785,9 @@ export default function JournalPage() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-[#fafaf9] p-6 rounded-xl border border-[#e7e5e4]">
+                <div
+                  className={`bg-[${sigmundTheme.background}] p-6 rounded-xl border border-[${sigmundTheme.border}]`}
+                >
                   <p className="text-[#1c1917] whitespace-pre-wrap leading-relaxed text-lg font-medium">
                     {selectedEntry.content}
                   </p>
@@ -699,13 +795,67 @@ export default function JournalPage() {
               )}
             </div>
 
+            {/* Sigmund's Score Section */}
+            {(selectedEntry.sentimentResult ||
+              pendingSentiment.has(selectedEntry.id)) && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <h3
+                    className={`${dm_serif.className} text-2xl text-[#1c1917]`}
+                  >
+                    Sigmund's Index
+                  </h3>
+                  <div className="group relative">
+                    <RiInformation2Line className="w-5 h-5 text-stone-400 cursor-help" />
+                    <div className="border-b-4 absolute left-full top-1/2 -translate-y-1/2 ml-3 w-80 p-4 bg-white text-[#1c1917] text-xs font-medium rounded-xl border border-stone-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 leading-relaxed">
+                      Sigmund's Index evaluates the emotional tone of each
+                      sentence in your entry and computes a composite score.
+                      {/* Arrow Tail */}
+                      <div className="absolute right-full top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-l border-t border-stone-200 rotate-[-45deg] translate-x-[7px]" />
+                    </div>
+                  </div>
+                </div>
+
+                {pendingSentiment.has(selectedEntry.id) ? (
+                  <div
+                    className={`flex flex-col items-center py-8 gap-3 bg-[${sigmundTheme.background}] rounded-xl border border-[${sigmundTheme.border}]`}
+                  >
+                    <div className="w-10 h-10 border-4 border-stone-200 border-t-[#0072ce] rounded-full animate-spin" />
+                    <p className="text-sm text-stone-500">
+                      Sigmund is reflecting on your entry...
+                    </p>
+                  </div>
+                ) : (
+                  <div
+                    className={`bg-[${sigmundTheme.background}] p-6 rounded-xl border border-[${sigmundTheme.border}]`}
+                  >
+                    <LinearGauge
+                      score={normalizeScore(
+                        selectedEntry.sentimentResult?.average_score
+                      )}
+                      isLoading={pendingSentiment.has(selectedEntry.id)}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Emotions Section */}
-            <div>
-              <h3
-                className={`${dm_serif.className} text-xl text-[#1c1917] mb-4`}
-              >
-                Emotions
-              </h3>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <h3 className={`${dm_serif.className} text-2xl text-[#1c1917]`}>
+                  Feelings and Emotions
+                </h3>
+                <div className="group relative">
+                  <RiInformation2Line className="w-5 h-5 text-stone-400 cursor-help" />
+                  <div className="border-b-4 absolute left-full top-1/2 -translate-y-1/2 ml-3 w-80 p-4 bg-white text-[#1c1917] text-xs font-medium rounded-xl border border-stone-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 leading-relaxed">
+                    This analysis extracts the feelings and emotions you express
+                    in your entry.
+                    {/* Arrow Tail */}
+                    <div className="absolute right-full top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-l border-t border-stone-200 rotate-[-45deg] translate-x-[7px]" />
+                  </div>
+                </div>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {pendingExtractions.has(selectedEntry.id) ? (
                   <span className="text-sm text-stone-400 italic animate-pulse">
@@ -716,7 +866,7 @@ export default function JournalPage() {
                   selectedEntry.emotions.map((emotion, idx) => (
                     <span
                       key={idx}
-                      className="px-3 py-1.5 bg-[#f0f9ff] text-[#0072ce] text-sm font-medium rounded-full border border-[#bae6fd]"
+                      className="px-3 py-1.5 bg-[#b2bfa233] text-[#426459] text-sm font-medium rounded-full border border-[#b2bfa2]"
                     >
                       {emotion.emotion}
                     </span>

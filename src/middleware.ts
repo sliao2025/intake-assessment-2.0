@@ -29,8 +29,8 @@ export async function middleware(req: NextRequest) {
     if (!hasToken && !guestMode) {
       return guardSignIn(req, "/intake");
     }
-    // const target = intakeFinished ? "/dashboard" : "/intake";
-    const target = "/intake";
+    const target = intakeFinished ? "/dashboard" : "/intake";
+    // const target = "/intake";
     const resp = NextResponse.redirect(new URL(target, req.url));
     return handleGuest(req, resp);
   }
@@ -39,9 +39,9 @@ export async function middleware(req: NextRequest) {
     if (!hasToken && !guestMode) {
       return guardSignIn(req, `${pathname}${search || ""}`);
     }
-    // if (intakeFinished && hasToken) {
-    //   return NextResponse.redirect(new URL("/dashboard", req.url));
-    // }
+    if (intakeFinished && hasToken) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
   }
 
   if (pathname.startsWith("/dashboard")) {

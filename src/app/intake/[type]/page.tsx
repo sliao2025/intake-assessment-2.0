@@ -8,7 +8,12 @@ import ProgressHeader from "../../components/ProgressHeader";
 import ConfettiBurst from "../../components/ConfettiBurst";
 import { useSession } from "next-auth/react";
 import { praises } from "../../components/messages";
-import { theme, ease, intPsychTheme } from "../../components/theme";
+import {
+  theme,
+  ease,
+  intPsychTheme,
+  sigmundTheme,
+} from "../../components/theme";
 import GardenFrame from "../../components/Garden/Garden";
 import ContactSection from "../../components/Sections/ContactSection";
 import ProfileSection from "../../components/Sections/ProfileSection";
@@ -549,6 +554,40 @@ export default function IntakeTypePage() {
           profile.assessments.data.scared.parent.responses.scared41;
         return Boolean(scaredParentLast !== "");
       }
+    }
+
+    // Follow-up: require all 3 generated questions to have an answer (text OR audio)
+    if (key === "follow up") {
+      // If questions exist, check answers. If not generated yet (e.g. still loading), block next.
+      // But based on flow, they should generate on mount of that section.
+
+      const q1 = profile.followupQuestions?.question1;
+      const q2 = profile.followupQuestions?.question2;
+      const q3 = profile.followupQuestions?.question3;
+
+      // Check if questions are actually generated/present first
+      const questionsReady = q1?.question && q2?.question && q3?.question;
+
+      if (!questionsReady) {
+        // If questions aren't ready, we can't proceed.
+        // (The section shows a loading state, user shouldn't be able to click next anyway ideally)
+        return false;
+      }
+
+      const q1Answered = Boolean(
+        (q1.answer.text && q1.answer.text.trim().length > 0) ||
+          q1.answer.audio?.url
+      );
+      const q2Answered = Boolean(
+        (q2.answer.text && q2.answer.text.trim().length > 0) ||
+          q2.answer.audio?.url
+      );
+      const q3Answered = Boolean(
+        (q3.answer.text && q3.answer.text.trim().length > 0) ||
+          q3.answer.audio?.url
+      );
+
+      return q1Answered && q2Answered && q3Answered;
     }
 
     // All other steps: allow Next
@@ -1204,8 +1243,11 @@ export default function IntakeTypePage() {
                         : setStep(Math.min(profile.maxVisited, lastIndex))
                     }
                     disabled={profile.maxVisited === 0 && !canNext}
-                    className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed border-b-4 border-black/20"
-                    style={{ background: intPsychTheme.secondary }}
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed border-b-4"
+                    style={{
+                      background: sigmundTheme.accent,
+                      borderColor: sigmundTheme.accentDark,
+                    }}
                   >
                     {profile.maxVisited === 0 ? "Start" : "Resume"}
                     <ChevronRight className="h-4 w-4" />
@@ -1250,14 +1292,17 @@ export default function IntakeTypePage() {
                             ? isSubmitting || submitted
                             : !canNext
                         }
-                        className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95 border-b-4 border-black/20 ${
+                        className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95 border-b-4 ${
                           steps[step].key === "review"
-                            ? "bg-gradient-to-r from-lime-400 to-green-600 shadow-md shadow-lime-300/50"
+                            ? "bg-gradient-to-r from-lime-400 to-green-600 shadow-md shadow-lime-300/50 border-black/20"
                             : ""
                         }`}
                         style={
                           steps[step].key !== "review"
-                            ? { background: intPsychTheme.secondary }
+                            ? {
+                                background: sigmundTheme.accent,
+                                borderColor: sigmundTheme.accentDark,
+                              }
                             : undefined
                         }
                         aria-live="polite"
@@ -1274,8 +1319,11 @@ export default function IntakeTypePage() {
                     )}
                     {submitted && steps[step].key === "review" && (
                       <button
-                        className={`inline-flex ml-2 items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95 border-b-4 border-black/20`}
-                        style={{ background: intPsychTheme.secondary }}
+                        className={`inline-flex ml-2 items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed transition duration-150 hover:brightness-90 active:scale-95 border-b-4`}
+                        style={{
+                          background: sigmundTheme.accent,
+                          borderColor: sigmundTheme.accentDark,
+                        }}
                         onClick={goNext}
                       >
                         See Report <ChevronRight className="h-4 w-4" />

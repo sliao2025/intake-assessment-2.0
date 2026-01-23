@@ -24,7 +24,7 @@
   margin-bottom: 25px;
 }
 .scrollable-div::-webkit-scrollbar-thumb {
-  background-color: #ffa440;
+  background-color: #91654f;
   border-radius: 9999px; /* fully rounded */
 }
 .scrollable-div::-webkit-scrollbar-thumb:hover {

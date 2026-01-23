@@ -7,11 +7,14 @@ import Field from "../primitives/Field";
 import StepTitle from "../StepTitle";
 import TextAreaWithEncouragement from "../primitives/TextAreawithEncouragement";
 import VoiceRecorder, { VoiceRecorderHandle } from "../VoiceRecorder";
-import { intPsychTheme } from "../theme";
+import { intPsychTheme, sigmundTheme } from "../theme";
 import VoicePreferredField from "../primitives/VoicePreferredField";
-import { DM_Sans } from "next/font/google";
+import { DM_Sans, DM_Serif_Text } from "next/font/google";
+import Image from "next/image";
+import sigmund_chair from "public/Sigmund Chair.png";
 
 const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
+const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
 
 type Props = {
   title: string;
@@ -36,10 +39,10 @@ export default function FollowUpSection({
   const [fadeIn, setFadeIn] = useState(true);
 
   const loadingPhrases = [
-    "Creating your personalized questions...",
-    "Analyzing your responses...",
-    "Tailoring follow-up questions...",
-    "Preparing your next steps...",
+    "Hmm, let me think about that for a second...",
+    "I'm reviewing your responses to tailor our next steps...",
+    "Just a moment while I gather some additional thoughts...",
+    "Reflecting on your journey so far...",
   ];
 
   // Rotate loading phrases every 2.5 seconds with fade animation
@@ -184,21 +187,54 @@ export default function FollowUpSection({
     return (
       <div className={`space-y-6 ${dm_sans.className}`}>
         <StepTitle n={step + 1} title={title} />
-        <div className="flex flex-col items-center justify-center py-20 space-y-4">
-          {/* Spinning loader */}
-          <div
-            className="h-10 w-10 border-4 border-slate-200 rounded-full animate-spin"
-            style={{ borderTopColor: intPsychTheme.accent }}
-            aria-hidden
-          />
-          {/* Text below */}
-          <p
-            className={`text-lg font-medium text-slate-700 transition-all duration-300 ease-in-out ${
-              fadeIn ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
-            }`}
-          >
-            {loadingPhrases[loadingPhrase]}
-          </p>
+        <div className="flex flex-col items-center justify-center py-12 px-4">
+          <div className="relative w-full max-w-lg flex flex-col items-center">
+            {/* Sigmund Scene */}
+            <div className="relative w-48 h-48 mb-6">
+              <Image
+                src={sigmund_chair}
+                alt="Sigmund reflecting"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
+
+            {/* Speech Bubble */}
+            <div
+              className={`relative bg-white border-2 border-stone-200 border-b-4 p-6 rounded-3xl transition-all duration-300 ease-in-out ${
+                fadeIn ? "opacity-100 scale-100" : "opacity-0 scale-95"
+              }`}
+            >
+              {/* Bubble Tail */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-white border-t-2 border-l-2 border-stone-200 rotate-45" />
+
+              <div className="flex flex-col items-center gap-4">
+                <p
+                  className={`${dm_serif.className} text-xl text-[#1c1917] text-center leading-relaxed`}
+                >
+                  {loadingPhrases[loadingPhrase]}
+                </p>
+                <div className="flex gap-1.5">
+                  <motion.div
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ repeat: Infinity, duration: 0.6, delay: 0 }}
+                    className="w-2 h-2 bg-stone-300 rounded-full"
+                  />
+                  <motion.div
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }}
+                    className="w-2 h-2 bg-stone-300 rounded-full"
+                  />
+                  <motion.div
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }}
+                    className="w-2 h-2 bg-stone-300 rounded-full"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -224,11 +260,28 @@ export default function FollowUpSection({
     >
       <StepTitle n={step + 1} title={title} />
 
-      <p className="text-gray-700 italic mb-6">
-        Based on your responses, we have a few follow-up questions to help us
-        better understand your situation. You can record your answer or type it
-        below.
-      </p>
+      <div
+        className={`flex flex-col sm:flex-row items-center sm:items-start gap-6 bg-[${sigmundTheme.background}] p-8 rounded-3xl border-2 border-stone-200 border-b-6 mb-8`}
+      >
+        <div className="flex-shrink-0 relative w-32 h-32">
+          <Image
+            src={sigmund_chair}
+            alt="Sigmund's Thoughts"
+            fill
+            className="object-contain"
+          />
+        </div>
+        <div className="flex-1 relative">
+          <h3 className={`${dm_serif.className} text-2xl text-[#1c1917] mb-3`}>
+            A few follow-up thoughts...
+          </h3>
+          <p className="text-[#44403c] text-lg leading-relaxed">
+            Based on your responses, I've put together a few follow-up questions
+            to help us better understand your situation. Take your time—you can
+            record your answer or type it below.
+          </p>
+        </div>
+      </div>
 
       {/* Question 1 */}
       <Field title={profile.followupQuestions.question1.question} required>

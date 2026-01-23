@@ -5,9 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import logo from "../../../assets/IP_Logo.png";
-import GardenFrame from "../../components/Garden/Garden";
-import { intPsychTheme, theme, ease } from "../../components/theme";
+import sigmund_logo from "public/Sigmund Window.png";
+import {
+  intPsychTheme,
+  theme,
+  ease,
+  sigmundTheme,
+} from "../../components/theme";
 import { DM_Sans, DM_Serif_Text } from "next/font/google";
 
 const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
@@ -34,13 +38,12 @@ function SignInContent() {
 
   return (
     <div
-      className={`bg-gray-50 fixed inset-0 h-dvh flex items-center justify-center overflow-hidden ${dm_sans.className}`}
+      className={`bg-stone-50 fixed inset-0 h-dvh flex items-center justify-center overflow-hidden ${dm_sans.className}`}
       style={{
         color: theme.text,
       }}
     >
       {/* Background visuals to match the main assessment page */}
-      <GardenFrame bloom={0} />
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-8">
         <motion.div
@@ -48,7 +51,7 @@ function SignInContent() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -15, opacity: 0 }}
           transition={{ duration: 0.8, ease }}
-          className="w-full rounded-4xl border border-[#e7e5e4] border-b-4 bg-white/80 backdrop-blur-sm px-4 py-6 md:px-6 md:py-8 shadow-sm max-h-[80vh] scrollable-div overflow-y-auto overflow-x-hidden box-border overscroll-y-contain"
+          className="w-full rounded-4xl border border-[#e7e5e4] border-b-4 bg-white/80 backdrop-blur-sm px-4 py-6 md:px-6 md:py-8 max-h-[80vh] scrollable-div overflow-y-auto overflow-x-hidden box-border overscroll-y-contain"
           style={{
             WebkitOverflowScrolling: "touch",
             scrollbarGutter: "stable both-edges",
@@ -83,20 +86,25 @@ function SignInContent() {
           <div className="">
             <div className="flex items-center ">
               <Image
-                src={logo}
-                alt="Integrative Psych logo"
+                src={sigmund_logo}
+                alt="Sigmund Logo"
                 width={100}
                 height={100}
                 className="object-contain mr-4"
               />
-              <h1 className="text-3xl font-semibold">
+              <h1 className="text-6xl font-semibold">
                 {mode !== "signup" ? (
-                  <span
-                    className={`${dm_serif.className}  `}
-                    style={{ color: intPsychTheme.primary }}
-                  >
-                    Integrative Psych Patient Portal
-                  </span>
+                  <div className="flex flex-col">
+                    <span
+                      className={`${dm_serif.className}  `}
+                      style={{ color: sigmundTheme.accent }}
+                    >
+                      Sigmund
+                    </span>
+                    <p className="text-gray-700 mt-1 text-sm font-normal">
+                      Created by Integrative Psych.
+                    </p>
+                  </div>
                 ) : (
                   <span
                     className={`${dm_serif.className}`}
@@ -120,7 +128,7 @@ function SignInContent() {
                 {mode === "signin" && (
                   <>
                     <button
-                      className={`${dm_sans.className} w-full cursor-pointer inline-flex items-center justify-center gap-3 rounded-full px-5 py-3 font-medium text-white transition-all border-b-4 border-black/20`}
+                      className={`${dm_sans.className} bg-[#463f3bff] w-full cursor-pointer inline-flex items-center justify-center gap-3 rounded-full px-5 py-3 font-medium text-white transition-all border-b-4 border-black/20`}
                       onClick={async () => {
                         const res = await signIn("google", {
                           callbackUrl,
@@ -131,7 +139,7 @@ function SignInContent() {
                         }
                       }}
                       style={{
-                        background: `linear-gradient(0deg, ${intPsychTheme.primary}, ${intPsychTheme.accent})`,
+                        // background: `linear-gradient(0deg, ${intPsychTheme.primary}, ${intPsychTheme.accent})`,
                         boxShadow: "0 2px 8px 0 rgba(0,0,0,0.08)",
                         transition: `transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), filter 0.2s`,
                       }}
@@ -217,7 +225,7 @@ function SignInContent() {
                     {mode === "signup" && (
                       <>
                         <input
-                          className="w-full rounded-full bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                          className="w-full rounded-full bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                           type="text"
                           placeholder="First Name"
                           value={firstName}
@@ -225,7 +233,7 @@ function SignInContent() {
                           required
                         />
                         <input
-                          className="w-full rounded-full bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                          className="w-full rounded-full bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                           type="text"
                           placeholder="Last Name"
                           value={lastName}
@@ -235,7 +243,7 @@ function SignInContent() {
                       </>
                     )}
                     <input
-                      className="w-full rounded-full bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                      className="w-full rounded-full bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                       type="email"
                       placeholder="Your email"
                       value={email}
@@ -243,7 +251,7 @@ function SignInContent() {
                       required
                     />
                     <input
-                      className="w-full rounded-full bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                      className="w-full rounded-full bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                       type="password"
                       placeholder="Your password"
                       value={password}
@@ -253,7 +261,7 @@ function SignInContent() {
                   </div>
 
                   <button
-                    className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 font-medium text-white bg-black/75 bg-[color:var(--accent)] hover:bg-black/85 transition-colors duration-200 ease-in-out border-b-4 border-black/20"
+                    className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 font-medium text-white bg-black/20 bg-[color:var(--accent)] hover:bg-black/35 transition-colors duration-200 ease-in-out border-b-4 border-black/20"
                     type="submit"
                   >
                     {mode === "signin" ? "Sign in" : "Create account"}
@@ -262,14 +270,15 @@ function SignInContent() {
 
                 <div>
                   {mode === "signin" ? (
-                    <div className="flex gap-3 mt-4">
+                    <div className="flex justify-center gap-3 mt-4">
                       <button
-                        className="flex-1 cursor-pointer rounded-full border border-gray-300 border-b-4 px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors"
+                        type="button"
+                        className="text-center text-sm underline cursor-pointer text-gray-500 hover:text-gray-700 transition-colors"
                         onClick={() => setMode("signup")}
                       >
                         Create an account
                       </button>
-                      <button
+                      {/* <button
                         type="button"
                         onClick={() => setMode("guest")}
                         className="flex-1 cursor-pointer rounded-full border border-gray-300 border-b-4 px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
@@ -277,7 +286,7 @@ function SignInContent() {
                         title="Continue as a guest (limited)"
                       >
                         Continue as guest
-                      </button>
+                      </button> */}
                     </div>
                   ) : (
                     <div className="flex justify-center mt-4">
@@ -297,7 +306,7 @@ function SignInContent() {
           {mode === "guest" && (
             <form className="space-y-4 mt-4">
               <input
-                className="w-full rounded-full bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                className="w-full rounded-full bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                 type="text"
                 placeholder="First Name"
                 value={firstName}
@@ -305,7 +314,7 @@ function SignInContent() {
                 required
               />
               <input
-                className="w-full rounded-full bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                className="w-full rounded-full bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                 type="text"
                 placeholder="Last Name"
                 value={lastName}
@@ -315,7 +324,7 @@ function SignInContent() {
               <div className="flex justify-between gap-4">
                 <button
                   onClick={() => setMode("signin")}
-                  className="px-4 py-2 cursor-pointer rounded-full border border-slate-300 border-b-4 bg-gray-100 "
+                  className="px-4 py-2 cursor-pointer rounded-full border border-stone-300 border-b-4 bg-gray-100 "
                 >
                   Back
                 </button>

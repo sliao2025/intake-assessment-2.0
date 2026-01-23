@@ -204,6 +204,7 @@ export async function POST(req: NextRequest) {
         pdfBuffer = await renderToBuffer(
           React.createElement(PdfComponent, {
             profile: profileData,
+            clinician: clinician,
           }) as any
         );
         console.log(
@@ -284,6 +285,7 @@ export async function POST(req: NextRequest) {
         <table style="border-collapse:collapse; font-size:14px;">
           <tr><td style="padding:4px 8px; color:#555">Name</td><td style="padding:4px 8px"><b>${firstName || "(unknown)"} ${lastName || ""}</b></td></tr>
           <tr><td style="padding:4px 8px; color:#555">Email</td><td style="padding:4px 8px">${email || "(not provided)"}</td></tr>
+          <tr><td style="padding:4px 8px; color:#555">Clinician</td><td style="padding:4px 8px">${clinician || "(not assigned)"}</td></tr>
           <tr><td style="padding:4px 8px; color:#555">Submitted (ET)</td><td style="padding:4px 8px">${submittedEt}</td></tr>
           <tr><td style="padding:4px 8px; color:#555">Submitted (ISO/UTC)</td><td style="padding:4px 8px"><code>${submittedIso}</code></td></tr>
         </table>

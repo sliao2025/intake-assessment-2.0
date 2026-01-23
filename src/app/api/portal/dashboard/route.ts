@@ -59,6 +59,23 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    const recentJournalEntries = await prisma.journalEntry.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      select: {
+        id: true,
+        content: true,
+        mood: true,
+        createdAt: true,
+        sentimentResult: true,
+      },
+    });
+
+    const totalJournalEntries = await prisma.journalEntry.count({
+      where: { userId },
+    });
+
     const moodLabels = ["Very Low", "Low", "Stable", "Good", "Very Good"];
     const currentMood = latestJournal
       ? moodLabels[latestJournal.mood - 1] || "Not set"
@@ -115,6 +132,16 @@ export async function GET(request: NextRequest) {
         },
         gad7: { current: 8, change: -2, direction: "down" },
         sleep: { current: 6.5, change: 1.5, direction: "up" },
+      },
+      journal: {
+        recent: recentJournalEntries.map((entry) => ({
+          ...entry,
+          contentSnippet:
+            entry.content.length > 100
+              ? entry.content.substring(0, 100) + "..."
+              : entry.content,
+        })),
+        total: totalJournalEntries,
       },
     };
 

@@ -167,6 +167,7 @@ export async function POST(req: NextRequest) {
         <table style="border-collapse:collapse; font-size:14px; margin-bottom:16px;">
           <tr><td style="padding:4px 8px; color:#555; font-weight:bold;">Name</td><td style="padding:4px 8px"><b>${firstName || "(unknown)"} ${lastName || ""}</b></td></tr>
           <tr><td style="padding:4px 8px; color:#555; font-weight:bold;">Email</td><td style="padding:4px 8px">${email || "(not provided)"}</td></tr>
+          <tr><td style="padding:4px 8px; color:#555; font-weight:bold;">Clinician</td><td style="padding:4px 8px">${clinician || "(not assigned)"}</td></tr>
           <tr><td style="padding:4px 8px; color:#555; font-weight:bold;">Patient Type</td><td style="padding:4px 8px">${patientType}</td></tr>
           <tr><td style="padding:4px 8px; color:#555; font-weight:bold;">Submitted (ET)</td><td style="padding:4px 8px">${submittedEt}</td></tr>
           <tr><td style="padding:4px 8px; color:#555; font-weight:bold;">Submitted (ISO/UTC)</td><td style="padding:4px 8px"><code>${submittedIso}</code></td></tr>

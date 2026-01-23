@@ -10,7 +10,7 @@ import {
   Trophy,
   ClipboardClock,
 } from "lucide-react";
-import { intPsychTheme } from "../components/theme";
+import { intPsychTheme, sigmundTheme } from "../components/theme";
 import { DM_Serif_Text, DM_Sans } from "next/font/google";
 import { useWeather } from "../lib/hooks/useWeather";
 import WeatherWidget from "../components/WeatherWidget";
@@ -211,7 +211,7 @@ export default function AssessmentsPage() {
               className={`${dm_serif.className} text-4xl mb-2`}
               style={{ color: intPsychTheme.primary }}
             >
-              Clinical Assessments
+              Clinical Scales
             </h1>
             <p className="text-stone-500 text-lg font-medium">
               Track your progress with standard psychiatric measures.
@@ -232,7 +232,7 @@ export default function AssessmentsPage() {
                 className={`${dm_serif.className} text-2xl`}
                 style={{ color: intPsychTheme.primary }}
               >
-                Priority Assessments
+                Assigned Scales
               </h2>
             </div>
 
@@ -240,7 +240,7 @@ export default function AssessmentsPage() {
               {assignedAssessmentsList.map((assessment) => (
                 <div
                   key={assessment.name}
-                  className="bg-white rounded-2xl flex flex-col justify-between  border-b-4 border-[#e7e5e4] hover:border-[#ffa440]/30 p-6 transition-all group relative overflow-hidden shadow-sm"
+                  className={`bg-white rounded-2xl flex flex-col justify-between  border-b-4 border-[${sigmundTheme.border}] hover:border-[${intPsychTheme.secondary}]/30 p-6 transition-all group relative overflow-hidden shadow-sm`}
                 >
                   {assessment.status === "Overdue" && (
                     <div
@@ -252,7 +252,9 @@ export default function AssessmentsPage() {
                   )}
 
                   <div className="mb-6">
-                    <div className="w-12 h-12 rounded-xl bg-[#0072ce]/10 flex items-center justify-center mb-4 border border-[#0072ce]/20">
+                    <div
+                      className={`w-12 h-12 rounded-xl bg-[${intPsychTheme.accent}]/10 flex items-center justify-center mb-4 border border-[${intPsychTheme.accent}]/20`}
+                    >
                       <span
                         className="text-2xl font-bold"
                         style={{ color: intPsychTheme.accent }}
@@ -269,7 +271,9 @@ export default function AssessmentsPage() {
                     <p className="text-stone-500 font-medium text-sm mb-4">
                       {assessment.fullName}
                     </p>
-                    <p className="text-stone-600 bg-[#f8fafc] p-3 rounded-lg text-sm leading-relaxed border-l-4 border-[#e2e8f0]">
+                    <p
+                      className={`text-stone-600 bg-[${intPsychTheme.background}] p-3 rounded-lg text-sm leading-relaxed border-l-4 border-[${sigmundTheme.border}]`}
+                    >
                       {assessment.description}
                     </p>
                   </div>
@@ -312,7 +316,7 @@ export default function AssessmentsPage() {
               className={`${dm_serif.className} text-2xl`}
               style={{ color: intPsychTheme.primary }}
             >
-              Available Assessments
+              Available Scales
             </h2>
           </div>
 
@@ -320,11 +324,13 @@ export default function AssessmentsPage() {
             {availableAssessments.map((assessment) => (
               <div
                 key={assessment.name}
-                className="bg-white rounded-2xl border-b-4 border-[#e7e5e4] hover:border-[#0072ce]/20 p-6 transition-all group flex flex-col justify-between shadow-sm"
+                className={`bg-white rounded-2xl border-b-4 border-[${sigmundTheme.border}] hover:border-[${intPsychTheme.accent}]/20 p-6 transition-all group flex flex-col justify-between shadow-sm`}
               >
                 <div>
                   <div className="flex justify-between items-start mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-[#0072ce]/10 flex items-center justify-center border border-[#0072ce]/20">
+                    <div
+                      className={`w-12 h-12 rounded-xl bg-[${intPsychTheme.accent}]/10 flex items-center justify-center border border-[${intPsychTheme.accent}]/20`}
+                    >
                       <span
                         className="text-2xl font-bold"
                         style={{ color: intPsychTheme.accent }}
@@ -353,7 +359,7 @@ export default function AssessmentsPage() {
 
                 <button
                   onClick={() => router.push(`/assessments/${assessment.type}`)}
-                  className="w-full bg-white border border-[#e7e5e4] border-b-2 text-stone-600 py-3 rounded-xl font-bold hover:bg-[#f0f9ff] hover:border-[#0072ce]/30 hover:text-[#0072ce] transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
+                  className={`w-full bg-white border border-[${sigmundTheme.border}] border-b-2 text-stone-600 py-3 rounded-xl font-bold hover:bg-[#f0f9ff] hover:border-[${intPsychTheme.accent}]/30 hover:text-[${intPsychTheme.accent}] transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs`}
                 >
                   Start
                   <ChevronRight className="w-4 h-4" />
@@ -371,14 +377,18 @@ export default function AssessmentsPage() {
               className={`${dm_serif.className} text-2xl`}
               style={{ color: intPsychTheme.primary }}
             >
-              Assessment History
+              Scale History
             </h2>
           </div>
 
-          <div className="bg-white rounded-2xl border border-[#e7e5e4] overflow-hidden shadow-sm">
+          <div
+            className={`bg-white rounded-2xl border border-[${sigmundTheme.border}] overflow-hidden shadow-sm`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-[#f8fafc] border-b border-[#e7e5e4]">
+                <thead
+                  className={`bg-[${intPsychTheme.background}] border-b border-[${sigmundTheme.border}]`}
+                >
                   <tr>
                     <th className="text-left p-4 text-xs font-bold text-stone-500 uppercase tracking-wider">
                       Date
@@ -394,7 +404,7 @@ export default function AssessmentsPage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#e7e5e4]">
+                <tbody className={`divide-y divide-[${sigmundTheme.border}]`}>
                   {history.length === 0 ? (
                     <tr>
                       <td
@@ -408,7 +418,7 @@ export default function AssessmentsPage() {
                     history.slice(0, 5).map((record, index) => (
                       <tr
                         key={index}
-                        className="hover:bg-[#f8fafc] transition-colors"
+                        className={`hover:bg-[${intPsychTheme.background}] transition-colors`}
                       >
                         <td className="p-4 font-medium text-stone-600">
                           {formatDate(record.completedAt)}

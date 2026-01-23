@@ -22,8 +22,9 @@ import {
   Transition,
 } from "@headlessui/react";
 import { DM_Serif_Text, DM_Sans } from "next/font/google";
-import { intPsychTheme } from "../../theme";
+import { intPsychTheme, sigmundTheme } from "../../theme";
 import logo from "@/assets/IP_Logo.png";
+import sigmund_logo from "public/Sigmund Window.png";
 
 interface PortalLayoutProps {
   children: React.ReactNode;
@@ -43,29 +44,29 @@ const navigationItems = [
     label: "Journal",
     icon: BookOpen,
     href: "/journal",
-    color: `text-[${intPsychTheme.secondary}]`, // Orange/Amber
+    color: `text-[${sigmundTheme.primary}]`, // Orange/Amber
   },
-  {
-    key: "assessments",
-    label: "Assessments",
-    icon: ClipboardList,
-    href: "/assessments",
-    color: `text-[${intPsychTheme.accent}]`, // Blue
-  },
-  {
-    key: "psychoeducation",
-    label: "Learn",
-    icon: Brain,
-    href: "/psychoeducation",
-    color: "text-[#7e22ce]", // Deep purple (keeping distinct for learning)
-  },
-  {
-    key: "garden",
-    label: "Garden",
-    icon: Sprout,
-    href: "/garden",
-    color: "text-[#4d7c0f]", // Moss green (keeping distinct for nature)
-  },
+  // {
+  //   key: "scales",
+  //   label: "Scales",
+  //   icon: ClipboardList,
+  //   href: "/scales",
+  //   color: `text-[${intPsychTheme.accent}]`, // Blue
+  // },
+  // {
+  //   key: "psychoeducation",
+  //   label: "Learn",
+  //   icon: Brain,
+  //   href: "/psychoeducation",
+  //   color: "text-[#7e22ce]", // Deep purple (keeping distinct for learning)
+  // },
+  // {
+  //   key: "garden",
+  //   label: "Garden",
+  //   icon: Sprout,
+  //   href: "/garden",
+  //   color: "text-[#4d7c0f]", // Moss green (keeping distinct for nature)
+  // },
 ];
 
 const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
@@ -121,25 +122,27 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
     >
       {/* Sidebar */}
       <aside
-        className={`${sidebarWidth} bg-white border-r-2 border-[#e7e5e4] flex flex-col transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] relative z-20 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]`}
+        className={`${sidebarWidth} bg-white border-r-2 border-[${sigmundTheme.border}] flex flex-col transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] relative z-20 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]`}
       >
         {/* Logo/Title - Header */}
-        <div className="relative p-6 flex items-center gap-3 justify-center border-b-2 border-[#e7e5e4]">
-          <div className="relative group cursor-pointer">
-            <div className="absolute inset-0 bg-[#e0f2fe] rounded-full transform scale-0 group-hover:scale-110 transition-transform duration-200" />
+        <div
+          className={`relative p-6 flex items-center gap-3 justify-center border-b-2 border-[${sigmundTheme.border}]`}
+        >
+          <div className="relative">
+            <div className="absolute inset-0 bg-[#e0f2fe] rounded-full transform scale-0" />
             <Image
-              src={logo}
-              alt="Integrative Psych logo"
-              className={`relative object-contain transition-all duration-300 ${isExpanded ? "h-14 w-14" : "h-10 w-10"}`}
+              src={sigmund_logo}
+              alt="Sigmund logo"
+              className={`relative object-contain transition-all duration-300 ${isExpanded ? "h-14 w-14" : "h-12 w-12"}`}
             />
           </div>
 
           {isExpanded && (
             <h1
-              className={`${dm_serif.className} text-2xl text-[#1c1917] tracking-tight leading-none`}
-              style={{ color: intPsychTheme.primary }}
+              className={`${dm_serif.className} text-4xl tracking-tight leading-none`}
+              style={{ color: sigmundTheme.accent }}
             >
-              Integrative <br /> Psych
+              Sigmund
             </h1>
           )}
 
@@ -148,7 +151,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
             type="button"
             onClick={toggleSidebar}
             // right-[-2px] to align center with the 2px border
-            className="absolute right-[-2px] top-full translate-x-1/2 -translate-y-1/2 bg-[#ffa440] border-[#e7e5e4] p-1.5 rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all z-50 text-white hover:text-white"
+            className={`absolute right-[-2px] top-full translate-x-1/2 -translate-y-1/2 bg-[#91654f] border-[${sigmundTheme.border}] p-1.5 rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all z-50 text-white hover:text-white`}
             aria-label={isExpanded ? "Shrink sidebar" : "Expand sidebar"}
           >
             {toggleIcon}
@@ -172,20 +175,20 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                     isExpanded ? "gap-4 px-4" : "justify-center px-0"
                   } py-4 rounded-xl text-base font-medium transition-all duration-200 relative overflow-hidden group ${
                     isActive
-                      ? "bg-[#f0f9ff] text-[#113e60] shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] border-2 border-[#e7e5e4]"
-                      : "text-stone-500 hover:bg-stone-100 hover:text-[#113e60] border border-transparent"
+                      ? `bg-[#f0f9ff] text-[#426459] shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] border-2 border-[${sigmundTheme.border}]`
+                      : "text-stone-500 hover:bg-stone-100 hover:text-[#426459] border border-transparent"
                   }`}
                 >
                   {/* Active Indicator Pill */}
                   {isActive && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#113e60] rounded-r-full" />
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#426459] rounded-r-full" />
                   )}
 
                   <Icon
                     className={`w-6 h-6 transition-transform duration-300 group-hover:scale-110 ${
                       isActive
                         ? item.color
-                        : "text-stone group-hover:text-[#113e60]"
+                        : "text-stone group-hover:text-[#426459]"
                     }`}
                     strokeWidth={2}
                   />
@@ -197,12 +200,12 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                 {/* Tooltip for collapsed state - High Z-Index */}
                 {!isExpanded && (
                   <div
-                    style={{ backgroundColor: intPsychTheme.primary }}
+                    style={{ backgroundColor: sigmundTheme.accent }}
                     className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-4 py-2  text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-[9999] shadow-xl pointer-events-none"
                   >
                     {item.label}
                     <div
-                      style={{ borderRightColor: intPsychTheme.primary }}
+                      style={{ borderRightColor: sigmundTheme.accent }}
                       className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-white"
                     ></div>
                   </div>
@@ -213,12 +216,12 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
         </nav>
 
         {/* User Profile */}
-        <div className="p-3 border-t-2 border-[#e7e5e4]">
+        <div className={`p-3 border-t-2 border-[${sigmundTheme.border}]`}>
           <Menu as="div" className="relative">
             <MenuButton
               className={`w-full ${
                 isExpanded ? "px-3 py-3" : "justify-center py-2"
-              } flex items-center gap-3 rounded-xl hover:bg-[#f5f5f4] border border-transparent hover:border-[#e7e5e4] transition-all group outline-none`}
+              } flex items-center gap-3 rounded-xl hover:bg-[#f5f5f4] border border-transparent hover:border-[${sigmundTheme.border}] transition-all group outline-none`}
             >
               <div className="relative">
                 <div className="w-10 h-10 rounded-full bg-[#e0f2fe] border border-[#bae6fd] flex items-center justify-center text-[#0369a1] font-bold text-lg overflow-hidden">
@@ -259,9 +262,11 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                   isExpanded
                     ? "left-0 bottom-full mb-4 w-full"
                     : "left-full bottom-0 ml-4 w-56"
-                } rounded-xl border border-[#e7e5e4] bg-white shadow-xl focus:outline-none z-[9999] overflow-hidden p-1`}
+                } rounded-xl border border-[${sigmundTheme.border}] bg-white shadow-xl focus:outline-none z-[9999] overflow-hidden p-1`}
               >
-                <div className="px-4 py-3 bg-[#fafaf9] border-b border-[#e7e5e4] mb-1">
+                <div
+                  className={`px-4 py-3 bg-[${sigmundTheme.background}] border-b border-[${sigmundTheme.border}] mb-1`}
+                >
                   <p className="text-xs font-bold text-stone-400 uppercase">
                     Signed in as
                   </p>
@@ -291,7 +296,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
       {/* Main Content */}
       <main
         className="flex-1 overflow-y-auto scroll-smooth"
-        style={{ backgroundColor: "#f8fafc" }} // Slate 50 - cooler
+        style={{ backgroundColor: sigmundTheme.background }} // Slate 50 - cooler
       >
         {children}
       </main>

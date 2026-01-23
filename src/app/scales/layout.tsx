@@ -14,7 +14,7 @@ export default function AssessmentLayout({ children }: AssessmentLayoutProps) {
   const pathname = usePathname();
 
   // Only show back button on dynamic route pages (not on /assessments itself)
-  const isDynamicRoute = pathname !== "/assessments";
+  const isDynamicRoute = pathname !== "/scales";
   // Use wider max-width for main list page, narrower for individual assessment pages
   const maxWidth = isDynamicRoute ? "max-w-4xl" : "max-w-7xl";
 
@@ -25,11 +25,11 @@ export default function AssessmentLayout({ children }: AssessmentLayoutProps) {
           {/* Back button - only on dynamic routes */}
           {isDynamicRoute && (
             <button
-              onClick={() => router.push("/assessments")}
+              onClick={() => router.push("/scales")}
               className="cursor-pointer flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back to Assessments</span>
+              <span>Back to Scales</span>
             </button>
           )}
 

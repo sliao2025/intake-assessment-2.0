@@ -4,8 +4,9 @@ import React, { Fragment } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
-import { theme, intPsychTheme, ease } from "./theme";
+import { theme, intPsychTheme, ease, sigmundTheme } from "./theme";
 import logo from "../../assets/IP_Logo.png";
+import sigmund_logo from "public/Sigmund Window.png";
 import { Roboto, DM_Serif_Text } from "next/font/google";
 import {
   Menu,
@@ -175,8 +176,8 @@ const ProgressHeader: React.FC<Props> = ({
     showLeft && showRight
       ? "justify-center"
       : showLeft
-      ? "justify-end"
-      : "justify-start";
+        ? "justify-end"
+        : "justify-start";
 
   return (
     <div className="sticky top-0 z-40 backdrop-blur bg-white/20 border-b border-gray-100">
@@ -185,15 +186,15 @@ const ProgressHeader: React.FC<Props> = ({
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Image
-              src={logo}
-              alt="Integrative Psych logo"
+              src={sigmund_logo}
+              alt="Sigmund Logo"
               className="h-12 w-12 object-contain"
             />
             <span
-              className={`font-semibold text-3xl ${dm_serif.className}`}
-              style={{ color: intPsychTheme.primary }}
+              className={`font-semibold text-4xl ${dm_serif.className}`}
+              style={{ color: sigmundTheme.accent }}
             >
-              Integrative Psych Pre-clinical Assessment
+              Sigmund's Assessment
             </span>
           </div>
           <div className="flex items-center justify-center gap-4">
@@ -305,10 +306,10 @@ const ProgressHeader: React.FC<Props> = ({
               const isActive = absoluteIndex === step;
               const isVisited = absoluteIndex <= maxVisited;
               const color = isActive
-                ? intPsychTheme.primary
+                ? sigmundTheme.secondaryDark
                 : absoluteIndex < maxVisited
-                ? theme.primary
-                : undefined;
+                  ? theme.primary
+                  : undefined;
 
               return (
                 <button
@@ -330,10 +331,10 @@ const ProgressHeader: React.FC<Props> = ({
                     className="inline-block h-2 w-2 rounded-full bg-gray-300 transition-colors"
                     style={
                       isActive
-                        ? { background: intPsychTheme.primary }
+                        ? { background: "#463f3bff" }
                         : absoluteIndex < maxVisited
-                        ? { background: theme.primary }
-                        : undefined
+                          ? { background: theme.primary }
+                          : undefined
                     }
                   />
                   <span className="whitespace-nowrap">{title}</span>
@@ -348,7 +349,7 @@ const ProgressHeader: React.FC<Props> = ({
           <motion.div
             className="h-2"
             style={{
-              background: `linear-gradient(90deg, ${intPsychTheme.primary}, ${intPsychTheme.accent})`,
+              background: `linear-gradient(90deg, ${sigmundTheme.primary}, ${sigmundTheme.accent})`,
             }}
             initial={{ width: 0 }}
             animate={{ width: `${progressPct}%` }}

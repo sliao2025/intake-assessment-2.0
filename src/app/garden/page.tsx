@@ -15,7 +15,7 @@ import {
 import PortalLayout from "../components/portal/Layout/PortalLayout";
 import { useSession } from "next-auth/react";
 import { DM_Sans } from "next/font/google";
-import { intPsychTheme } from "../components/theme";
+import { intPsychTheme, sigmundTheme } from "../components/theme";
 
 const dm_sans = DM_Sans({
   subsets: ["latin"],
@@ -741,25 +741,25 @@ export default function GardenBuilder() {
         </div>
         <button
           onClick={() => reorderFlower(flower.id, "front")}
-          className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-stone-600 hover:bg-[#ffa44033] hover:text-[#ffa440] rounded-lg transition-colors text-left uppercase tracking-wide"
+          className={`flex items-center gap-2 px-3 py-2 text-xs font-bold text-stone-600 hover:bg-[${intPsychTheme.secondaryLight}] hover:text-[${intPsychTheme.secondary}] rounded-lg transition-colors text-left uppercase tracking-wide`}
         >
           <BringToFront size={14} /> To Front
         </button>
         <button
           onClick={() => reorderFlower(flower.id, "forward")}
-          className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-stone-600 hover:bg-[#ffa44033] hover:text-[#ffa440] rounded-lg transition-colors text-left uppercase tracking-wide"
+          className={`flex items-center gap-2 px-3 py-2 text-xs font-bold text-stone-600 hover:bg-[${intPsychTheme.secondaryLight}] hover:text-[${intPsychTheme.secondary}] rounded-lg transition-colors text-left uppercase tracking-wide`}
         >
           <ChevronUp size={14} /> Forward
         </button>
         <button
           onClick={() => reorderFlower(flower.id, "backward")}
-          className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-stone-600 hover:bg-[#ffa44033] hover:text-[#ffa440] rounded-lg transition-colors text-left uppercase tracking-wide"
+          className={`flex items-center gap-2 px-3 py-2 text-xs font-bold text-stone-600 hover:bg-[${intPsychTheme.secondaryLight}] hover:text-[${intPsychTheme.secondary}] rounded-lg transition-colors text-left uppercase tracking-wide`}
         >
           <ChevronDown size={14} /> Backward
         </button>
         <button
           onClick={() => reorderFlower(flower.id, "back")}
-          className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-stone-600 hover:bg-[#ffa44033] hover:text-[#ffa440] rounded-lg transition-colors text-left uppercase tracking-wide"
+          className={`flex items-center gap-2 px-3 py-2 text-xs font-bold text-stone-600 hover:bg-[${intPsychTheme.secondaryLight}] hover:text-[${intPsychTheme.secondary}] rounded-lg transition-colors text-left uppercase tracking-wide`}
         >
           <SendToBack size={14} /> To Back
         </button>
@@ -770,19 +770,26 @@ export default function GardenBuilder() {
   return (
     <PortalLayout>
       <div
-        className={`flex h-full w-full bg-[#f8fafc] font-sans overflow-hidden text-[#1c1917] select-none ${dm_sans.className}`}
+        style={{ backgroundColor: intPsychTheme.background }}
+        className={`flex h-full w-full font-sans overflow-hidden text-[#1c1917] select-none ${dm_sans.className}`}
       >
         <FontStyle />
 
         {/* --- MAIN AREA: GARDEN CANVAS --- */}
         <main className="flex-1 relative flex flex-col bg-[#86efac] order-1 m-4 rounded-[2rem] overflow-hidden shadow-[inset_0_0_40px_rgba(22,101,52,0.2)] border-8 border-[#166534]">
           <header className="absolute top-6 left-6 right-6 flex justify-between items-center pointer-events-none z-30">
-            <div className="bg-white/90 backdrop-blur px-6 py-3 rounded-2xl border border-[#e7e5e4] shadow-sm">
+            <div
+              style={{ borderColor: sigmundTheme.border }}
+              className={`bg-white/90 backdrop-blur px-6 py-3 rounded-2xl border shadow-sm`}
+            >
               <span className="font-serif-display text-2xl text-[#1c1917]">
                 {session?.user?.name?.split(" ")[0]}'s Garden
               </span>
             </div>
-            <div className="bg-white/90 backdrop-blur px-4 py-3 rounded-2xl border border-[#e7e5e4] shadow-sm text-xs font-bold text-stone-400 tracking-widest uppercase">
+            <div
+              style={{ borderColor: sigmundTheme.border }}
+              className={`bg-white/90 backdrop-blur px-4 py-3 rounded-2xl border shadow-sm text-xs font-bold text-stone-400 tracking-widest uppercase`}
+            >
               {flowers.length} Plants
             </div>
           </header>
@@ -924,11 +931,15 @@ export default function GardenBuilder() {
 
                     {/* Selection UI */}
                     {isSelected && !flower.isDragging && (
-                      <div className="absolute -inset-4 border-2 border-[#0072ce] border-dashed rounded-3xl pointer-events-none animate-fade-in bg-[#0072ce]/10">
+                      <div
+                        className={`absolute -inset-4 border-2 border-[${intPsychTheme.accent}] border-dashed rounded-3xl pointer-events-none animate-fade-in bg-[${intPsychTheme.accent}]/10`}
+                      >
                         {/* Rotate Handle */}
-                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 h-10 w-0.5 bg-[#0072ce] flex flex-col justify-start items-center">
+                        <div
+                          className={`absolute -top-10 left-1/2 -translate-x-1/2 h-10 w-0.5 bg-[${intPsychTheme.accent}] flex flex-col justify-start items-center`}
+                        >
                           <div
-                            className="w-10 h-10 -mt-5 bg-white rounded-full shadow-md border border-[#0072ce]/30 flex items-center justify-center cursor-ew-resize pointer-events-auto hover:bg-[#f0fdf4] hover:text-[#0072ce] hover:scale-110 transition-all"
+                            className={`w-10 h-10 -mt-5 bg-white rounded-full shadow-md border border-[${intPsychTheme.accent}]/30 flex items-center justify-center cursor-ew-resize pointer-events-auto hover:bg-[#f0fdf4] hover:text-[${intPsychTheme.accent}] hover:scale-110 transition-all`}
                             onMouseDown={(e) =>
                               handleMouseDown(e, flower.id, "rotate")
                             }
@@ -955,13 +966,16 @@ export default function GardenBuilder() {
 
                         {/* Scale Handle */}
                         <div
-                          className="absolute -bottom-3 -right-3 w-10 h-10 bg-white rounded-full shadow-md border border-[#0072ce]/30 flex items-center justify-center cursor-nwse-resize pointer-events-auto hover:bg-[#f0fdf4] hover:scale-110 transition-all"
+                          className={`absolute -bottom-3 -right-3 w-10 h-10 bg-white rounded-full shadow-md border border-[${intPsychTheme.accent}]/30 flex items-center justify-center cursor-nwse-resize pointer-events-auto hover:bg-[#f0fdf4] hover:scale-110 transition-all`}
                           onMouseDown={(e) =>
                             handleMouseDown(e, flower.id, "scale")
                           }
                           title="Scale"
                         >
-                          <Maximize size={18} className="text-[#0072ce]" />
+                          <Maximize
+                            size={18}
+                            className={`text-[${intPsychTheme.accent}]`}
+                          />
                         </div>
 
                         {/* Layer Menu Button */}
@@ -974,7 +988,7 @@ export default function GardenBuilder() {
                               e.stopPropagation();
                               setShowLayersMenu(!showLayersMenu);
                             }}
-                            className={`bg-white p-3 rounded-full shadow-md hover:scale-110 transition-all border ${showLayersMenu ? "text-[#0072ce] border-[#0072ce] bg-[#f0fdf4]" : "text-stone-500 border-[#e7e5e4]"}`}
+                            className={`bg-white p-3 rounded-full shadow-md hover:scale-110 transition-all border ${showLayersMenu ? `text-[${intPsychTheme.accent}] border-[${intPsychTheme.accent}] bg-[#f0fdf4]` : `text-stone-500 border-[${sigmundTheme.border}]`}`}
                             title="Layers"
                           >
                             <Layers size={20} />
@@ -1007,9 +1021,13 @@ export default function GardenBuilder() {
         </main>
 
         {/* --- RIGHT SIDEBAR: PALETTE --- */}
-        <aside className="w-72 flex flex-col z-20 order-2 mr-4 my-4 bg-white rounded-[2rem] border border-[#e7e5e4] overflow-hidden shadow-sm">
+        <aside
+          className={`w-72 flex flex-col z-20 order-2 mr-4 my-4 bg-white rounded-[2rem] border border-[${sigmundTheme.border}] overflow-hidden shadow-sm`}
+        >
           {/* Tabs */}
-          <div className="flex p-3 gap-2 border-b border-[#e7e5e4] bg-[#f8fafc]">
+          <div
+            className={`flex p-3 gap-2 border-b border-[${sigmundTheme.border}] bg-[${intPsychTheme.background}]`}
+          >
             <button
               onClick={() => setActiveTab("flowers")}
               style={{
@@ -1030,7 +1048,7 @@ export default function GardenBuilder() {
               onClick={() => setActiveTab("trees")}
               className={`flex-1 cursor-pointer rounded-xl py-3 text-xs font-bold uppercase tracking-wider transition-all ${
                 activeTab === "trees"
-                  ? "text-[#0072ce] bg-white shadow-sm border-b-4 border-[#0072ce] translate-y-[-1px]"
+                  ? `text-[${intPsychTheme.accent}] bg-white shadow-sm border-b-4 border-[${intPsychTheme.accent}] translate-y-[-1px]`
                   : "text-stone-400 hover:text-stone-600 hover:bg-white"
               }`}
             >
@@ -1040,7 +1058,7 @@ export default function GardenBuilder() {
               onClick={() => setActiveTab("bushes")}
               className={`flex-1 cursor-pointer rounded-xl py-3 text-xs font-bold uppercase tracking-wider transition-all ${
                 activeTab === "bushes"
-                  ? "text-[#0072ce] bg-white shadow-sm border-b-4 border-[#0072ce] translate-y-[-1px]"
+                  ? `text-[${intPsychTheme.accent}] bg-white shadow-sm border-b-4 border-[${intPsychTheme.accent}] translate-y-[-1px]`
                   : "text-stone-400 hover:text-stone-600 hover:bg-white"
               }`}
             >
@@ -1048,7 +1066,9 @@ export default function GardenBuilder() {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-8 space-y-6 scrollbar-thin bg-[#f8fafc]">
+          <div
+            className={`flex-1 overflow-y-auto p-8 space-y-6 scrollbar-thin bg-[${intPsychTheme.background}]`}
+          >
             {ITEMS.filter((i) => i.category === activeTab).map((item) => {
               return (
                 <div
@@ -1058,7 +1078,7 @@ export default function GardenBuilder() {
                   className="group flex flex-col items-center cursor-grab active:cursor-grabbing"
                 >
                   <div
-                    className="w-full aspect-square relative flex items-center justify-center bg-white rounded-2xl border border-[#e7e5e4] group-hover:scale-105 group-hover:shadow-md transition-all duration-300 p-6"
+                    className={`w-full aspect-square relative flex items-center justify-center bg-white rounded-2xl border border-[${sigmundTheme.border}] group-hover:scale-105 group-hover:shadow-md transition-all duration-300 p-6`}
                     style={{
                       borderColor: undefined, // handled by hover
                     }}
@@ -1078,7 +1098,7 @@ export default function GardenBuilder() {
                   </div>
                   <span
                     style={{ color: undefined }}
-                    className="mt-3 text-sm font-medium text-stone-500 group-hover:text-[#0072ce] transition-colors"
+                    className={`mt-3 text-sm font-medium text-stone-500 group-hover:text-[${intPsychTheme.accent}] transition-colors`}
                   >
                     {item.label}
                   </span>

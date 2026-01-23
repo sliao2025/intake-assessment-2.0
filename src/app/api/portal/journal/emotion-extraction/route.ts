@@ -25,7 +25,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const EMOTION_EXTRACTOR_URL = "http://localhost:8081";
+    const EMOTION_EXTRACTOR_URL =
+      "https://emotion-extraction-b5ikba4x4q-uk.a.run.app";
 
     const response = await fetch(`${EMOTION_EXTRACTOR_URL}/extract`, {
       method: "POST",

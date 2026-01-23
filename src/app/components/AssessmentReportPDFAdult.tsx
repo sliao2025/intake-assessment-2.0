@@ -567,7 +567,13 @@ const strengthLabel = (s: Strength) => {
   }
 };
 
-export const AssessmentReportPDFAdult = ({ profile }: { profile: Profile }) => {
+export const AssessmentReportPDFAdult = ({
+  profile,
+  clinician,
+}: {
+  profile: Profile;
+  clinician?: string;
+}) => {
   const fullName =
     `${profile.firstName || ""} ${profile.lastName || ""}`.trim();
   const isChild = profile.isChild;
@@ -701,7 +707,8 @@ export const AssessmentReportPDFAdult = ({ profile }: { profile: Profile }) => {
               Adult Intake Assessment Report
             </Text>
             <Text style={styles.headerSubtitle}>
-              Patient: {fullName} • Created:{" "}
+              Patient: {fullName} • Clinician: {clinician || "Not Assigned"} •
+              Created:{" "}
               {new Date().toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "long",
