@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { intPsychTheme } from "../../components/theme";
+import { intPsychTheme, sigmundTheme } from "../../components/theme";
 import { DM_Serif_Text } from "next/font/google";
 import Phq9Form from "../../components/Scales/Adult/Phq9Form";
 import Gad7Form from "../../components/Scales/Adult/Gad7Form";
@@ -11,8 +11,13 @@ import PTSDForm from "../../components/Scales/Adult/PTSDForm";
 import CRAFFTForm from "../../components/Scales/Adult/CRAFFTForm";
 import ACEResilienceForm from "../../components/Scales/Adult/ACEResilienceForm";
 import ASRS5Form from "../../components/Scales/Adult/ASRS5Form";
+
+import SelfHarmForm from "../../components/Scales/Adult/SelfHarmForm";
+import AQ10Form from "../../components/Scales/Adult/AQ10Form";
+import MDQForm from "../../components/Scales/Adult/MDQForm";
+
 import { SetAActions } from "../../lib/types/types";
-import { ArrowLeft } from "lucide-react";
+import useSound from "use-sound";
 
 const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
 
@@ -46,7 +51,7 @@ const ASSESSMENT_INFO: Record<
     fullName: "Substance Use Screening",
     description: "Screens for substance use risk in the past 12 months",
   },
-  aceResilience: {
+  aceresilience: {
     name: "ACE Resilience",
     fullName: "Adverse Childhood Experiences Resilience Scale",
     description: "Measures protective factors and resilience",
@@ -55,6 +60,22 @@ const ASSESSMENT_INFO: Record<
     name: "ASRS-5",
     fullName: "Adult ADHD Self-Report Scale",
     description: "Screens for ADHD symptoms",
+  },
+  selfharm: {
+    name: "Self Harm",
+    fullName: "Self-Harm Screening",
+
+    description: "Screens for recent and lifetime self-harm",
+  },
+  aq10: {
+    name: "AQ-10",
+    fullName: "Autism Spectrum Quotient-10",
+    description: "Screening tool for autism spectrum traits",
+  },
+  mdq: {
+    name: "MDQ",
+    fullName: "Mood Disorder Questionnaire",
+    description: "Screening tool for bipolar disorder",
   },
 };
 
@@ -158,7 +179,7 @@ function getInitialAssessmentData(type: string): any {
         },
       };
       break;
-    case "aceResilience":
+    case "aceresilience":
       base.assessments.data.aceResilience = {
         r01: "",
         r02: "",
@@ -185,6 +206,60 @@ function getInitialAssessmentData(type: string): any {
         asrs6: "",
       };
       break;
+    case "selfharm":
+      base.assessments.data.selfHarm = {
+        pastMonth: "",
+        lifetime: "",
+      };
+      break;
+    case "aq10":
+      base.assessments.data.aq10 = {
+        aq01: "",
+        aq02: "",
+        aq03: "",
+        aq04: "",
+        aq05: "",
+        aq06: "",
+        aq07: "",
+        aq08: "",
+        aq09: "",
+        aq10: "",
+      };
+      break;
+    case "mdq":
+      base.assessments.data.mdq = {
+        mdq1: "",
+        mdq2: "",
+        mdq3: "",
+        mdq4: "",
+        mdq5: "",
+        mdq6: "",
+        mdq7: "",
+        mdq8: "",
+        mdq9: "",
+        mdq10: "",
+        mdq11: "",
+        mdq12: "",
+        mdq13: "",
+        cooccurrence: "",
+        impact: "",
+      };
+      break;
+    case "ymrs":
+      base.assessments.data.ymrs = {
+        ymrs1: "",
+        ymrs2: "",
+        ymrs3: "",
+        ymrs4: "",
+        ymrs5: "",
+        ymrs6: "",
+        ymrs7: "",
+        ymrs8: "",
+        ymrs9: "",
+        ymrs10: "",
+        ymrs11: "",
+      };
+      break;
   }
 
   return base;
@@ -193,7 +268,7 @@ function getInitialAssessmentData(type: string): any {
 // Calculate scores
 function calculateScore(
   type: string,
-  data: any
+  data: any,
 ): { totalScore: number; severity: string } {
   switch (type) {
     case "phq9": {
@@ -202,7 +277,7 @@ function calculateScore(
         (sum: number, val: any) => {
           return sum + (parseInt(val) || 0);
         },
-        0
+        0,
       );
       let severity = "Minimal";
       if (score >= 20) severity = "Severe";
@@ -217,7 +292,7 @@ function calculateScore(
         (sum: number, val: any) => {
           return sum + (parseInt(val) || 0);
         },
-        0
+        0,
       );
       let severity = "Minimal";
       if (score >= 15) severity = "Severe";
@@ -241,7 +316,7 @@ function calculateScore(
     case "ptsd": {
       const ptsd = data.ptsd || {};
       const score: number = Object.values(ptsd).filter(
-        (val: any) => val === "yes"
+        (val: any) => val === "yes",
       ).length;
       let severity = "Negative";
       if (score >= 3) severity = "Positive";
@@ -254,7 +329,7 @@ function calculateScore(
 
       // Count positive responses in Part B
       const partBScore: number = Object.values(partB).filter(
-        (val: any) => val === "yes"
+        (val: any) => val === "yes",
       ).length;
       const hasSubstanceUse =
         (parseInt(partA.daysAlcohol) || 0) > 0 ||
@@ -267,13 +342,14 @@ function calculateScore(
 
       return { totalScore: partBScore, severity };
     }
-    case "aceResilience": {
+
+    case "aceresilience": {
       const ace = data.aceResilience || {};
       const score: number = Object.values(ace).reduce<number>(
         (sum: number, val: any) => {
           return sum + (parseInt(val) || 0);
         },
-        0
+        0,
       );
       let severity = "High Resilience";
       if (score < 30) severity = "Moderate Resilience";
@@ -286,10 +362,89 @@ function calculateScore(
         (sum: number, val: any) => {
           return sum + (parseInt(val) || 0);
         },
-        0
+        0,
       );
       let severity = "Negative";
       if (score >= 14) severity = "Positive";
+      return { totalScore: score, severity };
+    }
+    case "selfharm": {
+      const dataHash = data.selfHarm || {};
+      // Logic: If either answer is yes -> Positive/Warning
+      const isPositive =
+        dataHash.pastMonth === "yes" || dataHash.lifetime === "yes";
+      // Let's count "yes" for score, though it's barely a score
+      let score = 0;
+      if (dataHash.pastMonth === "yes") score++;
+      if (dataHash.lifetime === "yes") score++;
+
+      let severity = "Negative";
+      if (isPositive) severity = "Positive";
+      return { totalScore: score, severity };
+    }
+    case "aq10": {
+      const d = data.aq10 || {};
+      // Scoring:
+      // 1: Agree(2,3) -> 1
+      // 2: Disagree(0,1) -> 1
+      // 3: Disagree -> 1
+      // 4: Disagree -> 1
+      // 5: Disagree -> 1
+      // 6: Disagree -> 1
+      // 7: Agree -> 1
+      // 8: Agree -> 1
+      // 9: Disagree -> 1
+      // 10: Agree -> 1
+
+      let s = 0;
+      const pt = (v: string, dir: "agree" | "disagree") => {
+        const n = parseInt(v);
+        if (isNaN(n)) return 0;
+        if (dir === "agree" && (n === 2 || n === 3)) return 1;
+        if (dir === "disagree" && (n === 0 || n === 1)) return 1;
+        return 0;
+      };
+
+      s += pt(d.aq01, "agree");
+      s += pt(d.aq02, "disagree");
+      s += pt(d.aq03, "disagree");
+      s += pt(d.aq04, "disagree");
+      s += pt(d.aq05, "disagree");
+      s += pt(d.aq06, "disagree");
+      s += pt(d.aq07, "agree");
+      s += pt(d.aq08, "agree");
+      s += pt(d.aq09, "disagree");
+      s += pt(d.aq10, "agree");
+
+      let severity = "No significant traits";
+      if (s >= 6) severity = "Consider referral";
+      return { totalScore: s, severity };
+    }
+    case "mdq": {
+      const d = data.mdq || {};
+      let symptoms = 0;
+      for (let i = 1; i <= 13; i++) {
+        if (d[`mdq${i}`] === "yes") symptoms++;
+      }
+      const cooccurs = d.cooccurrence === "yes";
+      const impact = parseInt(d.impact || "0"); // 2=Moderate, 3=Serious
+
+      let severity = "Negative";
+      if (symptoms >= 7 && cooccurs && impact >= 2) {
+        severity = "Positive";
+      }
+      return { totalScore: symptoms, severity };
+    }
+    case "ymrs": {
+      const d = data.ymrs || {};
+      const score: number = Object.values(d).reduce<number>(
+        (a: number, b: any) => a + (parseInt(b) || 0),
+        0,
+      );
+      let severity = "Minimal";
+      if (score >= 25)
+        severity = "Severe Mania"; // Rough cutoffs
+      else if (score >= 15) severity = "Moderate Mania";
       return { totalScore: score, severity };
     }
     default:
@@ -332,13 +487,33 @@ function isComplete(type: string, data: any): boolean {
       }
       return true;
     }
-    case "aceResilience": {
+    case "aceresilience": {
       const ace = data.aceResilience || {};
       return Object.values(ace).every((val: any) => val !== "");
     }
     case "asrs5": {
       const asrs5 = data.asrs5 || {};
       return Object.values(asrs5).every((val: any) => val !== "");
+    }
+    case "selfharm": {
+      const sh = data.selfHarm || {};
+      return sh.pastMonth !== "" && sh.lifetime !== "";
+    }
+    case "aq10": {
+      const d = data.aq10 || {};
+      return Object.values(d).every((val: any) => val !== "");
+    }
+    case "mdq": {
+      const d = data.mdq || {};
+      // 13 items + cooccurrence + impact
+      // Actually check specifically the keys we use
+      for (let i = 1; i <= 13; i++) if (!d[`mdq${i}`]) return false;
+      if (!d.cooccurrence || !d.impact) return false;
+      return true;
+    }
+    case "ymrs": {
+      const d = data.ymrs || {};
+      return Object.values(d).every((val: any) => val !== "");
     }
     default:
       return false;
@@ -351,7 +526,7 @@ export default function AssessmentPage() {
   const type = (params.type as string)?.toLowerCase();
 
   const [assessmentData, setAssessmentData] = useState<any>(() =>
-    getInitialAssessmentData(type)
+    getInitialAssessmentData(type),
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -361,10 +536,12 @@ export default function AssessmentPage() {
   } | null>(null);
 
   const info = ASSESSMENT_INFO[type];
+  const [playSound] = useSound("/sfx/neutral-positive-button-click.wav");
+  const [playMistake] = useSound("/sfx/mistake-ui.wav");
 
   useEffect(() => {
     if (!info) {
-      router.push("/assessments");
+      router.push("/scales");
     }
   }, [type, info, router]);
 
@@ -376,7 +553,7 @@ export default function AssessmentPage() {
         if (response.ok) {
           const data = await response.json();
           const assigned = data.assignedAssessments?.find(
-            (a: any) => a.assessmentType.toLowerCase() === type.toLowerCase()
+            (a: any) => a.assessmentType.toLowerCase() === type.toLowerCase(),
           );
           if (assigned) {
             setAssignedAssessment({
@@ -437,8 +614,8 @@ export default function AssessmentPage() {
         throw new Error(data.error || "Failed to submit assessment");
       }
 
-      // Success - redirect to assessments page
-      router.push("/assessments");
+      // Success - redirect to scales page
+      router.push("/scales");
     } catch (err: any) {
       setError(err.message || "Failed to submit assessment");
       setSubmitting(false);
@@ -452,13 +629,13 @@ export default function AssessmentPage() {
     <div className="space-y-6">
       <div>
         <h1
-          style={{ color: intPsychTheme.primary }}
-          className={`${dm_serif.className} text-3xl text-gray-900 mb-2`}
+          style={{ color: sigmundTheme.accent }}
+          className={`${dm_serif.className} text-3xl text-stone-900 mb-2`}
         >
           {info.name}
         </h1>
-        <p className="text-gray-600">{info.fullName}</p>
-        <p className="text-sm text-gray-500 mt-1">{info.description}</p>
+        <p className="text-stone-600">{info.fullName}</p>
+        <p className="text-sm text-stone-500 mt-1">{info.description}</p>
       </div>
 
       {/* Form */}
@@ -468,29 +645,16 @@ export default function AssessmentPage() {
         {type === "pss4" && <PSS4Form a={a} setA={setA} pss0to4={pss0to4} />}
         {type === "ptsd" && <PTSDForm a={a} setA={setA} />}
         {type === "crafft" && <CRAFFTForm a={a} setA={setA} />}
-        {type === "aceResilience" && (
+        {type === "aceresilience" && (
           <ACEResilienceForm a={a} setA={setA} aceTrue5={aceTrue5} />
         )}
         {type === "asrs5" && (
           <ASRS5Form a={a} setA={setA} asrs0to4={asrs0to4} />
         )}
+        {type === "selfharm" && <SelfHarmForm a={a} setA={setA} />}
+        {type === "aq10" && <AQ10Form a={a} setA={setA} />}
+        {type === "mdq" && <MDQForm a={a} setA={setA} />}
       </div>
-
-      {/* Score Preview (if complete) */}
-      {complete && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Preliminary Score</p>
-              <p className="text-2xl font-bold text-gray-900">{totalScore}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-600">Severity</p>
-              <p className="text-lg font-semibold text-gray-900">{severity}</p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Error Message */}
       {error && (
@@ -502,18 +666,30 @@ export default function AssessmentPage() {
       {/* Submit Button */}
       <div className="flex gap-4">
         <button
-          onClick={() => router.push("/assessments")}
-          className="flex-1 px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+          onClick={() => router.push("/scales")}
+          className="flex-1 px-6 py-3 border border-stone-300 rounded-xl text-stone-700 hover:bg-stone-50 transition-all font-bold uppercase tracking-wider text-xs shadow-[0_4px_0_0_#e2e8f0] hover:translate-y-[-1px] active:translate-y-[1px] active:shadow-none bg-white"
         >
           Cancel
         </button>
         <button
-          onClick={handleSubmit}
-          disabled={!complete || submitting}
-          style={{
-            backgroundColor: complete ? intPsychTheme.secondary : "#ccc",
+          onClick={async () => {
+            if (!complete || submitting) {
+              playMistake();
+              return;
+            }
+            await handleSubmit();
+            playSound();
           }}
-          className="cursor-pointer flex-1 px-6 py-3 text-white rounded-xl hover:opacity-90 transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+          aria-disabled={!complete || submitting}
+          style={{
+            backgroundColor: complete ? sigmundTheme.secondary : "#ccc",
+            boxShadow: complete ? "0 4px 0 0 #744d3a" : "0 4px 0 0 #999",
+          }}
+          className={`flex-1 px-6 py-3 text-white rounded-xl hover:opacity-90 transition-all font-bold uppercase tracking-wider text-xs hover:translate-y-[-1px] active:translate-y-[1px] active:shadow-none ${
+            !complete || submitting
+              ? "cursor-not-allowed opacity-50"
+              : "cursor-pointer"
+          }`}
         >
           {submitting ? "Submitting..." : "Submit Assessment"}
         </button>

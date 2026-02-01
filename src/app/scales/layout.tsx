@@ -20,13 +20,15 @@ export default function AssessmentLayout({ children }: AssessmentLayoutProps) {
 
   return (
     <PortalLayout>
-      <div className="min-h-screen isDynamicRoute ? 'p-8' : 'p-0'">
+      <div
+        className={`min-h-screen ${isDynamicRoute ? "p-6 md:p-8 pb-16" : ""}`}
+      >
         <div className={`${maxWidth} mx-auto`}>
           {/* Back button - only on dynamic routes */}
           {isDynamicRoute && (
             <button
               onClick={() => router.push("/scales")}
-              className="cursor-pointer flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+              className="cursor-pointer flex items-center gap-2 text-stone-600 hover:text-stone-900 mb-6 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Scales</span>

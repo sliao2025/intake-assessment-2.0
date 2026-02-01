@@ -169,7 +169,7 @@ export default function ProfileSection({
                     min={0}
                     max={8}
                     step={1}
-                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 pr-8 text-slate-900 placeholder:text-slate-400"
+                    className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 pr-8 text-stone-900 placeholder:text-stone-400"
                     placeholder="e.g., 5"
                     value={profile.height?.feet ?? ""}
                     onChange={(e) =>
@@ -185,7 +185,7 @@ export default function ProfileSection({
                       }))
                     }
                   />
-                  <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
+                  <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 text-sm">
                     ft
                   </div>
                 </div>
@@ -197,7 +197,7 @@ export default function ProfileSection({
                     min={0}
                     max={11}
                     step={1}
-                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 pr-8 text-slate-900 placeholder:text-slate-400"
+                    className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 pr-8 text-stone-900 placeholder:text-stone-400"
                     placeholder="e.g., 8"
                     value={profile.height?.inches ?? ""}
                     onChange={(e) =>
@@ -213,7 +213,7 @@ export default function ProfileSection({
                       }))
                     }
                   />
-                  <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
+                  <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 text-sm">
                     in
                   </div>
                 </div>
@@ -230,7 +230,7 @@ export default function ProfileSection({
                 type="number"
                 min={0}
                 step={1}
-                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 pr-12 text-slate-900 placeholder:text-slate-400"
+                className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 pr-12 text-stone-900 placeholder:text-stone-400"
                 placeholder="e.g., 150"
                 value={profile.weightLbs ?? ""}
                 onChange={(e) =>
@@ -241,7 +241,7 @@ export default function ProfileSection({
                   }))
                 }
               />
-              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
+              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 text-sm">
                 lbs
               </div>
             </div>
@@ -261,13 +261,13 @@ export default function ProfileSection({
               }
             >
               <div className="relative">
-                <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
                   {profile.genderIdentity ? (
-                    <span className="text-slate-900">
+                    <span className="text-stone-900">
                       {genderLabel(profile.genderIdentity)}
                     </span>
                   ) : (
-                    <span className="text-slate-400">Choose…</span>
+                    <span className="text-stone-400">Choose…</span>
                   )}
                   <ChevronDown
                     className="group pointer-events-none absolute top-3 right-2.5 size-4"
@@ -275,7 +275,7 @@ export default function ProfileSection({
                   />
                 </ListboxButton>
 
-                <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
                   {genderOptions.map((option) => (
                     <ListboxOption
                       key={option.value}
@@ -285,20 +285,20 @@ export default function ProfileSection({
                       {({ active, selected }) => (
                         <li
                           className={`${
-                            active ? "bg-slate-100" : "bg-white"
+                            active ? "bg-stone-100" : "bg-white"
                           } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                         >
                           <span
                             className={`${
                               selected
-                                ? "font-medium text-slate-900"
-                                : "font-normal text-slate-700"
+                                ? "font-medium text-stone-900"
+                                : "font-normal text-stone-700"
                             } block truncate`}
                           >
                             {option.label}
                           </span>
                           {selected && (
-                            <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                            <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                               <Check />
                             </span>
                           )}
@@ -327,15 +327,15 @@ export default function ProfileSection({
               multiple
             >
               <div className="relative">
-                <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
                   {profile.sexualOrientation.length === 0 ? (
-                    <span className="text-slate-400">Select one or more…</span>
+                    <span className="text-stone-400">Select one or more…</span>
                   ) : (
                     <span className="flex flex-wrap gap-1">
                       {profile.sexualOrientation.map((o) => (
                         <span
                           key={o.value}
-                          className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
+                          className="inline-flex items-center rounded-md bg-stone-100 px-2 py-0.5 text-xs text-stone-700"
                         >
                           {o.label}
                         </span>
@@ -348,7 +348,7 @@ export default function ProfileSection({
                   />
                 </ListboxButton>
 
-                <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
                   {sexualOrientations.map((orientation) => (
                     <ListboxOption
                       key={orientation.value}
@@ -358,20 +358,20 @@ export default function ProfileSection({
                       {({ active, selected }) => (
                         <li
                           className={`${
-                            active ? "bg-slate-100" : "bg-white"
+                            active ? "bg-stone-100" : "bg-white"
                           } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                         >
                           <span
                             className={`${
                               selected
-                                ? "font-medium text-slate-900"
-                                : "font-normal text-slate-700"
+                                ? "font-medium text-stone-900"
+                                : "font-normal text-stone-700"
                             } block truncate`}
                           >
                             {orientation.label}
                           </span>
                           {selected && (
-                            <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                            <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                               <Check />
                             </span>
                           )}
@@ -400,9 +400,9 @@ export default function ProfileSection({
               multiple
             >
               <div className="relative">
-                <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
                   {profile.ethnicity.length === 0 ? (
-                    <span className="text-slate-400">
+                    <span className="text-stone-400">
                       Select all that apply…
                     </span>
                   ) : (
@@ -410,7 +410,7 @@ export default function ProfileSection({
                       {profile.ethnicity.map((o) => (
                         <span
                           key={o.value}
-                          className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
+                          className="inline-flex items-center rounded-md bg-stone-100 px-2 py-0.5 text-xs text-stone-700"
                         >
                           {o.label}
                         </span>
@@ -423,7 +423,7 @@ export default function ProfileSection({
                   />
                 </ListboxButton>
 
-                <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
                   {ethnicityOptions.map((option) => (
                     <ListboxOption
                       key={option.value}
@@ -433,20 +433,20 @@ export default function ProfileSection({
                       {({ active, selected }) => (
                         <li
                           className={`${
-                            active ? "bg-slate-100" : "bg-white"
+                            active ? "bg-stone-100" : "bg-white"
                           } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                         >
                           <span
                             className={`${
                               selected
-                                ? "font-medium text-slate-900"
-                                : "font-normal text-slate-700"
+                                ? "font-medium text-stone-900"
+                                : "font-normal text-stone-700"
                             } block truncate`}
                           >
                             {option.label}
                           </span>
                           {selected && (
-                            <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                            <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                               <Check />
                             </span>
                           )}
@@ -475,9 +475,9 @@ export default function ProfileSection({
               multiple
             >
               <div className="relative">
-                <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
                   {profile.religion.length === 0 ? (
-                    <span className="text-slate-400">
+                    <span className="text-stone-400">
                       Select all that apply…
                     </span>
                   ) : (
@@ -485,7 +485,7 @@ export default function ProfileSection({
                       {profile.religion.map((o) => (
                         <span
                           key={o.value}
-                          className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
+                          className="inline-flex items-center rounded-md bg-stone-100 px-2 py-0.5 text-xs text-stone-700"
                         >
                           {o.label}
                         </span>
@@ -498,7 +498,7 @@ export default function ProfileSection({
                   />
                 </ListboxButton>
 
-                <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
                   {religionOptions.map((option) => (
                     <ListboxOption
                       key={option.value}
@@ -508,20 +508,20 @@ export default function ProfileSection({
                       {({ active, selected }) => (
                         <li
                           className={`${
-                            active ? "bg-slate-100" : "bg-white"
+                            active ? "bg-stone-100" : "bg-white"
                           } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                         >
                           <span
                             className={`${
                               selected
-                                ? "font-medium text-slate-900"
-                                : "font-normal text-slate-700"
+                                ? "font-medium text-stone-900"
+                                : "font-normal text-stone-700"
                             } block truncate`}
                           >
                             {option.label}
                           </span>
                           {selected && (
-                            <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                            <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                               <Check />
                             </span>
                           )}
@@ -550,9 +550,9 @@ export default function ProfileSection({
               multiple
             >
               <div className="relative">
-                <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
                   {profile.pronouns.length === 0 ? (
-                    <span className="text-slate-400">
+                    <span className="text-stone-400">
                       Select all that apply…
                     </span>
                   ) : (
@@ -560,7 +560,7 @@ export default function ProfileSection({
                       {profile.pronouns.map((o) => (
                         <span
                           key={o.value}
-                          className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
+                          className="inline-flex items-center rounded-md bg-stone-100 px-2 py-0.5 text-xs text-stone-700"
                         >
                           {o.label}
                         </span>
@@ -573,7 +573,7 @@ export default function ProfileSection({
                   />
                 </ListboxButton>
 
-                <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
                   {pronounOptions.map((option) => (
                     <ListboxOption
                       key={option.value}
@@ -583,20 +583,20 @@ export default function ProfileSection({
                       {({ active, selected }) => (
                         <li
                           className={`${
-                            active ? "bg-slate-100" : "bg-white"
+                            active ? "bg-stone-100" : "bg-white"
                           } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                         >
                           <span
                             className={`${
                               selected
-                                ? "font-medium text-slate-900"
-                                : "font-normal text-slate-700"
+                                ? "font-medium text-stone-900"
+                                : "font-normal text-stone-700"
                             } block truncate`}
                           >
                             {option.label}
                           </span>
                           {selected && (
-                            <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                            <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                               <Check />
                             </span>
                           )}
@@ -615,7 +615,7 @@ export default function ProfileSection({
                 min={0}
                 max={8}
                 step={1}
-                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 pr-16 text-slate-900 placeholder:text-slate-400"
+                className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 pr-16 text-stone-900 placeholder:text-stone-400"
                 placeholder="e.g., 5"
                 value={profile.dailyMobileScreenTime ?? ""}
                 onChange={(e) =>
@@ -626,7 +626,7 @@ export default function ProfileSection({
                   }))
                 }
               />
-              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
+              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 text-sm">
                 hours
               </div>
             </div>
@@ -641,13 +641,13 @@ export default function ProfileSection({
                   }
                 >
                   <div className="relative">
-                    <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                    <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
                       {profile.highestDegree ? (
-                        <span className="text-slate-900">
+                        <span className="text-stone-900">
                           {degreeLabel(profile.highestDegree)}
                         </span>
                       ) : (
-                        <span className="text-slate-400">Choose…</span>
+                        <span className="text-stone-400">Choose…</span>
                       )}
                       <ChevronDown
                         className="group pointer-events-none absolute top-3 right-2.5 size-4"
@@ -655,7 +655,7 @@ export default function ProfileSection({
                       />
                     </ListboxButton>
 
-                    <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                    <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
                       {degreeOptions.map((option) => (
                         <ListboxOption
                           key={option.value}
@@ -665,20 +665,20 @@ export default function ProfileSection({
                           {({ active, selected }) => (
                             <li
                               className={`${
-                                active ? "bg-slate-100" : "bg-white"
+                                active ? "bg-stone-100" : "bg-white"
                               } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                             >
                               <span
                                 className={`${
                                   selected
-                                    ? "font-medium text-slate-900"
-                                    : "font-normal text-slate-700"
+                                    ? "font-medium text-stone-900"
+                                    : "font-normal text-stone-700"
                                 } block truncate`}
                               >
                                 {option.label}
                               </span>
                               {selected && (
-                                <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                                <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                                   <Check />
                                 </span>
                               )}
@@ -751,13 +751,13 @@ export default function ProfileSection({
                   }
                 >
                   <div className="relative">
-                    <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                    <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
                       {profile.alcoholFrequency ? (
-                        <span className="text-slate-900">
+                        <span className="text-stone-900">
                           {alcoholFrequencyLabel(profile.alcoholFrequency)}
                         </span>
                       ) : (
-                        <span className="text-slate-400">Choose…</span>
+                        <span className="text-stone-400">Choose…</span>
                       )}
                       <ChevronDown
                         className="group pointer-events-none absolute top-3 right-2.5 size-4"
@@ -765,7 +765,7 @@ export default function ProfileSection({
                       />
                     </ListboxButton>
 
-                    <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                    <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
                       {alcoholFrequencyOptions.map((option) => (
                         <ListboxOption
                           key={option.value}
@@ -775,20 +775,20 @@ export default function ProfileSection({
                           {({ active, selected }) => (
                             <li
                               className={`${
-                                active ? "bg-slate-100" : "bg-white"
+                                active ? "bg-stone-100" : "bg-white"
                               } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                             >
                               <span
                                 className={`${
                                   selected
-                                    ? "font-medium text-slate-900"
-                                    : "font-normal text-slate-700"
+                                    ? "font-medium text-stone-900"
+                                    : "font-normal text-stone-700"
                                 } block truncate`}
                               >
                                 {option.label}
                               </span>
                               {selected && (
-                                <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                                <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                                   <Check />
                                 </span>
                               )}
@@ -812,13 +812,13 @@ export default function ProfileSection({
                     }
                   >
                     <div className="relative">
-                      <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                      <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
                         {profile.drinksPerOccasion ? (
-                          <span className="text-slate-900">
+                          <span className="text-stone-900">
                             {drinksPerOccasionLabel(profile.drinksPerOccasion)}
                           </span>
                         ) : (
-                          <span className="text-slate-400">Choose…</span>
+                          <span className="text-stone-400">Choose…</span>
                         )}
                         <ChevronDown
                           className="group pointer-events-none absolute top-3 right-2.5 size-4"
@@ -826,7 +826,7 @@ export default function ProfileSection({
                         />
                       </ListboxButton>
 
-                      <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                      <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
                         {drinksPerOccasionOptions.map((option) => (
                           <ListboxOption
                             key={option.value}
@@ -836,20 +836,20 @@ export default function ProfileSection({
                             {({ active, selected }) => (
                               <li
                                 className={`${
-                                  active ? "bg-slate-100" : "bg-white"
+                                  active ? "bg-stone-100" : "bg-white"
                                 } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                               >
                                 <span
                                   className={`${
                                     selected
-                                      ? "font-medium text-slate-900"
-                                      : "font-normal text-slate-700"
+                                      ? "font-medium text-stone-900"
+                                      : "font-normal text-stone-700"
                                   } block truncate`}
                                 >
                                   {option.label}
                                 </span>
                                 {selected && (
-                                  <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                                  <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                                     <Check />
                                   </span>
                                 )}
@@ -875,9 +875,9 @@ export default function ProfileSection({
                   multiple
                 >
                   <div className="relative">
-                    <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                    <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
                       {profile.substancesUsed.length === 0 ? (
-                        <span className="text-slate-400">
+                        <span className="text-stone-400">
                           Select all that apply…
                         </span>
                       ) : (
@@ -885,7 +885,7 @@ export default function ProfileSection({
                           {profile.substancesUsed.map((o) => (
                             <span
                               key={o.value}
-                              className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
+                              className="inline-flex items-center rounded-md bg-stone-100 px-2 py-0.5 text-xs text-stone-700"
                             >
                               {o.label}
                             </span>
@@ -898,7 +898,7 @@ export default function ProfileSection({
                       />
                     </ListboxButton>
 
-                    <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                    <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
                       {substanceOptions.map((option) => (
                         <ListboxOption
                           key={option.value}
@@ -908,20 +908,20 @@ export default function ProfileSection({
                           {({ active, selected }) => (
                             <li
                               className={`${
-                                active ? "bg-slate-100" : "bg-white"
+                                active ? "bg-stone-100" : "bg-white"
                               } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                             >
                               <span
                                 className={`${
                                   selected
-                                    ? "font-medium text-slate-900"
-                                    : "font-normal text-slate-700"
+                                    ? "font-medium text-stone-900"
+                                    : "font-normal text-stone-700"
                                 } block truncate`}
                               >
                                 {option.label}
                               </span>
                               {selected && (
-                                <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                                <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                                   <Check />
                                 </span>
                               )}
@@ -943,9 +943,9 @@ export default function ProfileSection({
                   multiple
                 >
                   <div className="relative">
-                    <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                    <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
                       {profile.dietType.length === 0 ? (
-                        <span className="text-slate-400">
+                        <span className="text-stone-400">
                           Select all that apply…
                         </span>
                       ) : (
@@ -953,7 +953,7 @@ export default function ProfileSection({
                           {profile.dietType.map((o) => (
                             <span
                               key={o.value}
-                              className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
+                              className="inline-flex items-center rounded-md bg-stone-100 px-2 py-0.5 text-xs text-stone-700"
                             >
                               {o.label}
                             </span>
@@ -966,7 +966,7 @@ export default function ProfileSection({
                       />
                     </ListboxButton>
 
-                    <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                    <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
                       {dietOptions.map((option) => (
                         <ListboxOption
                           key={option.value}
@@ -976,20 +976,20 @@ export default function ProfileSection({
                           {({ active, selected }) => (
                             <li
                               className={`${
-                                active ? "bg-slate-100" : "bg-white"
+                                active ? "bg-stone-100" : "bg-white"
                               } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                             >
                               <span
                                 className={`${
                                   selected
-                                    ? "font-medium text-slate-900"
-                                    : "font-normal text-slate-700"
+                                    ? "font-medium text-stone-900"
+                                    : "font-normal text-stone-700"
                                 } block truncate`}
                               >
                                 {option.label}
                               </span>
                               {selected && (
-                                <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                                <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                                   <Check />
                                 </span>
                               )}
@@ -1147,7 +1147,7 @@ export default function ProfileSection({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <Field title="Your Child’s School Name" required>
                 <input
-                  className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                  className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                   placeholder="P.S. 321 William Penn"
                   value={profile.schoolInfo?.schoolName ?? ""}
                   onChange={(e) =>
@@ -1164,7 +1164,7 @@ export default function ProfileSection({
 
               <Field title="School Phone Number" required>
                 <input
-                  className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                  className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                   placeholder="e.g., 123-456-7890"
                   value={profile.schoolInfo?.schoolPhoneNumber ?? ""}
                   onChange={(e) =>
@@ -1183,7 +1183,7 @@ export default function ProfileSection({
                 <input
                   type="number"
                   min={0}
-                  className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                  className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                   placeholder="e.g., 3"
                   value={profile.schoolInfo?.yearsAtSchool ?? ""}
                   onChange={(e) =>
@@ -1200,7 +1200,7 @@ export default function ProfileSection({
               </Field>
               <Field title="Current Grade" required>
                 <input
-                  className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                  className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                   placeholder="e.g., 6th grade"
                   value={profile.schoolInfo?.grade ?? ""}
                   onChange={(e) =>

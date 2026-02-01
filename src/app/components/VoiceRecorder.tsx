@@ -649,10 +649,10 @@ const VoiceRecorder = forwardRef<
   }));
 
   return (
-    <div className="rounded-2xl border border-slate-300 p-3 md:p-4 bg-slate-50">
+    <div className="rounded-2xl border border-stone-300 p-3 md:p-4 bg-stone-50">
       <div className="flex justify-between gap-2">
         <div>
-          <p className="text-sm text-slate-600 font-medium">{label}</p>
+          <p className="text-sm text-stone-600 font-medium">{label}</p>
           {permissionError && (
             <p className="text-xs text-amber-700 mt-1">{permissionError}</p>
           )}
@@ -697,7 +697,7 @@ const VoiceRecorder = forwardRef<
             <span className="text-sm text-red-600 font-medium flex items-center gap-2">
               <span className="animate-pulse">●</span> Recording…
             </span>
-            <span className="font-mono text-lg font-bold text-slate-700">
+            <span className="font-mono text-lg font-bold text-stone-700">
               {mmss(elapsed)}
             </span>
           </div>
@@ -707,22 +707,22 @@ const VoiceRecorder = forwardRef<
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-600" />
 
-                <span className="text-sm font-medium text-slate-700">
+                <span className="text-sm font-medium text-stone-700">
                   Recording saved
                 </span>
               </div>
-              <span className="font-mono text-xl font-bold text-slate-700">
+              <span className="font-mono text-xl font-bold text-stone-700">
                 {mmss(actualDuration)}
               </span>
             </div>
           </div>
         ) : (
-          <span className="text-sm text-slate-500">No recording yet</span>
+          <span className="text-sm text-stone-500">No recording yet</span>
         )}
       </div>
 
       {recording && (
-        <div className="mt-3 rounded-xl bg-slate-100 p-4 border border-slate-200">
+        <div className="mt-3 rounded-xl bg-stone-100 p-4 border border-stone-200">
           <canvas
             ref={canvasRef}
             width={800}
@@ -745,7 +745,7 @@ const VoiceRecorder = forwardRef<
                   audioRef.current?.play();
                 }}
                 disabled={uploading}
-                className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-300 border-b-4 text-slate-800 hover:bg-slate-100 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-stone-300 border-b-4 text-stone-800 hover:bg-stone-100 transition-colors disabled:opacity-50"
               >
                 <Play className="h-4 w-4" /> Play
               </button>
@@ -757,7 +757,7 @@ const VoiceRecorder = forwardRef<
                   audioRef.current?.pause();
                   setPlaying(false);
                 }}
-                className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-300 border-b-4 text-slate-800 hover:bg-slate-100 transition-colors"
+                className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-stone-300 border-b-4 text-stone-800 hover:bg-stone-100 transition-colors"
               >
                 <Pause className="h-4 w-4" /> Pause
               </button>
@@ -771,7 +771,7 @@ const VoiceRecorder = forwardRef<
                 await handleDelete();
               }}
               disabled={deleting || uploading}
-              className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-300 border-b-4 text-slate-800 hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-stone-300 border-b-4 text-stone-800 hover:bg-stone-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {deleting ? (
                 <>

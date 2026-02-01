@@ -26,6 +26,7 @@ import {
   FaRegFaceFrownOpen,
   FaRegFaceTired,
 } from "react-icons/fa6";
+import useSound from "use-sound";
 
 interface EmotionTag {
   emotion: string;
@@ -73,12 +74,13 @@ export default function JournalPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
   const [pendingExtractions, setPendingExtractions] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [pendingSentiment, setPendingSentiment] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const { weather } = useWeather();
+  const [play] = useSound("/sfx/neutral-positive-button-click.wav");
 
   useEffect(() => {
     const fetchEntries = async () => {
@@ -183,7 +185,7 @@ export default function JournalPage() {
 
   const deleteJournalEntry = async (
     entryId: string,
-    event: React.MouseEvent
+    event: React.MouseEvent,
   ) => {
     event.stopPropagation();
     try {
@@ -216,7 +218,7 @@ export default function JournalPage() {
     console.log("Selected Entry:", entry);
     console.log(
       "Normalized Entry:",
-      normalizeScore(entry.sentimentResult?.average_score)
+      normalizeScore(entry.sentimentResult?.average_score),
     );
   };
 
@@ -262,8 +264,8 @@ export default function JournalPage() {
           prev.map((entry) =>
             entry.id === entryId
               ? { ...entry, ...data.entry, emotions: undefined }
-              : entry
-          )
+              : entry,
+          ),
         );
         if (selectedEntry?.id === entryId) {
           setSelectedEntry({
@@ -296,7 +298,7 @@ export default function JournalPage() {
             const extractionData = await extractionResponse.value.json();
             console.log(
               "Emotion Extraction Response (update):",
-              extractionData
+              extractionData,
             );
           }
 
@@ -312,7 +314,7 @@ export default function JournalPage() {
             setEntries(refreshData.entries || []);
             // Update selectedEntry from refreshed data
             const updatedEntry = refreshData.entries?.find(
-              (e: JournalEntry) => e.id === entryId
+              (e: JournalEntry) => e.id === entryId,
             );
             if (updatedEntry) {
               setSelectedEntry(updatedEntry);
@@ -510,16 +512,19 @@ export default function JournalPage() {
                 A quiet space for your thoughts and growth.
               </p>
             </div>
-            <WeatherWidget weather={weather} />
+            <div className="hidden sm:block">
+              <WeatherWidget weather={weather} />
+            </div>
           </div>
 
           {/* New Entry Section */}
-          <section className="bg-white rounded-2xl border-b-4 border-[#fde047]/50 p-6 shadow-sm">
+          <section className="bg-white rounded-2xl border-2 border-stone-200 border-b-6 p-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="bg-[#fef9c3] p-2 rounded-lg">
-                <Feather className="w-6 h-6 text-[#ca8a04]" />
-              </div>
-              <h2 className={`${dm_serif.className} text-2xl text-[#1c1917]`}>
+              <Feather
+                className="w-6 h-6"
+                style={{ color: sigmundTheme.secondary }}
+              />
+              <h2 className={`${dm_serif.className} text-2xl text-stone-700`}>
                 New Entry
               </h2>
             </div>
@@ -529,7 +534,7 @@ export default function JournalPage() {
                 <label className="block text-sm font-bold text-stone-400 uppercase tracking-wide mb-3">
                   How are you feeling today?
                 </label>
-                <div className="flex gap-4">
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                   {moodOptions.map((option) => {
                     const isSelected = selectedMood === option.value;
                     return (
@@ -537,7 +542,7 @@ export default function JournalPage() {
                         key={option.label}
                         type="button"
                         onClick={() => setSelectedMood(option.value)}
-                        className={`flex-1 flex flex-col items-center justify-center gap-2 p-4 rounded-xl border transition-all ${
+                        className={`w-full flex flex-col items-center justify-center gap-1 sm:gap-2 p-2 sm:p-4 rounded-xl border transition-all ${
                           isSelected
                             ? `${option.selectedBg} ${option.selectedBorder} border-2 ${option.selectedText} shadow-inner scale-[0.98]`
                             : `${option.bg} ${option.border} ${option.text} hover:scale-[1.02] hover:shadow-sm`
@@ -571,14 +576,24 @@ export default function JournalPage() {
               <button
                 type="button"
                 onClick={async () => {
+                  play();
                   if (!newContent.trim() || selectedMood === null) return;
                   await createJournalEntry(newContent.trim(), selectedMood);
                 }}
                 disabled={!newContent.trim() || selectedMood === null}
-                className={`w-full py-3.5 rounded-xl font-bold uppercase tracking-wide transition-all flex items-center justify-center gap-2 shadow-[0_2px_0_0_rgba(0,0,0,0.05)] text-sm ${
+                style={
                   !newContent.trim() || selectedMood === null
-                    ? `bg-[#f5f5f4] text-stone-400 cursor-not-allowed shadow-none border border-[${sigmundTheme.border}]`
-                    : "bg-[#ffa440] text-white border-b-4 border-[#f58402] hover:bg-[#f58402] hover:translate-y-[-1px] active:translate-y-[1px] active:border-b-0 active:shadow-none"
+                    ? { borderColor: sigmundTheme.border }
+                    : ({
+                        "--btn-bg": sigmundTheme.secondary,
+                        "--btn-border": sigmundTheme.secondaryDark,
+                        "--btn-bg-hover": sigmundTheme.secondaryLight,
+                      } as React.CSSProperties)
+                }
+                className={`cursor-pointer w-full py-3.5 rounded-xl font-bold uppercase tracking-wide transition-all flex items-center justify-center gap-2 shadow-[0_2px_0_0_rgba(0,0,0,0.05)] text-sm ${
+                  !newContent.trim() || selectedMood === null
+                    ? `bg-[#f5f5f4] text-stone-400 cursor-not-allowed shadow-none border`
+                    : "bg-[var(--btn-bg)] text-white border-b-4 border-[var(--btn-border)] hover:scale-[1.005] hover:border-[var(--btn-bg)] hover:bg-[var(--btn-bg-hover)] hover:translate-y-[-2px] active:translate-y-[2px] active:border-b-0 active:shadow-none"
                 }`}
               >
                 <Check className="w-5 h-5" />
@@ -590,8 +605,11 @@ export default function JournalPage() {
           {/* Previous Entries */}
           <section>
             <div className="flex items-center gap-3 mb-6">
-              <BookOpen className="w-6 h-6 text-[#0ea5e9]" />
-              <h2 className={`${dm_serif.className} text-2xl text-[#1c1917]`}>
+              <BookOpen
+                className="w-6 h-6"
+                style={{ color: sigmundTheme.secondary }}
+              />
+              <h2 className={`${dm_serif.className} text-2xl text-stone-700`}>
                 Your entries
               </h2>
             </div>
@@ -625,7 +643,7 @@ export default function JournalPage() {
                           <Calendar className="w-3 h-3" />
                           {new Date(entry.createdAt).toLocaleDateString(
                             "en-US",
-                            { month: "short", day: "numeric" }
+                            { month: "short", day: "numeric" },
                           )}
                         </div>
 
@@ -641,7 +659,7 @@ export default function JournalPage() {
                             pendingSentiment.has(entry.id)) && (
                             <CircularGauge
                               score={normalizeScore(
-                                entry.sentimentResult?.average_score
+                                entry.sentimentResult?.average_score,
                               )}
                               size={32}
                               showLabel={false}
@@ -831,7 +849,7 @@ export default function JournalPage() {
                   >
                     <LinearGauge
                       score={normalizeScore(
-                        selectedEntry.sentimentResult?.average_score
+                        selectedEntry.sentimentResult?.average_score,
                       )}
                       isLoading={pendingSentiment.has(selectedEntry.id)}
                     />

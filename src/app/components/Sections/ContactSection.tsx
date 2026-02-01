@@ -81,7 +81,7 @@ export default function ContactSection({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field title="First Name" required>
           <input
-            className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+            className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
             placeholder="e.g., John"
             value={profile.firstName}
             onChange={(e) =>
@@ -92,7 +92,7 @@ export default function ContactSection({
 
         <Field title="Last Name" required>
           <input
-            className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+            className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
             placeholder="e.g., Doe"
             value={profile.lastName}
             onChange={(e) =>
@@ -105,7 +105,7 @@ export default function ContactSection({
           <input
             type="number"
             min={1}
-            className={`w-full rounded-xl bg-white border px-3 py-2 text-slate-900 ${dobAgeError ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500" : "border-slate-300"} `}
+            className={`w-full rounded-xl bg-white border px-3 py-2 text-stone-900 ${dobAgeError ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500" : "border-stone-300"} `}
             placeholder="e.g., 20"
             value={profile.age}
             onChange={(e) => setProfile((p) => ({ ...p, age: e.target.value }))}
@@ -122,7 +122,7 @@ export default function ContactSection({
         <Field title="Date of Birth" required>
           <input
             type="date"
-            className={`w-full rounded-xl bg-white border px-3 py-2 text-slate-900 ${dobAgeError ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500" : "border-slate-300"}`}
+            className={`w-full rounded-xl bg-white border px-3 py-2 text-stone-900 ${dobAgeError ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500" : "border-stone-300"}`}
             value={profile.dob}
             onChange={(e) => setProfile((p) => ({ ...p, dob: e.target.value }))}
             aria-invalid={dobAgeError ? true : undefined}
@@ -133,7 +133,7 @@ export default function ContactSection({
         <Field title={profile.isChild ? "Parent Email" : "Email"} required>
           <input
             type="email"
-            className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
+            className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900"
             placeholder="you@example.com"
             value={profile.email}
             onChange={(e) =>
@@ -148,7 +148,7 @@ export default function ContactSection({
         >
           <input
             type="tel"
-            className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900"
+            className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900"
             placeholder="123-456-7890"
             value={profile.contactNumber}
             onChange={(e) =>
@@ -168,7 +168,7 @@ export default function ContactSection({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <Field title="Parent/Guardian 1 First Name" required>
               <input
-                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                 placeholder="e.g., Jane"
                 value={profile.parent1FirstName ?? ""}
                 onChange={(e) =>
@@ -182,7 +182,7 @@ export default function ContactSection({
 
             <Field title="Parent/Guardian 1 Last Name" required>
               <input
-                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                 placeholder="e.g., Doe"
                 value={profile.parent1LastName ?? ""}
                 onChange={(e) =>
@@ -192,7 +192,7 @@ export default function ContactSection({
             </Field>
             <Field title="Parent/Guardian 2 First Name" required>
               <input
-                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                 placeholder="e.g., John"
                 value={profile.parent2FirstName ?? ""}
                 onChange={(e) =>
@@ -206,7 +206,7 @@ export default function ContactSection({
 
             <Field title="Parent/Guardian 2 Last Name" required>
               <input
-                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                 placeholder="e.g., Doe"
                 value={profile.parent2LastName ?? ""}
                 onChange={(e) =>
@@ -217,7 +217,7 @@ export default function ContactSection({
 
             <Field title="Parent/Guardian Occupation" required>
               <input
-                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                 placeholder="e.g., Teacher"
                 value={profile.parentOccupation ?? ""}
                 onChange={(e) =>
@@ -231,7 +231,7 @@ export default function ContactSection({
 
             <Field title="Parent/Guardian Employer" required>
               <input
-                className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                 placeholder="e.g., NYC Public Schools"
                 value={profile.parentEmployer ?? ""}
                 onChange={(e) =>
@@ -251,13 +251,13 @@ export default function ContactSection({
                 }
               >
                 <div className="relative">
-                  <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                  <ListboxButton className="w-full relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
                     {profile.parentEducation ? (
-                      <span className="text-slate-900">
+                      <span className="text-stone-900">
                         {degreeLabel(profile.parentEducation)}
                       </span>
                     ) : (
-                      <span className="text-slate-400">Choose…</span>
+                      <span className="text-stone-400">Choose…</span>
                     )}
                     <ChevronDown
                       className="group pointer-events-none absolute top-3 right-2.5 size-4"
@@ -265,7 +265,7 @@ export default function ContactSection({
                     />
                   </ListboxButton>
 
-                  <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                  <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
                     {degreeOptions.map((option) => (
                       <ListboxOption
                         key={option.value}
@@ -275,20 +275,20 @@ export default function ContactSection({
                         {({ active, selected }) => (
                           <li
                             className={`${
-                              active ? "bg-slate-100" : "bg-white"
+                              active ? "bg-stone-100" : "bg-white"
                             } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                           >
                             <span
                               className={`${
                                 selected
-                                  ? "font-medium text-slate-900"
-                                  : "font-normal text-slate-700"
+                                  ? "font-medium text-stone-900"
+                                  : "font-normal text-stone-700"
                               } block truncate`}
                             >
                               {option.label}
                             </span>
                             {selected && (
-                              <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                              <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                                 <Check />
                               </span>
                             )}

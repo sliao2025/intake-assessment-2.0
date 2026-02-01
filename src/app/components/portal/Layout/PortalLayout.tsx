@@ -13,6 +13,8 @@ import {
   Brain,
   ClipboardList,
   Sprout,
+  PanelLeft, // Changed from AlignJustify to match clinician report
+  X,
 } from "lucide-react";
 import {
   Menu,
@@ -25,6 +27,9 @@ import { DM_Serif_Text, DM_Sans } from "next/font/google";
 import { intPsychTheme, sigmundTheme } from "../../theme";
 import logo from "@/assets/IP_Logo.png";
 import sigmund_logo from "public/Sigmund Window.png";
+import { useWeather } from "../../../lib/hooks/useWeather";
+import WeatherWidget from "../../WeatherWidget";
+import { useSound } from "use-sound";
 
 interface PortalLayoutProps {
   children: React.ReactNode;
@@ -46,27 +51,13 @@ const navigationItems = [
     href: "/journal",
     color: `text-[${sigmundTheme.primary}]`, // Orange/Amber
   },
-  // {
-  //   key: "scales",
-  //   label: "Scales",
-  //   icon: ClipboardList,
-  //   href: "/scales",
-  //   color: `text-[${intPsychTheme.accent}]`, // Blue
-  // },
-  // {
-  //   key: "psychoeducation",
-  //   label: "Learn",
-  //   icon: Brain,
-  //   href: "/psychoeducation",
-  //   color: "text-[#7e22ce]", // Deep purple (keeping distinct for learning)
-  // },
-  // {
-  //   key: "garden",
-  //   label: "Garden",
-  //   icon: Sprout,
-  //   href: "/garden",
-  //   color: "text-[#4d7c0f]", // Moss green (keeping distinct for nature)
-  // },
+  {
+    key: "scales",
+    label: "Scales",
+    icon: ClipboardList,
+    href: "/scales",
+    color: `text-[${intPsychTheme.accent}]`, // Blue
+  },
 ];
 
 const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
@@ -78,6 +69,9 @@ const dm_sans = DM_Sans({
 export default function PortalLayout({ children }: PortalLayoutProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const [isMobileOpen, setMobileOpen] = useState(false);
+  const { weather } = useWeather();
+  const [play] = useSound("/sfx/mid-pop.wav");
 
   // Initialize state from localStorage synchronously to prevent flash
   const [isExpanded, setIsExpanded] = useState(() => {
@@ -99,7 +93,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
       if (typeof window !== "undefined") {
         window.localStorage.setItem(
           "portalSidebarExpanded",
-          next ? "true" : "false"
+          next ? "true" : "false",
         );
       }
       return next;
@@ -116,28 +110,30 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
       .slice(0, 2);
   };
 
-  return (
-    <div
-      className={`flex h-screen overflow-hidden bg-slate-50 ${dm_sans.className}`}
-    >
-      {/* Sidebar */}
-      <aside
-        className={`${sidebarWidth} bg-white border-r-2 border-[${sigmundTheme.border}] flex flex-col transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] relative z-20 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]`}
-      >
+  const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => {
+    // Determine effective expanded state for rendering content
+    const expanded = isMobile || isExpanded;
+
+    return (
+      <>
         {/* Logo/Title - Header */}
         <div
-          className={`relative p-6 flex items-center gap-3 justify-center border-b-2 border-[${sigmundTheme.border}]`}
+          className={`relative p-6 flex items-center gap-3 ${
+            expanded ? "justify-start" : "justify-center"
+          } border-b-2 border-[${sigmundTheme.border}]`}
         >
-          <div className="relative">
+          <div className="relative flex-shrink-0">
             <div className="absolute inset-0 bg-[#e0f2fe] rounded-full transform scale-0" />
             <Image
               src={sigmund_logo}
               alt="Sigmund logo"
-              className={`relative object-contain transition-all duration-300 ${isExpanded ? "h-14 w-14" : "h-12 w-12"}`}
+              className={`relative object-contain transition-all duration-300 ${
+                expanded ? "h-14 w-14" : "h-12 w-12"
+              }`}
             />
           </div>
 
-          {isExpanded && (
+          {expanded && (
             <h1
               className={`${dm_serif.className} text-4xl tracking-tight leading-none`}
               style={{ color: sigmundTheme.accent }}
@@ -146,21 +142,34 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
             </h1>
           )}
 
-          {/* Toggle Button - Anchored to intersection of bottom border and right border */}
-          <button
-            type="button"
-            onClick={toggleSidebar}
-            // right-[-2px] to align center with the 2px border
-            className={`absolute right-[-2px] top-full translate-x-1/2 -translate-y-1/2 bg-[#91654f] border-[${sigmundTheme.border}] p-1.5 rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all z-50 text-white hover:text-white`}
-            aria-label={isExpanded ? "Shrink sidebar" : "Expand sidebar"}
-          >
-            {toggleIcon}
-          </button>
+          {/* Mobile Close Button */}
+          {isMobile && (
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-slate-100 text-stone-500"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          )}
+
+          {/* Desktop Toggle Button */}
+          {!isMobile && (
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              className={`absolute right-[-2px] top-full translate-x-1/2 -translate-y-1/2 bg-[#91654f] border-[${sigmundTheme.border}] p-1.5 rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all z-50 text-white hover:text-white`}
+              aria-label={isExpanded ? "Shrink sidebar" : "Expand sidebar"}
+            >
+              {toggleIcon}
+            </button>
+          )}
         </div>
 
         {/* Navigation */}
         <nav
-          className={`flex-1 px-4 py-6 space-y-2 scrollbar-hide ${isExpanded ? "overflow-y-auto" : "overflow-visible"}`}
+          className={`flex-1 px-4 py-6 space-y-2 scrollbar-hide ${
+            expanded ? "overflow-y-auto" : "overflow-visible"
+          }`}
         >
           {navigationItems.map((item) => {
             const Icon = item.icon;
@@ -171,8 +180,9 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
               <div key={item.key} className="relative group">
                 <Link
                   href={item.href}
+                  onClick={() => isMobile && setMobileOpen(false)} // Close on navigate (mobile)
                   className={`flex items-center ${
-                    isExpanded ? "gap-4 px-4" : "justify-center px-0"
+                    expanded ? "gap-4 px-4" : "justify-center px-0"
                   } py-4 rounded-xl text-base font-medium transition-all duration-200 relative overflow-hidden group ${
                     isActive
                       ? `bg-[#f0f9ff] text-[#426459] shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] border-2 border-[${sigmundTheme.border}]`
@@ -192,13 +202,13 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                     }`}
                     strokeWidth={2}
                   />
-                  {isExpanded && (
+                  {expanded && (
                     <span className="tracking-wide">{item.label}</span>
                   )}
                 </Link>
 
-                {/* Tooltip for collapsed state - High Z-Index */}
-                {!isExpanded && (
+                {/* Tooltip for collapsed state (Desktop only) */}
+                {!expanded && (
                   <div
                     style={{ backgroundColor: sigmundTheme.accent }}
                     className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-4 py-2  text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-[9999] shadow-xl pointer-events-none"
@@ -220,8 +230,10 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
           <Menu as="div" className="relative">
             <MenuButton
               className={`w-full ${
-                isExpanded ? "px-3 py-3" : "justify-center py-2"
-              } flex items-center gap-3 rounded-xl hover:bg-[#f5f5f4] border border-transparent hover:border-[${sigmundTheme.border}] transition-all group outline-none`}
+                expanded ? "px-3 py-3" : "justify-center py-2"
+              } flex items-center gap-3 rounded-xl hover:bg-[#f5f5f4] border border-transparent hover:border-[${
+                sigmundTheme.border
+              }] transition-all group outline-none`}
             >
               <div className="relative">
                 <div className="w-10 h-10 rounded-full bg-[#e0f2fe] border border-[#bae6fd] flex items-center justify-center text-[#0369a1] font-bold text-lg overflow-hidden">
@@ -238,7 +250,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                 </div>
               </div>
 
-              {isExpanded && (
+              {expanded && (
                 <div className="flex-1 min-w-0 text-left">
                   <p className="text-sm font-bold text-[#1c1917] truncate">
                     {session?.user?.name || "Adventurer"}
@@ -259,10 +271,12 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
             >
               <MenuItems
                 className={`absolute ${
-                  isExpanded
+                  expanded
                     ? "left-0 bottom-full mb-4 w-full"
                     : "left-full bottom-0 ml-4 w-56"
-                } rounded-xl border border-[${sigmundTheme.border}] bg-white shadow-xl focus:outline-none z-[9999] overflow-hidden p-1`}
+                } rounded-xl border border-[${
+                  sigmundTheme.border
+                }] bg-white shadow-xl focus:outline-none z-[9999] overflow-hidden p-1`}
               >
                 <div
                   className={`px-4 py-3 bg-[${sigmundTheme.background}] border-b border-[${sigmundTheme.border}] mb-1`}
@@ -291,15 +305,94 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
             </Transition>
           </Menu>
         </div>
+      </>
+    );
+  };
+
+  return (
+    <div
+      className={`flex h-screen overflow-hidden bg-slate-50 ${dm_sans.className}`}
+    >
+      {/* Mobile Overlay */}
+      <Transition show={isMobileOpen} as={Fragment}>
+        <div className="fixed inset-0 z-40 sm:hidden">
+          <Transition.Child
+            as={Fragment}
+            enter="transition-opacity ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="transition-opacity ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div
+              className="fixed inset-0 bg-black/50"
+              onClick={() => setMobileOpen(false)}
+            />
+          </Transition.Child>
+
+          <Transition.Child
+            as={Fragment}
+            enter="transition-transform ease-out duration-300"
+            enterFrom="-translate-x-full"
+            enterTo="translate-x-0"
+            leave="transition-transform ease-in duration-200"
+            leaveFrom="translate-x-0"
+            leaveTo="-translate-x-full"
+          >
+            <aside
+              className={`fixed inset-y-0 left-0 w-72 bg-white border-r-2 border-[${sigmundTheme.border}] flex flex-col z-50 shadow-xl`}
+            >
+              <SidebarContent isMobile={true} />
+            </aside>
+          </Transition.Child>
+        </div>
+      </Transition>
+
+      {/* Desktop Sidebar */}
+      <aside
+        className={`${sidebarWidth} hidden sm:flex bg-white border-r-2 border-[${sigmundTheme.border}] flex-col transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] relative z-20 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]`}
+      >
+        <SidebarContent />
       </aside>
 
       {/* Main Content */}
-      <main
-        className="flex-1 overflow-y-auto scroll-smooth"
-        style={{ backgroundColor: sigmundTheme.background }} // Slate 50 - cooler
-      >
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Mobile Header */}
+        <div className="sm:hidden bg-white border-b border-stone-200 p-4 flex items-center gap-4 sticky top-0 z-30">
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="p-2 -ml-2 rounded-lg text-stone-600 hover:bg-stone-50 transition-colors"
+          >
+            <PanelLeft className="w-6 h-6" />
+          </button>
+
+          <div className="flex items-center gap-3">
+            <Image
+              src={sigmund_logo}
+              alt="Sigmund logo"
+              className="h-8 w-8 object-contain"
+            />
+            <h1
+              className={`${dm_serif.className} text-xl tracking-tight leading-none`}
+              style={{ color: sigmundTheme.accent }}
+            >
+              Sigmund
+            </h1>
+          </div>
+
+          <div className="ml-auto">
+            <WeatherWidget weather={weather} compact />
+          </div>
+        </div>
+
+        <main
+          className="flex-1 overflow-y-auto scroll-smooth"
+          style={{ backgroundColor: sigmundTheme.background }}
+        >
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

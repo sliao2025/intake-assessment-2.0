@@ -618,7 +618,7 @@ export default function StorySection({
 
           <Field title={"What was the diagnosis?"} required>
             <input
-              className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+              className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
               placeholder="e.g., Generalized Anxiety Disorder"
               value={profile.previousDiagnosis || ""}
               onChange={(e) =>

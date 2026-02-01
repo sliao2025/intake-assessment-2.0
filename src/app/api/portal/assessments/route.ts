@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
           assessment.totalScore !== null
         );
       })
-      .map(({ requestedBy, dueDate, ...rest }) => rest);
+      .map(({ requestedBy, ...rest }) => rest);
 
     // Assigned assessments: have requestedBy but not yet completed
     const assignedAssessments = allAssessments
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
         where: { id: assessmentId },
         data: {
           responses,
-          totalScore: totalScore || null,
+          totalScore: totalScore ?? null,
           completedAt: new Date(), // Set when patient completes it
           // Keep requestedBy, dueDate, and assignedAt from the original assignment
         },
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
           clinicId: session.user.clinicId,
           assessmentType: assessmentTypeLower,
           responses,
-          totalScore: totalScore || null,
+          totalScore: totalScore ?? null,
           completedAt: new Date(), // Set when user completes it
         },
         select: {

@@ -1230,7 +1230,7 @@ export default function IntakeTypePage() {
             <div className="mt-8 flex items-center justify-between gap-3">
               <button
                 onClick={goBack}
-                className="inline-flex cursor-pointer disabled:cursor-not-allowed bg-white items-center gap-2 rounded-xl px-3 py-2 font-medium border border-gray-300 border-b-4 text-gray-700 disabled:opacity-40 transition duration-150 hover:brightness-95 active:scale-95"
+                className="inline-flex cursor-pointer disabled:cursor-not-allowed bg-white items-center gap-2 rounded-xl px-3 py-2 font-medium border border-gray-300 border-b-4 text-gray-700 disabled:opacity-40 transition duration-150 hover:brightness-108 active:border-b-0"
               >
                 <ChevronLeft className="h-4 w-4" /> Back
               </button>
@@ -1243,7 +1243,7 @@ export default function IntakeTypePage() {
                         : setStep(Math.min(profile.maxVisited, lastIndex))
                     }
                     disabled={profile.maxVisited === 0 && !canNext}
-                    className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white transition duration-150 hover:brightness-90 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed border-b-4"
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-semibold text-white transition duration-150 hover:brightness-120 active:border-b-0 disabled:opacity-60 disabled:cursor-not-allowed border-b-4"
                     style={{
                       background: sigmundTheme.accent,
                       borderColor: sigmundTheme.accentDark,

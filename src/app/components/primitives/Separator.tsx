@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { intPsychTheme } from "../theme";
+import { sigmundTheme } from "../theme";
 
 type Props = {
   label?: string;
@@ -18,7 +18,7 @@ export default function Separator({ label, className = "" }: Props) {
           className="absolute -top-3 left-1/2 -translate-x-1/2
                      px-3 py-1 rounded-full
                      text-xs font-semibold text-white backdrop-blur-sm"
-          style={{ backgroundColor: intPsychTheme.secondary }}
+          style={{ backgroundColor: sigmundTheme.primary }}
         >
           {label}
         </span>

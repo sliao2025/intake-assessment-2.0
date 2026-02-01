@@ -731,7 +731,7 @@ export default function AssessmentsSection({
             complete={snapCollateralDone}
           >
             <div className="space-y-4">
-              <p className="text-sm text-slate-700">
+              <p className="text-sm text-stone-700">
                 You can optionally share this assessment with teachers, coaches,
                 or other adults who know the child well. Their responses will
                 provide valuable perspectives on the child's behavior.

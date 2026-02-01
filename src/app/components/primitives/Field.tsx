@@ -10,11 +10,11 @@ const Field: React.FC<{
   className?: string;
 }> = ({ title, label, required, children, className }) => (
   <div className={`block ${className || ""}`}>
-    <div className="mb-1 text-md semibold text-slate-700">
+    <div className="mb-1 text-md semibold text-stone-700">
       {required && <span className="text-rose-600">* </span>}
       {title}
     </div>
-    <div className="mb-1 text-sm semibold text-slate-700">{label}</div>
+    <div className="mb-1 text-sm semibold text-stone-700">{label}</div>
     {children}
   </div>
 );

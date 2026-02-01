@@ -127,8 +127,8 @@ export default function WelcomeSection({
         <div className="rounded-2xl border border-[#e7e5e4] bg-white p-4 md:p-5">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-slate-900">Assessment Type</h3>
-              <p className="mt-1 text-sm text-slate-600">
+              <h3 className="font-semibold text-stone-900">Assessment Type</h3>
+              <p className="mt-1 text-sm text-stone-600">
                 {assessmentType === "child"
                   ? "Parent/guardian completing for a child under 18"
                   : "Completing for yourself (adult 18+)"}
@@ -146,11 +146,11 @@ export default function WelcomeSection({
           </div>
 
           {/* Clinician selector */}
-          <div className="mt-4 pt-4 border-t border-slate-100">
-            <h4 className="font-medium text-slate-900 mb-1">
+          <div className="mt-4 pt-4 border-t border-stone-100">
+            <h4 className="font-medium text-stone-900 mb-1">
               Who's your clinician? <span className="text-red-500">*</span>
             </h4>
-            <p className="text-sm text-slate-500 mb-2">
+            <p className="text-sm text-stone-500 mb-2">
               Please select your assigned clinician to continue.
             </p>
             <Field title="Who's your clinician?">
@@ -180,18 +180,18 @@ export default function WelcomeSection({
                     <div className="relative">
                       <ListboxButton
                         ref={buttonRef}
-                        className={`w-full relative block rounded-xl bg-white border px-3 py-2 text-left text-slate-900 ${
+                        className={`w-full relative block rounded-xl bg-white border px-3 py-2 text-left text-stone-900 ${
                           hasSelectedClinician
                             ? "border-emerald-300 ring-1 ring-emerald-200"
-                            : "border-slate-300"
+                            : "border-stone-300"
                         }`}
                       >
                         {clinicianName ? (
-                          <span className="text-slate-900">
+                          <span className="text-stone-900">
                             {clinicianName}
                           </span>
                         ) : (
-                          <span className="text-slate-400">
+                          <span className="text-stone-400">
                             Select your clinician…
                           </span>
                         )}
@@ -205,7 +205,7 @@ export default function WelcomeSection({
                         ? createPortal(
                             <ListboxOptions
                               static
-                              className="fixed z-[9999] mt-2 max-h-60 overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none"
+                              className="fixed z-[9999] mt-2 max-h-60 overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none"
                               style={{
                                 top: `${dropdownPosition.top}px`,
                                 left: `${dropdownPosition.left}px`,
@@ -221,20 +221,20 @@ export default function WelcomeSection({
                                   {({ active, selected }) => (
                                     <li
                                       className={`${
-                                        active ? "bg-slate-100" : "bg-white"
+                                        active ? "bg-stone-100" : "bg-white"
                                       } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                                     >
                                       <span
                                         className={`${
                                           selected
-                                            ? "font-medium text-slate-900"
-                                            : "font-normal text-slate-700"
+                                            ? "font-medium text-stone-900"
+                                            : "font-normal text-stone-700"
                                         } block truncate`}
                                       >
                                         {clinician.name}
                                       </span>
                                       {selected && (
-                                        <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                                        <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                                           <Check />
                                         </span>
                                       )}
@@ -261,20 +261,20 @@ export default function WelcomeSection({
           {/* At-a-glance cards */}
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="rounded-2xl border border-[#e7e5e4] bg-white p-4">
-              <div className="text-sm text-slate-500">Estimated time</div>
-              <div className="text-lg items-start flex font-semibold text-slate-900">
+              <div className="text-sm text-stone-500">Estimated time</div>
+              <div className="text-lg items-start flex font-semibold text-stone-900">
                 <p>30–60 minutes</p>
               </div>
-              <div className="mt-2 text-sm text-slate-600">
+              <div className="mt-2 text-sm text-stone-600">
                 You can move between sections and come back to edit answers.
               </div>
             </div>
             <div className="rounded-2xl border border-[#e7e5e4] bg-white p-4">
-              <div className="text-sm text-slate-500">Format</div>
-              <div className="text-lg font-semibold text-slate-900">
+              <div className="text-sm text-stone-500">Format</div>
+              <div className="text-lg font-semibold text-stone-900">
                 Multiple‑choice + Free‑response
               </div>
-              <div className="mt-2 text-sm text-slate-600">
+              <div className="mt-2 text-sm text-stone-600">
                 Type your responses or select from options.
               </div>
             </div>
@@ -282,25 +282,25 @@ export default function WelcomeSection({
 
           {/* What to expect */}
           <div className="rounded-2xl border border-[#e7e5e4] bg-white p-4 md:p-5">
-            <h3 className="font-semibold text-slate-900">What to expect</h3>
+            <h3 className="font-semibold text-stone-900">What to expect</h3>
             <ul className="mt-3 space-y-2">
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 flex-none text-emerald-600" />
-                <span className="text-slate-700">
+                <span className="text-stone-700">
                   This intake helps your clinician <b>jumpstart treatment</b> by
                   gathering context that might otherwise take a full session.
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 flex-none text-emerald-600" />
-                <span className="text-slate-700">
+                <span className="text-stone-700">
                   Progress is shown above. You'll unlock later sections as you
                   complete earlier ones.
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 flex-none text-emerald-600" />
-                <span className="text-slate-700">
+                <span className="text-stone-700">
                   The more <b>detail</b> you provide, the better we can tailor
                   your care.
                 </span>
@@ -310,11 +310,11 @@ export default function WelcomeSection({
 
           {/* Voice Recordings */}
           <div className="rounded-2xl border border-[#e7e5e4] bg-white p-4 md:p-5">
-            <h3 className="font-semibold text-slate-900">Voice Recordings</h3>
+            <h3 className="font-semibold text-stone-900">Voice Recordings</h3>
             <ul className="mt-3 space-y-2">
               <li className="flex items-start gap-2">
                 <Mic className="mt-0.5 h-5 w-5 shrink-0 flex-none text-red-600" />
-                <span className="text-slate-700">
+                <span className="text-stone-700">
                   <b>Record your answers</b> instead of typing—your clinician
                   will gain a richer, more nuanced understanding of your
                   situation.
@@ -322,14 +322,14 @@ export default function WelcomeSection({
               </li>
               <li className="flex items-start gap-2">
                 <FileAudio className="mt-0.5 h-5 w-5 shrink-0 flex-none text-red-600" />
-                <span className="text-slate-700">
+                <span className="text-stone-700">
                   You can record, type, or use <b>both methods</b> for each
                   question.
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <RotateCcw className="mt-0.5 h-5 w-5 shrink-0 flex-none text-red-600" />
-                <span className="text-slate-700">
+                <span className="text-stone-700">
                   To re-record, click <b>Delete</b> first, then click{" "}
                   <b>Record</b> again.
                 </span>
@@ -339,22 +339,22 @@ export default function WelcomeSection({
 
           {/* Saving behavior */}
           <div className="rounded-2xl border border-[#e7e5e4] bg-white p-4 md:p-5">
-            <h3 className="font-semibold text-slate-900">
+            <h3 className="font-semibold text-stone-900">
               Saving &amp; returning
             </h3>
             {session?.user?.role === "guest" ? (
-              <p className="mt-2 text-slate-700">
+              <p className="mt-2 text-stone-700">
                 You're using a <b>guest session</b>. If you close this tab, your
                 progress won't save. To save and return later, please create an
                 account or sign in with Google.
               </p>
             ) : (
-              <div className="mt-2 space-y-2 text-slate-700">
+              <div className="mt-2 space-y-2 text-stone-700">
                 <p>
                   Your progress saves each time you click <b>Next</b>. You can
                   return later and pick up where you left off.
                 </p>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-stone-600">
                   Note: If you leave a page mid‑way without clicking Next,
                   answers on that page may not be saved.
                 </p>

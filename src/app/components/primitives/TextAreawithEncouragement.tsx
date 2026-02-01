@@ -42,13 +42,13 @@ export default function TextAreaWithEncouragement({
     <div>
       <textarea
         rows={rows}
-        className={`w-full rounded-2xl bg-white border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400 ${className}`}
+        className={`w-full rounded-2xl bg-white border border-stone-300 px-4 py-3 text-stone-900 placeholder:text-stone-400 ${className}`}
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChangeText(e.target.value)}
       />
       <div className="mt-2">
-        <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
+        <div className="h-1.5 rounded-full bg-stone-200 overflow-hidden">
           <div
             className={`h-full w-full ${barColor} origin-left transform transition-transform duration-700 ease-in-out motion-reduce:transition-none`}
             style={{

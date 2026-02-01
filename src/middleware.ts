@@ -39,9 +39,9 @@ export async function middleware(req: NextRequest) {
     if (!hasToken && !guestMode) {
       return guardSignIn(req, `${pathname}${search || ""}`);
     }
-    if (intakeFinished && hasToken) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
-    }
+    // if (intakeFinished && hasToken) {
+    //   return NextResponse.redirect(new URL("/dashboard", req.url));
+    // }
   }
 
   if (pathname.startsWith("/dashboard")) {

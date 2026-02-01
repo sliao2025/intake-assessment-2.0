@@ -29,9 +29,11 @@ export const intPsychTheme = {
 
 export const sigmundTheme = {
   primary: "#b2bfa2",
+  primaryDark: "#8b9e74ff",
   primaryLight: "#b2bfa233",
   secondary: "#91654f",
   secondaryDark: "#463f3bff",
+  secondaryLight: "#a57760ff",
   accent: "#426459",
   accentDark: "#2d463e",
   background: "#fafaf9", // stone-50

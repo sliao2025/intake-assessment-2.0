@@ -128,7 +128,11 @@ function SignInContent() {
                 {mode === "signin" && (
                   <>
                     <button
-                      className={`${dm_sans.className} bg-[#463f3bff] w-full cursor-pointer inline-flex items-center justify-center gap-3 rounded-full px-5 py-3 font-medium text-white transition-all border-b-4 border-black/20`}
+                      style={{
+                        backgroundColor: sigmundTheme.secondaryDark,
+                        borderColor: "rgba(0,0,0,0.2)",
+                      }}
+                      className={`${dm_sans.className} w-full hover:brightness-105 hover:translate-y-[-2px] active:brightness-95 active:translate-y-[2px] active:border-b-0 cursor-pointer inline-flex items-center justify-center gap-3 rounded-full px-5 py-3 font-medium text-white transition-all border-b-4`}
                       onClick={async () => {
                         const res = await signIn("google", {
                           callbackUrl,
@@ -137,11 +141,6 @@ function SignInContent() {
                         if (res?.url) {
                           router.push(res.url);
                         }
-                      }}
-                      style={{
-                        // background: `linear-gradient(0deg, ${intPsychTheme.primary}, ${intPsychTheme.accent})`,
-                        boxShadow: "0 2px 8px 0 rgba(0,0,0,0.08)",
-                        transition: `transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), filter 0.2s`,
                       }}
                     >
                       <svg
@@ -215,7 +214,7 @@ function SignInContent() {
                         router.push(res.url);
                       } else if (res?.error) {
                         setErrorTip(
-                          "There was an error logging in. Please check your credentials and try again."
+                          "There was an error logging in. Please check your credentials and try again.",
                         );
                       }
                     }
@@ -261,7 +260,11 @@ function SignInContent() {
                   </div>
 
                   <button
-                    className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 font-medium text-white bg-black/20 bg-[color:var(--accent)] hover:bg-black/35 transition-colors duration-200 ease-in-out border-b-4 border-black/20"
+                    style={{
+                      backgroundColor: "rgba(0,0,0,0.2)",
+                      borderColor: "rgba(0,0,0,0.2)",
+                    }}
+                    className={`${dm_sans.className} w-full hover:brightness-105 hover:translate-y-[-2px] active:brightness-95 active:translate-y-[2px] active:border-b-0 cursor-pointer inline-flex items-center justify-center gap-3 rounded-full px-5 py-3 font-medium text-white transition-all border-b-4`}
                     type="submit"
                   >
                     {mode === "signin" ? "Sign in" : "Create account"}

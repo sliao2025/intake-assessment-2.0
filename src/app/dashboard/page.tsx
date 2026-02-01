@@ -28,6 +28,7 @@ import { useWeather } from "../lib/hooks/useWeather";
 import WeatherWidget from "../components/WeatherWidget";
 import Link from "next/link";
 import sigmund_chair from "public/Sigmund Chair.png";
+import { useSound } from "use-sound";
 
 interface DashboardData {
   assessments: {
@@ -68,11 +69,12 @@ const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 export default function DashboardPage() {
   const { data: session } = useSession();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
-    null
+    null,
   );
   const [loading, setLoading] = useState(true);
   const [clinician, setClinician] = useState<string | null>(null);
   const { weather } = useWeather();
+  // const [play] = useSound("/sfx/neutral-ui.wav");
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -136,7 +138,7 @@ export default function DashboardPage() {
   }
 
   const getWeatherGreeting = (
-    weather: { condition: string; icon: string } | null
+    weather: { condition: string; icon: string } | null,
   ): string => {
     if (!weather) return "";
     const icon = weather.icon;
@@ -174,7 +176,9 @@ export default function DashboardPage() {
                   : "Ready to continue your journey?"}
               </p>
             </div>
-            <WeatherWidget weather={weather} />
+            <div className="hidden sm:block">
+              <WeatherWidget weather={weather} />
+            </div>
           </div>
 
           {/* Main Action Grid */}
@@ -216,7 +220,11 @@ export default function DashboardPage() {
                   <div className="flex justify-end w-full">
                     <Link href="/journal">
                       <button
-                        className={`cursor-pointer px-8 py-3 bg-[${sigmundTheme.accent}] text-white rounded-xl font-bold hover:bg-[${sigmundTheme.secondaryDark}] active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-stone-900/10`}
+                        style={{
+                          borderColor: sigmundTheme.primaryDark,
+                          backgroundColor: sigmundTheme.primary,
+                        }}
+                        className={`cursor-pointer hover:brightness-105 active:translate-y-[2px] hover:translate-y-[-2px] border-b-4 px-8 py-3 text-white rounded-xl font-bold active:border-b-0 transition-all flex items-center gap-2`}
                       >
                         New Entry
                         <ArrowRight className="w-4 h-4" />
@@ -248,7 +256,7 @@ export default function DashboardPage() {
                 </p>
                 <Link href="/journal">
                   <button
-                    className={`w-full bg-white text-[${sigmundTheme.accent}] px-6 py-2 rounded-xl font-bold border-2 border-[${sigmundTheme.accent}] hover:bg-[${sigmundTheme.background}] hover:text-[${sigmundTheme.secondary}] hover:border-[${sigmundTheme.secondary}] transition-all`}
+                    className={`w-full cursor-pointer hover:scale-103 bg-white text-[${sigmundTheme.accent}] px-6 py-2 rounded-xl font-bold border-2 border-[${sigmundTheme.accent}] hover:bg-[${sigmundTheme.background}] hover:text-[${sigmundTheme.secondary}] hover:border-[${sigmundTheme.secondary}] transition-all`}
                   >
                     View History
                   </button>

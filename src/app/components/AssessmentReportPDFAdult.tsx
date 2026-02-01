@@ -350,6 +350,16 @@ const scoreSum = (obj: Record<string, any> = {}) =>
     0
   );
 
+const calculatePSSScore = (stress: any = {}) => {
+  const p1 = parseInt(stress.pss1) || 0;
+  const p2 = 4 - (parseInt(stress.pss2) || 0);
+  const p3 = 4 - (parseInt(stress.pss3) || 0);
+  const p4 = parseInt(stress.pss4) || 0;
+  // If all are missing, return 0, but if any are present, calculate sum with defaults
+  if (!stress.pss1 && !stress.pss2 && !stress.pss3 && !stress.pss4) return 0;
+  return p1 + p2 + p3 + p4;
+};
+
 /**
  * Helper to extract text content from fields that may have:
  * - .text (typed text)
@@ -1105,7 +1115,7 @@ export const AssessmentReportPDFAdult = ({
               {/* PSS-4 */}
               <PdfGauge
                 label="Stress (PSS-4)"
-                score={scoreSum(adultAssessments.stress)}
+                score={calculatePSSScore(adultAssessments.stress)}
                 max={16}
                 caption="Higher = more stress"
               />

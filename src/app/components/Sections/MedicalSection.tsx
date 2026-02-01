@@ -31,7 +31,7 @@ const dm_sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 // ---- Hoisted UI atoms to maintain stable component identity across renders ----
 const Card: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="rounded-2xl border border-slate-300 p-4 bg-white/80">
+  <div className="rounded-2xl border border-stone-300 p-4 bg-white/80">
     {children}
   </div>
 );
@@ -40,10 +40,10 @@ const Input = (
   props: React.InputHTMLAttributes<HTMLInputElement> & { label?: string }
 ) => (
   <div className="flex flex-col gap-1">
-    <label className="text-sm text-slate-600">{props.label}</label>
+    <label className="text-sm text-stone-600">{props.label}</label>
     <input
       {...props}
-      className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+      className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
     />
   </div>
 );
@@ -54,7 +54,7 @@ const AddButton: React.FC<{ onClick: () => void; label: string }> = ({
 }) => (
   <button
     onClick={onClick}
-    className="inline-flex cursor-pointer items-center rounded-xl border border-slate-300 border-b-4 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+    className="inline-flex cursor-pointer items-center rounded-xl border border-stone-300 border-b-4 bg-white px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
     style={{ outlineColor: intPsychTheme.secondary }}
   >
     + {label}
@@ -343,7 +343,7 @@ export default function MedicalSection({
                   <input
                     type="date" /* change to type="date" if you prefer a date picker */
                     placeholder="mm/dd/yyyy"
-                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                    className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                     value={
                       profile.childMedicalHistory?.neuropsychEvalDate ?? ""
                     }
@@ -467,10 +467,10 @@ export default function MedicalSection({
                   by="value"
                 >
                   <div className="relative">
-                    <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                    <ListboxButton className="w-full relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
                       {(profile.childPsychiatricHistory?.treatmentKinds ?? [])
                         .length === 0 ? (
-                        <span className="text-slate-400">
+                        <span className="text-stone-400">
                           Select all that apply…
                         </span>
                       ) : (
@@ -481,7 +481,7 @@ export default function MedicalSection({
                           ).map((o) => (
                             <span
                               key={o.value}
-                              className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
+                              className="inline-flex items-center rounded-md bg-stone-100 px-2 py-0.5 text-xs text-stone-700"
                             >
                               {o.label}
                             </span>
@@ -489,7 +489,7 @@ export default function MedicalSection({
                         </span>
                       )}
                     </ListboxButton>
-                    <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                    <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
                       {childTreatmentOptions.map((opt) => (
                         <ListboxOption
                           key={opt.value}
@@ -498,15 +498,15 @@ export default function MedicalSection({
                         >
                           {({ active, selected }) => (
                             <li
-                              className={`${active ? "bg-slate-100" : "bg-white"} relative cursor-pointer select-none py-2 pl-4 pr-10`}
+                              className={`${active ? "bg-stone-100" : "bg-white"} relative cursor-pointer select-none py-2 pl-4 pr-10`}
                             >
                               <span
-                                className={`${selected ? "font-medium text-slate-900" : "font-normal text-slate-700"} block truncate`}
+                                className={`${selected ? "font-medium text-stone-900" : "font-normal text-stone-700"} block truncate`}
                               >
                                 {opt.label}
                               </span>
                               {selected && (
-                                <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                                <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                                   <Check />
                                 </span>
                               )}
@@ -528,7 +528,7 @@ export default function MedicalSection({
                 <Field title="When was your child's first in treatment?">
                   <input
                     type="date"
-                    className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                    className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                     value={
                       profile.childPsychiatricHistory?.firstTreatmentDate ?? ""
                     }
@@ -1108,7 +1108,7 @@ export default function MedicalSection({
             ) && (
               <Field title="Other (please specify)">
                 <input
-                  className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 placeholder:text-slate-400"
+                  className="w-full rounded-xl bg-white border border-stone-300 px-3 py-2 text-stone-900 placeholder:text-stone-400"
                   placeholder="Describe other conditions…"
                   value={
                     profile.childMedicalHistory?.medicalConditionsOther ?? ""
@@ -1997,7 +1997,7 @@ export default function MedicalSection({
                 }
               >
                 <div className="relative">
-                  <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                  <ListboxButton className="w-full relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
                     {activityLevelLabel(
                       profile.childDevelopmentalHistory?.activityLevel
                     )}
@@ -2006,7 +2006,7 @@ export default function MedicalSection({
                       aria-hidden="true"
                     />
                   </ListboxButton>
-                  <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                  <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
                     {[
                       { value: "active", label: "Active" },
                       { value: "active_but_calm", label: "Active but calm" },
@@ -2021,20 +2021,20 @@ export default function MedicalSection({
                         {({ active, selected }) => (
                           <li
                             className={`${
-                              active ? "bg-slate-100" : "bg-white"
+                              active ? "bg-stone-100" : "bg-white"
                             } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                           >
                             <span
                               className={`${
                                 selected
-                                  ? "font-medium text-slate-900"
-                                  : "font-normal text-slate-700"
+                                  ? "font-medium text-stone-900"
+                                  : "font-normal text-stone-700"
                               } block truncate`}
                             >
                               {opt.label}
                             </span>
                             {selected && (
-                              <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                              <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                                 <Check />
                               </span>
                             )}
@@ -2090,7 +2090,7 @@ export default function MedicalSection({
                 }
               >
                 <div className="relative">
-                  <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                  <ListboxButton className="w-full relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
                     {affectiveStyleLabel(
                       profile.childDevelopmentalHistory?.earlyAffectiveStyle
                     )}
@@ -2099,7 +2099,7 @@ export default function MedicalSection({
                       aria-hidden="true"
                     />
                   </ListboxButton>
-                  <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                  <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
                     {[
                       { value: "cuddly", label: "Cuddly" },
                       { value: "irritable", label: "Irritable" },
@@ -2114,20 +2114,20 @@ export default function MedicalSection({
                         {({ active, selected }) => (
                           <li
                             className={`${
-                              active ? "bg-slate-100" : "bg-white"
+                              active ? "bg-stone-100" : "bg-white"
                             } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                           >
                             <span
                               className={`${
                                 selected
-                                  ? "font-medium text-slate-900"
-                                  : "font-normal text-slate-700"
+                                  ? "font-medium text-stone-900"
+                                  : "font-normal text-stone-700"
                               } block truncate`}
                             >
                               {opt.label}
                             </span>
                             {selected && (
-                              <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                              <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                                 <Check />
                               </span>
                             )}
@@ -2182,7 +2182,7 @@ export default function MedicalSection({
                 }
               >
                 <div className="relative">
-                  <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                  <ListboxButton className="w-full relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
                     {cryingPatternLabel(
                       profile.childDevelopmentalHistory?.cryingPattern
                     )}
@@ -2191,7 +2191,7 @@ export default function MedicalSection({
                       aria-hidden="true"
                     />
                   </ListboxButton>
-                  <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                  <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
                     {[
                       {
                         value: "easily_frequently",
@@ -2209,20 +2209,20 @@ export default function MedicalSection({
                         {({ active, selected }) => (
                           <li
                             className={`${
-                              active ? "bg-slate-100" : "bg-white"
+                              active ? "bg-stone-100" : "bg-white"
                             } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                           >
                             <span
                               className={`${
                                 selected
-                                  ? "font-medium text-slate-900"
-                                  : "font-normal text-slate-700"
+                                  ? "font-medium text-stone-900"
+                                  : "font-normal text-stone-700"
                               } block truncate`}
                             >
                               {opt.label}
                             </span>
                             {selected && (
-                              <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                              <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                                 <Check />
                               </span>
                             )}
@@ -2278,7 +2278,7 @@ export default function MedicalSection({
                 }
               >
                 <div className="relative">
-                  <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                  <ListboxButton className="w-full relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
                     {soothingLabel(
                       profile.childDevelopmentalHistory?.soothingWhenUpset
                     )}
@@ -2287,7 +2287,7 @@ export default function MedicalSection({
                       aria-hidden="true"
                     />
                   </ListboxButton>
-                  <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                  <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
                     {[
                       { value: "soothed_easily", label: "Soothed Easily" },
                       {
@@ -2305,20 +2305,20 @@ export default function MedicalSection({
                         {({ active, selected }) => (
                           <li
                             className={`${
-                              active ? "bg-slate-100" : "bg-white"
+                              active ? "bg-stone-100" : "bg-white"
                             } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                           >
                             <span
                               className={`${
                                 selected
-                                  ? "font-medium text-slate-900"
-                                  : "font-normal text-slate-700"
+                                  ? "font-medium text-stone-900"
+                                  : "font-normal text-stone-700"
                               } block truncate`}
                             >
                               {opt.label}
                             </span>
                             {selected && (
-                              <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                              <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                                 <Check />
                               </span>
                             )}
@@ -2394,7 +2394,7 @@ export default function MedicalSection({
                   }
                 >
                   <div className="relative">
-                    <ListboxButton className="w-full relative block rounded-xl bg-white border border-slate-300 px-3 py-2 text-left text-slate-900">
+                    <ListboxButton className="w-full relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
                       {reactionToStrangersLabel(
                         profile.childDevelopmentalHistory?.reactionToStrangers
                       )}
@@ -2403,7 +2403,7 @@ export default function MedicalSection({
                         aria-hidden="true"
                       />
                     </ListboxButton>
-                    <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-slate-200 focus:outline-none list-none">
+                    <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
                       {[
                         { value: "friendly", label: "Friendly" },
                         { value: "indifferent", label: "Indifferent" },
@@ -2417,20 +2417,20 @@ export default function MedicalSection({
                           {({ active, selected }) => (
                             <li
                               className={`${
-                                active ? "bg-slate-100" : "bg-white"
+                                active ? "bg-stone-100" : "bg-white"
                               } relative cursor-pointer select-none py-2 pl-4 pr-10`}
                             >
                               <span
                                 className={`${
                                   selected
-                                    ? "font-medium text-slate-900"
-                                    : "font-normal text-slate-700"
+                                    ? "font-medium text-stone-900"
+                                    : "font-normal text-stone-700"
                                 } block truncate`}
                               >
                                 {opt.label}
                               </span>
                               {selected && (
-                                <span className="absolute inset-y-0 right-3 flex items-center text-slate-600">
+                                <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
                                   <Check />
                                 </span>
                               )}
@@ -2494,7 +2494,7 @@ export default function MedicalSection({
           <Separator label="Developmental Milestones" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-stone-600">
                 Please mark any milestones that occurred later than the stated
                 age.
               </p>
@@ -2587,8 +2587,8 @@ export default function MedicalSection({
       {/* Current Medications */}
       <Separator label="Current Medications" />
       {profile.currentMedications.length === 0 ? (
-        <div className="flex items-center justify-between rounded-xl border border-dashed border-slate-300 p-4 bg-white/60">
-          <div className="text-sm text-slate-600">No medications added.</div>
+        <div className="flex items-center justify-between rounded-xl border border-dashed border-stone-300 p-4 bg-white/60">
+          <div className="text-sm text-stone-600">No medications added.</div>
           <AddButton onClick={addCurrentMed} label="Add Medication" />
         </div>
       ) : (
@@ -2596,7 +2596,7 @@ export default function MedicalSection({
           {profile.currentMedications.map((m, idx) => (
             <Card key={idx}>
               <div className="flex justify-between mb-2 group">
-                <div className="font-medium text-slate-700">
+                <div className="font-medium text-stone-700">
                   Medication #{idx + 1}
                 </div>
                 <RemoveButton onClick={() => removeCurrentMed(idx)} />
@@ -2638,7 +2638,7 @@ export default function MedicalSection({
                   }
                 />
                 <div className="flex flex-col gap-1">
-                  <label className="text-sm text-slate-600">Comments</label>
+                  <label className="text-sm text-stone-600">Comments</label>
                   <TextAreaWithEncouragement
                     rows={3}
                     placeholder="Optional notes about this medication…"
@@ -2661,8 +2661,8 @@ export default function MedicalSection({
       {/* Previous Medications */}
       <Separator label="Previous Medications" />
       {profile.previousMedications.length === 0 ? (
-        <div className="flex items-center justify-between rounded-xl border border-dashed border-slate-300 p-4 bg-white/60">
-          <div className="text-sm text-slate-600">
+        <div className="flex items-center justify-between rounded-xl border border-dashed border-stone-300 p-4 bg-white/60">
+          <div className="text-sm text-stone-600">
             No previous medications added.
           </div>
           <AddButton onClick={addPrevMed} label="Add Previous Medication" />
@@ -2672,7 +2672,7 @@ export default function MedicalSection({
           {profile.previousMedications.map((m, idx) => (
             <Card key={idx}>
               <div className="flex justify-between mb-2 group">
-                <div className="font-medium text-slate-700">
+                <div className="font-medium text-stone-700">
                   Previous Medication #{idx + 1}
                 </div>
                 <RemoveButton onClick={() => removePrevMed(idx)} />
@@ -2710,7 +2710,7 @@ export default function MedicalSection({
                   }
                 />
                 <div className="flex flex-col gap-1">
-                  <label className="text-sm text-slate-600">Comments</label>
+                  <label className="text-sm text-stone-600">Comments</label>
                   <TextAreaWithEncouragement
                     rows={3}
                     placeholder="Optional notes about this prior medication…"
@@ -2736,8 +2736,8 @@ export default function MedicalSection({
       {/* Medical Allergies */}
       <Separator label="Medical Allergies" />
       {profile.medicalAllergies.length === 0 ? (
-        <div className="flex items-center justify-between rounded-xl border border-dashed border-slate-300 p-4 bg-white/60">
-          <div className="text-sm text-slate-600">No allergies recorded.</div>
+        <div className="flex items-center justify-between rounded-xl border border-dashed border-stone-300 p-4 bg-white/60">
+          <div className="text-sm text-stone-600">No allergies recorded.</div>
           <AddButton onClick={addAllergy} label="Add Allergy" />
         </div>
       ) : (
@@ -2745,7 +2745,7 @@ export default function MedicalSection({
           {profile.medicalAllergies.map((a, idx) => (
             <Card key={idx}>
               <div className="flex justify-between mb-2 group">
-                <div className="font-medium text-slate-700">
+                <div className="font-medium text-stone-700">
                   Allergy #{idx + 1}
                 </div>
                 <RemoveButton onClick={() => removeAllergy(idx)} />
@@ -2773,8 +2773,8 @@ export default function MedicalSection({
       {/* Previous Hospitalization */}
       <Separator label="Previous Hospitalization" />
       {profile.previousHospitalizations.length === 0 ? (
-        <div className="flex items-center justify-between rounded-xl border border-dashed border-slate-300 p-4 bg-white/60">
-          <div className="text-sm text-slate-600">
+        <div className="flex items-center justify-between rounded-xl border border-dashed border-stone-300 p-4 bg-white/60">
+          <div className="text-sm text-stone-600">
             No hospitalizations added.
           </div>
           <AddButton onClick={addHosp} label="Add Hospitalization" />
@@ -2784,7 +2784,7 @@ export default function MedicalSection({
           {profile.previousHospitalizations.map((h, idx) => (
             <Card key={idx}>
               <div className="flex justify-between mb-2 group">
-                <div className="font-medium text-slate-700">
+                <div className="font-medium text-stone-700">
                   Hospitalization #{idx + 1}
                 </div>
                 <RemoveButton onClick={() => removeHosp(idx)} />
@@ -2809,7 +2809,7 @@ export default function MedicalSection({
                   onChange={(e) => updateHosp(idx, "date", e.target.value)}
                 />
                 <div className="flex flex-col gap-1">
-                  <label className="text-sm text-slate-600">Reason</label>
+                  <label className="text-sm text-stone-600">Reason</label>
                   <TextAreaWithEncouragement
                     rows={3}
                     placeholder="Briefly describe the reason for hospitalization…"
@@ -2830,15 +2830,15 @@ export default function MedicalSection({
       {/* Previous Injuries */}
       <Separator label="Previous Injuries" />
       {!showInjuries ? (
-        <div className="flex items-center justify-between rounded-xl border border-dashed border-slate-300 p-4 bg-white/60">
-          <div className="text-sm text-slate-600">No injuries recorded.</div>
+        <div className="flex items-center justify-between rounded-xl border border-dashed border-stone-300 p-4 bg-white/60">
+          <div className="text-sm text-stone-600">No injuries recorded.</div>
           <AddButton onClick={ensureInjuries} label="Add Injury Details" />
         </div>
       ) : (
-        <div className="rounded-2xl border border-slate-300 p-4 bg-white/80">
+        <div className="rounded-2xl border border-stone-300 p-4 bg-white/80">
           <div className="grid grid-cols-1 gap-3">
             <div className="flex flex-col gap-1">
-              <label className="text-sm text-slate-600">Injury List</label>
+              <label className="text-sm text-stone-600">Injury List</label>
               <TextAreaWithEncouragement
                 rows={2}
                 placeholder="e.g., concussion (2019); wrist fracture (2021)…"
@@ -2848,7 +2848,7 @@ export default function MedicalSection({
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm text-slate-600">Explanation</label>
+              <label className="text-sm text-stone-600">Explanation</label>
               <TextAreaWithEncouragement
                 rows={4}
                 placeholder="Add brief context, treatments, lingering effects…"
