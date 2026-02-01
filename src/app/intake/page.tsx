@@ -239,7 +239,7 @@ function blankSnapResponses(): Record<(typeof snapKeys)[number], string> {
 // --- SCARED (41) blank responses helper ---
 const scaredKeys = Array.from(
   { length: 41 },
-  (_, i) => `scared${String(i + 1).padStart(2, "0")}`
+  (_, i) => `scared${String(i + 1).padStart(2, "0")}`,
 );
 function blankScaredResponses(): Record<(typeof scaredKeys)[number], string> {
   return scaredKeys.reduce((acc, k) => {
@@ -450,6 +450,145 @@ export function makeDefaultChildProfile(): Profile {
   };
 }
 
+// --- Clinician Select Component (Extracted to avoid hook-in-render-prop issues) ---
+function ClinicianSelect({
+  open,
+  clinicianName,
+}: {
+  open: boolean;
+  clinicianName: string;
+}) {
+  const [dropdownPosition, setDropdownPosition] = useState<{
+    top: number;
+    left: number;
+    width: number;
+  } | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const hasSelectedClinician = !!clinicianName;
+
+  useEffect(() => {
+    if (open && buttonRef.current) {
+      const update = () => {
+        if (buttonRef.current) {
+          const rect = buttonRef.current.getBoundingClientRect();
+          setDropdownPosition({
+            top: rect.bottom + window.scrollY + 8, // 8px = mt-2
+            left: rect.left + window.scrollX,
+            width: rect.width,
+          });
+        }
+      };
+      requestAnimationFrame(update);
+    } else {
+      setDropdownPosition(null);
+    }
+  }, [open]);
+
+  return (
+    <div className="relative">
+      <ListboxButton
+        type="button"
+        ref={buttonRef}
+        className={`w-full relative block rounded-xl bg-white border-2 px-4 py-3 text-left text-stone-900 transition-all ${
+          hasSelectedClinician
+            ? "border-emerald-500 ring-1 ring-emerald-500"
+            : "border-stone-200 hover:border-stone-300"
+        }`}
+      >
+        {clinicianName ? (
+          <span className="block truncate text-stone-900 font-medium">
+            {clinicianName}
+          </span>
+        ) : (
+          <span className="block truncate text-stone-400">Select...</span>
+        )}
+        <ChevronDown
+          className="pointer-events-none absolute top-3.5 right-3 size-5 text-stone-400"
+          aria-hidden="true"
+        />
+      </ListboxButton>
+
+      {open && dropdownPosition && typeof window !== "undefined"
+        ? createPortal(
+            <ListboxOptions
+              static
+              className="fixed z-[9999] mt-2 max-h-60 overflow-auto rounded-xl bg-white py-1 shadow-xl border border-stone-200 focus:outline-none list-none ring-1 ring-black/5"
+              style={{
+                top: `${dropdownPosition.top}px`,
+                left: `${dropdownPosition.left}px`,
+                width: `${dropdownPosition.width}px`,
+              }}
+            >
+              {CLINICIANS.map((clinician) => (
+                <ListboxOption
+                  key={clinician.name}
+                  value={clinician.name}
+                  as={React.Fragment}
+                >
+                  {({ active, selected }) => (
+                    <li
+                      className={`${
+                        active
+                          ? "bg-emerald-50 text-emerald-900"
+                          : "bg-white text-stone-900"
+                      } relative cursor-pointer select-none py-3 pl-4 pr-10 border-b border-stone-50 last:border-0`}
+                    >
+                      <span
+                        className={`${
+                          selected ? "font-semibold" : "font-normal"
+                        } block truncate`}
+                      >
+                        {clinician.name}
+                      </span>
+                      {selected && (
+                        <span className="absolute inset-y-0 right-3 flex items-center text-emerald-600">
+                          <Check className="w-5 h-5" />
+                        </span>
+                      )}
+                    </li>
+                  )}
+                </ListboxOption>
+              ))}
+            </ListboxOptions>,
+            document.body,
+          )
+        : null}
+    </div>
+  );
+}
+
+const CardWrapper = ({
+  children,
+  title,
+}: {
+  children: React.ReactNode;
+  title: React.ReactNode;
+}) => (
+  <div
+    className={`fixed inset-0 h-dvh overflow-y-auto overflow-x-hidden ${dm_sans.className}`}
+    style={{
+      color: theme.text,
+      WebkitTapHighlightColor: "transparent",
+      backgroundColor: sigmundTheme.background,
+    }}
+  >
+    <div
+      className="relative z-10 mx-auto max-w-3xl px-4 min-h-full flex items-center justify-center p-4"
+      style={{ scrollbarGutter: "stable both-edges" }}
+    >
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease }}
+        className="w-full rounded-4xl border border-[#e7e5e4] border-b-4 bg-white px-6 py-10 md:px-10 shadow-sm"
+      >
+        <div className="text-center mb-8 md:mb-10">{title}</div>
+        {children}
+      </motion.div>
+    </div>
+  </div>
+);
+
 export default function IntakeSelectionPage() {
   const { data: session, status, update } = useSession();
   const router = useRouter();
@@ -473,23 +612,6 @@ export default function IntakeSelectionPage() {
 
   // Clinician Selection State
   const [clinicianName, setClinicianName] = useState<string>("");
-  const [dropdownPosition, setDropdownPosition] = useState<{
-    top: number;
-    left: number;
-    width: number;
-  } | null>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
-  const updateDropdownPosition = () => {
-    if (buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY + 8, // 8px = mt-2
-        left: rect.left + window.scrollX,
-        width: rect.width,
-      });
-    }
-  };
 
   // Check if user has an existing profile and redirect to appropriate type
   useEffect(() => {
@@ -563,41 +685,6 @@ export default function IntakeSelectionPage() {
     }
   };
 
-  // --- Render Helpers ---
-
-  // Common wrapper for the card
-  const CardWrapper = ({
-    children,
-    title,
-  }: {
-    children: React.ReactNode;
-    title: React.ReactNode;
-  }) => (
-    <div
-      className={`fixed inset-0 h-dvh overflow-y-auto overflow-x-hidden ${dm_sans.className}`}
-      style={{
-        color: theme.text,
-        WebkitTapHighlightColor: "transparent",
-        backgroundColor: sigmundTheme.background,
-      }}
-    >
-      <div
-        className="relative z-10 mx-auto max-w-3xl px-4 min-h-full flex items-center justify-center p-4"
-        style={{ scrollbarGutter: "stable both-edges" }}
-      >
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6, ease }}
-          className="w-full rounded-4xl border border-[#e7e5e4] border-b-4 bg-white px-6 py-10 md:px-10 shadow-sm"
-        >
-          <div className="text-center mb-8 md:mb-10">{title}</div>
-          {children}
-        </motion.div>
-      </div>
-    </div>
-  );
-
   // Loading State
   if (status === "loading" || step === "loading" || isSubmitting) {
     return (
@@ -613,7 +700,7 @@ export default function IntakeSelectionPage() {
             }}
             className="rounded-full h-12 w-12 border-4 animate-spin"
           />
-          <p className="text-slate-600 font-medium">
+          <p className="text-stone-600 font-medium">
             {isSubmitting ? "Updating your profile..." : "Loading..."}
           </p>
         </div>
@@ -632,7 +719,7 @@ export default function IntakeSelectionPage() {
             >
               Start Intake
             </h1>
-            <p className="text-lg text-slate-600 max-w-xl mx-auto">
+            <p className="text-lg text-stone-600 max-w-xl mx-auto">
               Before we begin, are you an <b>existing patient</b> who's already
               completed the previous intake assessment on Qualtrics?
             </p>
@@ -642,7 +729,7 @@ export default function IntakeSelectionPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           <button
             onClick={() => setStep("confirm-yes")}
-            className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-b-4 p-8 text-center transition-all duration-200 hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-emerald-500/20"
+            className="group relative cursor-pointer flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-b-4 p-8 text-center transition-all duration-200 hover:translate-y-[-2px] hover:brightness-105 hover:shadow-lg active:translate-y-[2px] active:brightness-95 active:border-b-2 focus:outline-none focus:ring-4 focus:ring-emerald-500/20"
             style={{
               borderColor: sigmundTheme.border,
               backgroundColor: "white",
@@ -654,24 +741,24 @@ export default function IntakeSelectionPage() {
             >
               <CheckCircle2 className="w-8 h-8 text-emerald-600" />
             </div>
-            <span className="text-xl font-bold text-slate-800 group-hover:text-emerald-700">
-              Yes, I have
+            <span className="text-xl font-bold text-stone-800 group-hover:text-emerald-700">
+              Yes, I am
             </span>
           </button>
 
           <button
             onClick={() => setStep("confirm-no")}
-            className="group relative flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-b-4 p-8 text-center transition-all duration-200 hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-slate-500/20"
+            className="group relative cursor-pointer flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-b-4 p-8 text-center transition-all duration-200 hover:translate-y-[-2px] hover:brightness-105 hover:shadow-lg active:translate-y-[2px] active:brightness-95 active:border-b-2 focus:outline-none focus:ring-4 focus:ring-stone-500/20"
             style={{
               borderColor: sigmundTheme.border,
               backgroundColor: "white",
             }}
           >
-            <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center transition-colors group-hover:bg-slate-200">
-              <XCircle className="w-8 h-8 text-slate-600" />
+            <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center transition-colors group-hover:bg-stone-200">
+              <XCircle className="w-8 h-8 text-stone-600" />
             </div>
-            <span className="text-xl font-bold text-slate-800 group-hover:text-slate-900">
-              No, not yet
+            <span className="text-xl font-bold text-stone-800 group-hover:text-stone-900">
+              No, I'm new
             </span>
           </button>
         </div>
@@ -689,11 +776,11 @@ export default function IntakeSelectionPage() {
               <AlertCircle className="w-8 h-8 text-amber-500" />
             </div>
             <h1
-              className={`text-2xl md:text-3xl ${dm_serif.className} font-bold mb-3 text-slate-900`}
+              className={`text-2xl md:text-3xl ${dm_serif.className} font-bold mb-3 text-stone-900`}
             >
               Are you sure?
             </h1>
-            <p className="text-lg text-slate-600 max-w-lg mx-auto leading-relaxed">
+            <p className="text-lg text-stone-600 max-w-lg mx-auto leading-relaxed">
               If you indicate you've already completed the Qualtrics assessment,
               you will <strong>skip</strong> our new intake and go directly to
               your dashboard.
@@ -704,14 +791,14 @@ export default function IntakeSelectionPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button
             onClick={() => setStep("check-legacy")}
-            className="order-2 md:order-1 w-full py-4 px-6 rounded-xl border-2 border-slate-200 font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors flex items-center justify-center gap-2"
+            className="order-2 md:order-1 w-full cursor-pointer py-4 px-6 rounded-xl border-2 border-stone-200 font-semibold text-stone-600 hover:bg-stone-50 hover:border-stone-300 hover:translate-y-[-2px] hover:brightness-105 active:translate-y-[2px] active:brightness-95 active:border-b-2 transition-all flex items-center justify-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" /> Go Back
           </button>
 
           <button
             onClick={() => setStep("select-clinician")}
-            className="order-1 md:order-2 w-full py-4 px-6 rounded-xl border-b-4 font-bold text-white shadow-md hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            className="order-1 md:order-2 w-full cursor-pointer py-4 px-6 rounded-xl border-b-4 font-bold text-white shadow-md hover:translate-y-[-2px] hover:brightness-105 active:translate-y-[2px] active:brightness-95 active:border-b-0 transition-all flex items-center justify-center gap-2"
             style={{
               backgroundColor: sigmundTheme.accent,
               borderColor: sigmundTheme.secondaryDark,
@@ -734,11 +821,11 @@ export default function IntakeSelectionPage() {
         title={
           <>
             <h1
-              className={`text-2xl md:text-3xl ${dm_serif.className} font-bold mb-3 text-slate-900`}
+              className={`text-2xl md:text-3xl ${dm_serif.className} font-bold mb-3 text-stone-900`}
             >
               Select Your Clinician
             </h1>
-            <p className="text-lg text-slate-600 max-w-lg mx-auto leading-relaxed">
+            <p className="text-lg text-stone-600 max-w-lg mx-auto leading-relaxed">
               Please select who you are seeing at Integrative Psych.
             </p>
           </>
@@ -746,7 +833,7 @@ export default function IntakeSelectionPage() {
       >
         <div className="max-w-md mx-auto w-full mb-8 text-left">
           <div className="mb-6">
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-stone-700 mb-2">
               Assigned Clinician <span className="text-red-500">*</span>
             </label>
             <Field>
@@ -754,94 +841,11 @@ export default function IntakeSelectionPage() {
                 value={clinicianName || ""}
                 onChange={(val: string) => {
                   setClinicianName(val);
-                  setDropdownPosition(null);
                 }}
               >
-                {({ open }) => {
-                  // Update position when dropdown opens
-                  useEffect(() => {
-                    if (open) {
-                      requestAnimationFrame(() => updateDropdownPosition());
-                    } else {
-                      setDropdownPosition(null);
-                    }
-                  }, [open]);
-
-                  return (
-                    <div className="relative">
-                      <ListboxButton
-                        ref={buttonRef}
-                        className={`w-full relative block rounded-xl bg-white border-2 px-4 py-3 text-left text-slate-900 transition-all ${
-                          hasSelectedClinician
-                            ? "border-emerald-500 ring-1 ring-emerald-500"
-                            : "border-slate-200 hover:border-slate-300"
-                        }`}
-                      >
-                        {clinicianName ? (
-                          <span className="block truncate text-slate-900 font-medium">
-                            {clinicianName}
-                          </span>
-                        ) : (
-                          <span className="block truncate text-slate-400">
-                            Select...
-                          </span>
-                        )}
-                        <ChevronDown
-                          className="pointer-events-none absolute top-3.5 right-3 size-5 text-slate-400"
-                          aria-hidden="true"
-                        />
-                      </ListboxButton>
-
-                      {open && dropdownPosition && typeof window !== "undefined"
-                        ? createPortal(
-                            <ListboxOptions
-                              static
-                              className="fixed z-[9999] mt-2 max-h-60 overflow-auto rounded-xl bg-white py-1 shadow-xl border border-slate-200 focus:outline-none list-none ring-1 ring-black/5"
-                              style={{
-                                top: `${dropdownPosition.top}px`,
-                                left: `${dropdownPosition.left}px`,
-                                width: `${dropdownPosition.width}px`,
-                              }}
-                            >
-                              {CLINICIANS.map((clinician) => (
-                                <ListboxOption
-                                  key={clinician.name}
-                                  value={clinician.name}
-                                  as={React.Fragment}
-                                >
-                                  {({ active, selected }) => (
-                                    <li
-                                      className={`${
-                                        active
-                                          ? "bg-emerald-50 text-emerald-900"
-                                          : "bg-white text-slate-900"
-                                      } relative cursor-pointer select-none py-3 pl-4 pr-10 border-b border-slate-50 last:border-0`}
-                                    >
-                                      <span
-                                        className={`${
-                                          selected
-                                            ? "font-semibold"
-                                            : "font-normal"
-                                        } block truncate`}
-                                      >
-                                        {clinician.name}
-                                      </span>
-                                      {selected && (
-                                        <span className="absolute inset-y-0 right-3 flex items-center text-emerald-600">
-                                          <Check className="w-5 h-5" />
-                                        </span>
-                                      )}
-                                    </li>
-                                  )}
-                                </ListboxOption>
-                              ))}
-                            </ListboxOptions>,
-                            document.body
-                          )
-                        : null}
-                    </div>
-                  );
-                }}
+                {({ open }) => (
+                  <ClinicianSelect open={open} clinicianName={clinicianName} />
+                )}
               </Listbox>
             </Field>
           </div>
@@ -851,7 +855,7 @@ export default function IntakeSelectionPage() {
           <button
             onClick={() => setStep("confirm-yes")}
             disabled={isSubmitting}
-            className="order-2 md:order-1 w-full py-4 px-6 rounded-xl border-2 border-slate-200 font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors flex items-center justify-center gap-2"
+            className="order-2 md:order-1 w-full cursor-pointer py-4 px-6 rounded-xl border-2 border-stone-200 font-semibold text-stone-600 hover:bg-stone-50 hover:border-stone-300 hover:translate-y-[-2px] hover:brightness-105 active:translate-y-[2px] active:brightness-95 active:border-b-2 transition-all flex items-center justify-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" /> Go Back
           </button>
@@ -861,19 +865,19 @@ export default function IntakeSelectionPage() {
             disabled={!hasSelectedClinician || isSubmitting}
             className={`order-1 md:order-2 w-full py-4 px-6 rounded-xl border-b-4 font-bold text-white shadow-md transition-all flex items-center justify-center gap-2 ${
               !hasSelectedClinician || isSubmitting
-                ? "bg-slate-300 border-slate-400 cursor-not-allowed opacity-70"
-                : "hover:brightness-110 active:scale-[0.98]"
+                ? "bg-stone-300 border-stone-400 cursor-not-allowed opacity-70"
+                : "cursor-pointer hover:translate-y-[-2px] hover:brightness-105 active:translate-y-[2px] active:brightness-95 active:border-b-0"
             }`}
             style={
               !hasSelectedClinician || isSubmitting
                 ? {}
                 : {
-                    backgroundColor: sigmundTheme.primary,
-                    borderColor: sigmundTheme.accent,
+                    backgroundColor: sigmundTheme.accent,
+                    borderColor: sigmundTheme.accentDark,
                   }
             }
           >
-            {isSubmitting ? "Setting up..." : "Complete Setup"}
+            {isSubmitting ? "Setting up..." : "Go to Dashboard"}
             {!isSubmitting && <ArrowRight className="w-4 h-4" />}
           </button>
         </div>
@@ -891,11 +895,11 @@ export default function IntakeSelectionPage() {
               <AlertCircle className="w-8 h-8 text-blue-500" />
             </div>
             <h1
-              className={`text-2xl md:text-3xl ${dm_serif.className} font-bold mb-3 text-slate-900`}
+              className={`text-2xl md:text-3xl ${dm_serif.className} font-bold mb-3 text-stone-900`}
             >
               Just to confirm
             </h1>
-            <p className="text-lg text-slate-600 max-w-lg mx-auto leading-relaxed">
+            <p className="text-lg text-stone-600 max-w-lg mx-auto leading-relaxed">
               You will now be asked to complete the full intake assessment to
               begin your treatment. This typically takes 30-45 minutes.
             </p>
@@ -905,14 +909,14 @@ export default function IntakeSelectionPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button
             onClick={() => setStep("check-legacy")}
-            className="order-2 md:order-1 w-full py-4 px-6 rounded-xl border-2 border-slate-200 font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors flex items-center justify-center gap-2"
+            className="order-2 md:order-1 w-full cursor-pointer py-4 px-6 rounded-xl border-2 border-stone-200 font-semibold text-stone-600 hover:bg-stone-50 hover:border-stone-300 hover:translate-y-[-2px] hover:brightness-105 active:translate-y-[2px] active:brightness-95 active:border-b-2 transition-all flex items-center justify-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" /> Go Back
           </button>
 
           <button
             onClick={() => setStep("select")}
-            className="order-1 md:order-2 w-full py-4 px-6 rounded-xl border-b-4 font-bold text-white shadow-md hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            className="order-1 md:order-2 w-full cursor-pointer py-4 px-6 rounded-xl border-b-4 font-bold text-white shadow-md hover:translate-y-[-2px] hover:brightness-105 active:translate-y-[2px] active:brightness-95 active:border-b-0 transition-all flex items-center justify-center gap-2"
             style={{
               backgroundColor: sigmundTheme.accent,
               borderColor: sigmundTheme.secondaryDark,
@@ -936,7 +940,7 @@ export default function IntakeSelectionPage() {
         title={
           <>
             <h1
-              className={`text-2xl md:text-4xl ${dm_serif.className} font-bold text-slate-900 mb-2`}
+              className={`text-2xl md:text-4xl ${dm_serif.className} font-bold text-stone-900 mb-2`}
               style={{ color: intPsychTheme.primary }}
             >
               Welcome
@@ -945,7 +949,7 @@ export default function IntakeSelectionPage() {
                 : ""}
               !
             </h1>
-            <p className="text-slate-600">
+            <p className="text-stone-600">
               Please select who this assessment is for to get started.
             </p>
           </>
@@ -954,7 +958,7 @@ export default function IntakeSelectionPage() {
         <div className="grid gap-4">
           <Link
             href="/intake/adult"
-            className="group block w-full text-left rounded-2xl border-2 border-b-4 p-5 md:p-6 transition-all duration-200 hover:border-emerald-500 hover:bg-emerald-50/50 border-slate-200 bg-white/80 hover:shadow-md"
+            className="group cursor-pointer block w-full text-left rounded-2xl border-2 border-b-4 p-5 md:p-6 transition-all duration-200 hover:border-emerald-500 hover:bg-emerald-50/50 hover:translate-y-[-2px] hover:brightness-105 hover:shadow-md active:translate-y-[2px] active:brightness-95 active:border-b-2 border-stone-200 bg-white/80"
           >
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
@@ -962,12 +966,12 @@ export default function IntakeSelectionPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                  <h2 className="text-lg font-semibold text-stone-900 group-hover:text-emerald-700 transition-colors">
                     Adult Assessment (18+)
                   </h2>
-                  <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="w-5 h-5 text-stone-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
                 </div>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm text-stone-600">
                   I am completing this for my own treatment.
                 </p>
               </div>
@@ -976,7 +980,7 @@ export default function IntakeSelectionPage() {
 
           <Link
             href="/intake/child"
-            className="group block w-full text-left rounded-2xl border-2 border-b-4 p-5 md:p-6 transition-all duration-200 hover:border-sky-500 hover:bg-sky-50/50 border-slate-200 bg-white/80 hover:shadow-md"
+            className="group cursor-pointer block w-full text-left rounded-2xl border-2 border-b-4 p-5 md:p-6 transition-all duration-200 hover:border-sky-500 hover:bg-sky-50/50 hover:translate-y-[-2px] hover:brightness-105 hover:shadow-md active:translate-y-[2px] active:brightness-95 active:border-b-2 border-stone-200 bg-white/80"
           >
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-12 h-12 rounded-full bg-sky-100 flex items-center justify-center group-hover:bg-sky-200 transition-colors">
@@ -984,12 +988,12 @@ export default function IntakeSelectionPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-slate-900 group-hover:text-sky-700 transition-colors">
+                  <h2 className="text-lg font-semibold text-stone-900 group-hover:text-sky-700 transition-colors">
                     Child Assessment (Under 18)
                   </h2>
-                  <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-sky-600 group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="w-5 h-5 text-stone-400 group-hover:text-sky-600 group-hover:translate-x-1 transition-all" />
                 </div>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm text-stone-600">
                   I am a parent or guardian filling this out for my child.
                 </p>
               </div>
@@ -997,8 +1001,8 @@ export default function IntakeSelectionPage() {
           </Link>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-slate-200">
-          <p className="text-sm text-slate-500 text-center">
+        <div className="mt-8 pt-6 border-t border-stone-200">
+          <p className="text-sm text-stone-500 text-center">
             If you're unsure which to select, please contact our administrative
             staff.
           </p>
