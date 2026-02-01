@@ -806,7 +806,7 @@ export default function JournalPage() {
                 <div
                   className={`bg-[${sigmundTheme.background}] p-6 rounded-xl border border-[${sigmundTheme.border}]`}
                 >
-                  <p className="text-[#1c1917] whitespace-pre-wrap leading-relaxed text-lg font-medium">
+                  <p className="text-[#1c1917] whitespace-pre-wrap leading-relaxed text-base md:text-lg font-medium">
                     {selectedEntry.content}
                   </p>
                 </div>

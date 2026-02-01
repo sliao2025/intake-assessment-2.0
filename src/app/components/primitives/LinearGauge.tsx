@@ -73,7 +73,7 @@ export default function LinearGauge({
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       const currentScore = Math.round(
-        startScore + (endScore - startScore) * eased
+        startScore + (endScore - startScore) * eased,
       );
       setDisplayScore(currentScore);
 
@@ -102,7 +102,7 @@ export default function LinearGauge({
         </div>
 
         {/* Speech Bubble and Score Container */}
-        <div className="flex-1 flex items-center gap-6">
+        <div className="flex-1 flex items-center gap-2">
           {/* Speech Bubble */}
           <div className="relative bg-white border-2 border-stone-200 border-b-4 p-4 rounded-2xl ml-1 flex-1">
             {/* Improved Bubble Tail */}
@@ -111,7 +111,7 @@ export default function LinearGauge({
               style={{ borderRadius: "0 0 0 2px" }}
             />
 
-            <p className="text-[#1c1917] font-medium text-base leading-snug relative z-10">
+            <p className="text-[#1c1917] font-medium text-[13px] md:text-base leading-snug relative z-10">
               {message}
             </p>
           </div>
@@ -120,7 +120,7 @@ export default function LinearGauge({
           <div className="flex flex-col items-end justify-center min-w-[80px]">
             <div className="flex items-baseline gap-0.5">
               <span
-                className="text-4xl font-bold tracking-tight"
+                className="text-3xl md:text-4xl font-bold tracking-tight"
                 style={{ color: scoreColor }}
               >
                 {isLoading ? "-" : displayScore}
