@@ -92,7 +92,7 @@ function SignInContent() {
                 height={100}
                 className="object-contain mr-4"
               />
-              <h1 className="text-6xl font-semibold">
+              <h1 className="text-5xl md:text-6xl font-semibold">
                 {mode !== "signup" ? (
                   <div className="flex flex-col">
                     <span
