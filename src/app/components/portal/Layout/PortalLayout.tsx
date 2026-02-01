@@ -51,13 +51,13 @@ const navigationItems = [
     href: "/journal",
     color: `text-[${sigmundTheme.primary}]`, // Orange/Amber
   },
-  {
-    key: "scales",
-    label: "Scales",
-    icon: ClipboardList,
-    href: "/scales",
-    color: `text-[${intPsychTheme.accent}]`, // Blue
-  },
+  // {
+  //   key: "scales",
+  //   label: "Scales",
+  //   icon: ClipboardList,
+  //   href: "/scales",
+  //   color: `text-[${intPsychTheme.accent}]`, // Blue
+  // },
 ];
 
 const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
