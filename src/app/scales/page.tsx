@@ -9,6 +9,8 @@ import {
   Clock,
   Trophy,
   ClipboardClock,
+  Lock,
+  Eye,
 } from "lucide-react";
 import { intPsychTheme, sigmundTheme } from "../components/theme";
 import { DM_Serif_Text, DM_Sans } from "next/font/google";
@@ -32,6 +34,7 @@ interface Assessment {
   completedAt: string;
   dueDate: string | null;
   responses: Record<string, any>;
+  canPatientView?: boolean | null;
 }
 
 interface AssignedAssessment {
@@ -55,6 +58,9 @@ export default function AssessmentsPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [filterType, setFilterType] = useState("all");
+  const [filterVisibility, setFilterVisibility] = useState<
+    "all" | "visible" | "locked"
+  >("all");
   const [selectedScale, setSelectedScale] = useState<Assessment | null>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [currIndex, setCurrIndex] = useState(0);
@@ -236,6 +242,51 @@ export default function AssessmentsPage() {
       type: "mdq",
       color: "orange",
     },
+    {
+      name: "Clinician Mania Scale",
+      fullName: "Young Mania Rating Scale (YMRS)",
+      description: "Clinician-administered assessment for mania",
+      frequency: "Clinician-administered",
+      type: "ymrs",
+      color: "red",
+      clinicianOnly: true,
+    },
+    {
+      name: "Clinician OCD Scale",
+      fullName: "Yale-Brown Obsessive Compulsive Scale (YBOCS)",
+      description: "Clinician-administered assessment for OCD",
+      frequency: "Clinician-administered",
+      type: "ybocs",
+      color: "cyan",
+      clinicianOnly: true,
+    },
+    {
+      name: "Clinician Anxiety Scale",
+      fullName: "Hamilton Anxiety Rating Scale (HAM-A)",
+      description: "Clinician-administered assessment for anxiety",
+      frequency: "Clinician-administered",
+      type: "hama",
+      color: "indigo",
+      clinicianOnly: true,
+    },
+    {
+      name: "Clinician Depression Scale",
+      fullName: "Hamilton Depression Rating Scale (HAM-D)",
+      description: "Clinician-administered assessment for depression",
+      frequency: "Clinician-administered",
+      type: "hamd",
+      color: "blue",
+      clinicianOnly: true,
+    },
+    {
+      name: "Clinician Psychosis Scale",
+      fullName: "Brief Psychiatric Rating Scale (BPRS)",
+      description: "Clinician-administered assessment for psychiatric symptoms",
+      frequency: "Clinician-administered",
+      type: "bprs",
+      color: "rose",
+      clinicianOnly: true,
+    },
   ];
 
   const completedTypes = new Set(
@@ -261,10 +312,32 @@ export default function AssessmentsPage() {
             : "Assigned"
           : "Assigned",
       };
+    })
+    .sort((a, b) => {
+      // Sort by due date (nearest first)
+      const dateA = a.assignedData?.dueDate
+        ? new Date(a.assignedData.dueDate).getTime()
+        : null;
+      const dateB = b.assignedData?.dueDate
+        ? new Date(b.assignedData.dueDate).getTime()
+        : null;
+
+      if (dateA !== null && dateB !== null) {
+        return dateA - dateB;
+      }
+
+      // If one has a date and the other doesn't, the one with date comes first
+      if (dateA !== null) return -1;
+      if (dateB !== null) return 1;
+
+      // If neither has a date, preserve original order (they are already in order from the filter/map)
+      return 0;
     });
 
   const availableAssessments = allAssessments.filter(
-    (assessment) => !assignedTypes.has(assessment.type.toLowerCase()),
+    (assessment) =>
+      !assignedTypes.has(assessment.type.toLowerCase()) &&
+      !(assessment as any).clinicianOnly,
   );
 
   const getLastTaken = (type: string) => {
@@ -277,18 +350,37 @@ export default function AssessmentsPage() {
     return lastCompleted ? formatDate(lastCompleted.completedAt) : "Never";
   };
 
-  const filteredHistory = history.filter((scale) => {
-    const scaleDate = new Date(scale.completedAt);
-    const matchesType =
-      filterType === "all" ||
-      scale.assessmentType.toLowerCase() === filterType.toLowerCase();
-    const matchesStartDate =
-      !startDate || (scaleDate && scaleDate >= new Date(startDate));
-    const matchesEndDate =
-      !endDate || (scaleDate && scaleDate <= new Date(endDate));
+  const filteredHistory = history
+    .filter((scale) => {
+      const scaleDate = new Date(scale.completedAt);
+      const matchesType =
+        filterType === "all" ||
+        scale.assessmentType.toLowerCase() === filterType.toLowerCase();
+      const matchesStartDate =
+        !startDate || (scaleDate && scaleDate >= new Date(startDate));
+      const matchesEndDate =
+        !endDate || (scaleDate && scaleDate <= new Date(endDate));
+      const matchesVisibility =
+        filterVisibility === "all" ||
+        (filterVisibility === "visible" && scale.canPatientView) ||
+        (filterVisibility === "locked" && !scale.canPatientView);
 
-    return matchesType && matchesStartDate && matchesEndDate;
-  });
+      return (
+        matchesType && matchesStartDate && matchesEndDate && matchesVisibility
+      );
+    })
+    .sort((a, b) => {
+      // When showing all, sort by visibility first (visible on top), then by date
+      if (filterVisibility === "all") {
+        // Visible scales come first
+        if (a.canPatientView && !b.canPatientView) return -1;
+        if (!a.canPatientView && b.canPatientView) return 1;
+      }
+      // Within same visibility group, sort by date descending (newest first)
+      return (
+        new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+      );
+    });
 
   const getAssessmentName = (type: string) => {
     return (
@@ -619,13 +711,36 @@ export default function AssessmentsPage() {
                 />
               </div>
 
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+                  Visibility:
+                </span>
+                <select
+                  value={filterVisibility}
+                  onChange={(e) =>
+                    setFilterVisibility(
+                      e.target.value as "all" | "visible" | "locked",
+                    )
+                  }
+                  className="text-xs font-medium bg-white border border-stone-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-stone-300"
+                >
+                  <option value="all">All</option>
+                  <option value="visible">Visible</option>
+                  <option value="locked">Locked</option>
+                </select>
+              </div>
+
               <div className="ml-auto flex items-center gap-2">
-                {(filterType !== "all" || startDate || endDate) && (
+                {(filterType !== "all" ||
+                  startDate ||
+                  endDate ||
+                  filterVisibility !== "all") && (
                   <button
                     onClick={() => {
                       setFilterType("all");
                       setStartDate("");
                       setEndDate("");
+                      setFilterVisibility("all");
                     }}
                     className="text-xs border border-red-200 bg-red-50 hover:bg-red-100 cursor-pointer px-2 py-1 rounded-full text-rose-500 tracking-wider hover:text-rose-600"
                   >
@@ -645,17 +760,17 @@ export default function AssessmentsPage() {
                   className={`bg-[${intPsychTheme.background}] border-b border-[${sigmundTheme.border}]`}
                 >
                   <tr>
-                    <th className="text-left p-4 text-xs font-bold text-stone-500 uppercase tracking-wider">
+                    <th className="text-left p-4 text-xs font-bold text-stone-500 uppercase tracking-wider whitespace-nowrap">
                       Date
                     </th>
-                    <th className="text-left p-4 text-xs font-bold text-stone-500 uppercase tracking-wider">
+                    <th className="text-left p-4 text-xs font-bold text-stone-500 uppercase tracking-wider whitespace-nowrap">
                       Assessment
                     </th>
-                    <th className="text-left p-4 text-xs font-bold text-stone-500 uppercase tracking-wider">
-                      Score
-                    </th>
-                    <th className="text-left p-4 text-xs font-bold text-stone-500 uppercase tracking-wider">
+                    <th className="text-left p-4 text-xs font-bold text-stone-500 uppercase tracking-wider whitespace-nowrap">
                       Status
+                    </th>
+                    <th className="text-left p-4 text-xs font-bold text-stone-500 uppercase tracking-wider whitespace-nowrap w-28">
+                      Visibility
                     </th>
                   </tr>
                 </thead>
@@ -677,7 +792,13 @@ export default function AssessmentsPage() {
                       return (
                         <tr
                           key={record.id}
-                          onClick={() =>
+                          title={
+                            !record.canPatientView
+                              ? "Your clinician needs to review and approve before you can view this."
+                              : undefined
+                          }
+                          onClick={() => {
+                            if (!record.canPatientView) return;
                             setSelectedScale({
                               ...record,
                               severity:
@@ -685,9 +806,9 @@ export default function AssessmentsPage() {
                                 (record.assessmentType.toLowerCase() === "mdq"
                                   ? getMDQSeverity(record.responses)
                                   : record.severity),
-                            })
-                          }
-                          className={`hover:bg-stone-50 transition-colors cursor-pointer`}
+                            });
+                          }}
+                          className={`transition-colors ${record.canPatientView ? "hover:bg-stone-50 cursor-pointer" : "opacity-60 cursor-not-allowed"}`}
                         >
                           <td className="p-4 font-medium text-stone-600">
                             {formatDate(record.completedAt)}
@@ -698,26 +819,30 @@ export default function AssessmentsPage() {
                           >
                             {getAssessmentName(record.assessmentType)}
                           </td>
-                          <td className="p-4 font-medium text-stone-600">
-                            <span className="bg-[#f1f5f9] px-2 py-1 rounded-md border border-[#e2e8f0]">
-                              {record.assessmentType.toLowerCase() === "mdq"
-                                ? record.severity ||
-                                  getMDQSeverity(record.responses) ||
-                                  "—"
-                                : record.totalScore !== null &&
-                                    record.totalScore !== undefined
-                                  ? record.totalScore
-                                  : "—"}
-                            </span>
-                          </td>
                           <td className="p-4">
                             {isLate ? (
-                              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border bg-[#ffe4e6] text-[#be123c] border-[#fda4af]">
+                              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border bg-[#ffe4e6] text-[#be123c] border-[#fda4af] whitespace-nowrap">
                                 Late
                               </span>
                             ) : (
-                              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border bg-[#dcfce7] text-[#166534] border-[#bbf7d0]">
+                              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border bg-[#dcfce7] text-[#166534] border-[#bbf7d0] whitespace-nowrap">
                                 On Time
+                              </span>
+                            )}
+                          </td>
+                          <td className="p-4">
+                            {record.canPatientView ? (
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border bg-emerald-50 text-emerald-700 border-emerald-200 w-fit">
+                                <Eye className="w-3 h-3" />
+                                Visible
+                              </span>
+                            ) : (
+                              <span
+                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border bg-stone-100 text-stone-500 border-stone-200 w-fit"
+                                title="Your clinician needs to review and approve before you can view this."
+                              >
+                                <Lock className="w-3 h-3" />
+                                Locked
                               </span>
                             )}
                           </td>

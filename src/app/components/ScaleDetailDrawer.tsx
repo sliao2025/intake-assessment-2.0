@@ -15,7 +15,39 @@ import {
   MDQ_QUESTIONS,
   YMRS_QUESTIONS,
   YMRS_OPTIONS,
+  YBOCS_QUESTIONS,
+  YBOCS_OPTIONS,
+  HAM_A_QUESTIONS,
+  HAM_A_OPTIONS,
+  HAM_A_DESCRIPTIONS,
+  HAM_D_QUESTIONS,
+  HAM_D_OPTIONS,
+  HAM_D_DESCRIPTIONS,
+  BPRS_QUESTIONS,
+  BPRS_OPTIONS,
+  BPRS_DESCRIPTIONS,
 } from "./text";
+
+const SCALE_SCORING_CRITERIA: Record<string, string> = {
+  phq9: "0–4 minimal · 5–9 mild · 10–14 moderate · 15–19 moderately severe · 20-27 severe",
+  gad7: "0–4 minimal · 5–9 mild · 10–14 moderate · 15–21 severe",
+  pss4: "higher = more stress",
+  ptsd: "Count of 'Yes' responses",
+  asrs5: ">14 = possible ADHD symptoms · <14 = ADHD less likely",
+  aceResilience: "higher = more resilience",
+  aceresilience: "higher = more resilience",
+  crafft: "2+ yes = high risk",
+  selfHarm: "any yes = positive",
+  selfharm: "any yes = positive",
+  aq10: "6+ = consider referral",
+  mdq: "7+ symptoms & impact = positive",
+  ymrs: "higher = more severe mania",
+  ybocs:
+    "0–7 subclinical · 8–15 mild · 16–23 moderate · 24–31 severe · 32–40 extreme",
+  hama: "<17 mild · 18–24 mild to moderate · 25–30 moderate to severe · 31–56 severe to very severe",
+  hamd: "0–7 no depression · 8–16 mild · 17–23 moderate · ≥24 severe",
+  bprs: "Higher score = more severe pathology",
+};
 
 import { DM_Serif_Text } from "next/font/google";
 import { sigmundTheme } from "./theme";
@@ -162,8 +194,8 @@ export default function ScaleDetailDrawer({ scale }: ScaleDetailDrawerProps) {
     switch (assessmentType.toLowerCase()) {
       case "phq9":
         return {
-          name: "PHQ-9",
-          fullName: "Patient Health Questionnaire",
+          name: "Depression Screening",
+          fullName: "Patient Health Questionnaire (PHQ-9)",
           questions: PHQ9_QUESTIONS,
           answers: responses.phq9 || responses,
           options: freq0to3,
@@ -171,8 +203,8 @@ export default function ScaleDetailDrawer({ scale }: ScaleDetailDrawerProps) {
         };
       case "gad7":
         return {
-          name: "GAD-7",
-          fullName: "Generalized Anxiety Disorder Scale",
+          name: "Anxiety Screening",
+          fullName: "Generalized Anxiety Disorder Scale (GAD-7)",
           questions: GAD7_QUESTIONS,
           answers: responses.gad7 || responses,
           options: freq0to3,
@@ -180,15 +212,15 @@ export default function ScaleDetailDrawer({ scale }: ScaleDetailDrawerProps) {
         };
       case "pss4":
         return {
-          name: "PSS-4",
-          fullName: "Perceived Stress Scale",
+          name: "Stress Assessment",
+          fullName: "Perceived Stress Scale (PSS-4)",
           questions: PSS4_QUESTIONS,
           answers: responses.stress || responses,
           options: pss0to4,
         };
       case "ptsd":
         return {
-          name: "PC-PTSD-5",
+          name: "Trauma Screening",
           fullName: "Post-Traumatic Stress Disorder Screen",
           questions: PTSD_QUESTIONS,
           answers: responses.ptsd || responses,
@@ -196,8 +228,8 @@ export default function ScaleDetailDrawer({ scale }: ScaleDetailDrawerProps) {
         };
       case "asrs5":
         return {
-          name: "ASRS-5",
-          fullName: "Adult ADHD Self-Report Scale",
+          name: "ADHD Screening",
+          fullName: "Adult ADHD Self-Report Scale (ASRS-5)",
           questions: ASRS5_QUESTIONS,
           answers: responses.asrs5 || responses,
           options: asrs0to4,
@@ -205,8 +237,8 @@ export default function ScaleDetailDrawer({ scale }: ScaleDetailDrawerProps) {
       case "aceresilience":
       case "aceResilience":
         return {
-          name: "ACE-Resilience",
-          fullName: "Adverse Childhood Experiences Resilience Scale",
+          name: "Resilience Check",
+          fullName: "ACE Resilience Scale",
           questions: ACE_RESILIENCE_QUESTIONS,
           answers:
             responses.aceResilience || responses.aceresilience || responses,
@@ -214,8 +246,8 @@ export default function ScaleDetailDrawer({ scale }: ScaleDetailDrawerProps) {
         };
       case "crafft":
         return {
-          name: "CRAFFT",
-          fullName: "Substance Use Screening",
+          name: "Substance Use",
+          fullName: "Substance Use Screening (CRAFFT)",
           questions: null,
           answers: responses.crafft || responses,
           options: yesNo,
@@ -224,7 +256,7 @@ export default function ScaleDetailDrawer({ scale }: ScaleDetailDrawerProps) {
       case "self_harm": // Handle potential key variations
       case "selfHarm":
         return {
-          name: "Self Harm",
+          name: "Safety Check",
           fullName: "Self-Harm Screening",
           questions: SELF_HARM_QUESTIONS,
           answers: responses.selfHarm || responses,
@@ -232,8 +264,8 @@ export default function ScaleDetailDrawer({ scale }: ScaleDetailDrawerProps) {
         };
       case "aq10":
         return {
-          name: "AQ-10",
-          fullName: "Autism Spectrum Quotient-10",
+          name: "Neurodiversity",
+          fullName: "Autism Spectrum Quotient-10 (AQ-10)",
           questions: AQ10_QUESTIONS,
           answers: responses.aq10 || responses,
           options: [
@@ -265,8 +297,8 @@ export default function ScaleDetailDrawer({ scale }: ScaleDetailDrawerProps) {
         };
       case "mdq":
         return {
-          name: "MDQ",
-          fullName: "Mood Disorder Questionnaire",
+          name: "Mood Patterns",
+          fullName: "Mood Disorder Questionnaire (MDQ)",
           questions: MDQ_QUESTIONS,
           answers: responses.mdq || responses,
           options: yesNo,
@@ -304,9 +336,140 @@ export default function ScaleDetailDrawer({ scale }: ScaleDetailDrawerProps) {
             });
           },
         };
+      case "ybocs":
+        return {
+          name: "YBOCS",
+          fullName: "Yale-Brown Obsessive Compulsive Scale",
+          questions: YBOCS_QUESTIONS,
+          answers: responses.ybocs || responses,
+          options: [],
+          getOptions: (k: string) => {
+            const opts = YBOCS_OPTIONS[k] || [];
+            return opts.map((o) => {
+              const val = parseInt(o.key);
+              let bg = "bg-stone-100";
+              let text = "text-stone-700";
+              if (val === 0) {
+                bg = "bg-emerald-100";
+                text = "text-emerald-800";
+              } else if (val === 1) {
+                bg = "bg-lime-100";
+                text = "text-lime-800";
+              } else if (val === 2) {
+                bg = "bg-yellow-100";
+                text = "text-yellow-800";
+              } else if (val === 3) {
+                bg = "bg-orange-100";
+                text = "text-orange-800";
+              } else if (val >= 4) {
+                bg = "bg-rose-100";
+                text = "text-rose-800";
+              }
+              return { ...o, bg, text };
+            });
+          },
+        };
+      case "hama":
+        return {
+          name: "HAM-A",
+          fullName: "Hamilton Anxiety Rating Scale",
+          questions: HAM_A_QUESTIONS,
+          answers: responses.hama || responses,
+          options: (HAM_A_OPTIONS.default || []).map((o) => {
+            const val = parseInt(o.key);
+            let bg = "bg-stone-100";
+            let text = "text-stone-700";
+            if (val === 0) {
+              bg = "bg-emerald-100";
+              text = "text-emerald-800";
+            } else if (val === 1) {
+              bg = "bg-lime-100";
+              text = "text-lime-800";
+            } else if (val === 2) {
+              bg = "bg-yellow-100";
+              text = "text-yellow-800";
+            } else if (val === 3) {
+              bg = "bg-orange-100";
+              text = "text-orange-800";
+            } else if (val >= 4) {
+              bg = "bg-rose-100";
+              text = "text-rose-800";
+            }
+            return { ...o, bg, text };
+          }),
+          descriptions: HAM_A_DESCRIPTIONS,
+        };
+      case "hamd":
+        return {
+          name: "HAM-D",
+          fullName: "Hamilton Depression Rating Scale",
+          questions: HAM_D_QUESTIONS,
+          answers: responses.hamd || responses,
+          options: [],
+          getOptions: (k: string) => {
+            const opts = HAM_D_OPTIONS[k] || [];
+            return opts.map((o) => {
+              const val = parseInt(o.key);
+              let bg = "bg-stone-100";
+              let text = "text-stone-700";
+              if (val === 0) {
+                bg = "bg-emerald-100";
+                text = "text-emerald-800";
+              } else if (val === 1) {
+                bg = "bg-lime-100";
+                text = "text-lime-800";
+              } else if (val === 2) {
+                bg = "bg-yellow-100";
+                text = "text-yellow-800";
+              } else if (val === 3) {
+                bg = "bg-orange-100";
+                text = "text-orange-800";
+              } else if (val >= 4) {
+                bg = "bg-rose-100";
+                text = "text-rose-800";
+              }
+              return { ...o, bg, text };
+            });
+          },
+          descriptions: HAM_D_DESCRIPTIONS,
+        };
+      case "bprs":
+        return {
+          name: "BPRS",
+          fullName: "Brief Psychiatric Rating Scale",
+          questions: BPRS_QUESTIONS,
+          answers: responses.bprs || responses,
+          options: (BPRS_OPTIONS.default || []).map((o) => {
+            const val = parseInt(o.key);
+            let bg = "bg-stone-100";
+            let text = "text-stone-700";
+            if (val <= 1) {
+              bg = "bg-emerald-100";
+              text = "text-emerald-800";
+            } else if (val <= 3) {
+              bg = "bg-lime-100";
+              text = "text-lime-800";
+            } else if (val <= 5) {
+              bg = "bg-yellow-100";
+              text = "text-yellow-800";
+            } else {
+              bg = "bg-rose-100";
+              text = "text-rose-800";
+            }
+            return { ...o, bg, text };
+          }),
+          descriptions: BPRS_DESCRIPTIONS,
+        };
       default:
         return null;
     }
+  };
+
+  const getScoringCriteria = () => {
+    return (
+      SCALE_SCORING_CRITERIA[assessmentType] ||
+      SCALE_SCORING_CRITERIA[assessmentType.toLowerCase()]
+    );
   };
 
   const info = getAssessmentInfo();
@@ -462,6 +625,11 @@ export default function ScaleDetailDrawer({ scale }: ScaleDetailDrawerProps) {
             <p className="text-xs font-bold text-stone-500 uppercase tracking-[0.2em]">
               {info.fullName}
             </p>
+            {getScoringCriteria() && (
+              <p className="text-[10px] sm:text-xs font-medium text-stone-400 mt-1">
+                Scoring: {getScoringCriteria()}
+              </p>
+            )}
           </div>
           <div className="flex flex-col items-end gap-2">
             <div className="bg-stone-50 border border-stone-200 rounded-2xl px-5 py-3 flex flex-col items-center min-w-[100px]">
@@ -589,6 +757,11 @@ export default function ScaleDetailDrawer({ scale }: ScaleDetailDrawerProps) {
           <p className="text-xs font-bold text-stone-500 uppercase tracking-[0.2em]">
             {info.fullName}
           </p>
+          {getScoringCriteria() && (
+            <p className="text-[10px] sm:text-xs font-medium text-stone-400 mt-1">
+              Scoring: {getScoringCriteria()}
+            </p>
+          )}
           {info.headerNote && (
             <p className="text-xs font-medium text-stone-400 italic mt-2">
               ({info.headerNote})
@@ -628,6 +801,7 @@ export default function ScaleDetailDrawer({ scale }: ScaleDetailDrawerProps) {
               const ans = (info.answers as any)?.[k];
               const opts = (info as any).getOptions?.(k) ?? info.options ?? [];
               const opt = optFor(opts, ans);
+              const description = (info as any).descriptions?.[k];
               return (
                 <li
                   key={k}
@@ -637,9 +811,16 @@ export default function ScaleDetailDrawer({ scale }: ScaleDetailDrawerProps) {
                     <span className="shrink-0 text-stone-300 font-bold mt-1">
                       •
                     </span>
-                    <span className="flex-1 min-w-0 text-md font-medium text-stone-700 leading-relaxed">
-                      {q}
-                    </span>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-md font-medium text-stone-700 leading-relaxed">
+                        {q}
+                      </span>
+                      {description && (
+                        <p className="text-xs text-stone-400 mt-1 italic leading-relaxed">
+                          {description}
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <div className="shrink-0 mt-1">
                     <span

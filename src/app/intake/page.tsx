@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import type { Profile } from "../lib/types/types";
+import type { Profile, Option } from "../lib/types/types";
 import { motion } from "framer-motion";
 import {
   User,
@@ -580,7 +580,7 @@ const CardWrapper = ({
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease }}
-        className="w-full rounded-4xl border border-[#e7e5e4] border-b-4 bg-white px-6 py-10 md:px-10 shadow-sm"
+        className="w-full rounded-4xl border border-[#e7e5e4] border-b-5 bg-white px-6 py-10 md:px-10"
       >
         <div className="text-center mb-8 md:mb-10">{title}</div>
         {children}
@@ -588,6 +588,14 @@ const CardWrapper = ({
     </div>
   </div>
 );
+
+const pronounOptions: Option[] = [
+  { label: "He/Him/His", value: "he_him_his" },
+  { label: "She/Her/Hers", value: "she_her_hers" },
+  { label: "They/Their/Theirs", value: "they_their_theirs" },
+  { label: "Ze/Zir/Zirs", value: "ze_zir_zirs" },
+  { label: "Pronoun is not listed", value: "other" },
+];
 
 export default function IntakeSelectionPage() {
   const { data: session, status, update } = useSession();
@@ -612,6 +620,43 @@ export default function IntakeSelectionPage() {
 
   // Clinician Selection State
   const [clinicianName, setClinicianName] = useState<string>("");
+
+  // Legacy patient demographic info
+  const [legacyAge, setLegacyAge] = useState<string>("");
+  const [legacyDob, setLegacyDob] = useState<string>("");
+  const [legacyPronouns, setLegacyPronouns] = useState<Option[]>([]);
+
+  // Validation state
+  const [dobAgeError, setDobAgeError] = useState<string | null>(null);
+
+  const computeAge = (dobStr: string): number | null => {
+    if (!dobStr) return null;
+    const d = new Date(dobStr);
+    if (isNaN(d.getTime())) return null;
+    const today = new Date();
+    let age = today.getFullYear() - d.getFullYear();
+    const m = today.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+    return age;
+  };
+
+  useEffect(() => {
+    if (!legacyDob || !legacyAge) {
+      setDobAgeError(null);
+      return;
+    }
+    const enteredAge = parseInt(String(legacyAge), 10);
+    const dobAge = computeAge(legacyDob);
+    if (Number.isNaN(enteredAge) || dobAge === null) {
+      setDobAgeError(null);
+      return;
+    }
+    if (enteredAge !== dobAge) {
+      setDobAgeError("Date of birth does not match the entered age.");
+    } else {
+      setDobAgeError(null);
+    }
+  }, [legacyDob, legacyAge]);
 
   // Check if user has an existing profile and redirect to appropriate type
   useEffect(() => {
@@ -668,6 +713,24 @@ export default function IntakeSelectionPage() {
         }
       }
 
+      // Save legacy patient demographics to the profile
+      if (legacyAge || legacyDob || legacyPronouns.length > 0) {
+        const demoPayload = {
+          action: "saveLegacyDemographics",
+          age: legacyAge,
+          dob: legacyDob,
+          pronouns: legacyPronouns,
+        };
+        const demoRes = await fetch("/api/profile/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(demoPayload),
+        });
+        if (!demoRes.ok) {
+          console.error("Failed to save legacy demographics");
+        }
+      }
+
       const res = await fetch("/api/user/complete", { method: "POST" });
       if (res.ok) {
         // Update session so middleware sees the new intakeFinished state
@@ -721,7 +784,7 @@ export default function IntakeSelectionPage() {
             </h1>
             <p className="text-lg text-stone-600 max-w-xl mx-auto">
               Before we begin, are you an <b>existing patient</b> who's already
-              completed the previous intake assessment on Qualtrics?
+              completed your intake assessment?
             </p>
           </>
         }
@@ -781,7 +844,7 @@ export default function IntakeSelectionPage() {
               Are you sure?
             </h1>
             <p className="text-lg text-stone-600 max-w-lg mx-auto leading-relaxed">
-              If you indicate you've already completed the Qualtrics assessment,
+              If you indicate you've already completed your intake assessment,
               you will <strong>skip</strong> our new intake and go directly to
               your dashboard.
             </p>
@@ -815,6 +878,12 @@ export default function IntakeSelectionPage() {
   // --- Step 2c: Select Clinician (For Legacy Users) ---
   if (step === "select-clinician") {
     const hasSelectedClinician = clinicianName !== "";
+    const hasAge = legacyAge !== "";
+    const hasDob = legacyDob !== "";
+    const hasPronouns = legacyPronouns.length > 0;
+
+    const canProceed =
+      hasSelectedClinician && hasAge && hasDob && hasPronouns && !dobAgeError;
 
     return (
       <CardWrapper
@@ -823,16 +892,17 @@ export default function IntakeSelectionPage() {
             <h1
               className={`text-2xl md:text-3xl ${dm_serif.className} font-bold mb-3 text-stone-900`}
             >
-              Select Your Clinician
+              A Few Quick Questions
             </h1>
             <p className="text-lg text-stone-600 max-w-lg mx-auto leading-relaxed">
-              Please select who you are seeing at Integrative Psych.
+              Please provide some basic information before continuing.
             </p>
           </>
         }
       >
-        <div className="max-w-md mx-auto w-full mb-8 text-left">
-          <div className="mb-6">
+        <div className="max-w-md mx-auto w-full mb-8 text-left space-y-6">
+          {/* Clinician Selection */}
+          <div>
             <label className="block text-sm font-medium text-stone-700 mb-2">
               Assigned Clinician <span className="text-red-500">*</span>
             </label>
@@ -849,6 +919,121 @@ export default function IntakeSelectionPage() {
               </Listbox>
             </Field>
           </div>
+
+          {/* Age and DOB side by side */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-2">
+                Age <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                min={1}
+                className={`w-full rounded-xl bg-white border px-3 py-2 text-stone-900 placeholder:text-stone-400 ${
+                  dobAgeError
+                    ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                    : "border-stone-300"
+                }`}
+                placeholder="e.g., 32"
+                value={legacyAge}
+                onChange={(e) => setLegacyAge(e.target.value)}
+                aria-invalid={dobAgeError ? true : undefined}
+                aria-describedby={dobAgeError ? "dob-age-mismatch" : undefined}
+              />
+              {dobAgeError && (
+                <p id="dob-age-mismatch" className="mt-1 text-xs text-red-600">
+                  {dobAgeError}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-2">
+                Date of Birth <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                className={`w-full rounded-xl bg-white border px-3 py-2 text-stone-900 ${
+                  dobAgeError
+                    ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                    : "border-stone-300"
+                }`}
+                value={legacyDob}
+                onChange={(e) => setLegacyDob(e.target.value)}
+                aria-invalid={dobAgeError ? true : undefined}
+                aria-describedby={dobAgeError ? "dob-age-mismatch" : undefined}
+              />
+            </div>
+          </div>
+
+          {/* Pronouns */}
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-2">
+              Preferred Pronouns <span className="text-red-500">*</span>
+            </label>
+            <Listbox
+              value={legacyPronouns}
+              onChange={(vals: Option[]) => setLegacyPronouns(vals)}
+              multiple
+            >
+              <div className="relative">
+                <ListboxButton className="w-full min-h-[42px] relative block rounded-xl bg-white border border-stone-300 px-3 py-2 text-left text-stone-900">
+                  {legacyPronouns.length === 0 ? (
+                    <span className="text-stone-400">
+                      Select all that apply…
+                    </span>
+                  ) : (
+                    <span className="flex flex-wrap gap-1">
+                      {legacyPronouns.map((o) => (
+                        <span
+                          key={o.value}
+                          className="inline-flex items-center rounded-md bg-stone-100 px-2 py-0.5 text-xs text-stone-700"
+                        >
+                          {o.label}
+                        </span>
+                      ))}
+                    </span>
+                  )}
+                  <ChevronDown
+                    className="group pointer-events-none absolute top-3 right-2.5 size-4"
+                    aria-hidden="true"
+                  />
+                </ListboxButton>
+
+                <ListboxOptions className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg border border-stone-200 focus:outline-none list-none">
+                  {pronounOptions.map((option) => (
+                    <ListboxOption
+                      key={option.value}
+                      value={option}
+                      as={React.Fragment}
+                    >
+                      {({ active, selected }) => (
+                        <li
+                          className={`${
+                            active ? "bg-stone-100" : "bg-white"
+                          } relative cursor-pointer select-none py-2 pl-4 pr-10`}
+                        >
+                          <span
+                            className={`${
+                              selected
+                                ? "font-medium text-stone-900"
+                                : "font-normal text-stone-700"
+                            } block truncate`}
+                          >
+                            {option.label}
+                          </span>
+                          {selected && (
+                            <span className="absolute inset-y-0 right-3 flex items-center text-stone-600">
+                              <Check />
+                            </span>
+                          )}
+                        </li>
+                      )}
+                    </ListboxOption>
+                  ))}
+                </ListboxOptions>
+              </div>
+            </Listbox>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -862,14 +1047,14 @@ export default function IntakeSelectionPage() {
 
           <button
             onClick={handleMarkComplete}
-            disabled={!hasSelectedClinician || isSubmitting}
+            disabled={!canProceed || isSubmitting}
             className={`order-1 md:order-2 w-full py-4 px-6 rounded-xl border-b-4 font-bold text-white shadow-md transition-all flex items-center justify-center gap-2 ${
-              !hasSelectedClinician || isSubmitting
+              !canProceed || isSubmitting
                 ? "bg-stone-300 border-stone-400 cursor-not-allowed opacity-70"
                 : "cursor-pointer hover:translate-y-[-2px] hover:brightness-105 active:translate-y-[2px] active:brightness-95 active:border-b-0"
             }`}
             style={
-              !hasSelectedClinician || isSubmitting
+              !canProceed || isSubmitting
                 ? {}
                 : {
                     backgroundColor: sigmundTheme.accent,

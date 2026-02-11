@@ -169,6 +169,10 @@ export type AdultAssessments = {
     r13: string;
   };
   stress: { pss1: string; pss2: string; pss3: string; pss4: string };
+  ybocs?: Record<string, string>;
+  hama?: Record<string, string>;
+  hamd?: Record<string, string>;
+  bprs?: Record<string, string>;
 };
 // ===== Child & Adult flexible assessment typing (preparation only) =====
 // Columbia DISC Teen Depression Scale (Ages 11+) — Teen self-report & Parent-report
@@ -335,7 +339,7 @@ export type AgeAwareAssessments =
 
 // Type guards (optional helpers for future use)
 export function isChildAssessments(
-  a: any
+  a: any,
 ): a is { kind: "child"; data: ChildAssessments } {
   return (
     a &&
@@ -346,7 +350,7 @@ export function isChildAssessments(
   );
 }
 export function isAdultAssessments(
-  a: any
+  a: any,
 ): a is { kind: "adult"; data: AdultAssessments } {
   return (
     a &&

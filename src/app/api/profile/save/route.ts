@@ -95,7 +95,7 @@ export async function POST(req: Request) {
     if (!clinician || typeof clinician !== "string") {
       return Response.json(
         { error: "clinician is required and must be a string" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -103,7 +103,7 @@ export async function POST(req: Request) {
       console.error("[updateClinician] No userId in session");
       return Response.json(
         { error: "User ID not found in session" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -135,7 +135,86 @@ export async function POST(req: Request) {
 
       return Response.json(
         { error: "Failed to update clinician" },
-        { status: 500 }
+        { status: 500 },
+      );
+    }
+  }
+
+  // Mode D: save legacy demographics (age, dob, pronouns) for Qualtrics patients
+  if (body.action === "saveLegacyDemographics") {
+    const { age, dob, pronouns } = body;
+
+    if (!userId) {
+      console.error("[saveLegacyDemographics] No userId in session");
+      return Response.json(
+        { error: "User ID not found in session" },
+        { status: 401 },
+      );
+    }
+
+    try {
+      // Parse name from session for the profile
+      const nameParts = ((session.user as any).name || "").split(" ");
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+
+      // Upsert the profile with the legacy demographics
+      await prisma.profile.upsert({
+        where: { userId },
+        update: {
+          age: age || null,
+          firstName: firstName || null,
+          lastName: lastName || null,
+          email: (session.user as any).email ?? null,
+          json: {
+            maxVisited: 0,
+            isChild: null,
+            firstName,
+            lastName,
+            email: (session.user as any).email || "",
+            age: age || null,
+            dob: dob || null,
+            pronouns: pronouns || [],
+            _legacyQualtrics: true,
+          },
+        },
+        create: {
+          userId,
+          clinicId: DEFAULT_CLINIC_ID,
+          age: age || null,
+          firstName: firstName || null,
+          lastName: lastName || null,
+          email: (session.user as any).email ?? null,
+          json: {
+            maxVisited: 0,
+            isChild: null,
+            firstName,
+            lastName,
+            email: (session.user as any).email || "",
+            age: age || null,
+            dob: dob || null,
+            pronouns: pronouns || [],
+            _legacyQualtrics: true,
+          },
+          firstSubmittedAt: null,
+        },
+      });
+
+      console.log(
+        `[saveLegacyDemographics] Saved demographics for legacy patient: ${userId}`,
+      );
+
+      return Response.json({ ok: true, mode: "saveLegacyDemographics" });
+    } catch (error: any) {
+      console.error("[saveLegacyDemographics] Failed to save demographics:", {
+        userId,
+        error: error.message,
+        code: error.code,
+      });
+
+      return Response.json(
+        { error: "Failed to save demographics" },
+        { status: 500 },
       );
     }
   }

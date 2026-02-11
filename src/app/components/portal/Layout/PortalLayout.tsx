@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Fragment } from "react";
+import React, { useState, Fragment, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -25,7 +25,6 @@ import {
 } from "@headlessui/react";
 import { DM_Serif_Text, DM_Sans } from "next/font/google";
 import { intPsychTheme, sigmundTheme } from "../../theme";
-import logo from "@/assets/IP_Logo.png";
 import sigmund_logo from "public/Sigmund Window.png";
 import { useWeather } from "../../../lib/hooks/useWeather";
 import WeatherWidget from "../../WeatherWidget";
@@ -51,13 +50,13 @@ const navigationItems = [
     href: "/journal",
     color: `text-[${sigmundTheme.primary}]`, // Orange/Amber
   },
-  // {
-  //   key: "scales",
-  //   label: "Scales",
-  //   icon: ClipboardList,
-  //   href: "/scales",
-  //   color: `text-[${intPsychTheme.accent}]`, // Blue
-  // },
+  {
+    key: "scales",
+    label: "Scales",
+    icon: ClipboardList,
+    href: "/scales",
+    color: `text-[${intPsychTheme.accent}]`, // Blue
+  },
 ];
 
 const dm_serif = DM_Serif_Text({ subsets: ["latin"], weight: ["400"] });
@@ -99,6 +98,17 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
       return next;
     });
   };
+
+  // Auto-collapse on resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1100 && isExpanded) {
+        setIsExpanded(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isExpanded]);
 
   const getInitials = (name?: string | null) => {
     if (!name) return "U";

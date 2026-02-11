@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
         requestedBy: true,
         dueDate: true,
         assignedAt: true,
+        canPatientView: true,
       },
     });
 
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
     console.error("Assessments GET error:", error);
     return NextResponse.json(
       { error: "Failed to fetch assessment history" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -90,14 +91,14 @@ export async function POST(request: NextRequest) {
     if (!assessmentType || typeof assessmentType !== "string") {
       return NextResponse.json(
         { error: "Assessment type is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!responses || typeof responses !== "object") {
       return NextResponse.json(
         { error: "Responses are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -122,7 +123,7 @@ export async function POST(request: NextRequest) {
       if (!existingAssigned) {
         return NextResponse.json(
           { error: "Assessment not found" },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
@@ -143,7 +144,7 @@ export async function POST(request: NextRequest) {
       if (!existingAssigned.requestedBy || !isNotCompleted) {
         return NextResponse.json(
           { error: "Assessment is not available for completion" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -154,6 +155,7 @@ export async function POST(request: NextRequest) {
           responses,
           totalScore: totalScore ?? null,
           completedAt: new Date(), // Set when patient completes it
+          canPatientView: false, // Reset to locked - clinician must review before patient can view
           // Keep requestedBy, dueDate, and assignedAt from the original assignment
         },
         select: {
@@ -192,7 +194,7 @@ export async function POST(request: NextRequest) {
     console.error("Assessment POST error:", error);
     return NextResponse.json(
       { error: "Failed to submit assessment" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

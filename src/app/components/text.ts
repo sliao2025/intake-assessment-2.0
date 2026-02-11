@@ -616,3 +616,358 @@ export const YMRS_OPTIONS: Record<string, { key: string; label: string }[]> = {
     { key: "4", label: "4 – Denies any behavior change" },
   ],
 };
+
+export const YBOCS_QUESTIONS: Record<string, string> = {
+  ybocs1: "1. Time occupied by obsessive thoughts",
+  ybocs2: "2. Interference due to obsessive thoughts",
+  ybocs3: "3. Distress associated with obsessive thoughts",
+  ybocs4: "4. Resistance against obsessions",
+  ybocs5: "5. Degree of control over obsessions",
+  ybocs6: "6. Time spent performing compulsive behaviors",
+  ybocs7: "7. Interference due to compulsive behaviors",
+  ybocs8: "8. Distress associated with compulsive behaviors",
+  ybocs9: "9. Resistance against compulsions",
+  ybocs10: "10. Degree of control over compulsions",
+};
+
+export const YBOCS_OPTIONS: Record<string, { key: string; label: string }[]> = {
+  ybocs1: [
+    { key: "0", label: "0 – None" },
+    { key: "1", label: "1 – Mild (< 1 hr/day)" },
+    { key: "2", label: "2 – Moderate (1-3 hrs/day)" },
+    { key: "3", label: "3 – Severe (> 3 hrs/day)" },
+    { key: "4", label: "4 – Extreme (> 8 hrs/day)" },
+  ],
+  ybocs2: [
+    { key: "0", label: "0 – None" },
+    { key: "1", label: "1 – Mild (Slight interference)" },
+    { key: "2", label: "2 – Moderate (Definite interference)" },
+    { key: "3", label: "3 – Severe (Substantial impairment)" },
+    { key: "4", label: "4 – Extreme (Incapacitating)" },
+  ],
+  ybocs3: [
+    { key: "0", label: "0 – None" },
+    { key: "1", label: "1 – Little distress" },
+    { key: "2", label: "2 – Moderate distress" },
+    { key: "3", label: "3 – Severe distress" },
+    { key: "4", label: "4 – Near constant, disabling distress" },
+  ],
+  ybocs4: [
+    { key: "0", label: "0 – Try to resist all the time" },
+    { key: "1", label: "1 – Try to resist most of the time" },
+    { key: "2", label: "2 – Make some effort to resist" },
+    { key: "3", label: "3 – Yield to all obsessions with some reluctance" },
+    { key: "4", label: "4 – Completely and willingly yield" },
+  ],
+  ybocs5: [
+    { key: "0", label: "0 – Complete control" },
+    { key: "1", label: "1 – Much control" },
+    { key: "2", label: "2 – Moderate control" },
+    { key: "3", label: "3 – Little control" },
+    { key: "4", label: "4 – No control" },
+  ],
+  ybocs6: [
+    { key: "0", label: "0 – None" },
+    { key: "1", label: "1 – Mild (< 1 hr/day)" },
+    { key: "2", label: "2 – Moderate (1-3 hrs/day)" },
+    { key: "3", label: "3 – Severe (> 3 hrs/day)" },
+    { key: "4", label: "4 – Extreme (> 8 hrs/day)" },
+  ],
+  ybocs7: [
+    { key: "0", label: "0 – None" },
+    { key: "1", label: "1 – Mild (Slight interference)" },
+    { key: "2", label: "2 – Moderate (Definite interference)" },
+    { key: "3", label: "3 – Severe (Substantial impairment)" },
+    { key: "4", label: "4 – Extreme (Incapacitating)" },
+  ],
+  ybocs8: [
+    { key: "0", label: "0 – None" },
+    { key: "1", label: "1 – Little distress" },
+    { key: "2", label: "2 – Moderate distress" },
+    { key: "3", label: "3 – Severe distress" },
+    { key: "4", label: "4 – Near constant, disabling distress" },
+  ],
+  ybocs9: [
+    { key: "0", label: "0 – Try to resist all the time" },
+    { key: "1", label: "1 – Try to resist most of the time" },
+    { key: "2", label: "2 – Make some effort to resist" },
+    { key: "3", label: "3 – Yield to all compulsions with some reluctance" },
+    { key: "4", label: "4 – Completely and willingly yield" },
+  ],
+  ybocs10: [
+    { key: "0", label: "0 – Complete control" },
+    { key: "1", label: "1 – Much control" },
+    { key: "2", label: "2 – Moderate control" },
+    { key: "3", label: "3 – Little control" },
+    { key: "4", label: "4 – No control" },
+  ],
+};
+
+export const HAM_A_QUESTIONS: Record<string, string> = {
+  hama1: "1. Anxious Mood",
+  hama2: "2. Tension",
+  hama3: "3. Fears",
+  hama4: "4. Insomnia",
+  hama5: "5. Intellectual",
+  hama6: "6. Depressed Mood",
+  hama7: "7. Somatic (Muscular)",
+  hama8: "8. Somatic (Sensory)",
+  hama9: "9. Cardiovascular Symptoms",
+  hama10: "10. Respiratory Symptoms",
+  hama11: "11. Gastrointestinal Symptoms",
+  hama12: "12. Genitourinary Symptoms",
+  hama13: "13. Autonomic Symptoms",
+  hama14: "14. Behavior at Interview",
+};
+
+export const HAM_A_OPTIONS: Record<string, { key: string; label: string }[]> = {
+  default: [
+    { key: "0", label: "0 – Not present" },
+    { key: "1", label: "1 – Mild" },
+    { key: "2", label: "2 – Moderate" },
+    { key: "3", label: "3 – Severe" },
+    { key: "4", label: "4 – Very Severe" },
+  ],
+};
+
+export const HAM_A_DESCRIPTIONS: Record<string, string> = {
+  hama1:
+    "Worries, anticipation of the worst, fearful anticipation, irritability.",
+  hama2:
+    "Feelings of tension, fatigability, startle response, moved to tears easily, trembling, feelings of restlessness, inability to relax.",
+  hama3:
+    "Of dark, of strangers, of being left alone, of animals, of traffic, of crowds.",
+  hama4:
+    "Difficulty in falling asleep, broken sleep, unsatisfying sleep and fatigue on waking, dreams, nightmares, night terrors.",
+  hama5: "Difficulty in concentration, poor memory.",
+  hama6:
+    "Loss of interest, lack of pleasure in hobbies, depression, early waking, diurnal swing.",
+  hama7:
+    "Pains and aches, twitching, stiffness, myoclonic jerks, grinding of teeth, unsteady voice, increased muscular tone.",
+  hama8:
+    "Tinnitus, blurring of vision, hot and cold flushes, feelings of weakness, pricking sensation.",
+  hama9:
+    "Tachycardia, palpitations, pain in chest, throbbing of vessels, fainting feelings, missing beat.",
+  hama10:
+    "Pressure or constriction in chest, choking feelings, sighing, dyspnea.",
+  hama11:
+    "Difficulty in swallowing, wind abdominal pain, burning sensations, abdominal fullness, nausea, vomiting, borborygmi, looseness of bowels, loss of weight, constipation.",
+  hama12:
+    "Frequency of micturition, urgency of micturition, amenorrhea, menorrhagia, development of frigidity, premature ejaculation, loss of libido, impotence.",
+  hama13:
+    "Dry mouth, flushing, pallor, tendency to sweat, giddiness, tension headache, raising of hair.",
+  hama14:
+    "Fidgeting, restlessness or pacing, tremor of hands, furrowed brow, strained face, sighing or rapid respiration, facial pallor, swallowing.",
+};
+
+export const HAM_D_QUESTIONS: Record<string, string> = {
+  hamd1: "1. Depressed Mood",
+  hamd2: "2. Feelings of Guilt",
+  hamd3: "3. Suicide",
+  hamd4: "4. Insomnia - Initial",
+  hamd5: "5. Insomnia - Middle",
+  hamd6: "6. Insomnia - Delayed",
+  hamd7: "7. Work and Activities",
+  hamd8: "8. Retardation",
+  hamd9: "9. Agitation",
+  hamd10: "10. Anxiety - Psychic",
+  hamd11: "11. Anxiety - Somatic",
+  hamd12: "12. Somatic Symptoms - Gastrointestinal",
+  hamd13: "13. Somatic Symptoms - General",
+  hamd14: "14. Genital Symptoms (Loss of Libido)",
+  hamd15: "15. Hypochondriasis",
+  hamd16: "16. Loss of Weight",
+  hamd17: "17. Insight",
+};
+
+export const HAM_D_OPTIONS: Record<string, { key: string; label: string }[]> = {
+  hamd1: [
+    { key: "0", label: "0 – Absent" },
+    { key: "1", label: "1 – Indicated only on questioning" },
+    { key: "2", label: "2 – Spontaneously reported verbally" },
+    { key: "3", label: "3 – Communicated nonverbally" },
+    { key: "4", label: "4 – Virtually only feeling state reported" },
+  ],
+  hamd2: [
+    { key: "0", label: "0 – Absent" },
+    { key: "1", label: "1 – Self-reproach" },
+    { key: "2", label: "2 – Ideas of guilt" },
+    { key: "3", label: "3 – Present illness is a punishment" },
+    { key: "4", label: "4 – Delusions of guilt / hallucinations" },
+  ],
+  hamd3: [
+    { key: "0", label: "0 – Absent" },
+    { key: "1", label: "1 – Feels life is not worth living" },
+    { key: "2", label: "2 – Wishes he/she were dead" },
+    { key: "3", label: "3 – Suicidal ideas or gestures" },
+    { key: "4", label: "4 – Attempts at suicide" },
+  ],
+  hamd4: [
+    { key: "0", label: "0 – Absent" },
+    { key: "1", label: "1 – Occasional difficulty" },
+    { key: "2", label: "2 – Frequent difficulty" },
+  ],
+  hamd5: [
+    { key: "0", label: "0 – Absent" },
+    { key: "1", label: "1 – Restless/disturbed" },
+    { key: "2", label: "2 – Waking during night" },
+  ],
+  hamd6: [
+    { key: "0", label: "0 – Absent" },
+    { key: "1", label: "1 – Waking early but goes back to sleep" },
+    { key: "2", label: "2 – Unable to sleep again" },
+  ],
+  hamd7: [
+    { key: "0", label: "0 – No difficulty" },
+    { key: "1", label: "1 – Thoughts of incapacity/fatigue" },
+    { key: "2", label: "2 – Loss of interest" },
+    { key: "3", label: "3 – Decrease in actual time spent" },
+    { key: "4", label: "4 – Stopped working / no activities" },
+  ],
+  hamd8: [
+    { key: "0", label: "0 – Normal" },
+    { key: "1", label: "1 – Slight retardation" },
+    { key: "2", label: "2 – Obvious retardation" },
+    { key: "3", label: "3 – Severe retardation" },
+    { key: "4", label: "4 – Stupor" },
+  ],
+  hamd9: [
+    { key: "0", label: "0 – None" },
+    { key: "1", label: "1 – Fidgetiness" },
+    { key: "2", label: "2 – Playing with hands/hair" },
+    { key: "3", label: "3 – Moving about, can't sit still" },
+    { key: "4", label: "4 – Hand wringing, nail biting, etc" },
+  ],
+  hamd10: [
+    { key: "0", label: "0 – No difficulty" },
+    { key: "1", label: "1 – Subjective tension/irritability" },
+    { key: "2", label: "2 – Worrying about minor matters" },
+    { key: "3", label: "3 – Apprehensive attitude in face/speech" },
+    { key: "4", label: "4 – Fears expressed without questioning" },
+  ],
+  hamd11: [
+    { key: "0", label: "0 – Absent" },
+    { key: "1", label: "1 – Mild" },
+    { key: "2", label: "2 – Moderate" },
+    { key: "3", label: "3 – Severe" },
+    { key: "4", label: "4 – Incapacitating" },
+  ],
+  hamd12: [
+    { key: "0", label: "0 – None" },
+    { key: "1", label: "1 – Loss of appetite" },
+    { key: "2", label: "2 – Difficulty eating without urging" },
+  ],
+  hamd13: [
+    { key: "0", label: "0 – None" },
+    { key: "1", label: "1 – Heaviness in limbs/back/head" },
+    { key: "2", label: "2 – Severe loss of energy" },
+  ],
+  hamd14: [
+    { key: "0", label: "0 – Absent" },
+    { key: "1", label: "1 – Mild" },
+    { key: "2", label: "2 – Severe" },
+  ],
+  hamd15: [
+    { key: "0", label: "0 – Not present" },
+    { key: "1", label: "1 – Self-absorption (bodily)" },
+    { key: "2", label: "2 – Preoccupation with health" },
+    { key: "3", label: "3 – Frequent complaints" },
+    { key: "4", label: "4 – Hypochondriacal delusions" },
+  ],
+  hamd16: [
+    { key: "0", label: "0 – No weight loss" },
+    { key: "1", label: "1 – Probable weight loss" },
+    { key: "2", label: "2 – Definite weight loss" },
+  ],
+  hamd17: [
+    { key: "0", label: "0 – Acknowledges being ill" },
+    { key: "1", label: "1 – Attributes cause to food/weather" },
+    { key: "2", label: "2 – Denies being ill" },
+  ],
+};
+
+export const HAM_D_DESCRIPTIONS: Record<string, string> = {
+  hamd1:
+    "Sadness, hopelessness, helplessness, worthlessness. Rate based on verbal and non-verbal expression.",
+  hamd2:
+    "Self-criticism, self-blame, ideas of guilt or remorse, delusions of guilt.",
+  hamd3:
+    "Passive wishes for death, active suicidal ideation, suicide attempts.",
+  hamd4:
+    "Difficulty falling asleep (initial insomnia), takes more than 30 minutes.",
+  hamd5: "Restless, disturbed sleep, waking during the night.",
+  hamd6:
+    "Early morning awakening with inability to return to sleep (terminal insomnia).",
+  hamd7:
+    "Feelings of incapacity, fatigue, loss of interest in work and activities.",
+  hamd8:
+    "Slowness of thought and speech, impaired concentration, decreased motor activity.",
+  hamd9: "Restlessness, fidgeting, hand-wringing, inability to sit still.",
+  hamd10: "Subjective tension, irritability, worrying, apprehension, fear.",
+  hamd11:
+    "GI (dry mouth, gas, indigestion), cardiovascular, respiratory, urinary symptoms of anxiety.",
+  hamd12: "Loss of appetite, heavy feeling in abdomen, constipation.",
+  hamd13: "Heaviness in limbs, back, head. Fatigue, loss of energy.",
+  hamd14: "Loss of libido, menstrual disturbances, sexual dysfunction.",
+  hamd15: "Preoccupation with health, excessive concern with bodily functions.",
+  hamd16: "Weight loss associated with present illness.",
+  hamd17: "Patient's awareness and acknowledgment of being ill.",
+};
+
+export const BPRS_QUESTIONS: Record<string, string> = {
+  bprs1: "1. Somatic Concern",
+  bprs2: "2. Anxiety",
+  bprs3: "3. Emotional Withdrawal",
+  bprs4: "4. Conceptual Disorganization",
+  bprs5: "5. Guilt Feelings",
+  bprs6: "6. Tension",
+  bprs7: "7. Mannerisms and Posturing",
+  bprs8: "8. Grandiosity",
+  bprs9: "9. Depressive Mood",
+  bprs10: "10. Hostility",
+  bprs11: "11. Suspiciousness",
+  bprs12: "12. Hallucinatory Behavior",
+  bprs13: "13. Motor Retardation",
+  bprs14: "14. Uncooperativeness",
+  bprs15: "15. Unusual Thought Content",
+  bprs16: "16. Blunted Affect",
+  bprs17: "17. Excitement",
+  bprs18: "18. Disorientation",
+};
+
+export const BPRS_OPTIONS: Record<string, { key: string; label: string }[]> = {
+  default: [
+    { key: "1", label: "1 – Not present" },
+    { key: "2", label: "2 – Very mild" },
+    { key: "3", label: "3 – Mild" },
+    { key: "4", label: "4 – Moderate" },
+    { key: "5", label: "5 – Moderately severe" },
+    { key: "6", label: "6 – Severe" },
+    { key: "7", label: "7 – Extremely severe" },
+  ],
+};
+
+export const BPRS_DESCRIPTIONS: Record<string, string> = {
+  bprs1:
+    "Preoccupation with physical health, fear of physical illness, or hypochondriasis.",
+  bprs2: "Worry, fear, over-concern for present or future, uneasiness.",
+  bprs3:
+    "Lack of spontaneous interaction, isolation, deficiency in relating to others.",
+  bprs4: "Thought processes confused, disconnected, disorganized, disrupted.",
+  bprs5: "Self-blame, shame, remorse for past behavior.",
+  bprs6: "Physical and motor manifestations of nervousness, over-activation.",
+  bprs7: "Peculiar, bizarre, unnatural motor behavior (not including tics).",
+  bprs8:
+    "Exaggerated self-opinion, arrogance, conviction of unusual power or abilities.",
+  bprs9: "Sorrow, sadness, despondency, pessimism.",
+  bprs10: "Animosity, contempt, belligerence, disdain for others.",
+  bprs11: "Mistrust, belief others harbor malicious or discriminatory intent.",
+  bprs12: "Perceptions without normal external stimulus correspondence.",
+  bprs13: "Slowed, weakened movements or speech, reduced body tone.",
+  bprs14: "Resistance, guardedness, rejection of authority.",
+  bprs15: "Unusual, odd, strange, bizarre thought content.",
+  bprs16:
+    "Reduced emotional tone, reduction in formal intensity of feelings, flatness.",
+  bprs17: "Heightened emotional tone, agitation, increased reactivity.",
+  bprs18: "Confusion or lack of proper association for person, place, or time.",
+};

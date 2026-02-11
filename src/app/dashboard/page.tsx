@@ -163,14 +163,14 @@ export default function DashboardPage() {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <h1
-                className={`${dm_serif.className} text-4xl md:text-5xl mb-2 text-[#1c1917]`}
+                className={`${dm_serif.className} text-3xl sm:text-4xl md:text-5xl mb-2 text-[#1c1917]`}
               >
                 Hi,{" "}
                 <span style={{ color: sigmundTheme.accent }}>
                   {firstName + "!"}
                 </span>
               </h1>
-              <p className="text-stone-500 text-lg font-medium flex items-center gap-2">
+              <p className="text-stone-500 text-base sm:text-lg font-medium flex items-center gap-2">
                 {weatherGreeting
                   ? `It's ${weatherGreeting.replace(", ", "").toLowerCase()}.`
                   : "Ready to continue your journey?"}
@@ -193,7 +193,7 @@ export default function DashboardPage() {
                 className={`rounded-[12px] p-6 h-full relative overflow-hidden flex flex-col sm:flex-row items-center gap-8`}
               >
                 {/* Sigmund Image */}
-                <div className="w-80 h-80 relative flex-shrink-0">
+                <div className="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 relative flex-shrink-0">
                   <div className="absolute inset-0 bg-[#e7e5e4] rounded-full blur-2xl opacity-50 transform translate-y-4" />
                   <Image
                     src={sigmund_chair}
@@ -208,11 +208,11 @@ export default function DashboardPage() {
                     DAILY REFLECTION
                   </div>
                   <h2
-                    className={`${dm_serif.className} text-3xl mb-3 text-[#1c1917]`}
+                    className={`${dm_serif.className} text-2xl sm:text-3xl mb-3 text-[#1c1917]`}
                   >
                     How are you feeling?
                   </h2>
-                  <p className="text-[#44403c] text-lg leading-relaxed mb-8 max-w-md">
+                  <p className="text-[#44403c] text-base sm:text-lg leading-relaxed mb-8 max-w-md">
                     Take a moment to check in with yourself. I'm here to listen
                     and help you find clarity.
                   </p>
