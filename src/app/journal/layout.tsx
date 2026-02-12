@@ -1,17 +1,15 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import PortalLayout from "../components/portal/Layout/PortalLayout";
-import { ArrowLeft } from "lucide-react";
-import { useRouter, usePathname } from "next/navigation";
 
-interface AssessmentLayoutProps {
+interface JournalLayoutProps {
   children: React.ReactNode;
 }
 
-export default function AssessmentLayout({ children }: AssessmentLayoutProps) {
+export default function JournalLayout({ children }: JournalLayoutProps) {
   const router = useRouter();
-  const pathname = usePathname();
   const [allowed, setAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -20,7 +18,7 @@ export default function AssessmentLayout({ children }: AssessmentLayoutProps) {
         const res = await fetch("/api/portal/settings");
         if (res.ok) {
           const data = await res.json();
-          if (!data.scalesEnabled) {
+          if (!data.journalEnabled) {
             router.replace("/dashboard");
             return;
           }
@@ -35,14 +33,9 @@ export default function AssessmentLayout({ children }: AssessmentLayoutProps) {
     checkAccess();
   }, [router]);
 
-  // Only show back button on dynamic route pages (not on /assessments itself)
-  const isDynamicRoute = pathname !== "/scales";
-  // Use wider max-width for main list page, narrower for individual assessment pages
-  const maxWidth = isDynamicRoute ? "max-w-4xl" : "max-w-7xl";
-
-  if (allowed === null) {
-    return (
-      <PortalLayout>
+  return (
+    <PortalLayout>
+      {allowed === null ? (
         <div className="flex items-center justify-center h-full min-h-[60vh]">
           <div className="flex flex-col items-center gap-4">
             <svg className="w-12 h-12 animate-spin" viewBox="0 0 50 50">
@@ -67,35 +60,13 @@ export default function AssessmentLayout({ children }: AssessmentLayoutProps) {
               />
             </svg>
             <span className="font-medium text-stone-500 animate-pulse">
-              Loading Scales
+              Loading Journal
             </span>
           </div>
         </div>
-      </PortalLayout>
-    );
-  }
-
-  return (
-    <PortalLayout>
-      <div
-        className={`min-h-screen ${isDynamicRoute ? "p-6 md:p-8 pb-16" : ""}`}
-      >
-        <div className={`${maxWidth} mx-auto`}>
-          {/* Back button - only on dynamic routes */}
-          {isDynamicRoute && (
-            <button
-              onClick={() => router.push("/scales")}
-              className="cursor-pointer flex items-center gap-2 text-stone-600 hover:text-stone-900 mb-6 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Scales</span>
-            </button>
-          )}
-
-          {/* Content */}
-          {children}
-        </div>
-      </div>
+      ) : (
+        children
+      )}
     </PortalLayout>
   );
 }

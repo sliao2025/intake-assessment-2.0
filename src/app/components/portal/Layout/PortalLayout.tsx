@@ -35,7 +35,7 @@ interface PortalLayoutProps {
 }
 
 // Using IntPsych Theme Colors
-const navigationItems = [
+const allNavigationItems = [
   {
     key: "dashboard",
     label: "Dashboard",
@@ -49,6 +49,7 @@ const navigationItems = [
     icon: BookOpen,
     href: "/journal",
     color: `text-[${sigmundTheme.primary}]`, // Orange/Amber
+    settingsKey: "journalEnabled" as const,
   },
   {
     key: "scales",
@@ -56,6 +57,7 @@ const navigationItems = [
     icon: ClipboardList,
     href: "/scales",
     color: `text-[${intPsychTheme.accent}]`, // Blue
+    settingsKey: "scalesEnabled" as const,
   },
 ];
 
@@ -71,6 +73,44 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
   const [isMobileOpen, setMobileOpen] = useState(false);
   const { weather } = useWeather();
   const [play] = useSound("/sfx/mid-pop.wav");
+  const [settings, setSettings] = useState<{
+    journalEnabled: boolean;
+    scalesEnabled: boolean;
+  } | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const cached = sessionStorage.getItem("portalSettings");
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  // Fetch patient visibility settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch("/api/portal/settings");
+        if (res.ok) {
+          const data = await res.json();
+          setSettings(data);
+          try {
+            sessionStorage.setItem("portalSettings", JSON.stringify(data));
+          } catch {}
+        }
+      } catch (err) {
+        console.error("Failed to fetch settings:", err);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  // Filter navigation items based on settings
+  const navigationItems = allNavigationItems.filter((item) => {
+    if (!item.settingsKey) return true; // Always show items without a settings key
+    if (!settings) return true; // While loading, show all items to prevent blink
+    return settings[item.settingsKey];
+  });
 
   // Initialize state from localStorage synchronously to prevent flash
   const [isExpanded, setIsExpanded] = useState(() => {
@@ -120,7 +160,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
       .slice(0, 2);
   };
 
-  const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => {
+  const renderSidebar = (isMobile = false) => {
     // Determine effective expanded state for rendering content
     const expanded = isMobile || isExpanded;
 
@@ -190,7 +230,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
               <div key={item.key} className="relative group">
                 <Link
                   href={item.href}
-                  onClick={() => isMobile && setMobileOpen(false)} // Close on navigate (mobile)
+                  onClick={() => isMobile && setMobileOpen(false)}
                   className={`flex items-center ${
                     expanded ? "gap-4 px-4" : "justify-center px-0"
                   } py-4 rounded-xl text-base font-medium transition-all duration-200 relative overflow-hidden group ${
@@ -221,7 +261,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                 {!expanded && (
                   <div
                     style={{ backgroundColor: sigmundTheme.accent }}
-                    className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-4 py-2  text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-[9999] shadow-xl pointer-events-none"
+                    className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-4 py-2 text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-[9999] shadow-xl pointer-events-none"
                   >
                     {item.label}
                     <div
@@ -353,7 +393,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
             <aside
               className={`fixed inset-y-0 left-0 w-72 bg-white border-r-2 border-[${sigmundTheme.border}] flex flex-col z-50 shadow-xl`}
             >
-              <SidebarContent isMobile={true} />
+              {renderSidebar(true)}
             </aside>
           </Transition.Child>
         </div>
@@ -363,7 +403,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
       <aside
         className={`${sidebarWidth} hidden sm:flex bg-white border-r-2 border-[${sigmundTheme.border}] flex-col transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] relative z-20 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]`}
       >
-        <SidebarContent />
+        {renderSidebar()}
       </aside>
 
       {/* Main Content */}

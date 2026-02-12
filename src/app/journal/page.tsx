@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import PortalLayout from "../components/portal/Layout/PortalLayout";
+
 import {
   Calendar,
   Trash2,
@@ -497,7 +497,7 @@ export default function JournalPage() {
   ];
 
   return (
-    <PortalLayout>
+    <>
       <div className={`min-h-screen p-6 md:p-8 ${dm_sans.className}`}>
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="flex items-center justify-between">
@@ -614,11 +614,7 @@ export default function JournalPage() {
               </h2>
             </div>
 
-            {loading ? (
-              <div className="text-center py-12 text-stone-400 font-bold">
-                Loading your entries...
-              </div>
-            ) : entries.length === 0 ? (
+            {!loading && entries.length === 0 ? (
               <div className="bg-[#f0f9ff] rounded-2xl p-12 text-center border border-[#bae6fd] border-dashed">
                 <p className="text-stone-500 font-medium text-lg">
                   Your journal is waiting for its first story.
@@ -899,6 +895,6 @@ export default function JournalPage() {
           </div>
         )}
       </Drawer>
-    </PortalLayout>
+    </>
   );
 }

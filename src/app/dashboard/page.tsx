@@ -20,6 +20,8 @@ import {
   Calendar,
   ClipboardList,
   GraduationCap,
+  Lock,
+  ChartCandlestick,
 } from "lucide-react";
 import Image from "next/image";
 import { intPsychTheme, sigmundTheme } from "../components/theme";
@@ -74,6 +76,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [clinician, setClinician] = useState<string | null>(null);
   const { weather } = useWeather();
+  const [settings, setSettings] = useState<{
+    journalEnabled: boolean;
+    scalesEnabled: boolean;
+  } | null>(null);
   // const [play] = useSound("/sfx/neutral-ui.wav");
 
   useEffect(() => {
@@ -103,8 +109,21 @@ export default function DashboardPage() {
       }
     };
 
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch("/api/portal/settings");
+        if (res.ok) {
+          const data = await res.json();
+          setSettings(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch settings:", err);
+      }
+    };
+
     fetchDashboardData();
     fetchClinician();
+    fetchSettings();
   }, []);
 
   const firstName = session?.user?.name?.split(" ")[0] || "Friend";
@@ -114,23 +133,30 @@ export default function DashboardPage() {
       <PortalLayout>
         <div className="flex items-center justify-center h-full min-h-[60vh]">
           <div className="flex flex-col items-center gap-4">
-            <div className="relative w-16 h-16 flex items-center justify-center">
-              <span
-                style={{
-                  borderTopColor: intPsychTheme.accent,
-                  borderRightColor: intPsychTheme.accentLight,
-                  borderBottomColor: intPsychTheme.accentLight,
-                  borderLeftColor: intPsychTheme.accentLight,
-                }}
-                className="absolute inset-0 border-4 rounded-full animate-spin"
+            <svg className="w-12 h-12 animate-spin" viewBox="0 0 50 50">
+              <circle
+                cx="25"
+                cy="25"
+                r="20"
+                fill="none"
+                stroke="#e7e5e4"
+                strokeWidth="5"
               />
-              <span
-                className={`absolute inset-2 bg-[${intPsychTheme.accent}] rounded-full opacity-0`}
+              <circle
+                cx="25"
+                cy="25"
+                r="20"
+                fill="none"
+                stroke="#b2bfa2"
+                strokeWidth="5"
+                strokeLinecap="round"
+                strokeDasharray="80, 200"
+                strokeDashoffset="0"
               />
-            </div>
-            <div className="font-medium text-stone-500 animate-pulse">
-              Gathering your data...
-            </div>
+            </svg>
+            <span className="font-medium text-stone-500 animate-pulse">
+              Loading Dashboard
+            </span>
           </div>
         </div>
       </PortalLayout>
@@ -183,86 +209,169 @@ export default function DashboardPage() {
 
           {/* Main Action Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Hero Card: New Journal Entry */}
-            <div
-              style={{ borderColor: sigmundTheme.border }}
-              className="lg:col-span-2 bg-white rounded-2xl border-b-4 border-2 p-1 shadow-sm group hover:border-[#1c1917]/20 transition-all duration-300"
-            >
+            {/* Hero Card: New Journal Entry — or locked state when disabled */}
+            {settings?.journalEnabled !== false ? (
               <div
-                style={{ backgroundColor: sigmundTheme.background }}
-                className={`rounded-[12px] p-6 h-full relative overflow-hidden flex flex-col sm:flex-row items-center gap-8`}
+                style={{ borderColor: sigmundTheme.border }}
+                className="lg:col-span-2 bg-white rounded-2xl border-b-4 border-2 p-1 shadow-sm group hover:border-[#1c1917]/20 transition-all duration-300"
               >
-                {/* Sigmund Image */}
-                <div className="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 relative flex-shrink-0">
-                  <div className="absolute inset-0 bg-[#e7e5e4] rounded-full blur-2xl opacity-50 transform translate-y-4" />
-                  <Image
-                    src={sigmund_chair}
-                    alt="Sigmund"
-                    fill
-                    className="object-contain drop-shadow-md"
-                  />
-                </div>
-                <div className="flex-1 relative z-10 w-full flex flex-col items-end text-right">
-                  <div className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm font-bold mb-4 border border-[#e7e5e4] text-[#1c1917]">
-                    <Pencil className="w-4 h-4 text-[#1c1917]" />
-                    DAILY REFLECTION
-                  </div>
-                  <h2
-                    className={`${dm_serif.className} text-2xl sm:text-3xl mb-3 text-[#1c1917]`}
-                  >
-                    How are you feeling?
-                  </h2>
-                  <p className="text-[#44403c] text-base sm:text-lg leading-relaxed mb-8 max-w-md">
-                    Take a moment to check in with yourself. I'm here to listen
-                    and help you find clarity.
-                  </p>
-
-                  <div className="flex justify-end w-full">
-                    <Link href="/journal">
-                      <button
-                        style={{
-                          borderColor: sigmundTheme.primaryDark,
-                          backgroundColor: sigmundTheme.primary,
-                        }}
-                        className={`cursor-pointer hover:brightness-105 active:translate-y-[2px] hover:translate-y-[-2px] border-b-4 px-8 py-3 text-white rounded-xl font-bold active:border-b-0 transition-all flex items-center gap-2`}
-                      >
-                        New Entry
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Past Entries Mini-Card */}
-            <div
-              className={`lg:col-span-1 bg-white rounded-2xl border-b-4 border-[${sigmundTheme.border}] p-6 shadow-sm flex flex-col items-center justify-center text-center gap-4 hover:border-[${sigmundTheme.accent}]/30 transition-all cursor-pointer group relative overflow-hidden`}
-            >
-              <div
-                className={`bg-[${sigmundTheme.background}] p-5 rounded-2xl mb-2 group-hover:scale-110 transition-transform duration-300 shadow-inner`}
-              >
-                <BookOpen className="w-10 h-10 text-[#57534e]" />
-              </div>
-
-              <div className="relative z-10">
-                <h3
-                  className={`${dm_serif.className} text-2xl text-[#1c1917] mb-1`}
+                <div
+                  style={{ backgroundColor: sigmundTheme.background }}
+                  className={`rounded-[12px] p-6 h-full relative overflow-hidden flex flex-col sm:flex-row items-center gap-8`}
                 >
-                  Past Entries
-                </h3>
-                <p className="text-stone-500 font-medium mb-6">
-                  Review your journey and insights.
-                </p>
-                <Link href="/journal">
-                  <button
-                    className={`w-full cursor-pointer hover:scale-103 bg-white text-[${sigmundTheme.accent}] px-6 py-2 rounded-xl font-bold border-2 border-[${sigmundTheme.accent}] hover:bg-[${sigmundTheme.background}] hover:text-[${sigmundTheme.secondary}] hover:border-[${sigmundTheme.secondary}] transition-all`}
-                  >
-                    View History
-                  </button>
-                </Link>
+                  {/* Sigmund Image */}
+                  <div className="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 relative flex-shrink-0">
+                    <div className="absolute inset-0 bg-[#e7e5e4] rounded-full blur-2xl opacity-50 transform translate-y-4" />
+                    <Image
+                      src={sigmund_chair}
+                      alt="Sigmund"
+                      fill
+                      className="object-contain drop-shadow-md"
+                    />
+                  </div>
+                  <div className="flex-1 relative z-10 w-full flex flex-col items-end text-right">
+                    <div className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm font-bold mb-4 border border-[#e7e5e4] text-[#1c1917]">
+                      <Pencil className="w-4 h-4 text-[#1c1917]" />
+                      DAILY REFLECTION
+                    </div>
+                    <h2
+                      className={`${dm_serif.className} text-2xl sm:text-3xl mb-3 text-[#1c1917]`}
+                    >
+                      How are you feeling?
+                    </h2>
+                    <p className="text-[#44403c] text-base sm:text-lg leading-relaxed mb-8 max-w-md">
+                      Take a moment to check in with yourself. I'm here to
+                      listen and help you find clarity.
+                    </p>
+
+                    <div className="flex justify-end w-full">
+                      <Link href="/journal">
+                        <button
+                          style={{
+                            borderColor: sigmundTheme.primaryDark,
+                            backgroundColor: sigmundTheme.primary,
+                          }}
+                          className={`cursor-pointer hover:brightness-105 active:translate-y-[2px] hover:translate-y-[-2px] border-b-4 px-8 py-3 text-white rounded-xl font-bold active:border-b-0 transition-all flex items-center gap-2`}
+                        >
+                          New Entry
+                          <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              /* Locked Journal Card */
+              <div
+                style={{ borderColor: sigmundTheme.border }}
+                className="lg:col-span-2 bg-white rounded-2xl border-b-4 border-2 p-1 shadow-sm"
+              >
+                <div
+                  style={{ backgroundColor: sigmundTheme.background }}
+                  className={`rounded-[12px] p-6 h-full relative overflow-hidden flex flex-col sm:flex-row items-center gap-8 opacity-60`}
+                >
+                  <div className="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 relative flex-shrink-0">
+                    <div className="absolute inset-0 bg-[#e7e5e4] rounded-full blur-2xl opacity-50 transform translate-y-4" />
+                    <Image
+                      src={sigmund_chair}
+                      alt="Sigmund"
+                      fill
+                      className="object-contain drop-shadow-md grayscale-[0.5]"
+                    />
+                  </div>
+                  <div className="flex-1 relative z-10 w-full flex flex-col items-end text-right">
+                    <div className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full text-sm font-bold mb-4 border border-[#e7e5e4] text-stone-400">
+                      <Lock className="w-4 h-4 text-stone-400" />
+                      JOURNAL
+                    </div>
+                    <h2
+                      className={`${dm_serif.className} text-2xl sm:text-3xl mb-3 text-stone-400`}
+                    >
+                      Not Yet Available
+                    </h2>
+                    <p className="text-stone-400 text-base sm:text-lg leading-relaxed mb-8 max-w-md">
+                      Your clinician hasn't enabled the Journal feature yet.
+                      Check back soon!
+                    </p>
+
+                    <div className="flex justify-end w-full">
+                      <button
+                        disabled
+                        className="px-8 py-3 bg-stone-200 text-stone-400 rounded-xl font-bold cursor-not-allowed flex items-center gap-2"
+                      >
+                        <Lock className="w-4 h-4" />
+                        Locked
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Right Column: Scales active card when enabled, or Past Entries when journal enabled */}
+            {settings?.scalesEnabled ? (
+              <div
+                style={{ borderColor: sigmundTheme.border }}
+                className={`lg:col-span-1 bg-white rounded-2xl border-b-4 border-2 p-6 shadow-sm flex flex-col items-center justify-center text-center gap-4 hover:border-[${sigmundTheme.accent}]/30 transition-all cursor-pointer group relative overflow-hidden`}
+              >
+                <div
+                  className={`bg-[${sigmundTheme.background}] p-5 rounded-2xl mb-2 group-hover:scale-110 transition-transform duration-300 shadow-inner`}
+                >
+                  <ChartCandlestick className="w-10 h-10 text-[#57534e]" />
+                </div>
+
+                <div className="relative z-10">
+                  <h3
+                    className={`${dm_serif.className} text-2xl text-[#1c1917] mb-1`}
+                  >
+                    Scales
+                  </h3>
+                  <p className="text-stone-500 font-medium mb-6">
+                    View your assessment results.
+                  </p>
+                  <Link href="/scales">
+                    <button
+                      className={`w-full cursor-pointer hover:scale-103 bg-white text-[${sigmundTheme.accent}] px-6 py-2 rounded-xl font-bold border-2 border-[${sigmundTheme.accent}] hover:bg-[${sigmundTheme.background}] hover:text-[${sigmundTheme.secondary}] hover:border-[${sigmundTheme.secondary}] transition-all`}
+                    >
+                      View Scales
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              /* Locked Scales Card (shown when scales disabled) */
+              <div
+                style={{ borderColor: sigmundTheme.border }}
+                className="lg:col-span-1 bg-white rounded-2xl border-b-4 border-2 p-6 shadow-sm flex flex-col items-center justify-center text-center gap-4"
+              >
+                <div className="bg-stone-100 p-5 rounded-2xl mb-2 shadow-inner">
+                  <ChartCandlestick className="w-10 h-10 text-stone-400" />
+                </div>
+
+                <div className="relative z-10">
+                  <div className="inline-flex items-center gap-2 bg-stone-100 px-3 py-1 rounded-full text-xs font-bold mb-3 border border-stone-200 text-stone-400">
+                    <Lock className="w-3 h-3" />
+                    SCALES
+                  </div>
+                  <h3
+                    className={`${dm_serif.className} text-2xl text-stone-400 mb-1`}
+                  >
+                    Not Yet Available
+                  </h3>
+                  <p className="text-stone-400 font-medium mb-6">
+                    Your clinician hasn&apos;t enabled Scales yet.
+                  </p>
+                  <button
+                    disabled
+                    className="w-full px-6 py-2 bg-stone-200 text-stone-400 rounded-xl font-bold cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <Lock className="w-4 h-4" />
+                    Locked
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Stats Grid */}
@@ -456,25 +565,8 @@ export default function DashboardPage() {
               Coming Soon
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 opacity-60 grayscale-[0.5] pointer-events-none select-none">
-              {/* Feature 1: Clinical Scales */}
-              <div
-                className={`bg-stone-50 rounded-2xl border-2 border-dashed border-stone-200 p-6 flex flex-col items-center text-center gap-4`}
-              >
-                <div className="bg-white p-4 rounded-full shadow-sm">
-                  <ClipboardList className="w-6 h-6 text-stone-400" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-stone-600 mb-1">
-                    Clinical Scales
-                  </h3>
-                  <p className="text-sm text-stone-400">
-                    Track your progress with standard psychiatric measures.
-                  </p>
-                </div>
-              </div>
-
-              {/* Feature 2: Psychoeducation */}
+            <div className="opacity-60 grayscale-[0.5] pointer-events-none select-none">
+              {/* Feature: Psychoeducation */}
               <div
                 className={`bg-stone-50 rounded-2xl border-2 border-dashed border-stone-200 p-6 flex flex-col items-center text-center gap-4`}
               >
