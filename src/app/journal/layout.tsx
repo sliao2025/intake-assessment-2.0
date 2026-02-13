@@ -36,29 +36,12 @@ export default function JournalLayout({ children }: JournalLayoutProps) {
   return (
     <PortalLayout>
       {allowed === null ? (
-        <div className="flex items-center justify-center h-full min-h-[60vh]">
+        <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
           <div className="flex flex-col items-center gap-4">
-            <svg className="w-12 h-12 animate-spin" viewBox="0 0 50 50">
-              <circle
-                cx="25"
-                cy="25"
-                r="20"
-                fill="none"
-                stroke="#e7e5e4"
-                strokeWidth="5"
-              />
-              <circle
-                cx="25"
-                cy="25"
-                r="20"
-                fill="none"
-                stroke="#b2bfa2"
-                strokeWidth="5"
-                strokeLinecap="round"
-                strokeDasharray="80, 200"
-                strokeDashoffset="0"
-              />
-            </svg>
+            <div
+              style={{ borderColor: "#e7e5e4", borderTopColor: "#b2bfa2" }}
+              className="rounded-full w-10 h-10 border-4 animate-spin"
+            />
             <span className="font-medium text-stone-500 animate-pulse">
               Loading Journal
             </span>

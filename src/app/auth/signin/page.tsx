@@ -375,8 +375,8 @@ export default function SignInPage() {
         >
           <div className="animate-pulse text-center">
             <div
-              style={{ borderTopColor: intPsychTheme.secondary }}
-              className="rounded-full h-12 w-12 mx-auto mb-4 border-4 border-gray-300 border-t-4 border-t-transparent animate-spin"
+              style={{ borderColor: "#e7e5e4", borderTopColor: "#b2bfa2" }}
+              className="rounded-full w-10 h-10 mx-auto mb-4 border-4 animate-spin"
             />
             <p className="text-gray-700">Loading…</p>
           </div>

@@ -42,6 +42,14 @@ export const authOptions: NextAuthOptions = {
               clinicId: DEFAULT_CLINIC_ID,
             },
           });
+          // Create default settings for the new guest user
+          await prisma.settings.create({
+            data: {
+              userId: user.id,
+              journalEnabled: false,
+              scalesEnabled: false,
+            },
+          });
           return {
             id: user.id,
             email: user.email ?? undefined,

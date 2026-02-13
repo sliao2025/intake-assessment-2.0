@@ -56,7 +56,7 @@ const steps: Step[] = [
 // Deep merge incoming partial profile into defaults (arrays replaced, objects merged, primitives prefer incoming when defined)
 function mergeWithDefaults<T extends Record<string, any>>(
   defaults: T,
-  incoming: Partial<T>
+  incoming: Partial<T>,
 ): T {
   const output: any = Array.isArray(defaults) ? [] : { ...defaults };
   for (const key of Object.keys(defaults)) {
@@ -79,7 +79,7 @@ function mergeWithDefaults<T extends Record<string, any>>(
     if (d && typeof d === "object" && !Array.isArray(d)) {
       (output as any)[key] = mergeWithDefaults(
         d,
-        typeof i === "object" ? i : {}
+        typeof i === "object" ? i : {},
       );
       continue;
     }
@@ -177,7 +177,7 @@ export default function IntakeTypePage() {
               "[Clinician] Loaded from DB:",
               data.clinician,
               "Email:",
-              email
+              email,
             );
           }
         }
@@ -207,7 +207,7 @@ export default function IntakeTypePage() {
             // User has existing profile with different type - redirect to their correct type
             // This prevents accidentally overwriting their data with the wrong assessment
             console.log(
-              `User has existing ${savedIsChild ? "child" : "adult"} profile, but URL is for ${isChild ? "child" : "adult"}. Redirecting to correct type.`
+              `User has existing ${savedIsChild ? "child" : "adult"} profile, but URL is for ${isChild ? "child" : "adult"}. Redirecting to correct type.`,
             );
             const correctPath = savedIsChild
               ? "/intake/child"
@@ -238,7 +238,7 @@ export default function IntakeTypePage() {
             email: session?.user?.role !== "guest" ? session?.user?.email : "",
           });
           console.log(
-            "No saved profile found, using URL-based type and session info"
+            "No saved profile found, using URL-based type and session info",
           );
         }
       } catch (err) {
@@ -270,7 +270,7 @@ export default function IntakeTypePage() {
           profile.email &&
           profile.email.includes("@") &&
           profile.dob &&
-          profile.contactNumber
+          profile.contactNumber,
       );
 
       if (profile.isChild === true) {
@@ -281,7 +281,7 @@ export default function IntakeTypePage() {
             profile.parent2LastName &&
             profile.parentOccupation &&
             profile.parentEmployer &&
-            profile.parentEducation
+            profile.parentEducation,
         );
         return patientOk && parentOk;
       }
@@ -303,7 +303,7 @@ export default function IntakeTypePage() {
           profile.height.feet !== null &&
           profile.height.inches !== null &&
           profile.weightLbs !== null &&
-          profile.dailyMobileScreenTime !== null
+          profile.dailyMobileScreenTime !== null,
       );
 
       // ---- CHILD PATH ----
@@ -322,26 +322,26 @@ export default function IntakeTypePage() {
             (si.hasRepeatedGrade
               ? Boolean(
                   si.repeatedGradeDetail &&
-                    si.repeatedGradeDetail.trim().length > 0
+                    si.repeatedGradeDetail.trim().length > 0,
                 )
               : true) &&
             typeof si.hasSpecialClasses === "boolean" &&
             (si.hasSpecialClasses
               ? Boolean(
                   si.specialClassesDetail &&
-                    si.specialClassesDetail.trim().length > 0
+                    si.specialClassesDetail.trim().length > 0,
                 )
               : true) &&
             typeof si.hasSpecialServices === "boolean" &&
             (si.hasSpecialServices
               ? Boolean(
                   si.specialServicesDetail &&
-                    si.specialServicesDetail.trim().length > 0
+                    si.specialServicesDetail.trim().length > 0,
                 )
               : true) &&
             Boolean(
-              si.academicGrades && String(si.academicGrades).trim().length > 0
-            )
+              si.academicGrades && String(si.academicGrades).trim().length > 0,
+            ),
         );
 
         // Relationships & Abilities (all required except boolean-gated details and otherConcerns)
@@ -352,14 +352,14 @@ export default function IntakeTypePage() {
             (ra.hadTruancyProceedings
               ? Boolean(
                   ra.truancyProceedingsDetail &&
-                    ra.truancyProceedingsDetail.trim().length > 0
+                    ra.truancyProceedingsDetail.trim().length > 0,
                 )
               : true) &&
             typeof ra.receivedSchoolCounseling === "boolean" &&
             (ra.receivedSchoolCounseling
               ? Boolean(
                   ra.schoolCounselingDetail &&
-                    ra.schoolCounselingDetail.trim().length > 0
+                    ra.schoolCounselingDetail.trim().length > 0,
                 )
               : true) &&
             ra.activitiesInterestsStrengths &&
@@ -367,7 +367,7 @@ export default function IntakeTypePage() {
             // NEW: require all three Likert ratings to be selected
             ra.childAbilityWorkIndependently &&
             ra.childAbilityOrganizeSelf &&
-            ra.childAttendance
+            ra.childAttendance,
           // ra.otherConcerns is optional
         );
 
@@ -386,7 +386,7 @@ export default function IntakeTypePage() {
           profile.isSexuallyActive !== null &&
           profile.isEmployed !== null &&
           profile.jobDetails &&
-          profile.hasFirearm !== null
+          profile.hasFirearm !== null,
       );
 
       return Boolean(baseCommonOk && adultExtrasOk);
@@ -437,16 +437,16 @@ export default function IntakeTypePage() {
       const hasStory = Boolean(
         (profile.storyNarrative?.text &&
           profile.storyNarrative.text.trim().length > 0) ||
-          profile.storyNarrative?.audio?.url
+          profile.storyNarrative?.audio?.url,
       );
       const hasGoals = Boolean(
         (profile.goals?.text && profile.goals.text.trim().length > 0) ||
-          profile.goals?.audio?.url
+          profile.goals?.audio?.url,
       );
       const hasLiving = Boolean(
         (profile.livingSituation?.text &&
           profile.livingSituation.text.trim().length > 0) ||
-          profile.livingSituation?.audio?.url
+          profile.livingSituation?.audio?.url,
       );
 
       // Previous treatment (required for both)
@@ -458,13 +458,13 @@ export default function IntakeTypePage() {
         const hasTreatmentSummary = Boolean(
           (profile.prevTreatmentSummary?.text &&
             profile.prevTreatmentSummary.text.trim().length > 0) ||
-            profile.prevTreatmentSummary?.audio?.url
+            profile.prevTreatmentSummary?.audio?.url,
         );
         treatmentDetailsOk = Boolean(
           profile.therapyDuration &&
             profile.previousDiagnosis &&
             profile.previousDiagnosis.trim().length > 0 &&
-            hasTreatmentSummary
+            hasTreatmentSummary,
         );
       }
 
@@ -479,7 +479,7 @@ export default function IntakeTypePage() {
         const hasElaboration = Boolean(
           (profile.familyHistoryElaboration?.text &&
             profile.familyHistoryElaboration.text.trim().length > 0) ||
-            profile.familyHistoryElaboration?.audio?.url
+            profile.familyHistoryElaboration?.audio?.url,
         );
         familyHistoryOk = hasElaboration;
       }
@@ -498,7 +498,7 @@ export default function IntakeTypePage() {
           profile.fatherSideMedicalIssues &&
             profile.fatherSideMedicalIssues.trim().length > 0 &&
             profile.motherSideMedicalIssues &&
-            profile.motherSideMedicalIssues.trim().length > 0
+            profile.motherSideMedicalIssues.trim().length > 0,
         );
         return commonOk && childOk;
       }
@@ -507,13 +507,13 @@ export default function IntakeTypePage() {
       const hasEnvironments = Boolean(
         (profile.upbringingEnvironments?.text &&
           profile.upbringingEnvironments.text.trim().length > 0) ||
-          profile.upbringingEnvironments?.audio?.url
+          profile.upbringingEnvironments?.audio?.url,
       );
 
       const hasUpbringingWhoWith = Boolean(
         (profile.upbringingWhoWith?.text &&
           profile.upbringingWhoWith.text.trim().length > 0) ||
-          profile.upbringingWhoWith?.audio?.url
+          profile.upbringingWhoWith?.audio?.url,
       );
 
       const hasChildhoodAnswer = typeof profile.likedChildhood === "boolean";
@@ -523,7 +523,7 @@ export default function IntakeTypePage() {
         childhoodReasonOk = Boolean(
           (profile.childhoodNegativeReason?.text &&
             profile.childhoodNegativeReason.text.trim().length > 0) ||
-            profile.childhoodNegativeReason?.audio?.url
+            profile.childhoodNegativeReason?.audio?.url,
         );
       }
 
@@ -576,15 +576,15 @@ export default function IntakeTypePage() {
 
       const q1Answered = Boolean(
         (q1.answer.text && q1.answer.text.trim().length > 0) ||
-          q1.answer.audio?.url
+          q1.answer.audio?.url,
       );
       const q2Answered = Boolean(
         (q2.answer.text && q2.answer.text.trim().length > 0) ||
-          q2.answer.audio?.url
+          q2.answer.audio?.url,
       );
       const q3Answered = Boolean(
         (q3.answer.text && q3.answer.text.trim().length > 0) ||
-          q3.answer.audio?.url
+          q3.answer.audio?.url,
       );
 
       return q1Answered && q2Answered && q3Answered;
@@ -619,7 +619,7 @@ export default function IntakeTypePage() {
 
       console.log(
         "[NotifyAssessmentComplete] Full payload:",
-        JSON.stringify(payload, null, 2)
+        JSON.stringify(payload, null, 2),
       );
 
       await fetch("/api/notify/assessment-complete", {
@@ -653,37 +653,37 @@ export default function IntakeTypePage() {
           if (cssrs.wishDead === "yes") {
             hasWarning = true;
             concernQuestions.push(
-              "Have you wished you were dead or wished you could go to sleep and not wake up?"
+              "Have you wished you were dead or wished you could go to sleep and not wake up?",
             );
           }
           if (cssrs.thoughts === "yes") {
             hasWarning = true;
             concernQuestions.push(
-              "In the past month have you had any actual thoughts of killing yourself?"
+              "In the past month have you had any actual thoughts of killing yourself?",
             );
           }
           if (cssrs.methodHow === "yes") {
             hasWarning = true;
             concernQuestions.push(
-              "Have you been thinking about how you might do this?"
+              "Have you been thinking about how you might do this?",
             );
           }
           if (cssrs.intention === "yes") {
             hasWarning = true;
             concernQuestions.push(
-              "Have you had these thoughts and had some intention of acting on them?"
+              "Have you had these thoughts and had some intention of acting on them?",
             );
           }
           if (cssrs.plan === "yes") {
             hasWarning = true;
             concernQuestions.push(
-              "Have you started to work out or worked out the details of how to kill yourself? Do you intend to carry out this plan?"
+              "Have you started to work out or worked out the details of how to kill yourself? Do you intend to carry out this plan?",
             );
           }
           if (cssrs.behavior === "yes") {
             hasWarning = true;
             concernQuestions.push(
-              "Have you ever done anything, started to do anything, or prepared to do anything to end your life?"
+              "Have you ever done anything, started to do anything, or prepared to do anything to end your life?",
             );
           }
           if (cssrs.behavior3mo === "yes") {
@@ -704,37 +704,37 @@ export default function IntakeTypePage() {
           if (s.wishDead === "yes") {
             hasWarning = true;
             concernQuestions.push(
-              "In the past month, have you wished you were dead, or wished you could go to sleep and not wake up?"
+              "In the past month, have you wished you were dead, or wished you could go to sleep and not wake up?",
             );
           }
           if (s.thoughts === "yes") {
             hasWarning = true;
             concernQuestions.push(
-              "In the past month, have you had any actual thoughts about killing yourself?"
+              "In the past month, have you had any actual thoughts about killing yourself?",
             );
           }
           if (s.methodHow === "yes") {
             hasWarning = true;
             concernQuestions.push(
-              "In the past month, have you been thinking about how you might end your life?"
+              "In the past month, have you been thinking about how you might end your life?",
             );
           }
           if (s.intention === "yes") {
             hasWarning = true;
             concernQuestions.push(
-              "In the past month, have you had these suicidal thoughts and some intention of acting on them?"
+              "In the past month, have you had these suicidal thoughts and some intention of acting on them?",
             );
           }
           if (s.plan === "yes") {
             hasWarning = true;
             concernQuestions.push(
-              "In the past month, have you started to work out the details of how to kill yourself? Do you intend to carry out this plan?"
+              "In the past month, have you started to work out the details of how to kill yourself? Do you intend to carry out this plan?",
             );
           }
           if (s.behavior === "yes") {
             hasWarning = true;
             concernQuestions.push(
-              "Have you done anything, started to do anything, or prepared to do anything, to end your life? Such as: collected pills, obtained a gun, wrote a will or suicide note"
+              "Have you done anything, started to do anything, or prepared to do anything, to end your life? Such as: collected pills, obtained a gun, wrote a will or suicide note",
             );
           }
           if (s.behavior3mo === "yes") {
@@ -747,13 +747,13 @@ export default function IntakeTypePage() {
           if (selfHarm.pastMonth === "yes") {
             hasWarning = true;
             concernQuestions.push(
-              "In the past month, have you intentionally hurt yourself (e.g., cut, burned, scratched) without wanting to die?"
+              "In the past month, have you intentionally hurt yourself (e.g., cut, burned, scratched) without wanting to die?",
             );
           }
           if (selfHarm.lifetime === "yes") {
             hasWarning = true;
             concernQuestions.push(
-              "Have you ever intentionally hurt yourself without wanting to die?"
+              "Have you ever intentionally hurt yourself without wanting to die?",
             );
           }
         }
@@ -815,7 +815,7 @@ export default function IntakeTypePage() {
       // compute new profile FIRST to avoid stale closure
       const newMaxVisited = Math.min(
         lastIndex,
-        Math.max(profile.maxVisited, next)
+        Math.max(profile.maxVisited, next),
       );
       const nextProfile: Profile = { ...profile, maxVisited: newMaxVisited };
 
@@ -856,7 +856,7 @@ export default function IntakeTypePage() {
           // Handle 409 Conflict (Optimistic Locking)
           if (r.status === 409) {
             console.warn(
-              "[saveProgress] Optimistic concurrency conflict detected."
+              "[saveProgress] Optimistic concurrency conflict detected.",
             );
 
             // Fetch latest profile from DB
@@ -867,7 +867,7 @@ export default function IntakeTypePage() {
 
               if (serverProfile) {
                 console.log(
-                  "[saveProgress] Merging server changes into local state..."
+                  "[saveProgress] Merging server changes into local state...",
                 );
                 // Merge server (as base) with local (as overrides).
                 // mergeWithDefaults will preserve server fields if local fields are undefined/null/missing.
@@ -934,8 +934,8 @@ export default function IntakeTypePage() {
       >
         <div className="animate-pulse text-center">
           <div
-            style={{ borderTopColor: intPsychTheme.secondary }}
-            className="rounded-full h-12 w-12 mx-auto mb-4 border-4 border-gray-300 border-t-4 border-t-transparent animate-spin"
+            style={{ borderColor: "#e7e5e4", borderTopColor: "#b2bfa2" }}
+            className="rounded-full w-10 h-10 mx-auto mb-4 border-4 animate-spin"
           />
           <p className="text-gray-700">Preparing your intake…</p>
         </div>
@@ -975,7 +975,7 @@ export default function IntakeTypePage() {
           race: Array.isArray(finalized.ethnicity)
             ? finalized.ethnicity
                 .map((x: any) =>
-                  typeof x === "string" ? x : (x?.label ?? x?.value ?? "")
+                  typeof x === "string" ? x : (x?.label ?? x?.value ?? ""),
                 )
                 .filter(Boolean)
                 .join(", ")
@@ -984,7 +984,7 @@ export default function IntakeTypePage() {
           sexualOrientation: Array.isArray(finalized.sexualOrientation)
             ? finalized.sexualOrientation
                 .map((x: any) =>
-                  typeof x === "string" ? x : (x?.label ?? x?.value ?? "")
+                  typeof x === "string" ? x : (x?.label ?? x?.value ?? ""),
                 )
                 .filter(Boolean)
                 .join(", ")
@@ -1020,7 +1020,7 @@ export default function IntakeTypePage() {
           day: "2-digit",
           hour: "2-digit",
           minute: "2-digit",
-        })
+        }),
       );
       setBurst(true);
       setPraise("All done!!!🎉");

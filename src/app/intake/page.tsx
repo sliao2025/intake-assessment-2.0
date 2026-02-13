@@ -758,10 +758,10 @@ export default function IntakeSelectionPage() {
         <div className="animate-pulse text-center flex flex-col items-center gap-4">
           <div
             style={{
-              borderColor: sigmundTheme.border,
-              borderTopColor: sigmundTheme.secondary,
+              borderColor: "#e7e5e4",
+              borderTopColor: "#b2bfa2",
             }}
-            className="rounded-full h-12 w-12 border-4 animate-spin"
+            className="rounded-full w-10 h-10 border-4 animate-spin"
           />
           <p className="text-stone-600 font-medium">
             {isSubmitting ? "Updating your profile..." : "Loading..."}

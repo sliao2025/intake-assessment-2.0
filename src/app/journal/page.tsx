@@ -834,7 +834,13 @@ export default function JournalPage() {
                   <div
                     className={`flex flex-col items-center py-8 gap-3 bg-[${sigmundTheme.background}] rounded-xl border border-[${sigmundTheme.border}]`}
                   >
-                    <div className="w-10 h-10 border-4 border-stone-200 border-t-[#0072ce] rounded-full animate-spin" />
+                    <div
+                      style={{
+                        borderColor: "#e7e5e4",
+                        borderTopColor: "#b2bfa2",
+                      }}
+                      className="w-10 h-10 border-4 rounded-full animate-spin"
+                    />
                     <p className="text-sm text-stone-500">
                       Sigmund is reflecting on your entry...
                     </p>

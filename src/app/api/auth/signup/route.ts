@@ -29,12 +29,21 @@ export async function POST(req: NextRequest) {
   const passwordHash = await argon2.hash(password);
   const name = [firstName, lastName].filter(Boolean).join(" ") || null;
 
-  await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       email: e,
       passwordHash,
       name,
       clinicId: DEFAULT_CLINIC_ID,
+    },
+  });
+
+  // Create default settings for the new user
+  await prisma.settings.create({
+    data: {
+      userId: user.id,
+      journalEnabled: false,
+      scalesEnabled: false,
     },
   });
 
