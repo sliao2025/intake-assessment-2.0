@@ -10,4 +10,5 @@ export const CLINICIANS: Clinician[] = [
   { name: "Shayna Feuer", email: "sfeuer@psych-nyc.com" },
   { name: "Jordan Arbelaez", email: "jarbelaez@psych-nyc.com" },
   { name: "Jennifer Ray", email: "jray@psych-nyc.com" },
+  { name: "Phillip Scherbakov", email: "pscherbakov@psych-nyc.com" },
 ];
